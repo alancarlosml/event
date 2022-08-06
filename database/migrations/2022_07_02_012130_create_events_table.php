@@ -33,10 +33,10 @@ return new class extends Migration
             ->references('id')
             ->on('places')
             ->onDelete('cascade');
-            $table->integer('category_id')->unsigned()->index();
-            $table->foreign('category_id')
+            $table->integer('area_id')->unsigned()->index();
+            $table->foreign('area_id')
                   ->references('id')
-                  ->on('categories')
+                  ->on('areas')
                   ->onDelete('cascade');
             $table->timestamps();
         });

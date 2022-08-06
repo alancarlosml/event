@@ -56,24 +56,25 @@
                                     <td>@if($category->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                     <td>
                                         <div class="d-flex">
+                                            <a class="btn btn-secondary btn-sm mr-1" href="{{route('area.index', $category->id)}}">
+                                                <i class="fa-solid fa-list"></i>
+                                                Áreas
+                                            </a>
                                             <a class="btn btn-primary btn-sm mr-1" href="{{route('category.show', $category->id)}}">
-                                                <i class="fas fa-eye">
-                                                </i>
+                                                <i class="fas fa-eye"></i>
                                                 Detalhes
                                             </a>
                                             {{-- <a href="{{route('students.show', $student->id)}}" class="btn btn-info m-1">Details</a> --}}
                                             {{-- <a href="{{route('category.edit', $category->id)}}" class="btn btn-primary m-1">Editar</a> --}}
                                             <a class="btn btn-info btn-sm mr-1" href="{{route('category.edit', $category->id)}}">
-                                                <i class="fas fa-pencil-alt">
-                                                </i>
+                                                <i class="fas fa-pencil-alt"></i>
                                                 Editar
                                             </a>
                                             <form action="{{ route('category.destroy', $category->id) }}" method="POST">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                                 <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$category->id}})">
-                                                    <i class="fas fa-trash">
-                                                    </i>
+                                                    <i class="fas fa-trash"></i>
                                                     Remover
                                                 </a>
                                                 {{-- <a class="btn btn-danger m-1 btn-remove" href="javascript:;" onclick="removeData({{$category->id}})">Remover</a> --}}

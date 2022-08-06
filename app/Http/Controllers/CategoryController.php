@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Area;
 use Illuminate\Http\Request;
 
 use App\Models\Category;
@@ -79,5 +80,14 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         return view('category.show', compact('category'));
+    }
+
+    public function getAreas(Request $request)
+    {
+        $data['areas'] = Area::where("category_id",$request->category_id)
+                    ->where("status", 1)
+                    ->get(["name","id"]);
+        
+        return response()->json($data);
     }
 }

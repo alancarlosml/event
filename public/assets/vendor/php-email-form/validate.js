@@ -50,30 +50,54 @@
   });
 
   function php_email_form_submit(thisForm, action, formData) {
-    fetch(action, {
-      method: 'POST',
-      body: formData,
-      headers: {'X-Requested-With': 'XMLHttpRequest'}
-    })
-    .then(response => {
-      if( response.ok ) {
-        return response.text()
-      } else {
-        throw new Error(`${response.status} ${response.statusText} ${response.url}`); 
-      }
-    })
-    .then(data => {
+
+    $.ajax({
+      type: "POST",
+      url: action,
+      data: formData,
+      dataType: "json",
+      encode: true,
+      headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+      processData: false,
+      contentType: false,
+      })
+    .done(function (data) {
       thisForm.querySelector('.loading').classList.remove('d-block');
-      if (data.trim() == 'OK') {
-        thisForm.querySelector('.sent-message').classList.add('d-block');
-        thisForm.reset(); 
-      } else {
-        throw new Error(data ? data : 'Form submission failed and no error message returned from: ' + action); 
-      }
-    })
-    .catch((error) => {
-      displayError(thisForm, error);
+      thisForm.querySelector('.sent-message').classList.add('d-block');
+      thisForm.reset(); 
     });
+
+    event.preventDefault();
+
+    // fetch(action, {
+    //   method: 'POST',
+    //   body: formData,
+    //   headers: {
+    //     'X-Requested-With': 'XMLHttpRequest',
+    //     'X-CSRF-TOKEN': thisForm.querySelector('[name="_token"]').value}
+    // })
+    // .then(response => {
+    //   if( response.ok ) {
+    //     return response.text()
+    //   } else {
+    //     console.log(response);
+    //     throw new Error(`${response.status} ${response.statusText} ${response.url}`); 
+    //   }
+    // })
+    // .then(data => {
+    //   thisForm.querySelector('.loading').classList.remove('d-block');
+    //   if (data.trim() == 'OK') {
+    //     thisForm.querySelector('.sent-message').classList.add('d-block');
+    //     thisForm.reset(); 
+    //   } else {
+    //     throw new Error(data ? data : 'Form submission failed and no error message returned from: ' + action); 
+    //   }
+    // })
+    // .catch((error) => {
+    //   displayError(thisForm, error);
+    // });
   }
 
   function displayError(thisForm, error) {

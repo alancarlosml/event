@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', 'App\Http\Controllers\HomeController@home');
 Route::get('/eventos', 'App\Http\Controllers\HomeController@events');
 Route::get('/{slug}', 'App\Http\Controllers\HomeController@event');
+Route::post ('/contato', 'App\Http\Controllers\HomeController@contact')->name('contact');
 // Route::get('/contato', 'App\Http\Controllers\HomeController@contact');
 
 
@@ -43,6 +44,15 @@ Route::post('admin/categories/store', 'App\Http\Controllers\CategoryController@s
 Route::get('admin/categories/edit/{id}', 'App\Http\Controllers\CategoryController@edit')->middleware(['auth'])->name('category.edit');
 Route::post('admin/categories/update/{id}', 'App\Http\Controllers\CategoryController@update')->middleware(['auth'])->name('category.update');
 Route::delete('admin/categories/destroy/{id}', 'App\Http\Controllers\CategoryController@destroy')->middleware(['auth'])->name('category.destroy');
+Route::post('admin/categories/get-areas-by-category','App\Http\Controllers\CategoryController@getAreas')->middleware(['auth']);
+
+Route::get('admin/categories/{category_id}/areas', 'App\Http\Controllers\AreaController@index')->middleware(['auth'])->name('area.index');
+Route::get('admin/categories/{category_id}/areas/show/{id}', 'App\Http\Controllers\AreaController@show')->middleware(['auth'])->name('area.show');
+Route::get('admin/categories/{category_id}/areas/create', 'App\Http\Controllers\AreaController@create')->middleware(['auth'])->name('area.create');
+Route::post('admin/categories/{category_id}/areas/store', 'App\Http\Controllers\AreaController@store')->middleware(['auth'])->name('area.store');
+Route::get('admin/categories/{category_id}/areas/edit/{id}', 'App\Http\Controllers\AreaController@edit')->middleware(['auth'])->name('area.edit');
+Route::post('admin/categories/{category_id}/areas/update/{id}', 'App\Http\Controllers\AreaController@update')->middleware(['auth'])->name('area.update');
+Route::delete('admin/categories/{category_id}/areas/destroy/{id}', 'App\Http\Controllers\AreaController@destroy')->middleware(['auth'])->name('area.destroy');
 
 Route::get('admin/places/list', 'App\Http\Controllers\PlaceController@index')->middleware(['auth'])->name('place.index');
 Route::get('admin/places/show/{id}', 'App\Http\Controllers\PlaceController@show')->middleware(['auth'])->name('place.show');
@@ -60,8 +70,8 @@ Route::get('admin/events/list', 'App\Http\Controllers\EventController@index')->m
 Route::get('admin/events/show/{id}', 'App\Http\Controllers\EventController@show')->middleware(['auth'])->name('event.show');
 Route::get('admin/events/{id}/lotes', 'App\Http\Controllers\EventController@lotes')->middleware(['auth'])->name('event.lotes');
 Route::get('admin/events/{id}/reports', 'App\Http\Controllers\EventController@reports')->middleware(['auth'])->name('event.reports');
-Route::get('admin/events/create', 'App\Http\Controllers\EventController@create')->middleware(['auth'])->name('event.create');
-Route::post('admin/events/store', 'App\Http\Controllers\EventController@store')->middleware(['auth'])->name('event.store');
+// Route::get('admin/events/create', 'App\Http\Controllers\EventController@create')->middleware(['auth'])->name('event.create');
+// Route::post('admin/events/store', 'App\Http\Controllers\EventController@store')->middleware(['auth'])->name('event.store');
 Route::get('admin/events/edit/{id}', 'App\Http\Controllers\EventController@edit')->middleware(['auth'])->name('event.edit');
 Route::post('admin/events/update/{id}', 'App\Http\Controllers\EventController@update')->middleware(['auth'])->name('event.update');
 Route::delete('admin/events/destroy/{id}', 'App\Http\Controllers\EventController@destroy')->middleware(['auth'])->name('event.destroy');
@@ -98,7 +108,6 @@ Route::post('admin/owners/update/{id}', 'App\Http\Controllers\OwnerController@up
 Route::delete('admin/owners/destroy/{id}', 'App\Http\Controllers\OwnerController@destroy')->middleware(['auth'])->name('owner.destroy');
 Route::post('admin/owners/store_file/{id}','App\Http\Controllers\OwnerController@file_store')->middleware(['auth'])->name('owner.store_file');
 Route::get('admin/owners/delete_file/{id}','App\Http\Controllers\OwnerController@delete_file')->middleware(['auth'])->name('owner.delete_file');
-
 
 Route::get('admin/participantes/list', 'App\Http\Controllers\ParticipanteController@index')->middleware(['auth'])->name('participante.index');
 Route::get('admin/participantes/show/{id}', 'App\Http\Controllers\ParticipanteController@show')->middleware(['auth'])->name('participante.show');

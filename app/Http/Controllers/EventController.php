@@ -15,6 +15,7 @@ use App\Models\Participante;
 use App\Models\ParticipanteLote;
 use App\Models\Place;
 use App\Models\Order;
+use App\Models\Owner;
 use App\Models\State;
 
 class EventController extends Controller
@@ -50,7 +51,17 @@ class EventController extends Controller
             'name' => 'required',
             'slug' => 'required|unique:events',
             'description' => 'required',
-            'place_name' => 'required'
+            'category' => 'required',
+            'area_id' => 'required',
+            'total' => 'required',
+            'place_name' => 'required',
+            'address' => 'required',
+            'number' => 'required',
+            'district' => 'required',
+            'zip' => 'required',
+            'state' => 'required',
+            'city_id' => 'required',
+            'status' => 'required'
         ]);
 
         $input = $request->all();
@@ -68,10 +79,13 @@ class EventController extends Controller
             ->join('cities', 'cities.id', '=', 'places.city_id')
             ->join('states', 'states.uf', '=', 'cities.uf')
             ->join('owners', 'owners.id', '=', 'events.owner_id')
+            ->join('areas', 'areas.id', '=', 'events.area_id')
+            ->join('categories', 'categories.id', '=', 'areas.category_id')
             ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
             ->where('events.id', $id)
             ->select(
                 'events.*', 
+                'categories.id as category_id',
                 'places.name as place_name', 
                 'places.address as place_address', 
                 'places.number as place_number', 
@@ -83,6 +97,8 @@ class EventController extends Controller
                 'owners.email as owner_email'
                 )
             ->first();
+
+        // dd($event);
 
         $dates = DB::table('event_times')
             ->join('event_dates', 'event_dates.id', '=', 'event_times.event_dates_id')
@@ -110,27 +126,51 @@ class EventController extends Controller
         if($event->banner){
             $request->validate([
                 'name' => 'required',
-                'slug' => 'required|unique:events',
+                'slug' => 'required|unique:events,slug,'.$event->id,
                 'description' => 'required',
-                'place_name' => 'required'
+                'category' => 'required',
+                'area_id' => 'required',
+                'max_tickets' => 'required',
+                'place_name' => 'required',
+                'address' => 'required',
+                'number' => 'required',
+                'district' => 'required',
+                'zip' => 'required',
+                'state' => 'required',
+                'city_id' => 'required'
             ]);
         }else{
             $request->validate([
                 'banner' => 'mimes:jpg,jpeg,bmp,png|max:2048',
                 'name' => 'required',
-                'slug' => 'required|unique:events',
+                'slug' => 'required|unique:events,slug,'.$event->id,
                 'description' => 'required',
-                'place_name' => 'required'
+                'category' => 'required',
+                'area_id' => 'required',
+                'max_tickets' => 'required',
+                'place_name' => 'required',
+                'address' => 'required',
+                'number' => 'required',
+                'district' => 'required',
+                'zip' => 'required',
+                'state' => 'required',
+                'city_id' => 'required'
             ]);
         }
 
         $input = $request->all();
+
+        // dd($input);
+        
+        $owner = Owner::where('email', $input['owner_email'])->first();
 
         if(isset($input['status'])){
             $input['status'] = 1;
         }else{
             $input['status'] = 0;
         }
+
+        $input['owner_id'] = $owner->id;
 
         $event->fill($input)->save();
     

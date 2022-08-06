@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta content="" name="description">
         <meta content="" name="keywords">
+        <meta name="csrf-token" content="{{ csrf_token() }}" />
 
         <title>Laravel</title>
 
@@ -59,7 +60,7 @@
                   </li>
                 <li><a class="nav-link scrollto active" href="#planos">Planos e Preços</a></li>
                 <li><a class="nav-link" href="/eventos">Eventos</a></li>
-                <li><a class="nav-link" href="/contato">Contato</a></li>
+                <li><a class="nav-link" href="#contato">Contato</a></li>
                 {{-- <li><a href="blog.html">Blog</a></li> --}}
                 {{-- <li><a class="nav-link" href="/cadastro"></a></li> --}}
                 <li><a class="getstarted" href="/login">Criar evento</a></li>
@@ -167,9 +168,12 @@
     </body>
 
     <!-- Vendor JS Files -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.2/js/OverlayScrollbars.min.js" integrity="sha512-5UqQ4jRiUk3pxl9wZxAtep5wCxqcoo6Yu4FI5ufygoOMV2I2/lOtH1YjKdt3FcQ9uhcKFJapG0HAQ0oTC5LnOw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
     <script src="assets/vendor/aos/aos.js"></script>
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    {{-- <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script> --}}
     <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
     <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
     <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>

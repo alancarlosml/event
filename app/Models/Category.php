@@ -16,6 +16,11 @@ class Category extends Model
         'status'
     ];
 
+    public function areas()
+    {
+        return $this->hasMany(Area::class);
+    }
+
     public function getAll(){
         
         $categories = Category::where('categories.status', 1)
@@ -24,4 +29,5 @@ class Category extends Model
 
         return $categories;
     }
+    
 }

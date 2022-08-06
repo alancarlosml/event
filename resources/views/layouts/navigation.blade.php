@@ -217,6 +217,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{route('event.index')}}" class="nav-link">
+                  <i class="fa-solid fa-radio ml-1"></i>
+                    <p> Eventos </p>
+                </a>
+            </li>
+            {{-- <li class="nav-item">
               <a href="#" class="nav-link">
                   <i class="fa-solid fa-radio ml-1"></i>
                   <p class="ml-2"> Eventos 
@@ -237,7 +243,7 @@
                       </a>
                   </li>
               </ul>
-            </li>
+            </li> --}}
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="fa-solid fa-user-check ml-2"></i>

@@ -42,7 +42,9 @@ class PlaceController extends Controller
             'number' => 'required',
             'district' => 'required',
             'zip' => 'required',
+            'state' => 'required',
             'city_id' => 'required',
+            'status' => 'required'
         ]);
 
         $input = $request->all();
@@ -79,7 +81,9 @@ class PlaceController extends Controller
             'number' => 'required',
             'district' => 'required',
             'zip' => 'required',
+            'state' => 'required',
             'city_id' => 'required',
+            'status' => 'required'
         ]);
 
         $input = $request->all();

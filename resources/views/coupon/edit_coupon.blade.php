@@ -102,7 +102,7 @@
                         </div>
                         <div class="form-check pb-3">
                             <div class="custom-switch">
-                                <input type="checkbox" checked="checked" class="custom-control-input" name="status" id="status" value="1">
+                                <input type="checkbox" @if($coupon->status == 1) checked="checked" @else value="1" @endif class="custom-control-input" name="status" id="status">
                                 <label class="custom-control-label" for="status">Ativar</label>
                             </div>
                         </div>

@@ -58,16 +58,16 @@
                         <div class="card-body">
                             <h4>Sobre o evento</h4>
                             <div class="form-group">
-                                <label for="name">Nome</label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Nome" value="{{$event->name}}">
+                                <label for="name">Nome*</label>
+                                <input type="text" class="form-control col-lg-6 col-sm-12" id="name" name="name" placeholder="Nome" value="{{$event->name}}">
                             </div>
                             <div class="form-group">
-                                <label for="slug">URL do evento</label>
+                                <label for="slug">URL do evento*</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
                                       <span class="input-group-text" id="basic-addon3">https://example.com/users/</span>
                                     </div>
-                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" value="{{$event->slug}}">
+                                    <input type="text" class="form-control col-lg-4 col-sm-12" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" value="{{$event->slug}}">
                                   </div>
                                 <small id="slugHelp" class="form-text text-danger d-none">Essa URL já está em uso, por favor, selecione outra.</small>
                             </div>
@@ -77,15 +77,33 @@
                             </div> --}}
                             <div class="form-group">
                                 <label for="subtitle">Subtítulo</label>
-                                <input type="text" class="form-control" id="subtitle" name="subtitle" placeholder="Subtítulo" value="{{$event->subtitle}}">
+                                <input type="text" class="form-control col-lg-6 col-sm-12" id="subtitle" name="subtitle" placeholder="Subtítulo" value="{{$event->subtitle}}">
                             </div>
                             <div class="form-group">
-                                <label for="description">Descrição</label>
+                                <label for="description">Descrição*</label>
                                 <textarea class="form-control" id="description" name="description">
                                     {{$event->description}}
                                 </textarea>
                             </div>
-                            <div class="form-group">
+                            <div class="form-row">
+                                <div class="form-group col-lg-3 col-sm-12">
+                                    <label for="category">Categoria*</label>
+                                    <select name="category" id="category" class="form-control" required>
+                                        <option>Selecione</option>
+                                        @foreach ($categories as $category)
+                                        <option value="{{$category->id}}" @if($event->category_id == $category->id) selected @endif>{{$category->description}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-lg-3 col-sm-12">
+                                    <label for="area_id">Área*</label>
+                                    <select name="area_id" id="area_id" class="form-control" required>
+                                        <option>Selecione</option>
+                                        <option>...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            {{-- <div class="form-group">
                                 <label for="category">Categoria</label>
                                 <select name="category" id="category" class="form-control">
                                 <option>Selecione</option>
@@ -93,15 +111,16 @@
                                     <option value="{{$category->id}}" @if($event->category_id = $category->id) selected @endif>{{$category->description}}</option>
                                 @endforeach
                                 </select>
+                            </div> --}}
+                            <div class="form-group">
+                                <label for="owner_email">Organizador*</label>
+                                <input type="text" class="form-control col-lg-6 col-sm-12" id="owner_email" name="owner_email" placeholder="Organizador" value="{{$event->owner_email}}">
                             </div>
                             <div class="form-group">
-                                <label for="owner_email">Organizador</label>
-                                <input type="text" class="form-control" id="owner_email" name="owner_email" placeholder="Organizador" value="{{$event->owner_email}}">
-                            </div>
-                            <div class="form-group">
-                                <label for="banner">Banner do evento</label>
+                                <label for="banner">Banner do evento*</label>
                                 @if(!$event->banner)
-                                    <input class="form-control" type="file" id="banner" name="banner">
+                                    <input type="file" class="custom-file-input" id="banner" required>
+                                    <label class="custom-file-label" for="banner">Choose file</label>
                                 @else
                                 <div class="form-group">
                                     <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
@@ -110,8 +129,8 @@
                                 @endif
                             </div>
                             <div class="form-group">
-                                <label for="max_tickets">Total máximo de vagas</label>
-                                <input type="number" class="form-control col-2" id="max_tickets" name="max_tickets" value="{{old('max_tickets', $event->max_tickets)}}">
+                                <label for="max_tickets">Total máximo de vagas*</label>
+                                <input type="number" class="form-control col-lg-2 col-sm-12" id="max_tickets" name="max_tickets" value="{{old('max_tickets', $event->max_tickets)}}">
                             </div>
                         </div>
                         <hr>
@@ -169,8 +188,8 @@
                             <h4>Endereço do evento</h4>
                             <div class="form-row">
                                 <div class="form-group col-md-10">
-                                    <label for="place_name">Local</label>
-                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{$event->place_name}}">
+                                    <label for="place_name">Local*</label>
+                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{$event->place_name}}" required>
                                 </div>
                                 @if(!$event->place_name)
                                     <div class="form-group col-md-2">
@@ -184,17 +203,17 @@
                             <div id="event_address" @if(!$event->place_name) class="d-none" @endif>
                                 <div class="form-row">
                                 <div class="form-group col-md-10">
-                                    <label for="address">Rua</label>
-                                    <input type="text" class="form-control" id="address" name="address" placeholder="Rua" value="{{$event->place_address}}">
+                                    <label for="address">Rua*</label>
+                                    <input type="text" class="form-control" id="address" name="address" placeholder="Rua" value="{{$event->place_address}}" required>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <label for="number">Número</label>
-                                    <input type="text" class="form-control" id="number" name="number" placeholder="Número" value="{{$event->place_number}}">
+                                    <label for="number">Número*</label>
+                                    <input type="text" class="form-control" id="number" name="number" placeholder="Número" value="{{$event->place_number}}" required>
                                 </div>
                                 </div>
                                 <div class="form-group">
-                                <label for="district">Bairro</label>
-                                <input type="text" class="form-control" id="district" name="district" placeholder="Bairro" value="{{$event->place_district}}">
+                                <label for="district">Bairro*</label>
+                                <input type="text" class="form-control" id="district" name="district" placeholder="Bairro" value="{{$event->place_district}}" required>
                                 </div>
                                 <div class="form-group">
                                 <label for="complement">Complemento</label>
@@ -202,8 +221,8 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group col-md-5">
-                                        <label for="state">Estado</label>
-                                        <select id="state" class="form-control" name="state">
+                                        <label for="state">Estado*</label>
+                                        <select id="state" class="form-control" name="state" required>
                                         <option>Selecione</option>
                                         @foreach ($states as $state)
                                             <option value="{{$state->uf}}" @if($event->city_uf == $state->uf) selected @endif>{{$state->name}}</option>
@@ -211,16 +230,17 @@
                                         </select>
                                     </div>
                                     <div class="form-group col-md-5">
-                                    <label for="city">Cidade</label>
-                                    <select id="city" class="form-control" name="city_id">
+                                    <label for="city">Cidade*</label>
+                                    <select id="city" class="form-control" name="city_id" required>
                                         <option selected>Selecione</option>
                                         <option>...</option>
                                     </select>
                                     <input type="hidden" name="city_id_hidden" id="city_id_hidden" value="{{$event->city_id}}">
+                                    <input type="hidden" name="area_id_hidden" id="area_id_hidden" value="{{$event->area_id}}">
                                     </div>
                                     <div class="form-group col-md-2">
-                                        <label for="zip">CEP</label>
-                                        <input type="text" class="form-control" id="zip" name="zip" placeholder="CEP" value="{{$event->place_zip}}">
+                                        <label for="zip">CEP*</label>
+                                        <input type="text" class="form-control" id="zip" name="zip" placeholder="CEP" value="{{$event->place_zip}}" required>
                                     </div>
                                 </div>  
                             </div>  
@@ -302,6 +322,26 @@
                     );
                 });
 
+                $('#category').on('change', function() {
+                    var category_id = this.value;
+                    $("#area_id").html('');
+                    $.ajax({
+                        url:"{{url('admin/categories/get-areas-by-category')}}",
+                        type: "POST",
+                        data: {
+                            category_id: category_id,
+                            _token: '{{csrf_token()}}' 
+                        },
+                        dataType : 'json',
+                        success: function(result){
+                            $('#area_id').html('<option value="">Selecione</option>'); 
+                            $.each(result.areas,function(key,value){
+                                $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
+                            });
+                        }
+                    });
+                });
+
                 // Summernote
                 $('#description').summernote({
                     placeholder: 'Descreva em detalhes o evento',
@@ -344,7 +384,7 @@
                         var uf = $("#state").val();
                         $("#city").html('');
                         $.ajax({
-                            url:"{{url('places/get-cities-by-state')}}",
+                            url:"{{url('admin/places/get-cities-by-state')}}",
                             type: "POST",
                             data: {
                                 uf: uf,
@@ -385,7 +425,7 @@
                     var uf = this.value;
                     $("#city").html('');
                     $.ajax({
-                        url:"{{url('places/get-cities-by-state')}}",
+                        url:"{{url('admin/places/get-cities-by-state')}}",
                         type: "POST",
                         data: {
                             uf: uf,
@@ -405,7 +445,7 @@
                 var uf = $("#state").val();
                 $("#city").html('');
                 $.ajax({
-                    url:"{{url('places/get-cities-by-state')}}",
+                    url:"{{url('admin/places/get-cities-by-state')}}",
                     type: "POST",
                     data: {
                         uf: uf,
@@ -423,9 +463,27 @@
                         $('#city option[value='+city_id+']').attr('selected','selected');
                     }
                 });
-                
+
+                var category_id = $("#category").val();
+                $("#area_id").html('');
+                $.ajax({
+                    url:"{{url('admin/categories/get-areas-by-category')}}",
+                    type: "POST",
+                    data: {
+                        category_id: category_id,
+                        _token: '{{csrf_token()}}' 
+                    },
+                    dataType : 'json',
+                    success: function(result){
+                        $('#area_id').html('<option value="">Selecione</option>'); 
+                        area_id = $('#area_id_hidden').val();
+                        $.each(result.areas,function(key,value){
+                            $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
+                        });
+                        $('#area_id option[value='+area_id+']').attr('selected','selected');
+                    }
+                });
             });
-            
         </script>
     @endpush
 </x-app-layout>

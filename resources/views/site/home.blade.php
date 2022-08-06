@@ -15,8 +15,8 @@
                 </div>
               </div>
             </div>
-            <div class="col-lg-6 hero-img" data-aos="zoom-out" data-aos-delay="200">
-              <img src="assets/img/hero-img.png" class="img-fluid" alt="">
+            <div class="col-lg-6 hero-img">
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/XOTq6z3QdX8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
           </div>
         </div>
@@ -285,8 +285,7 @@
                     @foreach ($categories as $category)
                         <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
                             <div class="service-box blue">
-                                <h3>{{$category->description}}</h3>
-                                <a href="/{{$category->slug}}" class="read-more"><span>Saiba mais</span> <i class="bi bi-arrow-right"></i></a>
+                                <h3><a href="/{{$category->slug}}">{{$category->description}}</a></h3>
                             </div>
                         </div>
                     @endforeach
@@ -294,7 +293,7 @@
             </div>
         </section><!-- End Services Section -->
 
-        <!-- ======= Counts Section ======= -->
+        {{-- <!-- ======= Counts Section ======= -->
         <section id="counts" class="counts" style="background: #4154f1;">
             <div class="container" data-aos="fade-up">
     
@@ -341,14 +340,14 @@
                     </div>
                 </div>
             </div>
-        </section><!-- End Counts Section -->
+        </section><!-- End Counts Section --> --}}
     
         <!-- ======= Pricing Section ======= -->
-        <section id="planos" class="pricing">
+        <section id="planos" class="pricing" style="background: #4154f1;">
             <div class="container" data-aos="fade-up">
                 <header class="section-header">
                     {{-- <h2>Planos e preços</h2> --}}
-                    <p>Planos e preços</p>
+                    <p style="color: #ffffff">Planos e preços</p>
                 </header>
         
                 <div class="row gy-4 justify-content-center" data-aos="fade-left">
@@ -652,7 +651,7 @@
         </section><!-- End Recent Blog Posts Section --> --}}
     
         <!-- ======= Contact Section ======= -->
-        <section id="contact" class="contact">
+        <section id="contato" class="contact">
     
             <div class="container" data-aos="fade-up">
     
@@ -666,36 +665,37 @@
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-geo-alt"></i>
-                                    <h3>Address</h3>
+                                    <h3>Endereço</h3>
                                     <p>A108 Adam Street,<br>New York, NY 535022</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-telephone"></i>
-                                    <h3>Call Us</h3>
+                                    <h3>Telefones</h3>
                                     <p>+1 5589 55488 55<br>+1 6678 254445 41</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-envelope"></i>
-                                    <h3>Email Us</h3>
+                                    <h3>Email</h3>
                                     <p>info@example.com<br>contact@example.com</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-clock"></i>
-                                    <h3>Open Hours</h3>
-                                    <p>Monday - Friday<br>9:00AM - 05:00PM</p>
+                                    <h3>Horário de funcionamento</h3>
+                                    <p>Seg - Sex<br>9:00AM - 05:00PM</p>
                                 </div>
                             </div>
                         </div>
                     </div>
         
                     <div class="col-lg-6">
-                        <form action="forms/contact.php" method="post" class="php-email-form">
+                        <form action="{{route('contact')}}" method="post" class="php-email-form">
+                            @csrf
                             <div class="row gy-4">
                                 <div class="col-md-6">
                                     <input type="text" name="name" class="form-control" placeholder="Seu nome" required>
@@ -710,15 +710,15 @@
                                 </div>
                 
                                 <div class="col-md-12">
-                                    <textarea class="form-control" name="message" rows="6" placeholder="Mensagem" required></textarea>
+                                    <textarea class="form-control" name="text" rows="6" placeholder="Mensagem" required></textarea>
                                 </div>
                 
                                 <div class="col-md-12 text-center">
-                                    <div class="loading">Loading</div>
+                                    <div class="loading">Carregando...</div>
                                     <div class="error-message"></div>
-                                    <div class="sent-message">Your message has been sent. Thank you!</div>
+                                    <div class="sent-message">Sua mensagem foi enviada. Obrigado!</div>
                 
-                                    <button type="submit">Send Message</button>
+                                    <button type="submit">Enviar mensagem</button>
                                 </div>
                             </div>
                         </form>
