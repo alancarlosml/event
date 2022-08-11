@@ -9,13 +9,14 @@ class EventDate extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+      'date',
+      'time_begin',
+      'time_end'
+    ];
+
     public function event()
     {
       return $this->belongsTo(Event::class);
-    }
-
-    public function event_times()
-    {
-      return $this->hasMany(EventTime::class);
     }
 }

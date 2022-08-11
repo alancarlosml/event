@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Models\Configuration;
 use App\Models\Lote;
 
 class LoteController extends Controller
@@ -20,7 +21,11 @@ class LoteController extends Controller
 
     public function create($id){
 
-        return view('lote.add', compact('id'));
+        $config = Configuration::findOrFail(1);
+
+        $taxa_juros = $config->tax;
+
+        return view('lote.add', compact('id', 'taxa_juros'));
     }
 
     public function store(Request $request, $id)
@@ -77,10 +82,14 @@ class LoteController extends Controller
                 
         $lote = Lote::find($id);
 
+        $config = Configuration::findOrFail(1);
+
+        $taxa_juros = $config->tax;
+
         $lote['datetime_begin'] = date('m/d/Y H:m', strtotime(str_replace('-', '/', $lote['datetime_begin'])));
         $lote['datetime_end'] = date('m/d/Y H:m', strtotime(str_replace('-', '/', $lote['datetime_end'])));
 
-        return view('lote.edit', compact('lote'));
+        return view('lote.edit', compact('lote', 'taxa_juros'));
     }
 
     public function update(Request $request, $id)

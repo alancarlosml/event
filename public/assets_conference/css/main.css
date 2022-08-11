@@ -1282,7 +1282,6 @@ h1{
     position:relative
 }
 .accordion .header-title:after{
-    font-family:lineicons;
     content:"\e93a";
     position:absolute;
     right:10px;
@@ -2733,7 +2732,7 @@ footer{
 
 @media(max-width:767px){
     .hero-image{
-        padding: 80px 20px;
+        padding: 80px 20px 20px 20px;
     }
 }
 
@@ -2749,4 +2748,70 @@ footer{
 .duvida-contato {
     font-size: 16px;
     margin-top: 30px;
+}
+/* 
+#event-list img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+#event-list .single-blog-item {
+    border: 1px solid #dfdede;
+    box-shadow: 2px 5px 10px #dfdede;
+    margin: 15px auto;
+    padding: 5px;
+    position: relative;
+    border-radius: 10px;
+}
+
+#event-list .blog-content {
+    padding: 15px;
+}
+
+#event-list .blog-content h4 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+#event-list .blog-content h6 a{
+    color:#013289;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+#event-list .blog-content h4 a{
+    color:#4154f1;
+    font-size: 20px;
+}
+
+#event-list .blog-content h4#place_name a{
+    color:#333;
+    font-size: 16px;
+}
+
+#event-list .blog-date {
+    position: absolute;
+    background: #4154f1;
+    top: 35px;
+    color: #fff;
+    border-radius: 0 25px 25px 0;
+    padding: 5px 15px;
+    font-weight: 500;
+} */
+
+.payment-summary .card {
+
+    padding: 15px 15px;
+}
+
+.payment-summary .card h6 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.payment-summary .card hr {
+    margin-top: 0px;
 }

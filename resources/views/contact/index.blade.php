@@ -57,7 +57,7 @@
                                     <td>{{$contact->email}}</td>
                                     <td>{{$contact->phone}}</td>
                                     <td>{{$contact->text}}</td>
-                                    <td>{{ \Carbon\Carbon::parse($contact->created_at)->format('j/m/Y h:i') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($contact->created_at)->format('j/m/Y H:i') }}</td>
                                     <td>
                                         <div class="d-flex">
                                             <a class="btn btn-primary btn-sm mr-1" href="{{route('contact.show', $contact->id)}}">

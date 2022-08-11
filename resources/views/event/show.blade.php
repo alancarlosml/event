@@ -92,7 +92,7 @@
                         <div class="form-group">
                             <label for="created_at">Data de criação</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y h:i') }}
+                                {{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}
                             </p>
                         </div>
                         <div class="form-group">
@@ -118,7 +118,7 @@
                                     <th>Preço final</th>
                                     <th>Quantidade</th>
                                     <th>Visibilidade</th>
-                                    <th>Cupons</th>
+                                    {{-- <th>Cupons</th> --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -134,13 +134,13 @@
                                             <td>@money($lote->final_value)</td>
                                             <td>{{$lote->quantity}}</td>
                                             <td>@if($lote->visibility == 0) Público @else Privado @endif</td>
-                                            <td>
+                                            {{-- <td>
                                                 <ul class="list-group list-group-flush">
                                                     @foreach($lote->coupons as $coupon)
                                                     <li>{{$coupon->code}}</li>
                                                     @endforeach
                                                 </ul>
-                                            </td>
+                                            </td> --}}
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -158,6 +158,7 @@
                                         <th>Valor desconto</th>
                                         <th>Limite de compras</th>
                                         <th>Limite de inscrições</th>
+                                        <th>Lotes</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -166,10 +167,17 @@
                                         <tr>
                                             <td>{{$coupon->id}}</td>
                                             <td>{{$coupon->code}}</td>
-                                            <td>{{$coupon->discount_type}}</td>
-                                            <td>{{$coupon->discount_value}}</td>
+                                            <td>@if($coupon->discount_type == 0) Porcentagem @elseif($coupon->discount_type == 1) Fixo @endif</td>
+                                            <td>@if($coupon->discount_type == 0) {{$coupon->discount_value*100}}% @elseif($coupon->discount_type == 1) @money($coupon->discount_value) @endif</td>
                                             <td>{{$coupon->limit_buy}}</td>
                                             <td>{{$coupon->limit_tickets}}</td>
+                                            <td>
+                                                <ul class="list-group list-group-flush">
+                                                    @foreach($coupon->lotes as $lote)
+                                                    <li>{{$lote->name}}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
                                             <td>@if($coupon->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                         </tr>
                                     @endforeach

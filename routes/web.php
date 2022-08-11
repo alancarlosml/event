@@ -14,15 +14,23 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'App\Http\Controllers\HomeController@home');
-Route::get('/eventos', 'App\Http\Controllers\HomeController@events');
-Route::get('/{slug}', 'App\Http\Controllers\HomeController@event');
+Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
+Route::get('/{slug}', 'App\Http\Controllers\EventHomeController@event');
 Route::post ('/contato', 'App\Http\Controllers\HomeController@contact')->name('contact');
+Route::post('/get-areas','App\Http\Controllers\HomeController@getAreas');
 // Route::get('/contato', 'App\Http\Controllers\HomeController@contact');
 
 
 
+// Route::get('admin/register', [RegisteredUserController::class, 'create'])->name('register');
 
+// Route::post('admin/register', [RegisteredUserController::class, 'store']);
 
+// Route::get('admin/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+
+Route::get('admin/login', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@create')->name('admin.login');
+Route::post('admin/login', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@store')->name('admin.login');
+Route::post('admin/logout', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@destroy')->name('admin.logout');
 
 Route::get('admin/dashboard', 'App\Http\Controllers\DashboardController@dashboard')->middleware(['auth'])->name('dashboard');
 
@@ -117,5 +125,12 @@ Route::get('admin/participantes/edit/{id}', 'App\Http\Controllers\ParticipanteCo
 Route::post('admin/participantes/update/{id}', 'App\Http\Controllers\ParticipanteController@update')->middleware(['auth'])->name('participante.update');
 Route::delete('admin/participantes/destroy/{id}', 'App\Http\Controllers\ParticipanteController@destroy')->middleware(['auth'])->name('participante.destroy');
 
+Route::get('painel/criar-evento', 'App\Http\Controllers\EventHomeController@create_event')->middleware(['auth'])->name('event_home.create_event');
+Route::get('painel/autocomplete_place', 'App\Http\Controllers\EventHomeController@autocomplete_place')->name('event_home.autocomplete_place');
+Route::get('painel/check_slug', 'App\Http\Controllers\EventHomeController@check_slug')->name('event_home.check_slug');
+Route::get('painel/create_slug', 'App\Http\Controllers\EventHomeController@create_slug')->name('event_home.create_slug');
+Route::post('painel/store_file/{id}','App\Http\Controllers\EventHomeController@file_store')->middleware(['auth'])->name('event_home.store_file');
+Route::get('painel/delete_file/{id}','App\Http\Controllers\EventHomeController@delete_file')->middleware(['auth'])->name('event_home.delete_file');
+Route::post('painel/get-areas-by-category','App\Http\Controllers\HomeController@getAreas')->middleware(['auth'])->name('event_home.get_areas_by_category');
 
 require __DIR__.'/auth.php';

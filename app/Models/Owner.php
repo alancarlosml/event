@@ -12,6 +12,8 @@ class Owner extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $guard = 'web';
+
     /**
      * The attributes that are mass assignable.
      *

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Area;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 use App\Models\Category;
 
@@ -26,11 +27,18 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'description' => 'required',
-            'slug' => 'required'
+            'description' => 'required'
         ]);
 
         $input = $request->all();
+
+        $input['slug'] = $slug = Str::slug($input['description'], '-');
+
+        if(isset($input['status'])){
+            $input['status'] = 1;
+        }else{
+            $input['status'] = 0;
+        }
 
         Category::create($input);
 
@@ -49,11 +57,12 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $this->validate($request, [
-            'description' => 'required',
-            'slug' => 'required'
+            'description' => 'required'
         ]);
 
         $input = $request->all();
+
+        $input['slug'] = $slug = Str::slug($input['description'], '-');
 
         if(isset($input['status'])){
             $input['status'] = 1;

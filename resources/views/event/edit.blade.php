@@ -130,37 +130,93 @@
                             </div>
                             <div class="form-group">
                                 <label for="max_tickets">Total máximo de vagas*</label>
-                                <input type="number" class="form-control col-lg-2 col-sm-12" id="max_tickets" name="max_tickets" value="{{old('max_tickets', $event->max_tickets)}}">
+                                <input type="number" class="form-control col-lg-2 col-sm-12" id="max_tickets" name="max_tickets" value="{{old('max_tickets', $event->max_tickets)}}" min="0">
                             </div>
                         </div>
                         <hr>
-                        <div class="card-body">
+                        <div class="card-body" id="card-date">
                             <h4>Data e hora do evento</h4>
                             @foreach ($dates as $date)
                                 <div class="form-row">
                                     <div class="form-group col-md-3">
                                         <label for="number">Data</label>
-                                        <div class="input-group date" id="datetimepicker_day" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_day" id="datetimepicker_day_input" data-target="#datetimepicker_day" value="{{ \Carbon\Carbon::parse($date->date)->format('d/m/Y') }}"/>
-                                            <div class="input-group-append" data-target="#datetimepicker_day" data-toggle="datetimepicker">
+                                        <div class="input-group date" id="datetimepicker_day_{{$date->id}}" data-target-input="nearest">
+                                            <input class="form-control datetimepicker-input datetimepicker_day" data-target="#datetimepicker_day_{{$date->id}}" name="date[]" value="{{$date->date}}"/>
+                                            <div class="input-group-append" data-target="#datetimepicker_day_{{$date->id}}" data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label for="number">Hora início</label>
-                                        <div class="input-group date" id="datetimepicker_hour_begin" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" data-target="#datetimepicker_hour_begin" name="time_begin[]" value="{{$date->time_begin}}"/>
-                                            <div class="input-group-append" data-target="#datetimepicker_hour_begin" data-toggle="datetimepicker">
+                                        <div class="input-group date" id="datetimepicker_hour_begin_{{$date->id}}" data-target-input="nearest">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" data-target="#datetimepicker_hour_begin_{{$date->id}}" name="time_begin[]" value="{{$date->time_begin}}"/>
+                                            <div class="input-group-append" data-target="#datetimepicker_hour_begin_{{$date->id}}" data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i class="fa-regular fa-clock"></i></div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label for="number">Hora fim</label>
-                                        <div class="input-group date" id="datetimepicker_hour_end" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" data-target="#datetimepicker_hour_end" name="time_end[]" value="{{$date->time_end}}"/>
-                                            <div class="input-group-append" data-target="#datetimepicker_hour_end" data-toggle="datetimepicker">
+                                        <div class="input-group date" id="datetimepicker_hour_end_{{$date->id}}" data-target-input="nearest">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" data-target="#datetimepicker_hour_end_{{$date->id}}" name="time_end[]" value="{{$date->time_end}}"/>
+                                            <div class="input-group-append" data-target="#datetimepicker_hour_end_{{$date->id}}" data-toggle="datetimepicker">
+                                                <div class="input-group-text"><i class="fa-regular fa-clock"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{-- <input class="datepicker_recurring_time_begin"/>
+                                    <input class="datepicker_recurring_time_end"/> --}}
+                                    @if ($loop->first)
+                                        <div class="form-group col-md-2">
+                                            <a class="btn btn-success btn-sm mr-1" id="cmd" style="margin-top: 35px" href="javascript:;">
+                                                <i class="fa-solid fa-plus"></i>
+                                                Adicionar novo
+                                            </a>
+                                        </div> 
+                                    @else
+                                        <div class="form-group col-md-2">
+                                            <a class="btn btn-danger btn-sm mr-1 btn-remove" style="margin-top: 35px" href="javascript:;">
+                                                <i class="fa-solid fa-remove"></i>
+                                                Remover
+                                            </a>
+                                        </div> 
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+
+
+
+
+
+
+
+                            {{-- @foreach ($dates as $date)
+                                <div class="form-row">
+                                    <div class="form-group col-md-3">
+                                        <label for="number">Data</label>
+                                        <div class="input-group date" id="datetimepicker_day_{{$date->id}}" data-target-input="nearest">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_day" id="datetimepicker_day_input" data-target="#datetimepicker_day_{{$date->id}}" value="{{ \Carbon\Carbon::parse($date->date)->format('d/m/Y') }}"/>
+                                            <div class="input-group-append" data-target="#datetimepicker_day_{{$date->id}}" data-toggle="datetimepicker">
+                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label for="number">Hora início</label>
+                                        <div class="input-group date" id="datetimepicker_hour_begin_{{$date->id}}" data-target-input="nearest">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" data-target="#datetimepicker_hour_begin_{{$date->id}}" name="time_begin[]" value="{{$date->time_begin}}"/>
+                                            <div class="input-group-append" data-target="#datetimepicker_hour_begin_{{$date->id}}" data-toggle="datetimepicker">
+                                                <div class="input-group-text"><i class="fa-regular fa-clock"></i></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label for="number">Hora fim</label>
+                                        <div class="input-group date" id="datetimepicker_hour_end_{{$date->id}}" data-target-input="nearest">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" data-target="#datetimepicker_hour_end_{{$date->id}}" name="time_end[]" value="{{$date->time_end}}"/>
+                                            <div class="input-group-append" data-target="#datetimepicker_hour_end_{{$date->id}}" data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i class="fa-regular fa-clock"></i></div>
                                             </div>
                                         </div>
@@ -182,7 +238,7 @@
                                     @endif
                                 </div>
                             @endforeach
-                        </div>
+                        </div> --}}
                         <hr>
                         <div class="card-body">
                             <h4>Endereço do evento</h4>
@@ -276,14 +332,16 @@
     @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> --}}
+        <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
     @endpush
 
     @push('footer')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
+        {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> --}}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         <script>
@@ -407,18 +465,81 @@
                     }
                 });
 
-                // $('#datetimepicker_day_input').inputmask('dd/mm/yyyy');
-
-                $('.datetimepicker_day').datetimepicker({
-                    format: 'DD/MM/YYYY'
+                $('#cmd').click(function(){
+                    $('#card-date').append('<div class="form-row">' + 
+                            '<div class="form-group col-md-3">' +
+                                '<label for="number">Data</label>'+
+                                '<div class="input-group date" data-target-input="nearest">'+
+                                    '<input class="form-control datetimepicker-input datetimepicker_day" name="date[]" value=""/>'+
+                                    '<div class="input-group-append" data-toggle="datetimepicker">'+
+                                        '<div class="input-group-text"><i class="fa fa-calendar"></i></div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="form-group col-md-2">'+
+                                '<label for="number">Hora início</label>'+
+                                '<div class="input-group date" data-target-input="nearest">'+
+                                    '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" value=""/>'+
+                                    '<div class="input-group-append" data-toggle="datetimepicker">'+
+                                        '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="form-group col-md-2">'+
+                                '<label for="number">Hora fim</label>'+
+                                '<div class="input-group date" data-target-input="nearest">'+
+                                    '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" value=""/>'+
+                                    '<div class="input-group-append" data-toggle="datetimepicker">'+
+                                        '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="form-group col-md-2">'+
+                                '<a class="btn btn-danger btn-sm mr-1 btn-remove" style="margin-top: 35px" href="javascript:;">'+
+                                    '<i class="fa-solid fa-remove"></i>'+
+                                    ' Remover'+
+                                '</a>'+
+                            '</div>'+ 
+                        '</div>'
+                    );
                 });
 
-                $('.datetimepicker_hour_begin').datetimepicker({
-                    format: 'LT'
+                $('body').on('mousedown',".datetimepicker_day", function(){
+                    $(this).datetimepicker({
+                        timepicker:false,
+                        format:'d/m/Y',
+                        mask:true
+                    });
                 });
 
-                $('.datetimepicker_hour_end').datetimepicker({
-                    format: 'LT'
+                $('body').on('mousedown',".datetimepicker_hour_begin", function(){
+                    $(this).datetimepicker({
+                        datepicker:false,
+                        format:'H:i',
+                        mask:true,
+                        onShow:function( ct ){
+                            this.setOptions({
+                                maxTime:$(this).val()?$(this).val():false
+                            })
+                        }
+                    });
+                });
+
+                $('body').on('mousedown',".datetimepicker_hour_end", function(){
+                    $(this).datetimepicker({
+                        datepicker:false,
+                        format:'H:i',
+                        mask:true,
+                        onShow:function( ct ){
+                            this.setOptions({
+                                minTime:$(this).val()?$(this).val():false
+                            })
+                        }
+                    });
+                });
+
+                $('body').on('click',".btn-remove", function(){
+                    $(this).parent().parent().remove();
                 });
 
                 $('#state').on('change', function() {

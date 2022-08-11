@@ -18,7 +18,7 @@
                         <li>
                             <i class="fa-solid fa-calendar-check"></i>
                         </li>
-                        <li><span><b>Data &amp; Hora</b> @if($event->min_event_dates() != $event->max_event_dates()) De {{\Carbon\Carbon::parse($event->min_event_dates())->format('d/m')}} a {{\Carbon\Carbon::parse($event->max_event_dates())->format('d/m')}}@else{{\Carbon\Carbon::parse($event->min_event_dates())->format('d/m')}}@endif, {{\Carbon\Carbon::parse($event->min_time)->format('h:i')}}h</span></li>
+                        <li><span><b>Data &amp; Hora</b> @if($event->min_event_dates() != $event->max_event_dates()) De {{\Carbon\Carbon::parse($event->min_event_dates())->format('d/m')}} a {{\Carbon\Carbon::parse($event->max_event_dates())->format('d/m')}}@else{{\Carbon\Carbon::parse($event->min_event_dates())->format('d/m')}}@endif, {{\Carbon\Carbon::parse($event->min_event_time())->format('H:i')}}h</span></li>
                     </ul>
                 </div>
                 <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
@@ -26,7 +26,7 @@
                         <li>
                             <i class="fa-solid fa-list-check"></i>
                         </li>
-                        <li><span><b>Categoria</b> {{ $event->category->description}}</span></li>
+                        <li><span><b>Categoria</b> {{ $event->area->category->description}}</span></li>
                     </ul>
                 </div>
                 <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
@@ -34,7 +34,7 @@
                         <li>
                             <i class="fa-solid fa-id-badge"></i>
                         </li>
-                        <li><span><b>Vagas</b> {{ $event->max_tickets}}</span></li>
+                        <li><span><b>Total de vagas</b> {{ $event->max_tickets}}</span></li>
                     </ul>
                 </div>
             </div>
@@ -66,14 +66,53 @@
                 </div>
             </div>
             <div class="row intro-wrapper">
-                <div class="col-lg-8">
+                {{-- @foreach ($event->event_dates as $event_date)
+                    {{$event_date->date}}
+                @endforeach --}}
+                <div class="col-lg-8 col-sm-12">
+                    {{-- <div class="col-12 mb-5 text-center">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="monday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#monday" role="tab" aria-controls="monday" aria-expanded="true">
+                                    <div class="item-text">
+                                        <h4>Day 01</h4>
+                                        <h5>14 February 2020</h5>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tuesday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#tuesday" role="tab" aria-controls="tuesday">
+                                    <div class="item-text">
+                                        <h4>Day 02</h4>
+                                        <h5>15 February 2020</h5>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="wednesday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#wednesday" role="tab" aria-controls="wednesday">
+                                    <div class="item-text">
+                                        <h4>Day 03</h4>
+                                        <h5>16 February 2020</h5>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="thursday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#thursday" role="tab" aria-controls="thursday">
+                                    <div class="item-text">
+                                        <h4>Day 04</h4>
+                                        <h5>17 February 2020</h5>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div> --}}
                     <div class="table-responsive">
                         <table class="table">
                             <tbody>
                                 <thead>
                                     <th>Lote</th>
                                     <th>Valor</th>
-                                    <th>Quantidade</th>
+                                    <th class="text-center">Quantidade</th>
                                 </thead>
                                 @foreach ($event->lotes as $lote)
                                 <tr class="border-bottom">
@@ -82,7 +121,7 @@
                                             <div class="ps-3 d-flex flex-column">
                                                 <p class="fw-bold text-uppercase"> <b>{{$lote->name}} </b></p>
                                                 @if($lote->description)<p class="fw-bold"> {{$lote->description}} </p>@endif
-                                                <small class="font-weight-bold"> Disponível até {{\Carbon\Carbon::parse($lote->datetime_end)->format('d/m/y \à\s h:i')}} </small>
+                                                <em> Disponível até {{\Carbon\Carbon::parse($lote->datetime_end)->format('d/m/y \à\s h:i')}} </em>
                                             </div>
                                         </div>
                                     </td>
@@ -99,7 +138,8 @@
                                     <td>
                                         <div class="d-flex align-items-center"> 
                                             <span class="pe-3 ml-2"> 
-                                                <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}">
+                                                <input class="inp-number" type="number" style="min-width: 1.5rem" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"/>
+                                                {{-- <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"> --}}
                                             </span>
                                         </div>
                                     </td>
@@ -109,25 +149,37 @@
                         </table>
                     </div>
                 </div>
-                <div class="col-lg-4 payment-summary">
-                    <div class="card px-md-3 px-2 pt-4">
+                <div class="col-lg-4 col-sm-12 payment-summary">
+                    <div class="card px-md-3 px-2">
                         <h6>Resumo</h6>
-                        <div class="d-flex justify-content-between b-bottom"> 
+                        <hr>
+                        {{-- <div class="d-flex justify-content-between b-bottom"> 
                             <input type="text" class="ps-2" placeholder="CUPOM">
                             <div class="btn btn-common">Aplicar</div>
+                        </div> --}}
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control ps-2" placeholder="CUPOM" aria-label="CUPOM" aria-describedby="button-addon2">
+                            <div class="input-group-append">
+                              <button class="btn btn-outline-secondary" style="color: #ff4a67; font-weight: 700" type="button" id="button-addon2">Aplicar</button>
+                            </div>
                         </div>
                         <div class="d-flex flex-column b-bottom">
-                            <div class="d-flex justify-content-between py-3"> <small class="text-muted">Order Summary</small>
+                            <div class="d-flex justify-content-between py-3"> 
+                                <strong>Sub-total</strong>
                                 <p>$122</p>
                             </div>
-                            <div class="d-flex justify-content-between pb-3"> <small class="text-muted">Additional Service</small>
-                                <p>$22</p>
+                            <div class="d-flex justify-content-between pb-3"> 
+                                <strong>Cupom (HKJGHJG)</strong>
+                                <p>- $22</p>
                             </div>
-                            <div class="d-flex justify-content-between"> <small class="text-muted">Total Amount</small>
-                                <p>$132</p>
+                            <div class="d-flex justify-content-between"> 
+                                <strong>Valor total</strong>
+                                <p>$100</p>
                             </div>
                         </div>
-                        <div class="sale my-3"> <span>sale<span class="px-1">expiring</span><span>in</span>:</span><span class="red">21<span class="ps-1">hours</span>,31<span class="ps-1 ">minutes</span></span> </div>
+                        <div class="d-flex flex-column b-bottom mt-4">
+                            <a href="/resumo" onclick="return validSubmition()" class="btn btn-common">Continuar</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -229,7 +281,7 @@
                                 <div class="row">
                                     <div class="col-md-6 form-line">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" id="name" name="email" placeholder="First Name" required="" data-error="Please enter your name">
+                                            <input type="text" class="form-control" id="name" name="name" placeholder="Nome" required data-error="Please enter your name">
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
@@ -241,7 +293,7 @@
                                     </div>
                                     <div class="col-md-12 form-line">
                                         <div class="form-group">
-                                            <input type="tel" class="form-control" id="msg_subject" name="subject" placeholder="Subject" required="" data-error="Please enter your message subject">
+                                            <input type="tel" class="form-control" id="msg_subject" name="subject" placeholder="Assunto" required="" data-error="Please enter your message subject">
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
@@ -250,7 +302,7 @@
                                             <textarea class="form-control" rows="4" id="message" name="message" required="" data-error="Write your message"></textarea>
                                         </div>
                                         <div class="form-submit">
-                                            <button type="submit" class="btn btn-common disabled" id="form-submit" style="pointer-events: all; cursor: pointer;"><i class="fa fa-paper-plane" aria-hidden="true"></i> Send Message</button>
+                                            <button type="submit" class="btn btn-common disabled" id="form-submit" style="pointer-events: all; cursor: pointer;"><i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar</button>
                                             <div id="msgSubmit" class="h3 text-center hidden"></div>
                                         </div>
                                     </div>
@@ -261,65 +313,62 @@
                 </div>
             </div>
         </div>
+        <!-- Modal -->
+        <div class="modal fade" id="cupomModal" tabindex="-1" role="dialog" aria-labelledby="cupomModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="img/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></h5>
+                {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&#10005;</span>
+                </button> --}}
+                </div>
+                {{-- <div class="modal-body">
+                ...
+                </div> --}}
+                <div class="modal-footer">
+                <button type="button" id="modal_close" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                {{-- <button type="button" class="btn btn-primary">Ok</button> --}}
+                </div>
+            </div>
+            </div>
+        </div>
     </section>
 
     @push('head')
 
-    <style>
-        #event-list img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-        }
+    @endpush
 
-        #event-list .single-blog-item {
-            border: 1px solid #dfdede;
-            box-shadow: 2px 5px 10px #dfdede;
-            margin: 15px auto;
-            padding: 5px;
-            position: relative;
-            border-radius: 10px;
-        }
+    @push('footer')
+        <script src="assets_conference/js/bootstrap-input-spinner.js"></script>
+        <script src="assets_conference/js/custom-editors.js"></script>
+        <script>
+            $(document).ready(function() {  
+                $(".inp-number").inputSpinner({buttonsOnly: true, autoInterval: undefined})
+            });
 
-        #event-list .blog-content {
-            padding: 15px;
-        }
+            function validSubmition(){
 
-        #event-list .blog-content h4 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
+            // let customSelect = $('.custom-select').val();
 
-        #event-list .blog-content h6 a{
-            color:#013289;
-            font-weight: 600;
-            font-size: 16px;
-        }
+            var count = 0;
+            $(".inp-number").each(function() {
+                if($(this).val() !== '0'){
+                    count++
+                }
+            });
 
-        #event-list .blog-content h4 a{
-            color:#4154f1;
-            font-size: 20px;
-        }
-        
-        #event-list .blog-content h4#place_name a{
-            color:#333;
-            font-size: 16px;
-        }
-        
-        #event-list .blog-date {
-            position: absolute;
-            background: #4154f1;
-            top: 35px;
-            /* left: 5px; */
-            color: #fff;
-            border-radius: 0 25px 25px 0;
-            padding: 5px 15px;
-            font-weight: 500;
-        }
+            if (count === 0) {
 
-    </style>
+                $('#cupomModal').modal('show');
+                $('#modal_txt').text('Por favor, selecione ao menos um ingresso.');
+                $('#modal_icon').attr('src', '/img/alert.png');
+                return false;
+            }
+
+            return true;
+            }
+        </script>
     @endpush
 
 </x-event-layout>

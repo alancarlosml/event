@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="card-body table-responsive p-0">
-                    <table class="table table-head-fixed text-nowrap">
+                    <table class="table table-head-fixed text-wrap">
                         <thead>
                             <tr>
                             <th>ID</th>
@@ -57,8 +57,8 @@
                                     <td>{{$event->name}}</td>
                                     <td>{{$event->owner_name}}</td>
                                     <td>{{$event->place_name}}</td>
-                                    <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif</td>
-                                    <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y h:i') }}</td>
+                                    <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif</td>
+                                    <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}</td>
                                     <td>@if($event->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                     <td>
                                         <div class="d-flex">
@@ -74,24 +74,30 @@
                                                 <i class="fa-solid fa-percent"></i>
                                                 Cupons
                                             </a>
-                                            <a class="btn btn-primary btn-sm mr-1" href="{{route('event.show', $event->id)}}">
-                                                <i class="fas fa-eye"></i>
-                                                Detalhes
-                                            </a>
-                                            <a class="btn btn-info btn-sm mr-1" href="{{route('event.edit', $event->id)}}">
-                                                <i class="fas fa-pencil-alt"></i>
-                                                Editar
-                                            </a>
-                                            <form action="{{ route('event.destroy', $event->id) }}" method="POST">
-                                                <input type="hidden" name="_method" value="DELETE">
-                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$event->id}})">
-                                                    <i class="fas fa-trash">
-                                                    </i>
-                                                    Remover
-                                                </a>
-                                                <button class="d-none" id="btn-remove-hidden-{{$event->id}}">Remover</button>
-                                            </form>
+                                            <div class="btn-group" role="group">
+                                                <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm mr-1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa-solid fa-gear"></i> Mais
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
+                                                    <a class="dropdown-item" href="{{route('event.show', $event->id)}}">
+                                                        <i class="fas fa-eye"></i>
+                                                        Detalhes
+                                                    </a>
+                                                    <a class="dropdown-item" href="{{route('event.edit', $event->id)}}">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                        Editar
+                                                    </a>
+                                                    <form action="{{ route('event.destroy', $event->id) }}" method="POST">
+                                                        <input type="hidden" name="_method" value="DELETE">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                        <a href="javascript:;" class="dropdown-item" onclick="removeData({{$event->id}})">
+                                                            <i class="fas fa-trash"></i>
+                                                            Remover
+                                                        </a>
+                                                        <button class="d-none" id="btn-remove-hidden-{{$event->id}}">Remover</button>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                     <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$event->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">

@@ -68,7 +68,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3">
-                                    <label for="tax_service">Taxa de serviço (7,0%)*</label>
+                                    <label for="tax_service">Taxa de serviço ({{number_format($taxa_juros*100, 2, ',')}}%)*</label>
                                     <select id="tax_service" class="form-control" id="tax_service" name="tax_service">
                                         <option selected>Selecione</option>
                                         <option value="0">Pago pelo participante</option>
@@ -98,7 +98,7 @@
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label for="quantity">Quantidade*</label>
-                                    <input type="number" class="form-control" id="quantity" name="quantity" placeholder="0">
+                                    <input type="number" class="form-control" id="quantity" name="quantity" placeholder="0" min="0">
                                 </div>
                             </div>
                             <div class="form-group">

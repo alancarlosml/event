@@ -74,66 +74,65 @@
         <!-- ======= Features Section ======= -->
         <section id="features" class="features">
     
-            <div class="container" data-aos="fade-up">
+            {{-- <div class="container" data-aos="fade-up">
         
                 <header class="section-header">
-                <h2>Features</h2>
-                <p>Laboriosam et omnis fuga quis dolor direda fara</p>
+                    <p>Características</p>
                 </header>
         
                 <div class="row">
         
-                <div class="col-lg-6">
-                    <img src="assets/img/features.png" class="img-fluid" alt="">
-                </div>
-        
-                <div class="col-lg-6 mt-5 mt-lg-0 d-flex">
-                    <div class="row align-self-center gy-4">
-        
-                    <div class="col-md-6" data-aos="zoom-out" data-aos-delay="200">
-                        <div class="feature-box d-flex align-items-center">
-                        <i class="bi bi-check"></i>
-                        <h3>Eos aspernatur rem</h3>
+                    <div class="col-lg-6">
+                        <img src="assets/img/features.png" class="img-fluid" alt="">
+                    </div>
+            
+                    <div class="col-lg-6 mt-5 mt-lg-0 d-flex">
+                        <div class="row align-self-center gy-4">
+            
+                            <div class="col-md-6" data-aos="zoom-out" data-aos-delay="200">
+                                <div class="feature-box d-flex align-items-center">
+                                    <i class="bi bi-check"></i>
+                                    <h3>Tenha um site próprio para seu evento</h3>
+                                </div>
+                            </div>
+                
+                            <div class="col-md-6" data-aos="zoom-out" data-aos-delay="300">
+                                <div class="feature-box d-flex align-items-center">
+                                <i class="bi bi-check"></i>
+                                <h3>Facilis neque ipsa</h3>
+                                </div>
+                            </div>
+                
+                            <div class="col-md-6" data-aos="zoom-out" data-aos-delay="400">
+                                <div class="feature-box d-flex align-items-center">
+                                <i class="bi bi-check"></i>
+                                <h3>Volup amet voluptas</h3>
+                                </div>
+                            </div>
+                
+                            <div class="col-md-6" data-aos="zoom-out" data-aos-delay="500">
+                                <div class="feature-box d-flex align-items-center">
+                                <i class="bi bi-check"></i>
+                                <h3>Rerum omnis sint</h3>
+                                </div>
+                            </div>
+                
+                            <div class="col-md-6" data-aos="zoom-out" data-aos-delay="600">
+                                <div class="feature-box d-flex align-items-center">
+                                <i class="bi bi-check"></i>
+                                <h3>Alias possimus</h3>
+                                </div>
+                            </div>
+                
+                            <div class="col-md-6" data-aos="zoom-out" data-aos-delay="700">
+                                <div class="feature-box d-flex align-items-center">
+                                <i class="bi bi-check"></i>
+                                <h3>Repellendus mollitia</h3>
+                                </div>
+                            </div>
+            
                         </div>
                     </div>
-        
-                    <div class="col-md-6" data-aos="zoom-out" data-aos-delay="300">
-                        <div class="feature-box d-flex align-items-center">
-                        <i class="bi bi-check"></i>
-                        <h3>Facilis neque ipsa</h3>
-                        </div>
-                    </div>
-        
-                    <div class="col-md-6" data-aos="zoom-out" data-aos-delay="400">
-                        <div class="feature-box d-flex align-items-center">
-                        <i class="bi bi-check"></i>
-                        <h3>Volup amet voluptas</h3>
-                        </div>
-                    </div>
-        
-                    <div class="col-md-6" data-aos="zoom-out" data-aos-delay="500">
-                        <div class="feature-box d-flex align-items-center">
-                        <i class="bi bi-check"></i>
-                        <h3>Rerum omnis sint</h3>
-                        </div>
-                    </div>
-        
-                    <div class="col-md-6" data-aos="zoom-out" data-aos-delay="600">
-                        <div class="feature-box d-flex align-items-center">
-                        <i class="bi bi-check"></i>
-                        <h3>Alias possimus</h3>
-                        </div>
-                    </div>
-        
-                    <div class="col-md-6" data-aos="zoom-out" data-aos-delay="700">
-                        <div class="feature-box d-flex align-items-center">
-                        <i class="bi bi-check"></i>
-                        <h3>Repellendus mollitia</h3>
-                        </div>
-                    </div>
-        
-                    </div>
-                </div>
         
                 </div> <!-- / row -->
         
@@ -208,69 +207,56 @@
                     <img src="assets/img/features-2.png" class="img-fluid" alt="">
                 </div>
         
-                </div><!-- End Feature Tabs -->
+                </div><!-- End Feature Tabs --> --}}
         
                 <!-- Feature Icons -->
                 <div class="row feature-icons" data-aos="fade-up">
-                <h3>Ratione mollitia eos ab laudantium rerum beatae quo</h3>
-        
-                <div class="row">
-                    <div class="col-xl-4 text-center" data-aos="fade-right" data-aos-delay="100">
-                        <img src="assets/img/features-3.png" class="img-fluid p-4" alt="">
-                    </div>
-                    <div class="col-xl-8 d-flex content">
-                        <div class="row align-self-center gy-4">
-            
-                            <div class="col-md-6 icon-box" data-aos="fade-up">
-                            <i class="ri-line-chart-line"></i>
-                            <div>
-                                <h4>Corporis voluptates sit</h4>
-                                <p>Consequuntur sunt aut quasi enim aliquam quae harum pariatur laboris nisi ut aliquip</p>
-                            </div>
-                            </div>
-            
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="100">
-                            <i class="ri-stack-line"></i>
-                            <div>
-                                <h4>Ullamco laboris nisi</h4>
-                                <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt</p>
-                            </div>
-                            </div>
-            
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="200">
-                            <i class="ri-brush-4-line"></i>
-                            <div>
-                                <h4>Labore consequatur</h4>
-                                <p>Aut suscipit aut cum nemo deleniti aut omnis. Doloribus ut maiores omnis facere</p>
-                            </div>
-                            </div>
-            
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="300">
-                            <i class="ri-magic-line"></i>
-                            <div>
-                                <h4>Beatae veritatis</h4>
-                                <p>Expedita veritatis consequuntur nihil tempore laudantium vitae denat pacta</p>
-                            </div>
-                            </div>
-            
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="400">
-                            <i class="ri-command-line"></i>
-                            <div>
-                                <h4>Molestiae dolor</h4>
-                                <p>Et fuga et deserunt et enim. Dolorem architecto ratione tensa raptor marte</p>
-                            </div>
-                            </div>
-            
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="500">
-                            <i class="ri-radar-line"></i>
-                            <div>
-                                <h4>Explicabo consectetur</h4>
-                                <p>Est autem dicta beatae suscipit. Sint veritatis et sit quasi ab aut inventore</p>
-                            </div>
+                    <header class="section-header">
+                        <p>Características</p>
+                    </header>
+
+                    <div class="row">
+                        <div class="col-xl-4 text-center" data-aos="fade-right" data-aos-delay="100">
+                            <img src="assets/img/features-3.png" class="img-fluid p-4" alt="">
+                        </div>
+                        <div class="col-xl-8 d-flex content">
+                            <div class="row align-self-center gy-4">
+                
+                                <div class="col-md-6 icon-box" data-aos="fade-up">
+                                    <i class="ri-line-chart-line"></i>
+                                    <div>
+                                        <h4>Site do evento</h4>
+                                        <p>Crie um site completo para seu evento em poucos minutos e de forma fácil. Basta preencher as informações, escolher o layout e publicar. Pronto! Site no ar e inscrições disponíveis para venda.</p>
+                                    </div>
+                                </div>
+                
+                                <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="100">
+                                    <i class="ri-stack-line"></i>
+                                    <div>
+                                        <h4>Inscrições</h4>
+                                        <p>Venda inscrições online através de cartão de crédito (em até 12x), boleto e até mesmo empenho. Você ainda pode receber pagamentos internacionais. E o melhor: receba o dinheiro em 2 dias*!</p>
+                                    </div>
+                                </div>
+                
+                                <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="200">
+                                    <i class="ri-brush-4-line"></i>
+                                    <div>
+                                        <h4>Credenciamento</h4>
+                                        <p>Todas as ferramentas de secretaria à sua disposição. Gere etiquetas para crachás, faça o check-in de participantes e controle a entrada e saída deles. Aproveite o app Doity Check-in e acelere o credenciamento!</p>
+                                    </div>
+                                </div>
+                
+                                <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="300">
+                                    <i class="ri-magic-line"></i>
+                                    <div>
+                                        <h4>Certificados</h4>
+                                        <p>Emita certificados online para participantes, palestrantes, autores, apresentadores, avaliadores e organizadores do evento. Personalize e envie por email com um simples clique!
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div><!-- End Feature Icons -->
             </div>
         </section><!-- End Features Section -->
@@ -284,7 +270,7 @@
                 <div class="row gy-4">
                     @foreach ($categories as $category)
                         <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                            <div class="service-box blue">
+                            <div class="service-box">
                                 <h3><a href="/{{$category->slug}}">{{$category->description}}</a></h3>
                             </div>
                         </div>
@@ -698,15 +684,19 @@
                             @csrf
                             <div class="row gy-4">
                                 <div class="col-md-6">
-                                    <input type="text" name="name" class="form-control" placeholder="Seu nome" required>
+                                    <input type="text" class="form-control" name="name" placeholder="Seu nome" required>
                                 </div>
                 
                                 <div class="col-md-6 ">
                                     <input type="email" class="form-control" name="email" placeholder="Seu email" required>
                                 </div>
                 
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <input type="text" class="form-control" name="subject" placeholder="Assunto" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="phone" placeholder="Telefone" required>
                                 </div>
                 
                                 <div class="col-md-12">

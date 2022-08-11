@@ -61,7 +61,7 @@
                                         <b>CEP:</b> {{$place->zip}} <br/>
                                         <b>Cidade:</b> {{$place->city_name}}-{{$place->city_uf}}<br/>
                                     </td>
-                                    <td>{{ \Carbon\Carbon::parse($place->created_at)->format('j/m/Y h:i') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($place->created_at)->format('j/m/Y H:i') }}</td>
                                     <td>@if($place->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                     <td>
                                         <div class="d-flex">

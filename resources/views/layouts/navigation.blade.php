@@ -131,9 +131,10 @@
         
         {{-- <div class="user-panel pb-3 mt-1 mr-3 d-flex">
             <div class="image"> --}}
-                <a class="user-panel pb-2 mr-3 ml-2 mt-1 d-flex" data-toggle="dropdown" href="#">
+                <a class="user-panel p-2 mr-3 ml-2 mt-1 d-flex" data-toggle="dropdown" href="#">
                     {{-- <span class="badge badge-danger navbar-badge" style="margin-top: -10px">3</span> --}}
-                    <img src="../../dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+                    {{-- <img src="{{ asset('dist/img/user2-160x160.jpg')}}" class="img-circle elevation-2" alt="User Image"> --}}
+                    <i class="fa-solid fa-user p-1 mr-1"></i> <b>{{ Auth::user()->name }}</b>
                 </a>
             {{-- </div> --}}
             {{-- <div class="info">
@@ -142,15 +143,15 @@
             {{-- </div> --}}
         <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
             <a href="#" class="dropdown-item">
-                <i class="fa-solid fa-id-card"></i> {{ Auth::user()->name }}
+                <i class="fa-solid fa-id-card"></i> Perfil
             </a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="{{ route('logout') }}"
+            <a class="dropdown-item" href="{{ route('admin.logout') }}"
                 onclick="event.preventDefault();
                 document.getElementById('logout-form').submit();">
                 <i class="fa-solid fa-right-from-bracket"></i> Sair
             </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+            <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
                 @csrf
             </form>
         </div>
@@ -178,8 +179,8 @@
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="../../index3.html" class="brand-link">
-      <img src="../../dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+    <a href="{{route('dashboard')}}" class="brand-link">
+      <img src="{{ asset('dist/img/AdminLTELogo.png')}}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light">AdminLTE 3</span>
     </a>
 

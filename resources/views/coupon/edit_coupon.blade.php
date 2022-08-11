@@ -72,11 +72,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="limit_buy">Limite de compras*</label>
-                                <input type="number" class="form-control col-1" id="limit_buy" name="limit_buy" placeholder="0" value="{{$coupon->limit_buy}}">
+                                <input type="number" class="form-control col-1" id="limit_buy" name="limit_buy" placeholder="0" value="{{$coupon->limit_buy}}" min="0">
                             </div>
                             <div class="form-group">
                                 <label for="limit_tickets">Limite de inscrições*</label>
-                                <input type="number" class="form-control col-1" id="limit_tickets" name="limit_tickets" placeholder="0" value="{{$coupon->limit_tickets}}">
+                                <input type="number" class="form-control col-1" id="limit_tickets" name="limit_tickets" placeholder="0" value="{{$coupon->limit_tickets}}" min="0">
                             </div>
                             <div class="form-group">
                                 <label for="lotes">Marque os lotes que terão este cupom de desconto</label>                      

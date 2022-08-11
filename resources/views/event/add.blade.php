@@ -105,7 +105,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="total">Total máximo de vagas*</label>
-                                <input type="number" class="form-control col-lg-2 col-sm-12" id="total" name="total" placeholder="0" required>
+                                <input type="number" class="form-control col-lg-2 col-sm-12" id="total" name="total" placeholder="0" required min="0">
                             </div>
                         </div>
                         <hr>

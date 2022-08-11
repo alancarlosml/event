@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
+use App\Models\Area;
 use App\Models\Category;
 use App\Models\Contact;
 use App\Models\Event;
+use App\Models\State;
 // use App\Models\Faq;
 
 class HomeController extends Controller
@@ -38,55 +40,6 @@ class HomeController extends Controller
         return view('site.home', compact('categories'));
     }
 
-    public function events(){
-
-        // $menu = 'home';
-        // $title = 'Home';
-        // $url = url('/');
-        // $description = 'Bilhete Mania - Venda de ingressos online';
-        // $image = url('img/favicon/favicon-96x96.png');
-
-        $event = new Event;
-        // $event = new Event;
-        // // $faq = new Faq;
-
-        $events = $event->getAll();
-        // $events = $event->getAll();
-        // // $faqs = $faq->getAll();
-
-        // $nextevents = DB::table('events')->where('active', 1)->take(6)->orderBy('created_at', 'desc')->get();
-
-        // $spotlights = $event->getAllSpotlights();
-
-        // dd($events->get(0)->category);
-
-        return view('site.events', compact('events'));
-    }
-
-    public function event($slug){
-
-        // $menu = 'home';
-        // $title = 'Home';
-        // $url = url('/');
-        // $description = 'Bilhete Mania - Venda de ingressos online';
-        // $image = url('img/favicon/favicon-96x96.png');
-
-        $event = Event::where('slug', $slug)->first();
-        // $event = new Event;
-        // // $faq = new Faq;
-
-        // $events = $event->getAll();
-        // // $faqs = $faq->getAll();
-
-        // $nextevents = DB::table('events')->where('active', 1)->take(6)->orderBy('created_at', 'desc')->get();
-
-        // $spotlights = $event->getAllSpotlights();
-
-        // dd($events->get(0)->category);
-
-        return view('site.event', compact('event'));
-    }
-
     public function contact(Request $request){
 
         $contact = Contact::create($request->all());
@@ -106,6 +59,15 @@ class HomeController extends Controller
         // $nextevents = DB::table('events')->where('active', 1)->take(6)->get();
 
         // return view('contact', compact('title', 'url', 'description', 'image', 'menu', 'categories', 'nextevents'));
+    }
+
+    public function getAreas(Request $request)
+    {
+        $data['areas'] = Area::where("category_id",$request->category_id)
+                    ->where("status", 1)
+                    ->get(["name","id"]);
+        
+        return response()->json($data);
     }
 
     // public function clear()

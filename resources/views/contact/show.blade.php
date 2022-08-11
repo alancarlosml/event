@@ -76,7 +76,7 @@
                         <div class="form-group">
                             <label for="created_at">Data de criação</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{ \Carbon\Carbon::parse($contact->created_at)->format('j/m/Y h:i') }}
+                                {{ \Carbon\Carbon::parse($contact->created_at)->format('j/m/Y H:i') }}
                             </p>
                         </div>
                         <div class="form-group">

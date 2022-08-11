@@ -39,8 +39,7 @@ class Event extends Model
         
         $events = Event::where('events.status', 1)
                         ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
-                        ->join('event_times', 'event_times.event_dates_id', '=', 'event_dates.id')
-                        ->selectRaw('events.*, min(event_dates.date) min_date, min(event_times.time_begin) min_time')
+                        ->selectRaw('events.*, min(event_dates.date) min_date, min(event_dates.time_begin) min_time')
                         ->orderBy('events.created_at','ASC')
                         ->groupBy('events.id')
                         ->get();
@@ -49,9 +48,9 @@ class Event extends Model
         return $events;
     }
 
-    public function category()
+    public function area()
     {
-      return $this->belongsTo(Category::class);
+      return $this->belongsTo(Area::class);
     }
 
     public function place()
@@ -87,6 +86,11 @@ class Event extends Model
     public function min_event_dates() 
     {
         return $this->event_dates()->min('event_dates.date');
+    }
+
+    public function min_event_time() 
+    {
+        return $this->event_dates()->min('event_dates.time_begin');
     }
     
 

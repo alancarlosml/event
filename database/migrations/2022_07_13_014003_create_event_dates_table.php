@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('event_dates', function (Blueprint $table) {
             $table->id();
             $table->date('date');
+            $table->timestamp('time_begin', $precision = 0);
+            $table->timestamp('time_end', $precision = 0);
             $table->integer('status');
             $table->integer('event_id')->unsigned()->index();;
             $table->foreign('event_id')

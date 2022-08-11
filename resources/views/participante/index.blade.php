@@ -56,7 +56,7 @@
                                     <td>{{$participante->name}}</td>
                                     <td>{{$participante->email}}</td>
                                     <td>{{$participante->phone}}</td>
-                                    <td>{{ \Carbon\Carbon::parse($participante->created_at)->format('j/m/Y h:i') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($participante->created_at)->format('j/m/Y H:i') }}</td>
                                     <td>@if($participante->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                     <td>
                                         <div class="d-flex">

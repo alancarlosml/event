@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Configuration;
 use App\Models\Coupon;
 use App\Models\Event;
+use App\Models\EventDate;
 use App\Models\Lote;
 use App\Models\Participante;
 use App\Models\ParticipanteLote;
@@ -100,15 +101,16 @@ class EventController extends Controller
 
         // dd($event);
 
-        $dates = DB::table('event_times')
-            ->join('event_dates', 'event_dates.id', '=', 'event_times.event_dates_id')
+        $dates = DB::table('event_dates')
             ->join('events', 'events.id', '=', 'event_dates.event_id')
             ->where('events.id', $id)
-            ->select(
-                'event_dates.date', 
-                'event_times.time_begin',
-                'event_times.time_end'
+            ->selectRaw(
+                'event_dates.id, 
+                DATE_FORMAT(event_dates.date, "%d/%m/%Y") as date, 
+                DATE_FORMAT(event_dates.time_begin, "%H:%i") as time_begin,
+                DATE_FORMAT(event_dates.time_end, "%H:%i") as time_end'
                 )
+            ->orderBy('event_dates.date')
             ->get();
 
         // dd($dates);
@@ -132,6 +134,9 @@ class EventController extends Controller
                 'area_id' => 'required',
                 'max_tickets' => 'required',
                 'place_name' => 'required',
+                'date' => 'required',
+                'time_begin' => 'required',
+                'time_end' => 'required',
                 'address' => 'required',
                 'number' => 'required',
                 'district' => 'required',
@@ -149,6 +154,9 @@ class EventController extends Controller
                 'area_id' => 'required',
                 'max_tickets' => 'required',
                 'place_name' => 'required',
+                'date' => 'required',
+                'time_begin' => 'required',
+                'time_end' => 'required',
                 'address' => 'required',
                 'number' => 'required',
                 'district' => 'required',
@@ -161,7 +169,33 @@ class EventController extends Controller
         $input = $request->all();
 
         // dd($input);
-        
+
+        $dates = $input['date'];
+        $times_begin = $input['time_begin'];
+        $times_end = $input['time_end'];
+
+        $event_date = new EventDate;
+
+        // $coupon->lotes()->detach();
+
+        DB::table('event_dates')->where('event_id', $id)->delete();
+
+        $finalArray = array();
+        for ($i = 0; $i < count($dates); $i++) {
+
+            $dates[$i] = str_replace('/', '-', $dates[$i]);
+            // dd(date('Y-m-d', strtotime($dates[$i])));
+            array_push($finalArray, array(
+                'date' => date('Y-m-d', strtotime($dates[$i])),
+                'time_begin' => date('H:i', strtotime($times_begin[$i])),
+                'time_end' => date('H:i', strtotime($times_end[$i])),
+                'status' => 1,
+                'event_id' => $id,
+                'created_at' => date("Y-m-d H:i:s")
+            ));
+        }
+        EventDate::insert($finalArray);       
+                
         $owner = Owner::where('email', $input['owner_email'])->first();
 
         if(isset($input['status'])){
