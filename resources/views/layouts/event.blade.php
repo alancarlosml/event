@@ -34,17 +34,17 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://preview.uideck.com/items/event-up/multi-page/blog.html">
+                                    <a class="nav-link" href="#inscricoes">
                                         Inscrições
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://preview.uideck.com/items/event-up/multi-page/contact.html">
+                                    <a class="nav-link" href="#contato">
                                         Contato
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link btn btn-common" href="https://preview.uideck.com/items/event-up/multi-page/contact.html">
+                                    <a class="nav-link btn btn-common" href="javacript:;">
                                         Entrar
                                     </a>
                                 </li>
@@ -56,7 +56,7 @@
                 <div class="mobile-menu">
                     <div class="slicknav_menu">
                         {{-- <div class="slicknav_brand"><a href="javascript:;"><img src="assets_conference/logo.png" class="img-responsive" alt="logo"></a></div> --}}
-                        <a href="javascript:;#" aria-haspopup="true" role="button" tabindex="0" class="slicknav_btn slicknav_collapsed" style=""><span class="slicknav_menutxt"></span><span class="slicknav_icon slicknav_no-text"><span class="slicknav_icon-bar"></span><span class="slicknav_icon-bar"></span><span class="slicknav_icon-bar"></span></span></a>
+                        <a href="javascript:;" aria-haspopup="true" role="button" tabindex="0" class="slicknav_btn slicknav_collapsed" style=""><span class="slicknav_menutxt"></span><span class="slicknav_icon slicknav_no-text"><span class="slicknav_icon-bar"></span><span class="slicknav_icon-bar"></span><span class="slicknav_icon-bar"></span></span></a>
                         <div class="slicknav_nav slicknav_hidden" aria-hidden="true" role="menu" style="display: none;">
                             <ul class="navbar-nav mr-auto w-100 justify-content-end">
                                 <li class="nav-item active">
@@ -65,17 +65,17 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://preview.uideck.com/items/event-up/multi-page/pricing.html" role="menuitem">
+                                    <a class="nav-link" href="#inscricoes" role="menuitem">
                                         Inscrições
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://preview.uideck.com/items/event-up/multi-page/contact.html" role="menuitem">
+                                    <a class="nav-link" href="#contato" role="menuitem">
                                         Contato
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://preview.uideck.com/items/event-up/multi-page/contact.html" role="menuitem">
+                                    <a class="nav-link" href="javascript;;" role="menuitem">
                                         Entrar
                                     </a>
                                 </li>

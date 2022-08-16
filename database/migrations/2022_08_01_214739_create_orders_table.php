@@ -24,9 +24,9 @@ return new class extends Migration
             $table->string('gatway_payment_method');  
             $table->integer('participante_lote_id')->unsigned()->index();
             $table->foreign('participante_lote_id')
-            ->references('id')
-            ->on('participantes_lotes')
-            ->onDelete('cascade');
+                ->references('id')
+                ->on('participantes_lotes')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

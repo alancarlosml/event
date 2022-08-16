@@ -412,7 +412,6 @@
                 });
 
                 var path = "{{route('event.autocomplete_place')}}";
-  
                 $("#place_name").autocomplete({
                     source: function( request, response ) {
                         $.ajax({

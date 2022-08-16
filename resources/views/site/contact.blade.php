@@ -14,27 +14,82 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="event-list">
-            <div class="container">
-                <div class="row">
-                    @foreach($events as $event) 
-                    
-                    <div class="col-md-4">
-                        <div class="single-blog-item">
-                            <div class="blog-thumnail">
-                                <a href="/eventos/{{$event->slug}}" target="_blank">
-                                    <img src="{{ URL::asset('storage/'.$event->banner) }}" alt="{{ $event->name}}" class="img-fluid">
-                                </a>
+        <section id="contato" class="contact">
+    
+            <div class="container" data-aos="fade-up">
+    
+                <header class="section-header">
+                    <p>Entre em contato</p>
+                </header>
+        
+                <div class="row gy-4">
+                    <div class="col-lg-6">
+                        <div class="row gy-4">
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <h3>Endereço</h3>
+                                    <p>A108 Adam Street,<br>New York, NY 535022</p>
+                                </div>
                             </div>
-                            <div class="blog-content">
-                                <h6><a href="/eventos/{{$event->slug}}" target="_blank">{{ $event->category->description}}</a></h6>
-                                <h4><a href="/eventos/{{$event->slug}}" target="_blank">{{ $event->name}}</a></h4><br/>
-                                <h4 id="place_name"><a href="/eventos/{{$event->slug}}" target="_blank">{{ $event->place->name}}, {{ $event->place->get_city()->name}}-{{ $event->place->get_city()->uf}}</a></h4>
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <i class="bi bi-telephone"></i>
+                                    <h3>Telefones</h3>
+                                    <p>+1 5589 55488 55<br>+1 6678 254445 41</p>
+                                </div>
                             </div>
-                            <span class="blog-date">{{\Carbon\Carbon::parse($event->min_date)->format('d/m/y')}}, {{\Carbon\Carbon::parse($event->min_time)->format('h:i')}}h</span>
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <i class="bi bi-envelope"></i>
+                                    <h3>Email</h3>
+                                    <p>info@example.com<br>contact@example.com</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box">
+                                    <i class="bi bi-clock"></i>
+                                    <h3>Horário de funcionamento</h3>
+                                    <p>Seg - Sex<br>9:00AM - 05:00PM</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    @endforeach
+        
+                    <div class="col-lg-6">
+                        <form action="{{route('contact')}}" method="post" class="php-email-form">
+                            @csrf
+                            <div class="row gy-4">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="name" placeholder="Seu nome" required>
+                                </div>
+                
+                                <div class="col-md-6 ">
+                                    <input type="email" class="form-control" name="email" placeholder="Seu email" required>
+                                </div>
+                
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="subject" placeholder="Assunto" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="phone" placeholder="Telefone" required>
+                                </div>
+                
+                                <div class="col-md-12">
+                                    <textarea class="form-control" name="text" rows="6" placeholder="Mensagem" required></textarea>
+                                </div>
+                
+                                <div class="col-md-12 text-center">
+                                    <div class="loading">Carregando...</div>
+                                    <div class="error-message"></div>
+                                    <div class="sent-message">Sua mensagem foi enviada. Obrigado!</div>
+                
+                                    <button type="submit">Enviar mensagem</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section>
@@ -43,61 +98,7 @@
 
       @push('head')
 
-      <style>
-            #event-list img {
-                width: 100%;
-                height: 250px;
-                object-fit: cover;
-            }
-
-            #event-list .single-blog-item {
-                border: 1px solid #dfdede;
-                box-shadow: 2px 5px 10px #dfdede;
-                margin: 15px auto;
-                padding: 5px;
-                position: relative;
-                border-radius: 10px;
-            }
-
-            #event-list .blog-content {
-                padding: 15px;
-            }
-
-            #event-list .blog-content h4 {
-                font-size: 20px;
-                font-weight: 700;
-                margin-bottom: 10px;
-                text-transform: uppercase;
-            }
-
-            #event-list .blog-content h6 a{
-                color:#013289;
-                font-weight: 600;
-                font-size: 16px;
-            }
-
-            #event-list .blog-content h4 a{
-                color:#4154f1;
-                font-size: 20px;
-            }
-            
-            #event-list .blog-content h4#place_name a{
-                color:#333;
-                font-size: 16px;
-            }
-            
-            #event-list .blog-date {
-                position: absolute;
-                background: #4154f1;
-                top: 35px;
-                /* left: 5px; */
-                color: #fff;
-                border-radius: 0 25px 25px 0;
-                padding: 5px 15px;
-                font-weight: 500;
-            }
-
-      </style>
+      
       @endpush
 
 </x-site-layout>

@@ -17,6 +17,8 @@ class Event extends Model
         'slug',
         'description',
         'banner',
+        'category',
+        'area_id',
         'max_tickets',
         'status'
     ];

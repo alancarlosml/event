@@ -40,7 +40,13 @@ class HomeController extends Controller
         return view('site.home', compact('categories'));
     }
 
-    public function contact(Request $request){
+    
+    public function show_contact_form()
+    {
+        return view('site.contact');
+    }
+
+    public function send(Request $request){
 
         $contact = Contact::create($request->all());
 

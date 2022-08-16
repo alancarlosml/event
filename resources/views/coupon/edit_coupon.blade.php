@@ -54,9 +54,10 @@
                                 <label for="code">Código do cupom*</label>
                                 <div class="input-group col-2">
                                     <input type="text" class="form-control" placeholder="Código" aria-label="Código" aria-describedby="basic-addon2" name="code" style="margin-left: -8px" value="{{$coupon->code}}">
-                                    <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button">Gerar</button>
-                                    </div>
+                                    {{-- <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button">Gerar</button>  
+                                    </div> --}}
+                                    <small id="codeHelp" class="form-text text-muted">Sugestão de código único.</small>
                                 </div>
                             </div>
                             <div class="form-row mb-3" style="margin-left: 0;">

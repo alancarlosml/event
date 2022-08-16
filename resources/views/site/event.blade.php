@@ -56,7 +56,7 @@
             </div>
         </div>
     </section>
-    <section id="intro" class="intro section-padding">
+    <section id="inscricoes" class="intro section-padding">
         <div class="container">
             <div class="row">
                 <div class="col-12">
@@ -201,7 +201,7 @@
             </div>
         </div>
     </section>
-    <section id="contact-text">
+    <section id="contato">
         <div class="container">
             <div class="row contact-wrapper">
                 <p><b>{{$event->place->name}}.</b> {{$event->place->address}}, {{$event->place->number}}. Bairro: {{$event->place->district}}. CEP: {{$event->place->zip}}. {{$event->place->get_city()->name}}-{{$event->place->get_city()->uf}} </p>

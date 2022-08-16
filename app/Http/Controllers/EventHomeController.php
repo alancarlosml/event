@@ -15,6 +15,7 @@ use App\Models\Lote;
 use App\Models\Participante;
 use App\Models\ParticipanteLote;
 use App\Models\Place;
+use App\Models\Option;
 use App\Models\Order;
 use App\Models\Owner;
 use App\Models\State;
@@ -75,10 +76,15 @@ class EventHomeController extends Controller
         return view('site.event', compact('event'));
     }
 
-    public function create_event()
+    public function create_event(Request $request)
     {
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
+        $options = Option::orderBy('id')->get();
+
+        $event = $request->session()->get('event');
+        $place = $request->session()->get('place');
+        $eventDate = $request->session()->get('eventDate');
 
         // $menu = 'home';
         // $title = 'Home';
@@ -101,35 +107,139 @@ class EventHomeController extends Controller
 
         // dd($events->get(0)->category);
 
-        return view('site.create_event', compact('categories', 'states'));
+        return view('site.create_event', compact('categories', 'states', 'options', 'event', 'place', 'eventDate'));
     }
 
-    public function store(Request $request)
+    public function postCreateStepOne(Request $request)
     {
-        $request->validate([
-            'banner' => 'mimes:jpg,jpeg,bmp,png|max:2048',
-            'name' => 'required',
-            'slug' => 'required|unique:events',
-            'description' => 'required',
-            'category' => 'required',
-            'area_id' => 'required',
-            'total' => 'required',
+        if(empty($request->session()->get('event'))){
+            
+            $validatedDataEvent = $request->validate([
+                'banner' => 'mimes:jpg,jpeg,bmp,png|max:2048',
+                'name' => 'required',
+                'slug' => 'required|unique:events',
+                'subtitle' => 'string',
+                'description' => 'required',
+                'category' => 'required',
+                'area_id' => 'required',
+                'max_tickets' => 'required'
+            ]);
+
+            $event = new Event();
+            $event->fill($validatedDataEvent);
+            $request->session()->put('event', $event);
+        }else{
+            $event = $request->session()->get('event');
+            $validatedDataEvent = $request->validate([
+                'name' => 'required',
+                'slug' => 'required|unique:events,slug,'.$event->id,
+                'description' => 'required',
+                'subtitle' => 'string',
+                'category' => 'required',
+                'area_id' => 'required',
+                'max_tickets' => 'required'
+            ]);
+
+            $event->fill($validatedDataEvent);
+            $request->session()->put('event', $event);
+        }
+
+        // dd($validatedDataEvent);
+
+        $validatedDataPlace = $request->validate([
             'place_name' => 'required',
             'address' => 'required',
             'number' => 'required',
             'district' => 'required',
+            'complement' => 'string',
             'zip' => 'required',
             'state' => 'required',
-            'city_id' => 'required',
-            'status' => 'required'
+            'city_id' => 'required'
         ]);
 
-        $input = $request->all();
+        if(empty($request->session()->get('place'))){
+            $place = new Place();
+            $place->fill($validatedDataPlace);
+            $request->session()->put('place', $place);
+        }else{
+            $place = $request->session()->get('place');
+            $place->fill($validatedDataPlace);
+            $request->session()->put('place', $place);
+        }
 
-        Event::create($input);
+        $validatedDataEventDate = $request->validate([
+            'date' => 'required',
+            'time_begin' => 'required',
+            'time_end' => 'required'
+        ]);
 
-        return redirect()->route('event.index');
+        $dates = $validatedDataEventDate['date'];
+        $times_begin = $validatedDataEventDate['time_begin'];
+        $times_end = $validatedDataEventDate['time_end'];
+
+        // $dates = $input['date'];
+        // $times_begin = $input['time_begin'];
+        // $times_end = $input['time_end'];
+
+        // DB::table('event_dates')->where('event_id', $id)->delete();
+
+        // $finalArray = array();
+        // for ($i = 0; $i < count($dates); $i++) {
+
+        //     array_push($finalArray, array(
+        //         'date' => $dates[$i],
+        //         'time_begin' => $times_begin[$i],
+        //         'time_end' => $times_end[$i]
+        //     ));
+        // }
+        // EventDate::insert($finalArray);   
+
+        if(empty($request->session()->get('eventDate'))){
+            $eventDate = new EventDate();
+            $eventDate->fill($validatedDataEventDate);
+            $request->session()->put('eventDate', $eventDate);
+        }else{
+            $eventDate = $request->session()->get('eventDate');
+            $eventDate->fill($validatedDataEventDate);
+            $request->session()->put('eventDate', $eventDate);
+        }
+  
+        return redirect()->route('event_home.create.step.two');
     }
+
+    public function createStepTwo(Request $request)
+    {
+        $lotes = $request->session()->get('lotes');
+  
+        return view('site.create_lotes', compact('lotes'));
+    }
+
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'banner' => 'mimes:jpg,jpeg,bmp,png|max:2048',
+    //         'name' => 'required',
+    //         'slug' => 'required|unique:events',
+    //         'description' => 'required',
+    //         'category' => 'required',
+    //         'area_id' => 'required',
+    //         'total' => 'required',
+    //         'place_name' => 'required',
+    //         'address' => 'required',
+    //         'number' => 'required',
+    //         'district' => 'required',
+    //         'zip' => 'required',
+    //         'state' => 'required',
+    //         'city_id' => 'required',
+    //         'status' => 'required'
+    //     ]);
+
+    //     $input = $request->all();
+
+    //     Event::create($input);
+
+    //     return redirect()->route('event.index');
+    // }
 
     public function edit($id){
                 
