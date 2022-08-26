@@ -1023,6 +1023,6 @@ class EventAdminController extends Controller
 
         // dd($payment_methods_json);
 
-        return view('event_home.reports', compact('event', 'lotes', 'resumo', 'participantes', 'participantes_json', 'config', 'situacao_participantes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
+        return view('painel_admin.reports', compact('event', 'lotes', 'resumo', 'participantes', 'participantes_json', 'config', 'situacao_participantes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
     }
 }
