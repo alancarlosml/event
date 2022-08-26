@@ -13,13 +13,16 @@ class Event extends Model
 
     protected $fillable = [
         'name',
+        'hash',
         'subtitle',
         'slug',
         'description',
         'banner',
-        'category',
+        'banner_option',
+        'owner_id',
         'area_id',
         'max_tickets',
+        'theme',
         'status'
     ];
 
@@ -50,6 +53,13 @@ class Event extends Model
         return $events;
     }
 
+    public function get_category()
+    {
+        return Category::join('areas', 'areas.category_id', '=', 'categories.id')
+                ->where('areas.id', $this->area_id)
+                ->selectRaw('categories.description, categories.id')->first();
+    }
+
     public function area()
     {
       return $this->belongsTo(Area::class);
@@ -73,6 +83,24 @@ class Event extends Model
     public function coupons()
     {
         return $this->hasMany(Coupon::class);
+    }
+
+    public function participantes()
+    {
+        return $this->belongsToMany(
+            Participante::class,
+            'participantes_events',
+            'event_id',
+            'participante_id');
+    }
+
+    public function get_participante_admin()
+    {
+        return Participante::join('participantes_events', 'participantes_events.participante_id', '=', 'participantes.id')
+                ->where('participantes_events.event_id', $this->id)
+                ->where('participantes_events.role', 'admin')
+                ->selectRaw('participantes.name, participantes.email')
+                ->first();
     }
 
     public function event_dates()

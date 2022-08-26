@@ -422,13 +422,11 @@
                                 search: request.term
                             },
                             success: function( data ) {
-                                console.log(data);
                                 response(data);
                             }
                         });
                     },
                     select: function (event, ui) {
-                        console.log(ui.item.uf);
                         $('#place_name').val(ui.item.label);
                         $('#address').val(ui.item.address);
                         $('#number').val(ui.item.number);

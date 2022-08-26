@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', 'App\Http\Controllers\HomeController@home');
+Route::get('/', 'App\Http\Controllers\HomeController@home')->name('home');
 Route::post ('/contato', 'App\Http\Controllers\HomeController@contact')->name('contact');
 Route::post('/get-areas','App\Http\Controllers\HomeController@getAreas');
 Route::get('/contato', 'App\Http\Controllers\HomeController@show_contact_form');
@@ -22,16 +22,58 @@ Route::post('painel/get-areas-by-category','App\Http\Controllers\HomeController@
 
 Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
 Route::get('/{slug}', 'App\Http\Controllers\EventHomeController@event');
-Route::get('painel/eventos/primeiro-passo', 'App\Http\Controllers\EventHomeController@create_event')->middleware(['auth'])->name('event_home.create_event');
-Route::post('painel/eventos/primeiro-passo', 'App\Http\Controllers\EventHomeController@postCreateStepOne')->middleware(['auth'])->name('event_home.create.step.one');
-Route::get('painel/eventos/segundo-passo', 'App\Http\Controllers\EventHomeController@createStepTwo')->middleware(['auth'])->name('event_home.create.step.two');
-Route::post('painel/eventos/segundo-passo', 'App\Http\Controllers\EventHomeController@postCreateStepTow')->middleware(['auth'])->name('event_home.create.step.two');
 Route::get('painel/autocomplete_place', 'App\Http\Controllers\EventHomeController@autocomplete_place')->name('event_home.autocomplete_place');
 Route::get('painel/check_slug', 'App\Http\Controllers\EventHomeController@check_slug')->name('event_home.check_slug');
 Route::get('painel/create_slug', 'App\Http\Controllers\EventHomeController@create_slug')->name('event_home.create_slug');
 Route::post('painel/store_file/{id}','App\Http\Controllers\EventHomeController@file_store')->middleware(['auth'])->name('event_home.store_file');
 Route::get('painel/delete_file/{id}','App\Http\Controllers\EventHomeController@delete_file')->middleware(['auth'])->name('event_home.delete_file');
+Route::post('painel/places/get-cities-by-state','App\Http\Controllers\EventHomeController@getCity')->middleware(['auth'])->name('event_home.get_city');
 
+// PAINEL - CRIAR EVENTO
+Route::get('painel/meus-eventos', 'App\Http\Controllers\EventAdminController@myEvents')->middleware(['auth'])->name('event_home.my_events');
+Route::get('painel/meus-eventos/detalhes/{hash}', 'App\Http\Controllers\EventAdminController@myEventsShow')->middleware(['auth'])->name('event_home.my_events_show');
+Route::get('painel/meus-eventos/editar/{hash}', 'App\Http\Controllers\EventAdminController@myEventsEdit')->middleware(['auth'])->name('event_home.my_events_edit');
+Route::get('painel/meus-eventos/{hash}/convidados', 'App\Http\Controllers\EventAdminController@guests')->middleware(['auth'])->name('event_home.guests');
+Route::get('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@addGuest')->middleware(['auth'])->name('event_home.guest_add');
+Route::post('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@storeGuest')->middleware(['auth'])->name('event_home.guest_store');
+Route::get('painel/meus-eventos/convidados/{id}/editar', 'App\Http\Controllers\EventAdminController@editGuest')->middleware(['auth'])->name('event_home.guest_edit');
+Route::post('painel/meus-eventos/convidados/{id}/editar', 'App\Http\Controllers\EventAdminController@updateGuest')->middleware(['auth'])->name('event_home.guests_update');
+Route::delete('painel/meus-eventos/convidados/{id}/excluir', 'App\Http\Controllers\EventAdminController@destroyGuest')->middleware(['auth'])->name('event_home.destroy_guest');
+Route::get('painel/meus-eventos/{hash}/relatorios', 'App\Http\Controllers\EventAdminController@reports')->middleware(['auth'])->name('event_home.reports');
+
+Route::get('painel/eventos/criar-evento', 'App\Http\Controllers\EventAdminController@createEventLink')->middleware(['auth'])->name('event_home.create_event_link');
+Route::get('painel/eventos/primeiro-passo', 'App\Http\Controllers\EventAdminController@create_event')->middleware(['auth'])->name('event_home.create_event');
+Route::post('painel/eventos/primeiro-passo', 'App\Http\Controllers\EventAdminController@postCreateStepOne')->middleware(['auth'])->name('event_home.create.step.one');
+
+Route::get('painel/eventos/segundo-passo', 'App\Http\Controllers\EventAdminController@createStepTwo')->middleware(['auth'])->name('event_home.create.step.two');
+// Route::post('painel/eventos/segundo-passo', 'App\Http\Controllers\EventAdminController@postCreateStepTow')->middleware(['auth'])->name('event_home.create.step.two');
+Route::get('painel/eventos/segundo-passo/criar-lote', 'App\Http\Controllers\EventAdminController@createLote')->middleware(['auth'])->name('event_home.lote_create');
+Route::post('painel/eventos/segundo-passo/criar-lote', 'App\Http\Controllers\EventAdminController@storeLote')->middleware(['auth'])->name('event_home.create_lote_store');
+Route::get('painel/eventos/lote/{hash}/editar', 'App\Http\Controllers\EventAdminController@editLote')->middleware(['auth'])->name('event_home.lote_edit');
+Route::post('painel/eventos/lote/{hash}/editar', 'App\Http\Controllers\EventAdminController@updateLote')->middleware(['auth'])->name('event_home.lote_update');
+Route::delete('painel/eventos/lote/{hash}/excluir', 'App\Http\Controllers\EventAdminController@deleteLote')->middleware(['auth'])->name('event_home.lote_delete');
+Route::post('painel/eventos/{event_id}/save_lotes', 'App\Http\Controllers\EventAdminController@save_lotes')->middleware(['auth'])->name('event_home.save_lotes');
+
+Route::get('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@createStepThree')->middleware(['auth'])->name('event_home.create.step.three');
+Route::post('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@postCreateStepThree')->middleware(['auth'])->name('event_home.create.step.three');
+Route::get('painel/eventos/{hash}/criar-cupom', 'App\Http\Controllers\EventAdminController@createCoupon')->middleware(['auth'])->name('event_home.create_coupon');
+Route::post('painel/eventos/{hash}/criar-cupom', 'App\Http\Controllers\EventAdminController@storeCoupon')->middleware(['auth'])->name('event_home.store_coupon');
+Route::get('painel/eventos/cupom/{hash}/editar', 'App\Http\Controllers\EventAdminController@editCoupon')->middleware(['auth'])->name('event_home.coupon_edit');
+Route::post('painel/eventos/cupom/{hash}/editar', 'App\Http\Controllers\EventAdminController@updateCoupon')->middleware(['auth'])->name('event_home.update_coupon');
+Route::delete('painel/eventos/cupom/{hash}/excluir', 'App\Http\Controllers\EventAdminController@destroyCoupon')->middleware(['auth'])->name('event_home.destroy_coupon');
+
+Route::get('painel/eventos/publicar', 'App\Http\Controllers\EventAdminController@createStepFour')->middleware(['auth'])->name('event_home.create.step.four');
+Route::post('painel/eventos/publicar/{hash}', 'App\Http\Controllers\EventAdminController@postCreateStepFour')->middleware(['auth'])->name('event_home.publish');
+Route::get('painel/eventos/{id}/delete_file','App\Http\Controllers\EventAdminController@deleteFileEvent')->middleware(['auth'])->name('event_home.delete_file_event');
+Route::get('painel/eventos/organizador/{id}/delete_file_icon','App\Http\Controllers\EventAdminController@deleteFileIcon')->middleware(['auth'])->name('event_home.delete_file_icon');
+
+
+
+// Route::post('painel/lotes/{id}/store', 'App\Http\Controllers\LoteController@store')->middleware(['auth'])->name('lote.store');
+// Route::get('painel/lotes/{id}/edit', 'App\Http\Controllers\LoteController@edit')->middleware(['auth'])->name('lote.edit');
+// Route::post('painel/lotes/{id}/update', 'App\Http\Controllers\LoteController@update')->middleware(['auth'])->name('lote.update');
+// Route::delete('painel/lotes/{id}/destroy', 'App\Http\Controllers\LoteController@destroy')->middleware(['auth'])->name('lote.destroy');
+// Route::post('painel/lotes/{id}/save_lotes', 'App\Http\Controllers\LoteController@save_lotes')->middleware(['auth'])->name('lote.save_lotes');
 
 
 
@@ -107,7 +149,7 @@ Route::post('admin/eventos/participantes/update/{id}', 'App\Http\Controllers\Eve
 Route::get('admin/events/{id}/coupons', 'App\Http\Controllers\CouponController@coupons')->middleware(['auth'])->name('event.coupons');
 Route::get('admin/events/{id}/create_coupon', 'App\Http\Controllers\CouponController@create_coupon')->middleware(['auth'])->name('event.create_coupon');
 Route::post('admin/events/{id}/store_coupon', 'App\Http\Controllers\CouponController@store_coupon')->middleware(['auth'])->name('event.store_coupon');
-Route::get('admin/events/edit_coupon/{id}', 'App\Http\Controllers\CouponController@edit_coupon')->middleware(['auth'])->name('event.edit_coupon');
+Route::get('admin/events/coupon_edit/{id}', 'App\Http\Controllers\CouponController@editCoupon')->middleware(['auth'])->name('event.coupon_edit');
 Route::post('admin/events/update_coupon/{id}', 'App\Http\Controllers\CouponController@update_coupon')->middleware(['auth'])->name('event.update_coupon');
 Route::delete('admin/events/destroy_coupon/{id}', 'App\Http\Controllers\CouponController@destroy_coupon')->middleware(['auth'])->name('event.destroy_coupon');
 

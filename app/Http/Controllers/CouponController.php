@@ -69,7 +69,7 @@ class CouponController extends Controller
         return view('coupon.coupons', compact('event', 'coupons', 'lotes'));
     }
 
-    public function edit_coupon($id){
+    public function editCoupon($id){
 
         $coupon = Coupon::find($id);
 
@@ -81,14 +81,14 @@ class CouponController extends Controller
         
         // dd($coupon->lotes);
                 
-        return view('coupon.edit_coupon', compact('event', 'coupon', 'lotes', 'id'));
+        return view('coupon.coupon_edit', compact('event', 'coupon', 'lotes', 'id'));
     }
 
     public function update_coupon(Request $request, $id)
     {
         $coupon = Coupon::find($id);
 
-        $event = Coupon::find($coupon->event_id);
+        $event = Event::find($coupon->event_id);
 
         $this->validate($request, [
             'code' => 'required',

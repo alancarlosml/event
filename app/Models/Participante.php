@@ -12,6 +12,8 @@ class Participante extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $guard = 'web';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,9 +22,7 @@ class Participante extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
-        'icon',
-        'description'
+        'password'
     ];
 
     /**
@@ -51,5 +51,14 @@ class Participante extends Authenticatable
             'participantes_lotes',
             'participante_id',
             'lote_id');
+    }
+
+    public function eventos()
+    {
+        return $this->belongsToMany(
+            Event::class,
+            'participantes_events',
+            'participante_id',
+            'event_id');
     }
 }

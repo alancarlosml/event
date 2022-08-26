@@ -442,6 +442,7 @@
             function removeSucc(id){
                 $('#btn-remove-hidden-' + id).click();
             }
+            
             $(document).ready(function() {
                 $('.order_lote').change(function(){
                     id = $(this).attr('id');

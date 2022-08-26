@@ -21,18 +21,20 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->string('banner');
+            $table->integer('banner_option');
             $table->string('max_tickets');
+            $table->string('theme');
             $table->integer('status');
             $table->integer('owner_id')->unsigned()->index();
             $table->foreign('owner_id')
-                  ->references('id')
-                  ->on('owners')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('owners')
+                ->onDelete('cascade');
             $table->integer('place_id')->unsigned()->index();
             $table->foreign('place_id')
-            ->references('id')
-            ->on('places')
-            ->onDelete('cascade');
+                ->references('id')
+                ->on('places')
+                ->onDelete('cascade');
             $table->integer('area_id')->unsigned()->index();
             $table->foreign('area_id')
                   ->references('id')

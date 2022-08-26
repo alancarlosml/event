@@ -9,12 +9,12 @@
               <li><a href="index.html">Home</a></li>
               <li>Eventos</li>
             </ol>
-            <h2>Criar um novo evento</h2>
+            <h2>Detalhes do evento: {{$event->name}}</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page pt-0" id="create-event-form">
             <div class="container">
                 <div class="form-group pl-3 pr-3">
                     @if ($message = Session::get('success'))
@@ -33,36 +33,95 @@
                     @endif
                 </div>
                 <div class="card-body table-responsive p-0">
-                    <ul id="progressbar">
-                        <li class="active" id="account"><strong>Informações</strong></li>
-                        <li class="active" id="personal"><strong>Inscrições</strong></li>
-                        <li id="payment"><strong>Cupom</strong></li>
-                        <li id="confirm"><strong>Fim</strong></li>
-                    </ul>
                     <div class="card-body">
-                        <div class="form-group text-right">
-                            <a href="" class="btn btn-success">Cadastrar novo lote</a>
+                        <div class="form-group">
+                            <label for="id">ID</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->id}}
+                            </p>
                         </div>
-                        <table class="table table-head-fixed text-nowrap">
-                            <thead>
-                                <tr>
-                                <th>ID</th>
-                                <th style="width: 10%">Ordem</th>
-                                <th>Nome</th>
-                                <th>Valor</th>
-                                <th>Taxa</th>
-                                <th>Preço final</th>
-                                <th>Quantidade</th>
-                                <th>Visibilidade</th>
-                                <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(isset($lotes))
-                                    @foreach($lotes as $lote)
+                        <div class="form-group">
+                            <label for="name">Nome</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->name}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="subtitle">Subtitulo</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->subtitle}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="slug">URL do evento</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->slug}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Descrição</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->description}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="banner">Banner</label> <br/>
+                            <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
+                        </div>
+                        <div class="form-group">
+                            <label for="max_tickets">N° máximo de ingressos</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->max_tickets}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_tickets">Local do evento</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->place->name}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_tickets">Responsável</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->get_participante_admin()->name}} - {{$event->get_participante_admin()->email}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="created_at">Data de criação</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Ativo</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                @if($event->status == 1) 
+                                    Sim 
+                                @else 
+                                    Não 
+                                @endif
+                            </p>
+                        </div>
+                        <hr>
+                        <label for="lotes">Lotes</label>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-head-fixed text-nowrap">
+                                <thead>
+                                    <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Valor</th>
+                                    <th>Taxa</th>
+                                    <th>Preço final</th>
+                                    <th>Quantidade</th>
+                                    <th>Visibilidade</th>
+                                    {{-- <th>Cupons</th> --}}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($event->lotes as $lote)
                                         <tr>
                                             <td>{{$lote->id}}</td>
-                                            <td style="width: 10%"><input type="number" class="order_lote" value="{{$lote->order}}" style="width: 30%" min="1"></td>
                                             <td>
                                                 <b>{{$lote->name}}</b><br/>
                                                 {{$lote->description}}
@@ -72,64 +131,58 @@
                                             <td>@money($lote->final_value)</td>
                                             <td>{{$lote->quantity}}</td>
                                             <td>@if($lote->visibility == 0) Público @else Privado @endif</td>
-                                            <td>
-                                                <div class="d-flex">
-                                                    <a class="btn btn-info btn-sm mr-1" href="{{route('lote.edit', $lote->id)}}">
-                                                        <i class="fas fa-pencil-alt">
-                                                        </i>
-                                                        Editar
-                                                    </a>
-                                                    <form action="{{ route('lote.destroy', $lote->id) }}" method="POST">
-                                                        <input type="hidden" name="_method" value="DELETE">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                        <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$lote->id}})">
-                                                            <i class="fas fa-trash">
-                                                            </i>
-                                                            Remover
-                                                        </a>
-                                                        <button class="d-none" id="btn-remove-hidden-{{$lote->id}}">Remover</button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                            <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$lote->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
-                                                <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de evento</h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Deseja realmente remover esse lote?
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$lote->id}}" onclick="removeSucc({{$lote->id}})">Sim</button>
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            {{-- <td>
+                                                <ul class="list-group list-group-flush">
+                                                    @foreach($lote->coupons as $coupon)
+                                                    <li>{{$coupon->code}}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </td> --}}
                                         </tr>
                                     @endforeach
-                                @else
-                                        <tr><td>Nenhum lote cadastrado.</td></tr>
-                                @endif
-                            </tbody>
-                        </table>
-                        <form method="POST" action="">
-                            @csrf
-                            @if(isset($lotes))
-                                @foreach($lotes as $lote)
-                                    <input type="hidden" name="order_lote[]" id="lote_{{$lote->id}}" value="{{$lote->id}}_{{$lote->order}}">
-                                @endforeach
-                            @endif
-                            <div class="card-footer">
-                                <a href="{{ route('event_home.create.step.one') }}" class="btn btn-primary">Anterior</a>
-                                <button type="submit" class="btn btn-primary">Próximo</button>
-                            </div>
-                        </form>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr>
+                        {{-- <label for="cupons">Cupons</label>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-head-fixed text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Código</th>
+                                        <th>Tipo desconto</th>
+                                        <th>Valor desconto</th>
+                                        <th>Limite de compras</th>
+                                        <th>Limite de inscrições</th>
+                                        <th>Lotes</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($event->coupons as $coupon)
+                                        <tr>
+                                            <td>{{$coupon->id}}</td>
+                                            <td>{{$coupon->code}}</td>
+                                            <td>@if($coupon->discount_type == 0) Porcentagem @elseif($coupon->discount_type == 1) Fixo @endif</td>
+                                            <td>@if($coupon->discount_type == 0) {{$coupon->discount_value*100}}% @elseif($coupon->discount_type == 1) @money($coupon->discount_value) @endif</td>
+                                            <td>{{$coupon->limit_buy}}</td>
+                                            <td>{{$coupon->limit_tickets}}</td>
+                                            <td>
+                                                <ul class="list-group list-group-flush">
+                                                    @foreach($coupon->lotes as $lote)
+                                                    <li>{{$lote->name}}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
+                                            <td>@if($coupon->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div> --}}
                     </div>
+                    <!-- /.card-body -->
                 </div>
             </div>
         </section>
@@ -210,6 +263,26 @@
                     }
                 });
             });
+
+            var category_id = $("#category").val();
+                $("#area_id").html('');
+                $.ajax({
+                    url:"{{route('event_home.get_areas_by_category')}}",
+                    type: "POST",
+                    data: {
+                        category_id: category_id,
+                        _token: '{{csrf_token()}}' 
+                    },
+                    dataType : 'json',
+                    success: function(result){
+                        $('#area_id').html('<option value="">Selecione</option>'); 
+                        area_id = $('#area_id_hidden').val();
+                        $.each(result.areas,function(key,value){
+                            $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
+                        });
+                        $('#area_id option[value='+area_id+']').attr('selected','selected');
+                    }
+                });
 
             $('#cmd').click(function(){
                 $('#card-date').append('<div class="form-row">' + 
@@ -348,8 +421,28 @@
             });
 
             $('#add_place').click(function(){
-                    $('#event_address').toggle();                    
-                });
+                $('#place_name').val('');
+                $('#address').val('');
+                $('#address').prop("readonly", false);
+                $('#number').val('');
+                $('#number').prop("readonly", false);
+                $('#district').val('');
+                $('#district').prop("readonly", false);
+                $('#complement').val('');
+                $('#complement').prop("readonly", false);
+                $('#zip').val('');
+                $('#zip').prop("readonly", false);
+                
+                $('#state').prop("disabled", false);
+                $('#state').prop('selectedIndex',0);
+                $('#city').prop("disabled", false);
+                $('#city').prop('selectedIndex',0);
+                $('#city_id_hidden').val('');
+                
+                // $('#state option[value="'+ui.item.uf+'"]').prop("selected", true);
+                // $('#state').prop("readonly", true);
+                // $('#city').prop("readonly", true);                 
+            });
 
             var path = "{{route('event_home.autocomplete_place')}}";
             $("#place_name").autocomplete({
@@ -368,18 +461,26 @@
                 },
                 select: function (event, ui) {
                     $('#place_name').val(ui.item.label);
+                    $('#place_id_hidden').val(ui.item.id);
                     $('#address').val(ui.item.address);
+                    $('#address').prop("readonly", true);
                     $('#number').val(ui.item.number);
+                    $('#number').prop("readonly", true);
                     $('#district').val(ui.item.district);
+                    $('#district').prop("readonly", true);
                     $('#complement').val(ui.item.complement);
+                    $('#complement').prop("readonly", true);
                     $('#zip').val(ui.item.zip);
-
+                    $('#zip').prop("readonly", true);
+                    
                     $('#state option[value="'+ui.item.uf+'"]').prop("selected", true);
+                    $('#state').prop("disabled", true);
+                    $('#city').prop("disabled", true);
                     
                     var uf = $("#state").val();
                     $("#city").html('');
                     $.ajax({
-                        url:"{{url('admin/places/get-cities-by-state')}}",
+                        url:"{{route('event_home.get_city')}}",
                         type: "POST",
                         data: {
                             uf: uf,
@@ -395,10 +496,53 @@
                             });
 
                             $('#city option[value="'+ui.item.city_id+'"]').prop("selected", true);
+                            $('#city_id_hidden').val(ui.item.city_id);
                         }
                     });
 
                     return false;
+                }
+            });
+
+            $('#state').on('change', function() {
+                var uf = this.value;
+                $("#city").html('');
+                $.ajax({
+                    url: "{{route('event_home.get_city')}}",
+                    type: "POST",
+                    data: {
+                        uf: uf,
+                        _token: '{{csrf_token()}}' 
+                    },
+                    dataType : 'json',
+                    success: function(result){
+                        $('#city').html('<option value="">Selecione</option>'); 
+                        $.each(result.cities,function(key,value){
+                            $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
+                        });
+                    }
+                });
+            });
+
+            var uf = $("#state").val();
+            $("#city").html('');
+            $.ajax({
+                url: "{{route('event_home.get_city')}}",
+                type: "POST",
+                data: {
+                    uf: uf,
+                    _token: '{{csrf_token()}}' 
+                },
+                dataType : 'json',
+                success: function(result){
+                    $('#city').html('<option value="">Selecione</option>'); 
+                    city_id = $('#city_id_hidden').val();
+
+                    $.each(result.cities,function(key,value){
+                        $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
+                    });
+
+                    $('#city option[value='+city_id+']').attr('selected','selected');
                 }
             });
 

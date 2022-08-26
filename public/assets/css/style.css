@@ -2608,7 +2608,7 @@ section {
 }
 
 #progressbar .active {
-  color: #673AB7
+  color: #007bff;
 }
 
 #progressbar li {
@@ -2623,7 +2623,7 @@ section {
 
 #progressbar #account:before {
   font-family: FontAwesome;
-  content: "\f13e"
+  content: "\f129"
 }
 
 #progressbar #personal:before {
@@ -2633,7 +2633,7 @@ section {
 
 #progressbar #payment:before {
   font-family: FontAwesome;
-  content: "\f030"
+  content: "\25"
 }
 
 #progressbar #confirm:before {
@@ -2667,7 +2667,7 @@ section {
 
 #progressbar li.active:before,
 #progressbar li.active:after {
-  background: #673AB7
+  background: #007bff;
 }
 
 /* CREATE EVENT FORM */
@@ -2682,4 +2682,29 @@ section {
 {
   font-size: 28px;
   font-weight: 700;
+}
+
+.btn-group-toggle label{
+  border: solid 1px #ced4da;
+  padding: 10px;
+  outline: none;
+}
+
+.btn-group-toggle .text-red {
+  color: red;
+}
+.btn-group-toggle .text-blue {
+  color: blue;
+}
+.btn-group-toggle .text-green {
+  color: green;
+}
+.btn-group-toggle .text-orange {
+  color: orange;
+}
+.btn-group-toggle .text-purple {
+  color: purple;
+}
+.btn-group-toggle .active {
+  background: #ddd;
 }

@@ -75,7 +75,7 @@
                                         <td>@if($coupon->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                         <td>
                                             <div class="d-flex">
-                                                <a class="btn btn-info btn-sm mr-1" href="{{route('event.edit_coupon', $coupon->id)}}">
+                                                <a class="btn btn-info btn-sm mr-1" href="{{route('event.coupon_edit', $coupon->id)}}">
                                                     <i class="fas fa-pencil-alt">
                                                     </i>
                                                     Editar

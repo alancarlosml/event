@@ -10,6 +10,7 @@ class Lote extends Model
     use HasFactory;
 
     protected $fillable = [
+        'hash',
         'name',
         'description',
         'value',

@@ -70,7 +70,7 @@
                 <li><a class="nav-link" href="/contato">Contato</a></li>
                 {{-- <li><a href="blog.html">Blog</a></li> --}}
                 {{-- <li><a class="nav-link" href="/cadastro"></a></li> --}}
-                <li><a class="getstarted" href="{{route('event_home.create_event')}}">Criar evento</a></li>
+                <li><a class="getstarted" href="{{route('event_home.create_event_link')}}">Criar evento</a></li>
                 @if(!Auth::user())
                 <li><a class="getstarted" href="{{route('login')}}">Entrar</a></li>
                 @else
@@ -79,7 +79,7 @@
                       {{ Auth::user()->name }}
                   </a>
                   <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
-                      <a href="#" class="dropdown-item">
+                      <a href="{{route('event_home.my_events')}}" class="dropdown-item">
                           Meus eventos
                       </a>
                       <div class="dropdown-divider"></div>
