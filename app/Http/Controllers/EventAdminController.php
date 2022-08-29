@@ -29,12 +29,13 @@ class EventAdminController extends Controller
     public function myEvents(){
         
         $events = DB::table('events')
-            ->join('places', 'places.id', '=', 'events.place_id')
-            ->join('participantes_events', 'participantes_events.event_id', '=', 'events.id')
-            ->join('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
+            ->leftJoin('places', 'places.id', '=', 'events.place_id')
+            ->leftJoin('participantes_events', 'participantes_events.event_id', '=', 'events.id')
+            ->leftJoin('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
+            ->leftJoin('lotes', 'events.id', '=', 'lotes.event_id')
             // ->join('users', 'users.id', '=', 'events.owner_id')
-            ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
-            ->join(DB::raw("(SELECT participantes.name,
+            ->leftJoin('event_dates', 'event_dates.event_id', '=', 'events.id')
+            ->leftJoin(DB::raw("(SELECT participantes.name,
                                     participantes.email, 
                                     participantes_events.event_id
                             from participantes
@@ -46,6 +47,9 @@ class EventAdminController extends Controller
             ->select('events.*', 
                     'places.name as place_name', 
                     'participantes_events.role', 
+                    'participantes.name as participante_name', 
+                    'event_dates.date as event_date', 
+                    'lotes.name as lote_name', 
                     DB::raw('MIN(event_dates.date) as date_event_min'), 
                     DB::raw('MAX(event_dates.date) as date_event_max'),
                     'x.name as admin_name',
@@ -475,20 +479,25 @@ class EventAdminController extends Controller
     {
         $input = $request->all();
 
-        foreach($input['order_lote'] as $order){
-            
-            $hash_order = explode('_', $order);
-            $hashlote = $hash_order[0];
-            $order = $hash_order[1];
-            $lote = Lote::where('hash', $hashlote)->first();
+        if(isset($input['order_lote']))
+        {
+            foreach($input['order_lote'] as $order){
+                
+                $hash_order = explode('_', $order);
+                $hashlote = $hash_order[0];
+                $order = $hash_order[1];
+                $lote = Lote::where('hash', $hashlote)->first();
 
-            if($lote) {
-                $lote->order = $order;
-                $lote->save();
+                if($lote) {
+                    $lote->order = $order;
+                    $lote->save();
+                }
             }
-        }
 
-        return redirect()->route('event_home.create.step.three');
+            return redirect()->route('event_home.create.step.three');
+        } else {
+            return redirect()->route('event_home.create.step.three');
+        }
     }
 
     public function createStepThree(Request $request)
@@ -891,6 +900,11 @@ class EventAdminController extends Controller
         return back()->with('success','Banner do organizador removido com sucesso!');
     }
 
+    public function contacts(Request $request, $hash)
+    {
+
+    }
+
     public function reports(Request $request, $hash)
     {
         $event = Event::where('hash', $hash)->first();
@@ -984,8 +998,10 @@ class EventAdminController extends Controller
         $participantes = Participante::orderBy('participantes.name')
                     ->join('participantes_lotes', 'participantes_lotes.participante_id', '=', 'participantes.id')
                     ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+                    ->join('events', 'events.id', '=', 'lotes.event_id')
                     ->leftJoin('inscricoes_coupons', 'inscricoes_coupons.participante_lote_id', '=', 'participantes_lotes.id')
                     ->leftJoin('coupons', 'inscricoes_coupons.coupon_id', '=', 'coupons.id')
+                    ->where('events.hash', $hash)
                     ->select('lotes.name as lote_name', 'participantes_lotes.id', 'participantes_lotes.number as inscricao', 'participantes_lotes.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
                     ->get();
         
@@ -993,8 +1009,10 @@ class EventAdminController extends Controller
                     ->join('participantes_lotes', 'participantes_lotes.participante_id', '=', 'participantes.id')
                     ->join('orders', 'participantes_lotes.id', '=', 'orders.participante_lote_id')
                     ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+                    ->join('events', 'events.id', '=', 'lotes.event_id')
                     ->leftJoin('inscricoes_coupons', 'inscricoes_coupons.participante_lote_id', '=', 'participantes_lotes.id')
                     ->leftJoin('coupons', 'inscricoes_coupons.coupon_id', '=', 'coupons.id')
+                    ->where('events.hash', $hash)
                     ->select('orders.gatway_status', 'lotes.value as lote_value','lotes.name as lote_name', 'participantes_lotes.id', 'participantes_lotes.number as inscricao', 'participantes_lotes.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
                     ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value) else '' end as valor_porcentagem")
                     ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value else '' end as valor_desconto")
@@ -1003,6 +1021,10 @@ class EventAdminController extends Controller
                     // dd($situacao_participantes);
         
         $payment_methods = Order::orderBy('orders.gatway_payment_method')
+                    ->join('participantes_lotes', 'participantes_lotes.id', '=', 'orders.participante_lote_id')
+                    ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+                    ->join('events', 'events.id', '=', 'lotes.event_id')
+                    ->where('events.hash', $hash)
                     ->select('orders.gatway_payment_method', DB::raw('count(*) as payment_methods_total'))
                     ->groupBy('orders.gatway_payment_method')
                     ->get();
@@ -1010,7 +1032,10 @@ class EventAdminController extends Controller
         $situacao_coupons  = Coupon::orderBy('coupons.id')
                     ->join('inscricoes_coupons', 'inscricoes_coupons.coupon_id', '=', 'coupons.id')
                     ->join('participantes_lotes', 'participantes_lotes.id', '=', 'inscricoes_coupons.participante_lote_id')
+                    ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+                    ->join('events', 'events.id', '=', 'lotes.event_id')
                     ->where('coupons.status', '1')
+                    ->where('events.hash', $hash)
                     ->select('coupons.id', 'coupons.code','coupons.limit_buy', 'coupons.discount_type', 'coupons.discount_value',
                     DB::raw("COUNT(CASE WHEN participantes_lotes.status = 1 THEN 1 END) AS confirmado"),
                     DB::raw("COUNT(CASE WHEN participantes_lotes.status = 2 THEN 1 END) AS pendente"))

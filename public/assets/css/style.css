@@ -244,9 +244,7 @@ section {
 }
 
 .navbar a:hover,
-.navbar .active,
-.navbar .active:focus,
-.navbar li:hover>a {
+.navbar .active{
   color: #1d2ecb;
 }
 
@@ -2707,4 +2705,39 @@ section {
 }
 .btn-group-toggle .active {
   background: #ddd;
+}
+
+.bg-light {
+  background-color: #f8f9fa!important;
+}
+
+.info-box {
+  box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+  border-radius: 0.25rem;
+  background-color: #fff;
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 1rem;
+  min-height: 80px;
+  padding: 0.5rem;
+  position: relative;
+  width: 100%;
+  text-align:center;
+}
+
+.info-box .info-box-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align:center;
+}
+
+.info-box .info-box-number {
+  display: block;
+  margin-top: 0.25rem;
+  font-weight: 700;
+}
+.text-success {
+  color: #28a745!important;
 }

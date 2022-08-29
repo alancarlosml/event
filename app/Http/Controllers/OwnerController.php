@@ -24,10 +24,17 @@ class OwnerController extends Controller
     {
         $this->validate($request, [
             'name' => 'required',
-            'icon' => 'mimes:jpg,jpeg,bmp,png|max:2048'
+            'icon' => 'mimes:jpg,jpeg,bmp,png|max:2048',
+            'status' => 'nullable'
         ]);
 
         $input = $request->all();
+
+        if(isset($input['status'])){
+            $input['status'] = 1;
+        }else{
+            $input['status'] = 0;
+        }
 
         $owner_id = Owner::create($input)->id;
 
@@ -57,10 +64,18 @@ class OwnerController extends Controller
     {
         $owner = Owner::findOrFail($id);
 
-        $this->validate($request, [
-            'name' => 'required',
-            'icon' => 'mimes:jpg,jpeg,bmp,png|max:2048'
-        ]);
+        if($owner->icon){
+            $this->validate($request, [
+                'name' => 'required',
+                'status'
+            ]);
+        } else {
+            $this->validate($request, [
+                'name' => 'required',
+                'icon' => 'mimes:jpg,jpeg,bmp,png|max:2048',
+                'status'
+            ]);
+        }
 
         $input = $request->all();
 

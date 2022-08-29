@@ -9,7 +9,7 @@
               <li><a href="index.html">Home</a></li>
               <li>Eventos</li>
             </ol>
-            <h2>Editar evento - {{$event->name}}</h2>
+            <h2>Editar evento: {{$event->name}}</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
@@ -111,9 +111,8 @@
                         <hr>
                         <div class="card-body" id="card-date">
                             <h4>Data e hora do evento</h4>
-                            @if(isset($dates))
+                            @if(!$dates)
                                 @foreach ($dates as $date)
-                            {{-- {{dd($date['date'])}} --}}
                                     <div class="form-row">
                                         <div class="form-group col-md-3">
                                             <label for="number">Data</label>

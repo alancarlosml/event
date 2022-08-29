@@ -9,7 +9,7 @@
               <li><a href="index.html">Home</a></li>
               <li>Eventos</li>
             </ol>
-            <h2>Criar um novo evento</h2>
+            <h2>Gerenciar evento</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
                                 <div id="banner_container">
-                                    @if($event->banner == '')
+                                    @if(isset($event->banner) == false)
                                         <input class="form-control" type="file" id="banner" name="banner">
                                     @else
                                     <div class="form-group">
@@ -120,7 +120,7 @@
                             </div>
                             <div id="banner_organizador">
                                 <label for="banner">Banner do organizador</label>
-                                @if($event->owner->icon == '')
+                                @if(isset($event->owner->icon) == false)
                                     <input class="form-control" type="file" id="icon" name="icon">
                                 @else
                                 <div class="form-group">

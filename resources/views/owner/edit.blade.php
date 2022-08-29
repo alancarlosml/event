@@ -58,16 +58,12 @@
                                 <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="{{$owner->email}}">
                             </div>
                             <div class="form-group">
-                                <label for="password">Senha</label>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Senha">
-                            </div>
-                            <div class="form-group">
-                                <label for="icon">Banner da empresa de organização</label>
+                                <label for="icon">Banner da empresa</label>
                                 @if(!$owner->icon)
                                     <input class="form-control" type="file" id="icon" name="icon">
                                 @else
                                 <div class="form-group">
-                                    <img src="{{ asset('storage/'.$owner->icon) }}" alt="Banner da empresa de organização" class="img-fluid img-thumbnail" style="width: 200px">
+                                    <img src="{{ asset('storage/'.$owner->icon) }}" alt="Banner da empresa" class="img-fluid img-thumbnail" style="width: 200px">
                                     <a href="{{route('owner.delete_file', $owner->id)}}" class="btn btn-danger">Excluir</a>
                                 </div>
                                 @endif

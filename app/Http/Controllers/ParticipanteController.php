@@ -12,7 +12,21 @@ class ParticipanteController extends Controller
         
         $participantes = Participante::orderBy('name')->get();
 
-        return view('participante.index', compact('participantes'));
+        $participantesAdmins = Participante::orderBy('name')
+                                ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
+                                ->where('participantes_events.role', 'admin')
+                                ->select('participantes.id', 'participantes.name')
+                                ->groupBy('participantes.id')
+                                ->get();
+
+        $participantesConvidados = Participante::orderBy('name')
+                                ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
+                                ->where('participantes_events.role', 'guest')
+                                ->select('participantes.id', 'participantes.name')
+                                ->groupBy('participantes.id')
+                                ->get();
+
+        return view('participante.index', compact('participantes', 'participantesAdmins', 'participantesConvidados'));
     }
 
     public function create(){

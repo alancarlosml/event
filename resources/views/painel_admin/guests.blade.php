@@ -9,7 +9,7 @@
               <li><a href="index.html">Home</a></li>
               <li>Eventos</li>
             </ol>
-            <h2>Gerenciar usuários</h2>
+            <h2>Gerenciar usuários convidados</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->

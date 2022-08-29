@@ -55,8 +55,8 @@
                         </p>
                     </div>
                     <div class="form-group">
-                        <label for="icon">Ícone</label> <br/>
-                        <img src="{{ asset('storage/'.$owner->icon) }}" alt="Ícone do responsável" class="img-fluid img-thumbnail" style="width: 200px">
+                        <label for="icon">Banner da empresa</label> <br/>
+                        <img src="{{ asset('storage/'.$owner->icon) }}" alt="Banner da empresa" class="img-fluid img-thumbnail" style="width: 200px">
                     </div>
                     <div class="form-group">
                         <label for="description">Descrição</label>
