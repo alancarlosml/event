@@ -271,37 +271,102 @@
                                 <div class="form-group col-md-5">
                                     <input type="text" class="form-control" id="question" name="question" placeholder="Nome" value="">
                                 </div>
-                                <div class="form-group col-md-3">
-                                    <select id="option" class="form-control" name="option" required>
-                                        @foreach ($options as $option)
-                                            <option value="{{$option->id}}">{{$option->option}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-3 col-sm-9">
-                                    <label for="required" style="margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
-                                        <input type="checkbox" name="required" id="required" value="1"> <b>Obrigatório</b>
-                                    </label>
-                                    <label for="unique" style="margin-left: 5px; margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
-                                        <input type="checkbox" name="unique" id="unique" value="1"> <b>Único</b>
-                                    </label>
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="form-group col-md-6 col-sm-12">
+                                            <select id="option" class="form-control" name="option" required>
+                                                @foreach ($options as $option)
+                                                    <option value="{{$option->id}}">{{$option->option}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6 col-sm-12">
+                                            <label for="required" style="margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
+                                                <input type="checkbox" name="required" id="required" value="1"> <b>Obrigatório</b>
+                                            </label>
+                                            <label for="unique" style="margin-left: 5px; margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
+                                                <input type="checkbox" name="unique" id="unique" value="1"> <b>Único</b>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-12 col-sm-12" id="div_new_options" style="display: none">
+                                            <label for="">Preencha as opções separadas por vírgula</label>
+                                            <input type="text" class="form-control" name="new_options" id="new_options">
+                                        </div>
+                                        <div class="form-group col-md-12 col-sm-12" id="div_new_number" style="display: none">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label for="">Mínimo</label>
+                                                    <input type="number" class="form-control val_min_option" name="val_min" min="0">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label for="">Máximo</label>
+                                                    <input type="number" class="form-control val_max_option" name="val_max" min="0">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="form-group col-md-1 col-sm-3" style="margin-top: 1px;">
                                     <button type="button" class="btn btn-success" id="add_new_field">Adicionar</button>
                                 </div>
                             </div>
                             <div id="card-new-field" style="margin:0">
-                                <div class="form-group">
-                                    <label for="name_new_field">Campo 1*</label>
-                                    <input type="text" class="form-control" name="name_new_field" id="name_new_field" value="Nome" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="email_new_field">Campo 2*</label>
-                                    <input type="text" class="form-control" name="email_new_field" id="email_new_field" value="Email" readonly>
-                                </div>
+                                @if(count($questions) > 0)
+                                    @foreach ($questions as $id => $question)
+                                        @php
+                                            $var_options = $question->question . "; (Tipo: " . $question->option->option . ")";
+                                            
+                                            if($question->value() != null){
+                                                $var_options = $var_options . "; [Opções: " . $question->value()->value . "]";
+                                            }
+                                            
+                                            if($question->required == 1){
+                                                $var_options = $var_options . '; Obrigatório';
+                                            }     
+                                            if($question->unique == 1){
+                                                $var_options = $var_options . '; Único';
+                                            }    
+                                            
+                                        @endphp
+                                        @if($id<2)
+                                            <div class="form-group">
+                                                <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
+                                                <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
+                                            </div>
+                                        @else
+                                            <div class="row">
+                                                <div class="form-group col-9">
+                                                    <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
+                                                    <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
+                                                </div>
+                                                <div class="form-group col-3">
+                                                    <a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px;" href="javascript:;">
+                                                        <i class="fa-solid fa-remove"></i> Remover
+                                                    </a>
+                                                    <a class="btn btn-secondary btn-sm mr-1 up" href="javascript:;" style="margin-top: 35px;" >
+                                                        <i class="fas fa-arrow-up"></i>
+                                                    </a>
+                                                    <a class="btn btn-secondary btn-sm mr-1 down" href="javascript:;" style="margin-top: 35px;" >
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                @else
+                                    <div class="form-group">
+                                        <label for="name_new_field">Campo 1*</label>
+                                        <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email_new_field">Campo 2*</label>
+                                        <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
+                                    </div>
+                                @endif
                             </div>
                         </div>
-                        <hr>
                         <!-- /.card-body -->
                         <div class="card-footer text-right">
                             <button type="submit" class="btn btn-primary">Próximo</button>
@@ -452,7 +517,24 @@
                 );
             });
 
-            var i_field = 2;
+            $('#option').change(function(){
+
+                var id_option_select = $(this).val();
+
+                if(id_option_select == 2 || id_option_select == 3 || id_option_select == 4){
+                    $('#div_new_options').show();
+                } else {
+                    $('#div_new_options').hide();
+                }
+
+                if(id_option_select == 9 || id_option_select == 10){
+                    $('#div_new_number').show();
+                } else {
+                    $('#div_new_number').hide();
+                }
+            });
+
+            var i_field = parseInt($('input.new_field').length);
             $('#add_new_field').click(function(){
                 var field = $(this).parent().parent().find('#question').val();
                 var option = $(this).parent().parent().find('#option').val();
@@ -462,13 +544,25 @@
 
                 if(field === ''){
 
-                    alert('preencha');
+                    alert('Por favor, preencha o nome do campo!');
                     return false;
                 }
 
                 var required_star = required ? '*':'';
                 var field_text = '';
                 var field_name = '';
+                var field_required = '';
+                var field_unique = '';
+                var field_options = '';
+
+                if(required){
+                    field_required = '; Obrigatório';
+                }
+
+                if(unique){
+                    field_unique = '; Único';
+                }
+
                 i_field = i_field+1;
 
                 $('#question').val('');
@@ -484,14 +578,17 @@
                     case '2':
                         field_text = '(Tipo: Seleção)';
                         field_name = 'select';
+                        field_options = '; [Opções: ' + $('#new_options').val() + ']';
                         break;
                     case '3':
                         field_text = '(Tipo: Marcação)';
                         field_name = 'checkbox';
+                        field_options = '; [Opções: ' + $('#new_options').val() + ']';
                         break;
                     case '4':
                         field_text = '(Tipo: Múltipla escolha)';
                         field_name = 'multiselect';
+                        field_options = '; [Opções: ' + $('#new_options').val() + ']';
                         break;
                     case '5':
                         field_text = '(Tipo: CPF)';
@@ -512,10 +609,12 @@
                     case '9':
                         field_text = '(Tipo: Número inteiro)';
                         field_name = 'integer';
+                        field_options = '; [Opções: ' + $('.val_min_option').val() + '|' + + $('.val_max_option').val() +']';
                         break;
                     case '10':
                         field_text = '(Tipo: Número decimal)';
                         field_name = 'decimal';
+                        field_options = '; [Opções: ' + $('.val_min_option').val() + '|' + + $('.val_max_option').val() +']';
                         break;
                     case '11':
                         field_text = '(Tipo: Arquivo)';
@@ -526,7 +625,7 @@
                         field_name = 'textearea';
                         break;
                     case '13':
-                        field_text = '(Tipo: Email)';
+                        field_text = '(Tipo: E-mail)';
                         field_name = 'new_email';
                         break;
                     case '14':
@@ -538,15 +637,40 @@
                 $('#card-new-field').append('<div class="form-row">' +
                     '<div class="form-group col-10">'+
                         '<label for="field_'+i_field+'">Campo ' + i_field + required_star + '</label>' +
-                        '<input type="text" class="form-control" name="'+field_name+'_new_field" value="'+field+' '+field_text +'" readonly>' +
+                        '<input type="text" class="form-control new_field" name="new_field[]" value="'+field+'; ' + field_text + '' + field_options + '' + field_required + '' + field_unique +'" readonly>' +
                     '</div>'+
                     '<div class="form-group col-2">'+
-                        '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px" href="javascript:;">'+
+                        '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px; margin-left: 20px;" href="javascript:;">'+
                             '<i class="fa-solid fa-remove"></i>'+
                             ' Remover'+
                         '</a>'+
                     '</div>'+
                 '</div>');
+
+                $('#new_options').val('');
+                $('.val_min_option').val('');
+                $('.val_max_option').val('');
+            });
+
+            $("#card-new-field .up:first").hide();
+            $("#card-new-field .down:last").hide();
+            
+            $(".up,.down").click(function () {
+                
+                var $element = this;
+                var row = $($element).parents("div:first").parents("div:first");
+                
+                if($(this).is('.up')){
+                    row.insertBefore(row.prev());
+                }
+                else{
+                    row.insertAfter(row.next());
+                }
+
+                $("#card-new-field .up:first").hide();
+                $("#card-new-field .down:last").hide();
+                $("#card-new-field .up:not(:first)").show();
+                $("#card-new-field .down:not(:last)").show();
             });
 
             $('#add_place').click(function(){

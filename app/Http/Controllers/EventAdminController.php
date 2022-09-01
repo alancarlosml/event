@@ -14,12 +14,14 @@ use App\Models\Coupon;
 use App\Models\Event;
 use App\Models\EventDate;
 use App\Models\Lote;
+use App\Models\Message;
 use App\Models\Participante;
 use App\Models\ParticipanteEvent;
 use App\Models\Place;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\Owner;
+use App\Models\Question;
 use App\Models\User;
 use App\Models\State;
 use Illuminate\Support\Facades\Auth;
@@ -78,6 +80,8 @@ class EventAdminController extends Controller
         $event = Event::where('hash', $hash)->first();
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
+        $options = Option::orderBy('id')->get();
+        $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
 
         $dates = DB::table('event_dates')
             ->join('events', 'events.id', '=', 'event_dates.event_id')
@@ -95,7 +99,7 @@ class EventAdminController extends Controller
         $request->session()->put('event', $event);
         $request->session()->put('event_id', $event->id);
 
-        return view('painel_admin.my_events_edit', compact('event', 'categories', 'states', 'dates'));
+        return view('painel_admin.my_events_edit', compact('event', 'categories', 'options', 'states', 'dates', 'questions'));
     }
 
     public function createEventLink(Request $request)
@@ -120,6 +124,7 @@ class EventAdminController extends Controller
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
         $options = Option::orderBy('id')->get();
+        // $questions = Question::orderBy('order')->get();
 
         $event = $request->session()->get('event');
         $place = $request->session()->get('place');
@@ -131,8 +136,15 @@ class EventAdminController extends Controller
                 $eventDate[$key]['date'] = date("d/m/Y", strtotime($eventDate[$key]['date']));
             }
         }
+        
+        $questions = "";
+        if($event)
+        {
+            $questions = $request->session()->get('questions');
+            // dd($questions);
+        }
 
-        return view('painel_admin.create_event', compact('categories', 'states', 'options', 'event', 'place', 'eventDate'));
+        return view('painel_admin.create_event', compact('categories', 'states', 'options', 'event', 'place', 'eventDate', 'questions'));
     }
 
     public function postCreateStepOne(Request $request)
@@ -166,6 +178,7 @@ class EventAdminController extends Controller
             $event_id = $event->id;
             $request->session()->put('event', $event);
             $request->session()->put('event_id', $event_id);
+
         }else{
 
             $event_id = $request->session()->get('event_id');
@@ -180,7 +193,8 @@ class EventAdminController extends Controller
                 'area_id' => 'required',
                 'max_tickets' => 'required',
                 'admin_email' => 'required',
-                'status' => 'string'
+                'status' => 'string',
+                'new_field' => 'required'
             ]);
             
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
@@ -277,6 +291,101 @@ class EventAdminController extends Controller
 
         /*********************************************/
         /*************** END SAVE DATES **************/
+        /*********************************************/
+
+        /*********************************************/
+        /*************** SAVE QUESTIONS **************/
+        /*********************************************/
+
+        DB::table('questions')->where('event_id', $event_id)->delete();
+
+        $fields = $validatedDataEvent['new_field'];
+
+        foreach($fields as $id => $field){
+
+            // if($field == 'Nome'){
+
+            //     $option = Option::where('option', $field)->first();
+                
+            //     DB::table('questions')->insert([
+            //         'question' => 'Nome',
+            //         'order' => 1,
+            //         'required' => 1,
+            //         'unique' => 0,
+            //         'status' => 1,
+            //         'option_id' => 1,
+            //         'event_id' => $event_id
+            //     ]);
+                
+            // } elseif($field == 'E-mail'){
+                
+            //     $option = Option::where('option', $field)->first();
+                
+            //     DB::table('questions')->insert([
+            //         'question' => 'E-mail',
+            //         'order' => 2,
+            //         'required' => 1,
+            //         'unique' => 1,
+            //         'status' => 1,
+            //         'option_id' => 13,
+            //         'event_id' => $event_id
+            //     ]);
+
+            // } else {
+                preg_match_all("/\(([^\]]*)\)/", $field, $matches);
+                $result_field = $matches[1];
+                $result_field = str_replace("Tipo: ", "", $result_field);
+
+                $more_fields = explode(';', $field);
+
+                $required = 0;
+                if(strpos($field, 'Obrigatório')){
+                    $required = 1;
+                }
+
+                $unique = 0;
+                if(strpos($field, 'Único')){
+                    $unique = 1;
+                }
+
+                // dd($result_field[0]);
+
+                $option = Option::where('option', $result_field[0])->first();
+                $question = Question::create([
+                // DB::table('questions')->insert([
+                    'question' => $more_fields[0],
+                    'order' => $id + 1,
+                    'required' => $required,
+                    'unique' => $unique,
+                    'status' => 1,
+                    'option_id' => $option->id,
+                    'event_id' => $event_id
+                ]);
+
+                $id_question = $question->id;
+
+                $result_regex = preg_match_all("/\[([^\]]*)\]/", $field, $matches);
+
+                if($result_regex){
+                    $result_field = $matches[1];
+                    $result_field = str_replace("Opções: ", "", $result_field);
+
+                    DB::table('option_values')->insert([
+                        'value' => $result_field[0],
+                        'question_id' => $id_question
+                    ]);
+                }
+
+
+            // }
+        }
+
+        $questions = Question::orderBy('order')->where('event_id', $event_id)->get();
+
+        $request->session()->put('questions', $questions);
+
+        /*********************************************/
+        /************* END SAVE QUESTIONS ************/
         /*********************************************/
 
         return redirect()->route('event_home.create.step.two');
@@ -902,7 +1011,13 @@ class EventAdminController extends Controller
 
     public function contacts(Request $request, $hash)
     {
+        $event = Event::where('hash', $hash)->first();
 
+        $event_id = $event->id;
+
+        $messages = Message::where('event_id', $event_id)->get();
+
+        return view('painel_admin.contacts', compact('messages'));
     }
 
     public function reports(Request $request, $hash)

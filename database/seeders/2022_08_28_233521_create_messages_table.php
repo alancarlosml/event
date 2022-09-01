@@ -13,18 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->string('question');
-            $table->integer('required');
-            $table->integer('unique');
-            $table->integer('order');
-            $table->integer('status');
-            $table->integer('option_id')->unsigned()->index();
-            $table->foreign('option_id')
-                ->references('id')
-                ->on('options')
-                ->onDelete('cascade');
+            $table->string('name');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('subject');
+            $table->text('text');
+            $table->integer('read');
             $table->integer('event_id')->unsigned()->index();
             $table->foreign('event_id')
                 ->references('id')
@@ -41,6 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('messages');
     }
 };

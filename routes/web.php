@@ -37,6 +37,9 @@ Route::get('painel/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdmin
 Route::get('painel/meus-eventos/{hash}/convidados', 'App\Http\Controllers\EventAdminController@guests')->middleware(['auth'])->name('event_home.guests');
 Route::get('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@addGuest')->middleware(['auth'])->name('event_home.guest_add');
 Route::post('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@storeGuest')->middleware(['auth'])->name('event_home.guest_store');
+Route::get('painel/meus-eventos/{hash}/mensagens', 'App\Http\Controllers\EventAdminController@listMessages')->middleware(['auth'])->name('event_home.messages');
+Route::get('painel/meus-eventos/mensagens/{id}/abrir', 'App\Http\Controllers\EventAdminController@showMessage')->middleware(['auth'])->name('event_home.show_message');
+Route::delete('painel/meus-eventos/mensagens/{id}/excluir', 'App\Http\Controllers\EventAdminController@destroyMessage')->middleware(['auth'])->name('event_home.destroy_message');
 Route::get('painel/meus-eventos/convidados/{id}/editar', 'App\Http\Controllers\EventAdminController@editGuest')->middleware(['auth'])->name('event_home.guest_edit');
 Route::post('painel/meus-eventos/convidados/{id}/editar', 'App\Http\Controllers\EventAdminController@updateGuest')->middleware(['auth'])->name('event_home.guests_update');
 Route::delete('painel/meus-eventos/convidados/{id}/excluir', 'App\Http\Controllers\EventAdminController@destroyGuest')->middleware(['auth'])->name('event_home.destroy_guest');

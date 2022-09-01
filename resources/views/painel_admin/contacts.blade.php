@@ -36,96 +36,44 @@
                     <table class="table table-head-fixed text-wrap hover" id="list_events">
                         <thead>
                             <tr>
-                            <th>ID</th>
-                            <th>Detalhes</th>
-                            <th>Responsável</th>
-                            <th>Local</th>
-                            <th>Data Criação</th>
-                            <th>Status</th>
-                            <th>Ações</th>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>Texto</th>
+                                <th>Data Criação</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($events as $event)
-                                <tr @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "") style="background:#faceca" @endif>
-                                    <td>{{$event->id}}</td>
-                                    <td>
-                                        <b>Nome:</b> {{$event->name}} <br/>
-                                        <b>Data evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif
-                                    </td>
-                                    <td>
-                                        {{$event->admin_name}} <br>
-                                        <small>{{$event->admin_email}}</small>
-                                    </td>
-                                    <td>{{$event->place_name}}</td>
-                                    {{-- <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif</td> --}}
-                                    <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y') }}</td>
-                                    <td>
-                                        @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "")
-                                            <span class="badge badge-danger">Incompleto</span> 
-                                        @else
-                                            @if($event->status == 1) 
-                                                <span class="badge badge-success">Ativo</span> 
-                                            @else
-                                                <span class="badge badge-warning">Não ativo</span> 
-                                            @endif
-                                        @endif
-                                    </td>
+                            @foreach($messages as $message)
+                                <tr @if($message->read == 0) style="background:#eeefff; font-weight:bold" @endif>
+                                    <td>{{$message->id}}</td>
+                                    <td>{{$message->name}}</td>
+                                    <td>{{$message->email}}</td>
+                                    <td>{{$message->phone}}</td>
+                                    <td>{{$message->text}}</td>
+                                    <td>{{ \Carbon\Carbon::parse($message->created_at)->format('j/m/Y H:i') }}</td>
                                     <td>
                                         <div class="d-flex">
-                                            {{-- <a class="btn btn-success btn-sm mr-1" href="{{route('event.reports', $event->id)}}">
-                                                <i class="fa-solid fa-chart-pie"></i>
-                                                Relatórios
-                                            </a> --}}
-                                            {{-- <a class="btn btn-secondary btn-sm mr-1" href="{{route('event.lotes', $event->id)}}">
-                                                <i class="fa-solid fa-tags"></i>
-                                                Lotes
+                                            <a class="btn btn-primary btn-sm mr-1" href="{{route('event_home.show_message', $message->id)}}">
+                                                <i class="fa-solid fa-envelope"></i>
+                                                Abrir
                                             </a>
-                                            <a class="btn btn-warning btn-sm mr-1" href="{{route('event.coupons', $event->id)}}">
-                                                <i class="fa-solid fa-percent"></i>
-                                                Cupons
-                                            </a> --}}
-                                            <div class="btn-group" role="group">
-                                                <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm mr-1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i class="fa-solid fa-gear"></i> Configurações
-                                                </button>
-                                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
-                                                    <a class="dropdown-item" href="{{route('event_home.reports', $event->hash)}}">
-                                                        <i class="fa-solid fa-chart-pie"></i>
-                                                        Relatórios
-                                                    </a>
-                                                    <a class="dropdown-item" href="{{route('event_home.my_events_show', $event->hash)}}">
-                                                        <i class="fas fa-eye"></i>
-                                                        Detalhes
-                                                    </a>
-                                                    @if($event->role == 'admin')
-                                                        <a class="dropdown-item" href="{{route('event_home.guests', $event->hash)}}">
-                                                            <i class="fas fa-person"></i>
-                                                            Usuários
-                                                        </a>
-                                                        <a class="dropdown-item" href="{{route('event_home.contacts', $event->hash)}}">
-                                                            <i class="fa-solid fa-envelope"></i>
-                                                            Contatos
-                                                        </a>
-                                                        <a class="dropdown-item" href="{{route('event_home.my_events_edit', $event->hash)}}">
-                                                            <i class="fas fa-pencil-alt"></i>
-                                                            Editar
-                                                        </a>
-                                                        <form action="{{ route('event.destroy', $event->id) }}" method="POST">
-                                                            <input type="hidden" name="_method" value="DELETE">
-                                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                            <a href="javascript:;" class="dropdown-item" onclick="removeData({{$event->id}})">
-                                                                <i class="fas fa-trash"></i>
-                                                                Remover
-                                                            </a>
-                                                            <button class="d-none" id="btn-remove-hidden-{{$event->id}}">Remover</button>
-                                                        </form>
-                                                    @endif
-                                                </div>
-                                            </div>
+                                            <form action="{{ route('event_home.destroy_message', $message->id) }}" method="POST">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$message->id}})">
+                                                    <i class="fas fa-trash">
+                                                    </i>
+                                                    Remover
+                                                </a>
+                                                {{-- <a class="btn btn-danger m-1 btn-remove" href="javascript:;" onclick="removeData({{$category->id}})">Remover</a> --}}
+                                                <button class="d-none" id="btn-remove-hidden-{{$message->id}}">Remover</button>
+                                            </form>
                                         </div>
                                     </td>
-                                    <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$event->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
+                                    <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$message->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -135,10 +83,10 @@
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    Deseja realmente remover essa evento?
+                                                    Deseja realmente remover essa mensagem?
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$event->id}}" onclick="removeSucc({{$event->id}})">Sim</button>
+                                                    <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$message->id}}" onclick="removeSucc({{$message->id}})">Sim</button>
                                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
                                                 </div>
                                             </div>
@@ -208,7 +156,7 @@
                     {
                         extend: 'csv',
                         text: 'CSV',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Listagem das mensagens recebidas - Evento',
                         exportOptions: {
                             modifier: {
                                 page: 'current'
@@ -228,7 +176,7 @@
                     {
                         extend: 'excel',
                         text: 'Excel',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Listagem das mensagens recebidas - Evento',
                         exportOptions: {
                             modifier: {
                                 page: 'current'
@@ -247,7 +195,7 @@
                     {
                         extend: 'pdf',
                         text: 'PDF',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Listagem das mensagens recebidas - Evento',
                         exportOptions: {
                             modifier: {
                                 page: 'current'
@@ -259,7 +207,7 @@
                     {
                         extend: 'print',
                         text: 'Imprimir',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Listagem das mensagens recebidas - Evento',
                         exportOptions: {
                             modifier: {
                                 page: 'current'

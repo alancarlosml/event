@@ -40,13 +40,13 @@
                     <table class="table table-head-fixed text-nowrap">
                         <thead>
                             <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Email</th>
-                            <th>Telefone</th>
-                            <th>Texto</th>
-                            <th>Data Criação</th>
-                            <th>Ações</th>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>Texto</th>
+                                <th>Data Criação</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
