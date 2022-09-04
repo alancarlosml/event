@@ -212,7 +212,7 @@
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label for="place_name">Não encontrou o local?</label><br>
-                                    <a class="btn btn-warning btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_place">
+                                    <a class="btn btn-success btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_place">
                                         <i class="fa-solid fa-plus"></i>
                                         Adicionar
                                     </a>
@@ -266,104 +266,108 @@
                         <hr>
                         <div class="card-body" style="padding-right: 34px">
                             <h4>Campos do formulário de inscrição</h4>
-                            <label for="question">Novo campo</label>
-                            <div class="form-row" style="margin:0">
-                                <div class="form-group col-md-5">
-                                    <input type="text" class="form-control" id="question" name="question" placeholder="Nome" value="">
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row">
-                                        <div class="form-group col-md-6 col-sm-12">
-                                            <select id="option" class="form-control" name="option" required>
-                                                @foreach ($options as $option)
-                                                    <option value="{{$option->id}}">{{$option->option}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group col-md-6 col-sm-12">
-                                            <label for="required" style="margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
-                                                <input type="checkbox" name="required" id="required" value="1"> <b>Obrigatório</b>
-                                            </label>
-                                            <label for="unique" style="margin-left: 5px; margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
-                                                <input type="checkbox" name="unique" id="unique" value="1"> <b>Único</b>
-                                            </label>
-                                        </div>
+                            <div class="card p-2 pr-4 mb-2">
+                                <label for="question">Novo campo</label>
+                                <div class="form-row" style="margin:0">
+                                    <div class="form-group col-md-5">
+                                        <input type="text" class="form-control" id="question" name="question" placeholder="Nome" value="">
                                     </div>
-                                    <div class="row">
-                                        <div class="form-group col-md-12 col-sm-12" id="div_new_options" style="display: none">
-                                            <label for="">Preencha as opções separadas por vírgula</label>
-                                            <input type="text" class="form-control" name="new_options" id="new_options">
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="form-group col-md-6 col-sm-12">
+                                                <select id="option" class="form-control" name="option" required>
+                                                    @foreach ($options as $option)
+                                                        <option value="{{$option->id}}">{{$option->option}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 col-sm-12">
+                                                <label for="required" style="margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
+                                                    <input type="checkbox" name="required" id="required" value="1"> <b>Obrigatório</b>
+                                                </label>
+                                                <label for="unique" style="margin-left: 5px; margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
+                                                    <input type="checkbox" name="unique" id="unique" value="1"> <b>Único</b>
+                                                </label>
+                                            </div>
                                         </div>
-                                        <div class="form-group col-md-12 col-sm-12" id="div_new_number" style="display: none">
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <label for="">Mínimo</label>
-                                                    <input type="number" class="form-control val_min_option" name="val_min" min="0">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label for="">Máximo</label>
-                                                    <input type="number" class="form-control val_max_option" name="val_max" min="0">
+                                        <div class="row">
+                                            <div class="form-group col-md-12 col-sm-12" id="div_new_options" style="display: none">
+                                                <label for="">Preencha as opções separadas por vírgula</label>
+                                                <input type="text" class="form-control" name="new_options" id="new_options">
+                                            </div>
+                                            <div class="form-group col-md-12 col-sm-12" id="div_new_number" style="display: none">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <label for="">Mínimo</label>
+                                                        <input type="number" class="form-control val_min_option" name="val_min" min="0">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label for="">Máximo</label>
+                                                        <input type="number" class="form-control val_max_option" name="val_max" min="0">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group col-md-1 col-sm-3" style="margin-top: 1px;">
-                                    <button type="button" class="btn btn-success" id="add_new_field">Adicionar</button>
+                                    <div class="form-group col-md-1 col-sm-3" style="margin-top: 1px;">
+                                        <button type="button" class="btn btn-success" id="add_new_field">Adicionar</button>
+                                    </div>
                                 </div>
                             </div>
                             <div id="card-new-field" style="margin:0">
-                                @if(count($questions) > 0)
-                                    @foreach ($questions as $id => $question)
-                                        @php
-                                            $var_options = $question->question . "; (Tipo: " . $question->option->option . ")";
-                                            
-                                            if($question->value() != null){
-                                                $var_options = $var_options . "; [Opções: " . $question->value()->value . "]";
-                                            }
-                                            
-                                            if($question->required == 1){
-                                                $var_options = $var_options . '; Obrigatório';
-                                            }     
-                                            if($question->unique == 1){
-                                                $var_options = $var_options . '; Único';
-                                            }    
-                                            
-                                        @endphp
-                                        @if($id<2)
-                                            <div class="form-group">
-                                                <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
-                                                <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
-                                            </div>
-                                        @else
-                                            <div class="row">
-                                                <div class="form-group col-9">
+                                @if(!isset($questions))
+                                    @if(count($questions) > 0)
+                                        @foreach ($questions as $id => $question)
+                                            @php
+                                                $var_options = $question->question . "; (Tipo: " . $question->option->option . ")";
+                                                
+                                                if($question->value() != null){
+                                                    $var_options = $var_options . "; [Opções: " . $question->value()->value . "]";
+                                                }
+                                                
+                                                if($question->required == 1){
+                                                    $var_options = $var_options . '; Obrigatório';
+                                                }     
+                                                if($question->unique == 1){
+                                                    $var_options = $var_options . '; Único';
+                                                }    
+                                                
+                                            @endphp
+                                            @if($id<2)
+                                                <div class="form-group">
                                                     <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
                                                     <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
                                                 </div>
-                                                <div class="form-group col-3">
-                                                    <a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px;" href="javascript:;">
-                                                        <i class="fa-solid fa-remove"></i> Remover
-                                                    </a>
-                                                    <a class="btn btn-secondary btn-sm mr-1 up" href="javascript:;" style="margin-top: 35px;" >
-                                                        <i class="fas fa-arrow-up"></i>
-                                                    </a>
-                                                    <a class="btn btn-secondary btn-sm mr-1 down" href="javascript:;" style="margin-top: 35px;" >
-                                                        <i class="fas fa-arrow-down"></i>
-                                                    </a>
+                                            @else
+                                                <div class="row">
+                                                    <div class="form-group col-9">
+                                                        <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
+                                                        <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
+                                                    </div>
+                                                    <div class="form-group col-3">
+                                                        <a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px;" href="javascript:;">
+                                                            <i class="fa-solid fa-remove"></i> Remover
+                                                        </a>
+                                                        <a class="btn btn-secondary btn-sm mr-1 up" href="javascript:;" style="margin-top: 35px;" >
+                                                            <i class="fas fa-arrow-up"></i>
+                                                        </a>
+                                                        <a class="btn btn-secondary btn-sm mr-1 down" href="javascript:;" style="margin-top: 35px;" >
+                                                            <i class="fas fa-arrow-down"></i>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                @else
-                                    <div class="form-group">
-                                        <label for="name_new_field">Campo 1*</label>
-                                        <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="email_new_field">Campo 2*</label>
-                                        <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
-                                    </div>
+                                            @endif
+                                        @endforeach
+                                    @else
+                                        <div class="form-group">
+                                            <label for="name_new_field">Campo 1*</label>
+                                            <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email_new_field">Campo 2*</label>
+                                            <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                         </div>
@@ -812,6 +816,8 @@
             $('body').on('click',".btn-remove-field", function(){
                 $(this).parent().parent().remove();
                 i_field = i_field-1;
+                $("#card-new-field .up:first").hide();
+                $("#card-new-field .down:last").hide();
             });
 
             $('body').on('click',".btn-remove", function(){

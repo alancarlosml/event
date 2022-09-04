@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Support\Facades\DB;
 // use Cviebrock\EloquentSluggable\Sluggable;
+
+use DateTime;
 
 class Event extends Model
 {
@@ -92,6 +95,104 @@ class Event extends Model
             'participantes_events',
             'event_id',
             'participante_id');
+    }
+
+    public static function getEvents($event_val, $category_val, $area_val, $state_val, $period_val) {
+        
+        $events = Event::where('events.status', 1);
+
+        if($event_val && !empty($event_val)) {
+            $events->where(function($q) use ($event_val) {
+                $q->where('events.name', 'like', "'%{$event_val}%'");
+            });
+        }
+
+        if($category_val != '0') {
+            $events = $events->join('areas', 'areas.id', '=', 'events.area_id');
+            $events = $events->join('categories', 'categories.id', '=', 'areas.category_id');
+            $events = $events->where('categories.id', $category_val);
+        }
+
+        if($area_val != null) {
+            $events = $events->where('events.area_id', $area_val);
+        }
+
+        if($state_val != '0') {
+            $events = $events->join('places', 'places.id', '=', 'events.place_id');
+            $events = $events->join('cities', 'cities.id', '=', 'places.city_id');
+            $events = $events->join('states', 'states.uf', '=', 'cities.uf');
+            $events = $events->where('states.uf', $state_val);
+        }
+
+        if($period_val != '0') {
+
+            $events = $events->join('event_dates', 'event_dates.event_id', '=', 'events.id');
+
+            $today = date('Y-m-d');
+            // $today = date('2022-08-27');
+
+            switch( $period_val ) {
+                case 'any':
+                    $events = $events;
+                    break;
+                case 'today':
+                    $events = $events->where('event_dates.date', $today);
+                    // $dates = DB::table('event_dates')
+                    //             ->selectRaw("date");
+
+                    // $eventsJoin = $events->joinSub($dates, 'x', function ($join)
+                    //     {
+                    //         $join->on('x.event_id', '=', 'events.id');
+                    //     })
+                    //     ->selectRaw("x.date")
+                    //     // ->where("MIN(x.date) as min_date, MAX(x.date) as max_date")
+                    //     ->groupBy('events.id');
+
+                    // // $events = $events->selectSub($eventsJoin, 'id');
+
+                    // // $events = $events->orderBy(function ($eventsJoin) {
+                    // //     $eventsJoin->whereBetween('2022-08-29', ['min_date', 'max_date']);
+                    // // });
+                    // $events = $eventsJoin;
+
+                    break;
+                case 'tomorrow':
+                    $events = $events->where('event_dates.date', date('Y-m-d', strtotime("+1 day")));
+                    break;
+                case 'week':
+                    $events = $events->where(DB::raw("week(event_dates.date)"), DB::raw("week(CURDATE())"));
+                    break;
+                case 'month':
+                    $events = $events->where(DB::raw("month(event_dates.date)"), DB::raw("month(CURDATE())"));
+                    break;
+                case 'year':
+                    $events = $events->where(DB::raw("year(event_dates.date)"), DB::raw("year(CURDATE())"));
+                    break;
+                default:
+                    $events = $events->where(DB::raw("LOWER(MONTHNAME(event_dates.date))"), $period_val);
+                    break;
+            }
+
+        }
+
+        // Filter By Type
+        // if($sort_by) {
+        //     $sort_by = lcfirst($sort_by);
+        //     if($sort_by == GlobalConstants::USER_TYPE_FRONTEND) {
+        //         $users = $users->where('users.type', $sort_by);
+        //     } else if($sort_by == GlobalConstants::USER_TYPE_BACKEND) {
+        //         $users = $users->where('users.type', $sort_by);
+        //     }
+        // }
+
+        // // Filter By Salaries
+        // if ($range && $range != GlobalConstants::ALL) {
+        //     $users = $users->where('users.salary', $range);
+        // }
+
+        // dd($events);
+
+        return $events->distinct()->paginate(12);
     }
 
     public function get_participante_admin()

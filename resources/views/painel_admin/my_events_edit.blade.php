@@ -211,7 +211,7 @@
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label for="place_name">Não encontrou o local?</label><br>
-                                    <a class="btn btn-warning btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_place">
+                                    <a class="btn btn-success btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_place">
                                         <i class="fa-solid fa-plus"></i>
                                         Adicionar
                                     </a>
@@ -265,50 +265,52 @@
                         <hr>
                         <div class="card-body" style="padding-right: 34px">
                             <h4>Campos do formulário de inscrição</h4>
-                            <label for="question">Novo campo</label>
-                            <div class="form-row" style="margin:0">
-                                <div class="form-group col-md-5">
-                                    <input type="text" class="form-control" id="question" name="question" placeholder="Nome" value="">
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row">
-                                        <div class="form-group col-md-6 col-sm-12">
-                                            <select id="option" class="form-control" name="option" required>
-                                                @foreach ($options as $option)
-                                                    <option value="{{$option->id}}">{{$option->option}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group col-md-6 col-sm-12">
-                                            <label for="required" style="margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
-                                                <input type="checkbox" name="required" id="required" value="1"> <b>Obrigatório</b>
-                                            </label>
-                                            <label for="unique" style="margin-left: 5px; margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
-                                                <input type="checkbox" name="unique" id="unique" value="1"> <b>Único</b>
-                                            </label>
-                                        </div>
+                            <div class="card p-2 pr-4 mb-2">
+                                <label for="question">Novo campo</label>
+                                <div class="form-row" style="margin:0">
+                                    <div class="form-group col-md-5">
+                                        <input type="text" class="form-control" id="question" name="question" placeholder="Nome" value="">
                                     </div>
-                                    <div class="row">
-                                        <div class="form-group col-md-12 col-sm-12" id="div_new_options" style="display: none">
-                                            <label for="">Preencha as opções separadas por vírgula</label>
-                                            <input type="text" class="form-control" name="new_options" id="new_options">
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="form-group col-md-6 col-sm-12">
+                                                <select id="option" class="form-control" name="option" required>
+                                                    @foreach ($options as $option)
+                                                        <option value="{{$option->id}}">{{$option->option}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 col-sm-12">
+                                                <label for="required" style="margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
+                                                    <input type="checkbox" name="required" id="required" value="1"> <b>Obrigatório</b>
+                                                </label>
+                                                <label for="unique" style="margin-left: 5px; margin-top:2px; padding: 5px 10px; border: solid 1px #ccc; border-radius: 10px;">
+                                                    <input type="checkbox" name="unique" id="unique" value="1"> <b>Único</b>
+                                                </label>
+                                            </div>
                                         </div>
-                                        <div class="form-group col-md-12 col-sm-12" id="div_new_number" style="display: none">
-                                            <div class="row">
-                                                <div class="col-6">
-                                                    <label for="">Mínimo</label>
-                                                    <input type="number" class="form-control val_min_option" name="val_min" min="0">
-                                                </div>
-                                                <div class="col-6">
-                                                    <label for="">Máximo</label>
-                                                    <input type="number" class="form-control val_max_option" name="val_max" min="0">
+                                        <div class="row">
+                                            <div class="form-group col-md-12 col-sm-12" id="div_new_options" style="display: none">
+                                                <label for="">Preencha as opções separadas por vírgula</label>
+                                                <input type="text" class="form-control" name="new_options" id="new_options">
+                                            </div>
+                                            <div class="form-group col-md-12 col-sm-12" id="div_new_number" style="display: none">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <label for="">Mínimo</label>
+                                                        <input type="number" class="form-control val_min_option" name="val_min" min="0">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label for="">Máximo</label>
+                                                        <input type="number" class="form-control val_max_option" name="val_max" min="0">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group col-md-1 col-sm-3" style="margin-top: 1px;">
-                                    <button type="button" class="btn btn-success" id="add_new_field">Adicionar</button>
+                                    <div class="form-group col-md-1 col-sm-3" style="margin-top: 1px;">
+                                        <button type="button" class="btn btn-success" id="add_new_field">Adicionar</button>
+                                    </div>
                                 </div>
                             </div>
                             <div id="card-new-field" style="margin:0">
@@ -799,6 +801,8 @@
             $('body').on('click',".btn-remove-field", function(){
                 $(this).parent().parent().remove();
                 i_field = i_field-1;
+                $("#card-new-field .up:first").hide();
+                $("#card-new-field .down:last").hide();
             });
 
             $('body').on('click',".btn-remove", function(){

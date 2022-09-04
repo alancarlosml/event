@@ -2594,8 +2594,9 @@ section {
 
 #event-list.search #event_button_search {
   padding: 10px;
-  font-size: 18px;
+  /* font-size: 18px; */
   font-weight: 500;
+  margin-top: -2px !important;
 }
 
 /* STEPS */

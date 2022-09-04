@@ -40,7 +40,7 @@ class EventHomeController extends Controller
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
 
-        $events = $event->getAll();
+        $events = $event::where('status', 1)->paginate(1);
         // $events = $event->getAll();
         // // $faqs = $faq->getAll();
 
@@ -51,6 +51,18 @@ class EventHomeController extends Controller
         // dd($events->get(0)->category);
 
         return view('site.events', compact('events', 'categories', 'states'));
+    }
+
+    public function getMoreEvents(Request $request) {
+        $event_val = $request->event_val;
+        $category_val = $request->category_val;
+        $area_val = $request->area_val;
+        $state_val = $request->state_val;
+        $period_val = $request->period_val;
+        if($request->ajax()) {
+            $events = Event::getEvents($event_val, $category_val, $area_val, $state_val, $period_val);
+            return view('site.events_data', compact('events'))->render();
+        }
     }
 
     public function event($slug){
