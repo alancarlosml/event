@@ -96,9 +96,12 @@
     
       </main><!-- End #main -->
 
-      @push('head')
+        @push('bootstrap_version')
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        @endpush
 
-      
-      @endpush
+        @push('head')
+            
+        @endpush
 
 </x-site-layout>

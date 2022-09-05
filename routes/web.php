@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'App\Http\Controllers\HomeController@home')->name('home');
 Route::post ('/contato', 'App\Http\Controllers\HomeController@contact')->name('contact');
-Route::post('/get-areas','App\Http\Controllers\HomeController@getAreas');
+// Route::post('/get-areas','App\Http\Controllers\HomeController@getAreas');
 Route::get('/contato', 'App\Http\Controllers\HomeController@show_contact_form');
 Route::post('/contato', 'App\Http\Controllers\HomeController@send')->name('contact');
-Route::post('painel/get-areas-by-category','App\Http\Controllers\HomeController@getAreas')->middleware(['auth'])->name('event_home.get_areas_by_category');
+Route::post('painel/get-areas-by-category','App\Http\Controllers\HomeController@getAreas')->name('event_home.get_areas_by_category');
 
 Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
 Route::get('/get-more-events', 'App\Http\Controllers\EventHomeController@getMoreEvents')->name('event_home.get-more-events');

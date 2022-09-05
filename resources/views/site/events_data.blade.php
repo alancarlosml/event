@@ -16,7 +16,7 @@
         </div>
     </div>
     @endforeach
-    <div class="">
-        {{ $events->links() }}
+    <div class="container d-flex justify-content-center">
+        {{ $events->links("pagination::bootstrap-4") }}
     </div>
 </div>

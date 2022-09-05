@@ -40,7 +40,11 @@ class EventHomeController extends Controller
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
 
-        $events = $event::where('status', 1)->paginate(1);
+        $events = $event::getEvents('', '0', '0', '0', '0');
+
+        // dd($events);
+
+        // $events = $event::where('status', 1)->paginate(1);
         // $events = $event->getAll();
         // // $faqs = $faq->getAll();
 

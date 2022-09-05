@@ -93,6 +93,10 @@
     
       </main><!-- End #main -->
 
+      @push('bootstrap_version')
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+      @endpush
+
       @push('head')
         {{-- <style>
             .bootstrap-select.open > .dropdown-menu{
@@ -364,18 +368,19 @@
                 },
                 url: "{{ route('event_home.get-more-events') }}" + "?page=" + page,
                     success:function(data) {
-                    $('#event_data').html(data);
-                }
+                        $('#event_data').html(data);
+                    }
             });
         }
 
         $(document).ready(function() {
 
-            $(document).on('click', '.pagination a', function(event) {
-                event.preventDefault();
-                var page = $(this).attr('href').split('page=')[1];
-                getMoreEvents(page);
-            });
+            // $(document).on('click', '.pagination a', function(event) {
+            //     event.preventDefault();
+            //     var page = $(this).attr('href').split('page=')[1];
+            //     console.log(page);
+            //     getMoreEvents(page);
+            // });
             $('#event_name_search').on('keyup', function() {
                 $value = $(this).val();
                 getMoreEvents(1);
@@ -438,7 +443,7 @@
                 $('#category option[value="'+category_id+'"]').attr('selected','selected');
                 $("#area_id").html('');
                 $.ajax({
-                    url:"{{url('/get-areas')}}",
+                    url:"{{route('event_home.get_areas_by_category')}}",
                     type: "POST",
                     data: {
                         category_id: category_id,
@@ -465,7 +470,7 @@
                 var category_id = this.value;
                 $("#area_id").html('');
                 $.ajax({
-                    url:"{{url('admin/categories/get-areas-by-category')}}",
+                    url:"{{route('event_home.get_areas_by_category')}}",
                     type: "POST",
                     data: {
                         category_id: category_id,

@@ -107,16 +107,21 @@ class Event extends Model
             });
         }
 
+        
+
         if($category_val != '0') {
             $events = $events->join('areas', 'areas.id', '=', 'events.area_id');
             $events = $events->join('categories', 'categories.id', '=', 'areas.category_id');
             $events = $events->where('categories.id', $category_val);
         }
 
-        if($area_val != null) {
+        // dd($area_val);
+
+        
+        if($area_val && $area_val != '0') {
             $events = $events->where('events.area_id', $area_val);
         }
-
+        
         if($state_val != '0') {
             $events = $events->join('places', 'places.id', '=', 'events.place_id');
             $events = $events->join('cities', 'cities.id', '=', 'places.city_id');
@@ -129,7 +134,6 @@ class Event extends Model
             $events = $events->join('event_dates', 'event_dates.event_id', '=', 'events.id');
 
             $today = date('Y-m-d');
-            // $today = date('2022-08-27');
 
             switch( $period_val ) {
                 case 'any':
@@ -137,24 +141,6 @@ class Event extends Model
                     break;
                 case 'today':
                     $events = $events->where('event_dates.date', $today);
-                    // $dates = DB::table('event_dates')
-                    //             ->selectRaw("date");
-
-                    // $eventsJoin = $events->joinSub($dates, 'x', function ($join)
-                    //     {
-                    //         $join->on('x.event_id', '=', 'events.id');
-                    //     })
-                    //     ->selectRaw("x.date")
-                    //     // ->where("MIN(x.date) as min_date, MAX(x.date) as max_date")
-                    //     ->groupBy('events.id');
-
-                    // // $events = $events->selectSub($eventsJoin, 'id');
-
-                    // // $events = $events->orderBy(function ($eventsJoin) {
-                    // //     $eventsJoin->whereBetween('2022-08-29', ['min_date', 'max_date']);
-                    // // });
-                    // $events = $eventsJoin;
-
                     break;
                 case 'tomorrow':
                     $events = $events->where('event_dates.date', date('Y-m-d', strtotime("+1 day")));
@@ -174,25 +160,10 @@ class Event extends Model
             }
 
         }
+        
+        // dd($events->get());
 
-        // Filter By Type
-        // if($sort_by) {
-        //     $sort_by = lcfirst($sort_by);
-        //     if($sort_by == GlobalConstants::USER_TYPE_FRONTEND) {
-        //         $users = $users->where('users.type', $sort_by);
-        //     } else if($sort_by == GlobalConstants::USER_TYPE_BACKEND) {
-        //         $users = $users->where('users.type', $sort_by);
-        //     }
-        // }
-
-        // // Filter By Salaries
-        // if ($range && $range != GlobalConstants::ALL) {
-        //     $users = $users->where('users.salary', $range);
-        // }
-
-        // dd($events);
-
-        return $events->distinct()->paginate(12);
+        return $events->paginate(2);
     }
 
     public function get_participante_admin()
