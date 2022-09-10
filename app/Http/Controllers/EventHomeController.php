@@ -69,32 +69,6 @@ class EventHomeController extends Controller
         }
     }
 
-    public function event($slug){
-
-        // $menu = 'home';
-        // $title = 'Home';
-        // $url = url('/');
-        // $description = 'Bilhete Mania - Venda de ingressos online';
-        // $image = url('img/favicon/favicon-96x96.png');
-
-        $event = Event::where('slug', $slug)->first();
-
-        // dd($event->event_dates);
-        // $event = new Event;
-        // // $faq = new Faq;
-
-        // $events = $event->getAll();
-        // // $faqs = $faq->getAll();
-
-        // $nextevents = DB::table('events')->where('active', 1)->take(6)->orderBy('created_at', 'desc')->get();
-
-        // $spotlights = $event->getAllSpotlights();
-
-        // dd($events->get(0)->category);
-
-        return view('site.event', compact('event'));
-    }
-
     public function getCity(Request $request)
     {
         $data['cities'] = City::where("uf",$request->uf)
@@ -634,14 +608,14 @@ class EventHomeController extends Controller
     //     return view('event.show', compact('event'));
     // }
 
-    // public function check_slug(Request $request)
-    // {
-    //     $slug = Str::slug($request->title, '-');
+    public function check_slug(Request $request)
+    {
+        $slug = Str::slug($request->title, '-');
 
-    //     $slug_exists = Event::where('slug', $slug)->count();
+        $slug_exists = Event::where('slug', $slug)->count();
 
-    //     return response()->json(['slug' => $slug, 'slug_exists' => $slug_exists]);
-    // }
+        return response()->json(['slug' => $slug, 'slug_exists' => $slug_exists]);
+    }
 
     // public function create_slug(Request $request)
     // {
@@ -652,16 +626,16 @@ class EventHomeController extends Controller
     //     return response()->json(['slug' => $slug, 'slug_exists' => $slug_exists]);
     // }
 
-    // public function autocomplete_place(Request $request)
-    // {
-    //     $data = Place::join('cities', 'cities.id', '=', 'places.city_id')
-    //                 ->join('states', 'states.uf', '=', 'cities.uf')
-    //                 ->where('places.name', 'LIKE', '%'. $request->get('search'). '%')
-    //                 ->select("places.name as value", "places.id", "places.address", "places.number", "places.complement", "places.district", "places.zip", "places.city_id", "states.uf")
-    //                 ->get();
+    public function autocomplete_place(Request $request)
+    {
+        $data = Place::join('cities', 'cities.id', '=', 'places.city_id')
+                    ->join('states', 'states.uf', '=', 'cities.uf')
+                    ->where('places.name', 'LIKE', '%'. $request->get('search'). '%')
+                    ->select("places.name as value", "places.id", "places.address", "places.number", "places.complement", "places.district", "places.zip", "places.city_id", "states.uf")
+                    ->get();
     
-    //     return response()->json($data);
-    // }
+        return response()->json($data);
+    }
 
     // public function lotes($id){
 

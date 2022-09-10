@@ -2578,15 +2578,16 @@ section {
 /* SEARCH EVENTS */
 
 #event-list.search {
-  margin-top: 20px;
+  /* margin-top: 20px; */
 }
 
 #event-list.search .info-box-content {
-  padding: 20px 0;
+  padding: 0 20px;
 }
 
 #event-list.search h6 {
-  font-size: 24px;
+  margin-bottom: 10px;
+  font-size: 30px;
   font-weight: 700;
 }
 
@@ -2694,19 +2695,19 @@ section {
 }
 
 .btn-group-toggle .text-red {
-  color: red;
+  color: #ff4a67;
 }
 .btn-group-toggle .text-blue {
-  color: blue;
+  color: #1cb9c8;
 }
 .btn-group-toggle .text-green {
-  color: green;
+  color: #26ae61;
 }
 .btn-group-toggle .text-orange {
-  color: orange;
+  color: #FBC02D;
 }
 .btn-group-toggle .text-purple {
-  color: purple;
+  color: #8546c9;
 }
 .btn-group-toggle .active {
   background: #ddd;

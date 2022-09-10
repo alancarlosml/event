@@ -5,16 +5,16 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>EventUp - Event and Conference Template</title>
-        <link rel="stylesheet" type="text/css" href="assets_conference/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/bootstrap.min.css') }}">
         {{-- <link rel="stylesheet" type="text/css" href="assets_conference/css/line-icons.css"> --}}
-        <link rel="stylesheet" type="text/css" href="assets_conference/css/slicknav.css">
-        <link rel="stylesheet" type="text/css" href="assets_conference/css/nivo-lightbox.css">
-        <link rel="stylesheet" type="text/css" href="assets_conference/css/color-switcher.css">
-        <link rel="stylesheet" type="text/css" href="assets_conference/css/animate.css">
-        <link rel="stylesheet" type="text/css" href="assets_conference/css/main.css">
-        <link rel="stylesheet" type="text/css" href="assets_conference/css/responsive.css">
-        <link rel="stylesheet" id="colors" href="assets_conference/css/red.css" type="text/css">
-        <link rel="stylesheet" href="assets_conference/css/color-switcher.css" type="text/css">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/slicknav.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/nivo-lightbox.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/color-switcher.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/animate.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/main.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/responsive.css') }}">
+        @stack('theme')
+        <link rel="stylesheet" href="{{ asset('assets_conference/css/color-switcher.css') }}" type="text/css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     </head>
     <body>

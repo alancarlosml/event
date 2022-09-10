@@ -270,7 +270,7 @@
                                 <label for="question">Novo campo</label>
                                 <div class="form-row" style="margin:0">
                                     <div class="form-group col-md-5">
-                                        <input type="text" class="form-control" id="question" name="question" placeholder="Nome" value="">
+                                        <input type="text" class="form-control" id="question" name="question" placeholder="Nome do campo" value="">
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row">
@@ -315,8 +315,9 @@
                                 </div>
                             </div>
                             <div id="card-new-field" style="margin:0">
-                                @if(!isset($questions))
-                                    @if(count($questions) > 0)
+                                {{-- {{dd($questions)}} --}}
+                                @if($questions != "")
+                                    @if(isset($questions))
                                         @foreach ($questions as $id => $question)
                                             @php
                                                 $var_options = $question->question . "; (Tipo: " . $question->option->option . ")";
@@ -368,6 +369,15 @@
                                             <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
                                         </div>
                                     @endif
+                                @else
+                                    <div class="form-group">
+                                        <label for="name_new_field">Campo 1*</label>
+                                        <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email_new_field">Campo 2*</label>
+                                        <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -643,17 +653,27 @@
                 }
 
                 $('#card-new-field').append('<div class="form-row">' +
-                    '<div class="form-group col-10">'+
+                    '<div class="form-group col-9">'+
                         '<label for="field_'+i_field+'">Campo ' + i_field + required_star + '</label>' +
                         '<input type="text" class="form-control new_field" name="new_field[]" value="'+field+'; ' + field_text + '' + field_options + '' + field_required + '' + field_unique +'" readonly>' +
                     '</div>'+
-                    '<div class="form-group col-2">'+
-                        '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px; margin-left: 20px;" href="javascript:;">'+
+                    '<div class="form-group col-3">'+
+                        '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px; margin-left: 17px;" href="javascript:;">'+
                             '<i class="fa-solid fa-remove"></i>'+
                             ' Remover'+
                         '</a>'+
+                        '<a class="btn btn-secondary btn-sm mr-1 up" href="javascript:;" style="margin-top: 35px;" >'+
+                            '<i class="fas fa-arrow-up"></i>'+
+                        '</a>'+
+                        '<a class="btn btn-secondary btn-sm mr-1 down" href="javascript:;" style="margin-top: 35px;" >'+
+                            '<i class="fas fa-arrow-down"></i>'+
+                        '</a>'+
                     '</div>'+
                 '</div>');
+
+                $("#card-new-field .up:first").hide();
+                $("#card-new-field .down:last").hide();
+                $("#card-new-field .down:not(:last)").show();
 
                 $('#new_options').val('');
                 $('.val_min_option').val('');

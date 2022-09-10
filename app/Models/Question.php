@@ -26,9 +26,11 @@ class Question extends Model
 
     public function value()
     {
-        return OptionValue::join('questions', 'questions.id', '=', 'option_values.question_id')
+        $option_value = OptionValue::join('questions', 'questions.id', '=', 'option_values.question_id')
                 ->where('option_values.question_id', $this->id)
-                ->selectRaw('option_values.value')
-                ->first();
+                ->select('option_values.id', 'option_values.value')
+                ->get();
+
+        return $option_value;
     }
 }

@@ -78,9 +78,9 @@
             editor: I18nEditor, // the editor (parsing and rendering of the input)
             template: // the template of the input
                 '<div class="input-group ${groupClass}">' +
-                '<button style="min-width: ${buttonsWidth}; padding: 8px 15px 5px 15px; border-radius: 10px 0 0 10px; color: #ff4a67" class="btn btn-decrement ${buttonsClass} btn-minus" type="button">${decrementButton}</button>' +
+                '<button style="min-width: ${buttonsWidth}; padding: 8px 15px 5px 15px; border-radius: 10px 0 0 10px;" class="btn btn-decrement ${buttonsClass} btn-minus" type="button">${decrementButton}</button>' +
                 '<input type="text" inputmode="decimal" style="text-align: ${textAlign}; width: 40px; padding: 0; border-top-color: #6c757d; border-bottom-color: #6c757d; background: #fff" class="form-control form-control-text-input"/>' +
-                '<button style="min-width: ${buttonsWidth}; padding: 8px 15px 5px 15px; border-radius: 0 10px 10px 0; color: #ff4a67" class="btn btn-increment ${buttonsClass} btn-plus" type="button">${incrementButton}</button>' +
+                '<button style="min-width: ${buttonsWidth}; padding: 8px 15px 5px 15px; border-radius: 0 10px 10px 0;" class="btn btn-increment ${buttonsClass} btn-plus" type="button">${incrementButton}</button>' +
                 '</div>'
         }
 

@@ -39,7 +39,7 @@
                         <li id="payment"><strong>Cupons</strong></li>
                         <li id="confirm"><strong>Fim</strong></li>
                     </ul>
-                    <div class="card-body">
+                    <div class="card-body" id="lote_field" >
                         <h4>Listagem dos lotes</h4>
                         <div class="form-group text-right">
                             <a href="{{route('event_home.lote_create')}}" class="btn btn-success">Cadastrar novo lote</a>
@@ -175,6 +175,9 @@
 
         $(document).ready(function() {
 
+            $("#lote_field .up:first").hide();
+            $("#lote_field .down:last").hide();
+
             $('.order_lote').change(function(){
                 id = $(this).attr('id');
                 value = $(this).val();
@@ -183,12 +186,11 @@
             });
 
             $(".up,.down").click(function () {
-               
-               var $element = this;
-               var row = $($element).parents("tr:first");
-
-               
-               if($(this).is('.up')){
+                
+                var $element = this;
+                var row = $($element).parents("tr:first");
+              
+                if($(this).is('.up')){
                     hash_this = $(this).parents('tr').find('.lote_hash').text();
                     hash_prev = row.prev().find('.lote_hash').text();
                     if(hash_prev != ''){
@@ -203,8 +205,8 @@
                             console.log(id_prev);
                             row.insertBefore(row.prev());
                     }
-               }
-               else{
+                }
+                else{
                     hash_this = $(this).parents('tr').find('.lote_hash').text();
                     hash_next = row.next().find('.lote_hash').text();
                     if(hash_next != ''){
@@ -219,7 +221,12 @@
                             console.log(id_next);
                             row.insertAfter(row.next());
                     }
-               }
+                }
+
+                $("#lote_field .up:first").hide();
+                $("#lote_field .down:last").hide();
+                $("#lote_field .up:not(:first)").show();
+                $("#lote_field .down:not(:last)").show();
           });
 
             // $('#description').summernote({

@@ -115,7 +115,7 @@
                                     <th class="text-center">Quantidade</th>
                                 </thead>
                                 @foreach ($event->lotes as $lote)
-                                <tr class="border-bottom">
+                                <tr class="border-bottom" lote_hash="{{$lote->hash}}">
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="ps-3 d-flex flex-column">
@@ -138,7 +138,7 @@
                                     <td>
                                         <div class="d-flex align-items-center"> 
                                             <span class="pe-3 ml-2"> 
-                                                <input class="inp-number" type="number" style="min-width: 1.5rem" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"/>
+                                                <input class="inp-number" name="inp-number" type="number" style="min-width: 1.5rem" value="{{old('inp-number', 0)}}" min="0" max="{{$lote->limit_max}}"/>
                                                 {{-- <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"> --}}
                                             </span>
                                         </div>
@@ -158,27 +158,38 @@
                             <div class="btn btn-common">Aplicar</div>
                         </div> --}}
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control ps-2" placeholder="CUPOM" aria-label="CUPOM" aria-describedby="button-addon2">
+                            <input type="text" class="form-control ps-2" placeholder="CUPOM" aria-label="CUPOM" aria-describedby="button-cupom" id="inp_coupon">
                             <div class="input-group-append">
-                              <button class="btn btn-outline-secondary" style="color: #ff4a67; font-weight: 700" type="button" id="button-addon2">Aplicar</button>
+                              <button class="btn btn-outline-secondary btn_apply_coupon" style="font-weight: 700" type="button" id="button-cupom" onclick="setCoupon('{{$event->hash}}')">Aplicar</button>
                             </div>
                         </div>
                         <div class="d-flex flex-column b-bottom">
                             <div class="d-flex justify-content-between py-3"> 
                                 <strong>Sub-total</strong>
-                                <p>$122</p>
+                                @if($subtotal)
+                                    <p id="subtotal">@money($subtotal)</p>
+                                @else
+                                    <p id="subtotal">R$ 0,00</p>
+                                @endif
                             </div>
-                            <div class="d-flex justify-content-between pb-3"> 
-                                <strong>Cupom (HKJGHJG)</strong>
-                                <p>- $22</p>
+                            @if($coupon)
+                            <div id="cupom_field" class="d-flex justify-content-between pb-3"> 
+                                <strong>Cupom ({{$coupon[0]['code']}})</strong>
+                                <p id="cupom_subtotal">- @money($coupon_subtotal)</p>
                             </div>
+                            @else
+                            <div id="cupom_field" class="d-flex justify-content-between pb-3" style="display: none !important;"> 
+                                <strong>Cupom (<span id="cupom_code"></span>)</strong>
+                                <p id="cupom_subtotal">- R$ 0,00</p>
+                            </div>
+                            @endif
                             <div class="d-flex justify-content-between"> 
                                 <strong>Valor total</strong>
-                                <p>$100</p>
+                                <p id="total">R$ 0,00</p>
                             </div>
                         </div>
                         <div class="d-flex flex-column b-bottom mt-4">
-                            <a href="/resumo" onclick="return validSubmition()" class="btn btn-common">Continuar</a>
+                            <a href="{{route('conference.resume', $event->slug)}}" onclick="return validSubmition()" class="btn btn-common">Continuar</a>
                         </div>
                     </div>
                 </div>
@@ -316,27 +327,41 @@
         <!-- Modal -->
         <div class="modal fade" id="cupomModal" tabindex="-1" role="dialog" aria-labelledby="cupomModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h5 class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="img/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></h5>
-                {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&#10005;</span>
-                </button> --}}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="img/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></h5>
+                        {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&#10005;</span>
+                        </button> --}}
+                    </div>
+                    {{-- <div class="modal-body">
+                    ...
+                    </div> --}}
+                    <div class="modal-footer">
+                        <button type="button" id="modal_close" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                        {{-- <button type="button" class="btn btn-primary">Ok</button> --}}
+                    </div>
                 </div>
-                {{-- <div class="modal-body">
-                ...
-                </div> --}}
-                <div class="modal-footer">
-                <button type="button" id="modal_close" class="btn btn-secondary" data-dismiss="modal">Ok</button>
-                {{-- <button type="button" class="btn btn-primary">Ok</button> --}}
-                </div>
-            </div>
             </div>
         </div>
     </section>
 
     @push('bootstrap_version')
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @endpush
+
+    @push('theme')
+        @if($event->theme == 'red')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">
+        @elseif($event->theme == 'blue')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/blue.css') }}" type="text/css">
+        @elseif($event->theme == 'green')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/green.css') }}" type="text/css">
+        @elseif($event->theme == 'purple')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/purple.css') }}" type="text/css">
+        @elseif($event->theme == 'orange')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/orange.css') }}" type="text/css">
+        @endif
     @endpush
 
     @push('head')
@@ -348,29 +373,139 @@
         <script src="assets_conference/js/custom-editors.js"></script>
         <script>
             $(document).ready(function() {  
-                $(".inp-number").inputSpinner({buttonsOnly: true, autoInterval: undefined})
+                $(".inp-number").inputSpinner({buttonsOnly: true, autoInterval: undefined});
+                
+                console.log($("input[type=number].inp-number").length);
+
+                $("input[type=number].inp-number").change(function (e) {
+                    // let lote_hash = $(this).parents('tr').attr('lote_hash');
+                    // let lote_quantity = $(this).val();
+                    setSubTotal();
+                    // alert(lote_hash);
+                    // $('.inp-number').each(function() {
+                    //     // sum += parseInt($(this).val());
+                    //     e.preventDefault();
+                    //     alert($(this).val());
+                    // });
+                });
             });
+
+            function setSubTotal(){
+    
+                let subtotal = "0,00";
+                let _token = '{{csrf_token()}}';
+                
+                let dict = [];
+                $("input[type=number].inp-number").each(function() {
+                    let lote_hash = $(this).parents('tr').attr('lote_hash');
+                    let lote_quantity = $(this).val();
+
+                    dict.push({
+                        lote_hash: lote_hash,
+                        lote_quantity: lote_quantity
+                    });
+                });
+
+                $.ajax({
+                    // url: "/getSubTotal",
+                    url:"{{route('conference.getSubTotal')}}",
+                    type:"POST",
+                    data:{
+                        dict:dict,
+                        _token: _token
+                    },
+                    success:function(response){
+                        if(response.success) {
+                            console.log(response);
+                            // $('.success').text(response.success);
+                            $('#subtotal').html(response.subtotal);
+                            $('#coupon_subtotal').html(response.coupon_subtotal);
+                            $('#total').html(response.total);
+                        }
+
+                        if(response.error) {
+                            location.reload();
+                            // $('#subtotal').html(response.subtotal);
+                        }
+                    },
+                });
+            }
+
+            function setCoupon(hash){
+    
+                let couponCode = $('#inp_coupon').val();
+                let eventHash = hash;
+                let _token = '{{csrf_token()}}';
+
+                if(couponCode == ''){
+                    $('#modal_txt').text('Por favor, insira um cupom válido.');
+                    $('#modal_icon').attr('src', '/img/alert.png');
+                    $('#cupomModal').modal('show');
+
+                    return;
+                }
+
+                $.ajax({
+                    url: "/getCoupon",
+                    type:"POST",
+                    data:{
+                        couponCode: couponCode,
+                        eventHash: eventHash,
+                        _token: _token
+                    },
+                    success:function(response){
+                        console.log(response);
+                        if(response.success) {
+                            $('#modal_txt').text(response.success);
+                            $('#modal_icon').attr('src', '/img/success.png');
+                            $('#cupomModal').modal('show');
+                            $('#cupom_field').show();
+                            let coupon_code = response.coupon[0]['code'];
+                            let coupon_type = response.coupon[0]['type'];
+                            let coupon_value = response.coupon[0]['value'];
+                            $('#cupom_code').text(coupon_code);
+                            $('#cupom_subtotal').text('- R$ ' + parseInt(response.coupon_discount).toFixed(2).replace(".", ","));
+                        }
+
+                        if(response.error) {
+                            $('#modal_txt').text(response.error);
+                            $('#modal_icon').attr('src', '/img/error.png');
+                            $('#cupomModal').modal('show');
+                        }
+                    },
+
+                    error:function(response){
+                        console.log(response);
+                        if(response) {
+                            $('#modal_txt').text(response.error);
+                            $('#modal_icon').attr('src', '/img/error.png');
+                            $('#cupomModal').modal('show');
+                        }
+                    },
+                });
+            }
+
 
             function validSubmition(){
 
-            // let customSelect = $('.custom-select').val();
+                // let customSelect = $('.custom-select').val();
 
-            var count = 0;
-            $(".inp-number").each(function() {
-                if($(this).val() !== '0'){
-                    count++
+                var count = 0;
+                $(".inp-number").each(function() {
+                    if($(this).val() !== '0'){
+                        count++
+                    }
+                });
+
+                if (count === 0) {
+
+                    $('#cupomModal').modal('show');
+                    $('#modal_txt').text('Por favor, selecione ao menos um ingresso.');
+                    $('#modal_icon').attr('src', '/img/alert.png');
+                    return false;
                 }
-            });
 
-            if (count === 0) {
-
-                $('#cupomModal').modal('show');
-                $('#modal_txt').text('Por favor, selecione ao menos um ingresso.');
-                $('#modal_icon').attr('src', '/img/alert.png');
-                return false;
-            }
-
-            return true;
+                return true;
             }
         </script>
     @endpush

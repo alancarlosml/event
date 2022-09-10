@@ -22,7 +22,6 @@ Route::post('painel/get-areas-by-category','App\Http\Controllers\HomeController@
 
 Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
 Route::get('/get-more-events', 'App\Http\Controllers\EventHomeController@getMoreEvents')->name('event_home.get-more-events');
-Route::get('/{slug}', 'App\Http\Controllers\EventHomeController@event');
 Route::get('painel/autocomplete_place', 'App\Http\Controllers\EventHomeController@autocomplete_place')->name('event_home.autocomplete_place');
 Route::get('painel/check_slug', 'App\Http\Controllers\EventHomeController@check_slug')->name('event_home.check_slug');
 Route::get('painel/create_slug', 'App\Http\Controllers\EventHomeController@create_slug')->name('event_home.create_slug');
@@ -73,7 +72,10 @@ Route::get('painel/eventos/{id}/delete_file','App\Http\Controllers\EventAdminCon
 Route::get('painel/eventos/organizador/{id}/delete_file_icon','App\Http\Controllers\EventAdminController@deleteFileIcon')->middleware(['auth'])->name('event_home.delete_file_icon');
 
 
-
+Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->name('conference.index');
+Route::get('{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->name('conference.resume');
+Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');
+Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');
 // Route::post('painel/lotes/{id}/store', 'App\Http\Controllers\LoteController@store')->middleware(['auth'])->name('lote.store');
 // Route::get('painel/lotes/{id}/edit', 'App\Http\Controllers\LoteController@edit')->middleware(['auth'])->name('lote.edit');
 // Route::post('painel/lotes/{id}/update', 'App\Http\Controllers\LoteController@update')->middleware(['auth'])->name('lote.update');

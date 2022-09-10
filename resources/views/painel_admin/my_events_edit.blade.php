@@ -269,7 +269,7 @@
                                 <label for="question">Novo campo</label>
                                 <div class="form-row" style="margin:0">
                                     <div class="form-group col-md-5">
-                                        <input type="text" class="form-control" id="question" name="question" placeholder="Nome" value="">
+                                        <input type="text" class="form-control" id="question" name="question" placeholder="Nome do campo" value="">
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row">
@@ -638,17 +638,27 @@
                 }
 
                 $('#card-new-field').append('<div class="form-row">' +
-                    '<div class="form-group col-10">'+
+                    '<div class="form-group col-9">'+
                         '<label for="field_'+i_field+'">Campo ' + i_field + required_star + '</label>' +
                         '<input type="text" class="form-control new_field" name="new_field[]" value="'+field+'; ' + field_text + '' + field_options + '' + field_required + '' + field_unique +'" readonly>' +
                     '</div>'+
-                    '<div class="form-group col-2">'+
+                    '<div class="form-group col-3">'+
                         '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px; margin-left: 17px;" href="javascript:;">'+
                             '<i class="fa-solid fa-remove"></i>'+
                             ' Remover'+
                         '</a>'+
+                        '<a class="btn btn-secondary btn-sm mr-1 up" href="javascript:;" style="margin-top: 35px;" >'+
+                            '<i class="fas fa-arrow-up"></i>'+
+                        '</a>'+
+                        '<a class="btn btn-secondary btn-sm mr-1 down" href="javascript:;" style="margin-top: 35px;" >'+
+                            '<i class="fas fa-arrow-down"></i>'+
+                        '</a>'+
                     '</div>'+
                 '</div>');
+
+                $("#card-new-field .up:first").hide();
+                $("#card-new-field .down:last").hide();
+                $("#card-new-field .down:not(:last)").show();
 
                 $('#new_options').val('');
                 $('.val_min_option').val('');

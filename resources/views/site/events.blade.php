@@ -17,14 +17,15 @@
         <section class="inner-page search" id="event-list">
             <div class="container">
                 <div class="row">
+                    <h6 class="text-left display-5">Busque mais eventos</h6>
                     <div class="info-box bg-light">
                         <div class="container-fluid info-box-content">
-                            <h6 class="text-left display-5">Busque mais eventos</h6>
                             <form action="enhanced-results.html">
                                 <div class="row mt-3">
                                     <div class="col-12">
                                         <div class="row">
-                                            <div class="form-group col-lg-3 col-sm-12">
+                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                                <label><b>Categoria</b></label>
                                                 <select name="category" id="category" class="custom-select sources" placeholder="Categoria">
                                                     <option value="0">Selecione uma opção</option>
                                                     @foreach ($categories as $category)
@@ -32,12 +33,14 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-group col-lg-3 col-sm-12">
+                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                                <label><b>Área</b></label>
                                                 <select name="area_id" id="area_id" class="custom-select sources" placeholder="Área">
                                                     <option value="0">Selecione uma categoria</option>
                                                 </select>
                                             </div>
-                                            <div class="form-group col-lg-3 col-sm-12">
+                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                                <label><b>Local</b></label>
                                                 <select name="state" id="state" class="custom-select sources" placeholder="Estado">
                                                     <option value="0">Selecione uma opção</option>
                                                     @foreach ($states as $state)
@@ -45,7 +48,8 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-group col-lg-3 col-sm-12">
+                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                                <label><b>Período</b></label>
                                                 <select name="period" id="period" class="custom-select sources" placeholder="Período">
                                                     <option value="0">Selecione uma opção</option>
                                                     <option value="any"> Qualquer </option>
@@ -68,16 +72,16 @@
                                             </div>
                                         </div>
                                         <div class="row mt-3">
-                                            <div class="col-10">
+                                            <div class="col-12">
                                                 <div class="form-group">
                                                     <div class="input-group">
                                                         <input type="search" class="form-control" id="event_name_search" placeholder="Nome do evento"/>
                                                     </div>
                                                 </div> 
                                             </div>
-                                            <div class="col-2 text-right">
+                                            {{-- <div class="col-2 text-right">
                                                 <input class="btn btn-primary" id="event_button_search" type="submit" value="Buscar" style="width: 100%;">
-                                            </div> 
+                                            </div>  --}}
                                         </div>  
                                     </div>
                                 </div>
