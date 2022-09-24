@@ -38,6 +38,15 @@
                     </ul>
                 </div>
             </div>
+            <div class="row mt-4">
+                <div class="mx-auto">
+                    @if($event->max_event_dates() >= \Carbon\Carbon::now())
+                    <a href="#inscricoes" class="btn btn-common sub-btn">Inscreva-se</a>
+                    @else
+                    <button class="btn btn-common sub-btn disabled">Encerrado</button>
+                    @endif
+                </div>
+            </div>
         </div>
     </section>
     <section id="about" class="section-padding mt-4">
@@ -60,7 +69,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <div class="section-title-header text-center">
+                    <div class="section-title-header text-center pb-4">
                         <h2 class="section-title wow fadeInUp animated" data-wow-delay="0.2s" style="visibility: visible;-webkit-animation-delay: 0.2s; -moz-animation-delay: 0.2s; animation-delay: 0.2s;">Inscrições</h2>
                     </div>
                 </div>
@@ -111,39 +120,60 @@
                             <tbody>
                                 <thead>
                                     <th>Lote</th>
-                                    <th>Valor</th>
-                                    <th class="text-center">Quantidade</th>
+                                    <th>
+                                        @if($event->max_event_dates() >= \Carbon\Carbon::now())
+                                        Valor
+                                        @endif
+                                    </th>
+                                    <th class="text-center">
+                                        @if($event->max_event_dates() >= \Carbon\Carbon::now())
+                                        Quantidade
+                                        @endif
+                                    </th>
                                 </thead>
                                 @foreach ($event->lotes as $lote)
-                                <tr class="border-bottom" lote_hash="{{$lote->hash}}">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="ps-3 d-flex flex-column">
-                                                <p class="fw-bold text-uppercase"> <b>{{$lote->name}} </b></p>
-                                                @if($lote->description)<p class="fw-bold"> {{$lote->description}} </p>@endif
-                                                <em> Disponível até {{\Carbon\Carbon::parse($lote->datetime_end)->format('d/m/y \à\s h:i')}} </em>
+                                    <tr class="border-bottom" lote_hash="{{$lote->hash}}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="ps-3 d-flex flex-column">
+                                                    <p class="fw-bold text-uppercase"> <b>{{$lote->name}} </b></p>
+                                                    @if($lote->description)<p class="fw-bold"> {{$lote->description}} </p>@endif
+                                                    <em> 
+                                                        @if($lote->datetime_end >= \Carbon\Carbon::now())
+                                                            Disponível até 
+                                                        @else
+                                                            Finalizado em 
+                                                        @endif
+                                                        {{\Carbon\Carbon::parse($lote->datetime_end)->format('d/m/y \à\s h:i')}} 
+                                                    </em>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex">
-                                            <p class="pe-3">
-                                                <span class="red">@money($lote->value)</span><br/>
-                                                @if ($lote->type == 0)
-                                                    <small>+ taxa de @money($lote->value * 0.1)</small> 
+                                        </td>
+                                        <td>
+                                            @if($lote->datetime_end >= \Carbon\Carbon::now())
+                                            <div class="d-flex">
+                                                <p class="pe-3">
+                                                    <span class="red">@money($lote->value)</span><br/>
+                                                    @if ($lote->type == 0)
+                                                        <small>+ taxa de @money($lote->value * 0.1)</small> 
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center justify-content-center"> 
+                                                @if($lote->datetime_end >= \Carbon\Carbon::now())
+                                                <span class="pe-3 ml-2"> 
+                                                    <input class="inp-number" name="inp-number" type="number" style="min-width: 1.5rem" value="{{old('inp-number', 0)}}" min="0" max="{{$lote->limit_max}}"/>
+                                                    {{-- <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"> --}}
+                                                </span>
+                                                @else
+                                                    Encerrado
                                                 @endif
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center"> 
-                                            <span class="pe-3 ml-2"> 
-                                                <input class="inp-number" name="inp-number" type="number" style="min-width: 1.5rem" value="{{old('inp-number', 0)}}" min="0" max="{{$lote->limit_max}}"/>
-                                                {{-- <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"> --}}
-                                            </span>
-                                        </div>
-                                    </td>
-                                </tr>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -153,53 +183,53 @@
                     <div class="card px-md-3 px-2">
                         <h6>Resumo</h6>
                         <hr>
-                        {{-- <div class="d-flex justify-content-between b-bottom"> 
-                            <input type="text" class="ps-2" placeholder="CUPOM">
-                            <div class="btn btn-common">Aplicar</div>
-                        </div> --}}
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control ps-2" placeholder="CUPOM" aria-label="CUPOM" aria-describedby="button-cupom" id="inp_coupon">
-                            <div class="input-group-append">
-                              <button class="btn btn-outline-secondary btn_apply_coupon" style="font-weight: 700" type="button" id="button-cupom" onclick="setCoupon('{{$event->hash}}')">Aplicar</button>
+                        @if($event->max_event_dates() >= \Carbon\Carbon::now())
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control ps-2" placeholder="CUPOM" aria-label="CUPOM" aria-describedby="button-cupom" id="inp_coupon">
+                                <div class="input-group-append">
+                                <button class="btn btn-outline-secondary btn_apply_coupon" style="font-weight: 700" type="button" id="button-cupom" onclick="setCoupon('{{$event->hash}}')">Aplicar</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="d-flex flex-column b-bottom">
-                            <div class="d-flex justify-content-between py-3"> 
-                                <strong>Sub-total</strong>
-                                @if($subtotal)
-                                    <p id="subtotal">@money($subtotal)</p>
+                            <div class="d-flex flex-column b-bottom">
+                                <div class="d-flex justify-content-between py-3"> 
+                                    <strong>Sub-total</strong>
+                                    @if(isset($subtotal))
+                                        <p id="subtotal">@money($subtotal)</p>
+                                    @else
+                                        <p id="subtotal">R$ 0,00</p>
+                                    @endif
+                                </div>
+                                @if(isset($coupon))
+                                <div id="cupom_field" class="d-flex justify-content-between pb-3"> 
+                                    <strong>Cupom ({{$coupon[0]['code']}}) <a href="javascript:;" onclick="removeCoupon()" title="Remover cupom"><i class="fa-regular fa-trash-can"></i></a></strong>
+                                    <p id="cupom_subtotal">- @money($coupon_subtotal)</p>
+                                </div>
                                 @else
-                                    <p id="subtotal">R$ 0,00</p>
+                                <div id="cupom_field" class="d-flex justify-content-between pb-3" style="display: none !important;"> 
+                                    <strong>Cupom (<span id="cupom_code"></span>)</strong>
+                                    <p id="cupom_subtotal">- R$ 0,00</p>
+                                </div>
                                 @endif
+                                <div class="d-flex justify-content-between"> 
+                                    <strong>Valor total</strong>
+                                    <p id="total">R$ 0,00</p>
+                                </div>
                             </div>
-                            @if($coupon)
-                            <div id="cupom_field" class="d-flex justify-content-between pb-3"> 
-                                <strong>Cupom ({{$coupon[0]['code']}})</strong>
-                                <p id="cupom_subtotal">- @money($coupon_subtotal)</p>
+                            <div class="d-flex flex-column b-bottom mt-4">
+                                <a href="{{route('conference.resume', $event->slug)}}" onclick="return validSubmition()" class="btn btn-common">Continuar</a>
                             </div>
-                            @else
-                            <div id="cupom_field" class="d-flex justify-content-between pb-3" style="display: none !important;"> 
-                                <strong>Cupom (<span id="cupom_code"></span>)</strong>
-                                <p id="cupom_subtotal">- R$ 0,00</p>
-                            </div>
-                            @endif
-                            <div class="d-flex justify-content-between"> 
-                                <strong>Valor total</strong>
-                                <p id="total">R$ 0,00</p>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-column b-bottom mt-4">
-                            <a href="{{route('conference.resume', $event->slug)}}" onclick="return validSubmition()" class="btn btn-common">Continuar</a>
-                        </div>
+                        @else
+                            <span>Esse evento já ocorreu. Agradecemos seu interesse!</span>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <section id="google-map-area">
+    <section id="local">
         <div class="row">
             <div class="col-12">
-                <div class="section-title-header text-center">
+                <div class="section-title-header text-center pb-4">
                     <h2 class="section-title wow fadeInUp animated" data-wow-delay="0.2s" style="visibility: visible;-webkit-animation-delay: 0.2s; -moz-animation-delay: 0.2s; animation-delay: 0.2s;">Local</h2>
                 </div>
             </div>
@@ -247,7 +277,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <div class="section-title-header text-center">
+                    <div class="section-title-header text-center pb-4">
                         <h2 class="section-title wow fadeInUp animated" data-wow-delay="0.2s" style="visibility: visible;-webkit-animation-delay: 0.2s; -moz-animation-delay: 0.2s; animation-delay: 0.2s;">Organizador</h2>
                     </div>
                 </div>
@@ -313,7 +343,7 @@
                                             <textarea class="form-control" rows="4" id="message" name="message" required="" data-error="Write your message"></textarea>
                                         </div>
                                         <div class="form-submit">
-                                            <button type="submit" class="btn btn-common disabled" id="form-submit" style="pointer-events: all; cursor: pointer;"><i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar</button>
+                                            <button type="submit" class="btn btn-common" id="form-submit" style="pointer-events: all; cursor: pointer;"><i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar</button>
                                             <div id="msgSubmit" class="h3 text-center hidden"></div>
                                         </div>
                                     </div>
@@ -325,11 +355,11 @@
             </div>
         </div>
         <!-- Modal -->
-        <div class="modal fade" id="cupomModal" tabindex="-1" role="dialog" aria-labelledby="cupomModalLabel" aria-hidden="true">
+        <div class="modal fade mt-5" id="cupomModal" tabindex="-1" role="dialog" aria-labelledby="cupomModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="img/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></h5>
+                        <strong class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="/assets_conference/imgs/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></strong>
                         {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&#10005;</span>
                         </button> --}}
@@ -369,14 +399,14 @@
     @endpush
 
     @push('footer')
-        <script src="assets_conference/js/bootstrap-input-spinner.js"></script>
-        <script src="assets_conference/js/custom-editors.js"></script>
+        <script src="{{ asset('assets_conference/js/bootstrap-input-spinner.js') }}"></script>
+        <script src="{{ asset('assets_conference/js/custom-editors.js') }}"></script>
+        
         <script>
+
             $(document).ready(function() {  
                 $(".inp-number").inputSpinner({buttonsOnly: true, autoInterval: undefined});
                 
-                console.log($("input[type=number].inp-number").length);
-
                 $("input[type=number].inp-number").change(function (e) {
                     // let lote_hash = $(this).parents('tr').attr('lote_hash');
                     // let lote_quantity = $(this).val();
@@ -439,7 +469,7 @@
 
                 if(couponCode == ''){
                     $('#modal_txt').text('Por favor, insira um cupom válido.');
-                    $('#modal_icon').attr('src', '/img/alert.png');
+                    $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                     $('#cupomModal').modal('show');
 
                     return;
@@ -457,7 +487,7 @@
                         console.log(response);
                         if(response.success) {
                             $('#modal_txt').text(response.success);
-                            $('#modal_icon').attr('src', '/img/success.png');
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/success.png');
                             $('#cupomModal').modal('show');
                             $('#cupom_field').show();
                             let coupon_code = response.coupon[0]['code'];
@@ -465,11 +495,18 @@
                             let coupon_value = response.coupon[0]['value'];
                             $('#cupom_code').text(coupon_code);
                             $('#cupom_subtotal').text('- R$ ' + parseInt(response.coupon_discount).toFixed(2).replace(".", ","));
+                            $('#total').html('R$ ' + parseInt(response.total).toFixed(2).replace(".", ","));
                         }
 
                         if(response.error) {
                             $('#modal_txt').text(response.error);
-                            $('#modal_icon').attr('src', '/img/error.png');
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                            $('#cupomModal').modal('show');
+                        }
+
+                        if(response.alert) {
+                            $('#modal_txt').text(response.alert);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                             $('#cupomModal').modal('show');
                         }
                     },
@@ -478,7 +515,44 @@
                         console.log(response);
                         if(response) {
                             $('#modal_txt').text(response.error);
-                            $('#modal_icon').attr('src', '/img/error.png');
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                            $('#cupomModal').modal('show');
+                        }
+                    },
+                });
+            }
+
+            function removeCoupon(){
+
+                let _token = '{{csrf_token()}}';
+    
+                $.ajax({
+                    url:"{{route('conference.removeCoupon', $event->slug)}}",
+                    type:"DELETE",
+                    data:{
+                        _token: _token
+                    },
+                    success:function(response){
+                        if(response.success) {
+                            $('#modal_txt').text(response.success);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/success.png');
+                            $('#cupomModal').modal('show');
+                            $('#cupom_field').hide();
+                            $('#subtotal').text(response.subtotal);
+                        }
+
+                        if(response.error) {
+                            $('#modal_txt').text(response.error);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                            $('#cupomModal').modal('show');
+                        }
+                    },
+
+                    error:function(response){
+                        console.log(response);
+                        if(response) {
+                            $('#modal_txt').text(response.error);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
                             $('#cupomModal').modal('show');
                         }
                     },
@@ -501,7 +575,7 @@
 
                     $('#cupomModal').modal('show');
                     $('#modal_txt').text('Por favor, selecione ao menos um ingresso.');
-                    $('#modal_icon').attr('src', '/img/alert.png');
+                    $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                     return false;
                 }
 

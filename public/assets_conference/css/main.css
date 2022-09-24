@@ -638,12 +638,29 @@ a.back-to-top:hover,a.back-to-top:focus{
     position:relative
 }
 .navbar-expand-lg .navbar-nav li a:hover,.navbar-expand-lg .navbar-nav li .active>a,.navbar-expand-lg .navbar-nav li a:focus{
-    color:#ff4a67;
+    /* color:#ff4a67; */
     outline:none
 }
 .navbar-expand-lg .navbar-nav .nav-link:focus,.navbar-expand-lg .navbar-nav .nav-link:hover{
-    color:#ff4a67
+    color:#ff4a67;
 }
+
+.navbar-nav li a.btn-common:hover{
+    color:#fff;
+    box-shadow:0 3px 11px 0 rgba(0,0,0,.15),0 3px 15px 0 rgba(0,0,0,.15);
+    -webkit-transition:all .5s ease-out 0s;
+    -moz-transition:all .5s ease-out 0s;
+    -ms-transition:all .5s ease-out 0s;
+    -o-transition:all .5s ease-out 0s;
+    transition:all .5s ease-out 0s
+}
+
+.navbar-nav li a.btn-common:hover::before{
+    background-color:rgba(255,255,255,.2);
+    opacity:1;
+    transform:scale(1,1)
+}
+
 .navbar{
     padding:0
 }

@@ -39,12 +39,17 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link" href="#local">
+                                        Local
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link" href="#contato">
                                         Contato
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link btn btn-common" href="javacript:;">
+                                <li class="mt-2">
+                                    <a class="btn btn-common sub-btn" href="javacript:;">
                                         Entrar
                                     </a>
                                 </li>
@@ -70,12 +75,17 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link" href="#local" role="menuitem">
+                                        Local
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link" href="#contato" role="menuitem">
                                         Contato
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="javascript;;" role="menuitem">
+                                    <a class="nav-link" href="javascript:;" role="menuitem">
                                         Entrar
                                     </a>
                                 </li>

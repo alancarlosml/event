@@ -318,9 +318,12 @@
                                     @foreach ($questions as $id => $question)
                                         @php
                                             $var_options = $question->question . "; (Tipo: " . $question->option->option . ")";
-                                            
-                                            if($question->value() != null){
-                                                $var_options = $var_options . "; [Opções: " . $question->value()->value . "]";
+                                            if(count($question->value()) > 0){
+                                                $value_array = array();
+                                                foreach($question->value() as $value_array_item){
+                                                    array_push($value_array, $value_array_item->value);
+                                                }
+                                                $var_options = $var_options . "; [Opções: " . implode(",", $value_array) . "]";
                                             }
                                             
                                             if($question->required == 1){
@@ -362,7 +365,11 @@
                                         <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
                                     </div>
                                     <div class="form-group">
-                                        <label for="email_new_field">Campo 2*</label>
+                                        <label for="name_new_field">Campo 2*</label>
+                                        <input type="text" class="form-control new_field" name="new_field[]" id="cpf_new_field" value="CPF; (Tipo: CPF); Obrigatório; Único" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email_new_field">Campo 3*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
                                     </div>
                                 @endif

@@ -209,7 +209,8 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // 'ExampleClass' => App\Example\ExampleClass::class,
+        'Moip' => Moip\Moip::class,
+        'BasicAuth' => Moip\Auth\BasicAuth::class
     ])->toArray(),
 
 ];

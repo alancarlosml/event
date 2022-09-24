@@ -74,8 +74,10 @@ Route::get('painel/eventos/organizador/{id}/delete_file_icon','App\Http\Controll
 
 Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->name('conference.index');
 Route::get('{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->name('conference.resume');
+Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->name('conference.thanks');
 Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');
 Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');
+Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');
 // Route::post('painel/lotes/{id}/store', 'App\Http\Controllers\LoteController@store')->middleware(['auth'])->name('lote.store');
 // Route::get('painel/lotes/{id}/edit', 'App\Http\Controllers\LoteController@edit')->middleware(['auth'])->name('lote.edit');
 // Route::post('painel/lotes/{id}/update', 'App\Http\Controllers\LoteController@update')->middleware(['auth'])->name('lote.update');

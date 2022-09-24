@@ -370,10 +370,14 @@ class EventAdminController extends Controller
                     $result_field = $matches[1];
                     $result_field = str_replace("Opções: ", "", $result_field);
 
-                    DB::table('option_values')->insert([
-                        'value' => $result_field[0],
-                        'question_id' => $id_question
-                    ]);
+                    $array_explode_question = explode(',', $result_field[0]);
+
+                    foreach($array_explode_question as $item_array_explode_question){
+                        DB::table('option_values')->insert([
+                            'value' => trim($item_array_explode_question),
+                            'question_id' => $id_question
+                        ]);
+                    }
                 }
 
 
