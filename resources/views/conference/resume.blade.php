@@ -18,10 +18,9 @@
                             <span><b>Data:</b> 12/08/2022</span><br>
                             <span><b>Local:</b> {{$event->place->name}}</span><br>
                             <span><b>Lote(s) selecionado(s):</b> </span>
-                            {{-- {{dd($array_lotes)}} --}}
                             <ul class="list-style">
                                 @foreach ($array_lotes as $array_lote)
-                                    <li class="ml-4" style="list-style-type: circle">{{$array_lote[0]}}x {{$array_lote[2]}}</li>
+                                    <li class="ml-4" style="list-style-type: circle">{{$array_lote['quantity']}}x {{$array_lote['name']}}</li>
                                 @endforeach
                             </ul>
                         </div>
@@ -37,11 +36,11 @@
                         @foreach ($array_lotes as $array_lote)
                         <li class="list-group-item">
                             <div class="d-flex justify-content-between">
-                                <div>{{$array_lote[0]}} @if ($array_lote[0] == 1) ingresso @else ingressos @endif</div>
-                                @if($array_lote[1] == 0)
+                                <div>{{$array_lote['id']}} @if ($array_lote['id'] == 1) ingresso @else ingressos @endif</div>
+                                @if($array_lote['value'] == 0)
                                 <div class="text-muted">Grátis</div>
                                 @else
-                                <div class="text-muted">@money($array_lote[1])</div>
+                                <div class="text-muted">@money($array_lote['value'])</div>
                                 @endif
                             </div>
                         </li>
@@ -80,148 +79,161 @@
                     </div>
                 </div>
                 <div class="col-md-8 order-md-1">
-                    <!-- Session Status -->
-                    {{-- <x-auth-session-status class="mb-4" :status="session('status')" /> --}}
-    
-                    <!-- Validation Errors -->
-                    {{-- <x-auth-validation-errors class="mb-4 alert alert-danger rounded" :errors="$errors" /> --}}
-                    {{-- <form class="needs-validation" method="POST" action="https://ws.sandbox.pagseguro.uol.com.br/v2/sessions?email={{config('services.pagseguro.email')}}&token={{config('services.pagseguro.token')}}"> --}}
+                    <div class="form-group pl-3 pr-3">
+                        @if ($message = Session::get('success'))
+                            <div class="alert alert-success">
+                                <strong>{{ $message }}</strong>
+                            </div>
+                        @endif
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </div>  
                     <form method="POST" id="checkout_submit" action="{{route('conference.thanks', $event->slug)}}">
                         @csrf
                         <div class="mb-3">
                             <div class="section-title-header text-center mb-4">
                                 <h2 class="section-title wow fadeInUp animated">Dados da inscrição</h2>
                             </div>
-                            {{-- <div class="mb-3">
-                                <label for="username">Nome completo</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Nome completo" value="">
-                                    <div class="invalid-feedback" style="width: 100%;"> Your username is required. </div>
+                            @foreach($array_lotes_obj as $k => $lote_obj)
+                                {{-- <div class="mb-3">
+                                    <label for="username">Nome completo</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="name" name="name" placeholder="Nome completo" value="">
+                                        <div class="invalid-feedback" style="width: 100%;"> Your username is required. </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email">E-mail <span class="text-muted"></span></label>
-                                <input type="email" class="form-control" id="email"name="email" placeholder="email@provedor.com" value="">
-                                <div class="invalid-feedback"> Please enter a valid email address for shipping updates. </div>
-                            </div> --}}
-                            @foreach ($questions as $id => $question)
-                                @switch($question->option_id)
-                                    @case(1)
-                                        {{-- Campo texto --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="text" class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required="required" @endif>
-                                        </div>
-                                        @break
-                                    @case(2)
-                                        {{-- Campo seleção --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <select class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                                <option value="0">Selecione</option>
+                                <div class="mb-3">
+                                    <label for="email">E-mail <span class="text-muted"></span></label>
+                                    <input type="email" class="form-control" id="email"name="email" placeholder="email@provedor.com" value="">
+                                    <div class="invalid-feedback"> Please enter a valid email address for shipping updates. </div>
+                                </div> --}}
+                                <strong class="d-block mb-3"><u>Informações do participante #{{$k+1}} ({{$lote_obj['name']}})</u></strong>
+                                @foreach ($questions as $id => $question)
+                                    @switch($question->option_id)
+                                        @case(1)
+                                            {{-- Campo texto --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="text" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required="required" @endif>
+                                            </div>
+                                            @break
+                                        @case(2)
+                                            {{-- Campo seleção --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <select class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                    <option value="0">Selecione</option>
+                                                    @foreach ($question->value() as $value)
+                                                        <option>{{$value->value}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @break
+                                        @case(3)
+                                            {{-- Campo marcação --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label><br/>
                                                 @foreach ($question->value() as $value)
-                                                    <option>{{$value->value}}</option>
+                                                    <input type="radio" name="new_field_radio" @if($question->required) required @endif/> {{$value->value}}
                                                 @endforeach
-                                            </select>
-                                        </div>
-                                        @break
-                                    @case(3)
-                                        {{-- Campo marcação --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label><br/>
-                                            @foreach ($question->value() as $value)
-                                                <input type="radio" name="new_field_radio" @if($question->required) required @endif/> {{$value->value}}
-                                            @endforeach
-                                        </div>
-                                        @break
-                                    @case(4)
-                                        {{-- Campo multipla escolha --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            @foreach ($question->value() as $value)
-                                                <input type="checkbox" name="new_field_checbox[]" @if($question->required) required @endif/> {{$value->value}}
-                                            @endforeach
-                                        </div>
-                                        @break
-                                    @case(5)
-                                        {{-- Campo CPF --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="text" class="form-control new_field cpf_mask" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(6)
-                                        {{-- Campo CNPJ --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="text" class="form-control new_field cnpj_mask" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(7)
-                                        {{-- Campo Data --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="date" class="form-control new_field date_mask" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(8)
-                                        {{-- Campo Telefone --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="text" class="form-control new_field phone_with_ddd_mask" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(9)
-                                        {{-- Campo Número inteiro --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="number" class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(10)
-                                        {{-- Campo Número decimal --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="number" class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(11)
-                                        {{-- Campo arquivo --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="file" class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(12)
-                                        {{-- Campo Textarea --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <textarea class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required @endif></textarea>
-                                        </div>
-                                        @break
-                                    @case(13)
-                                        {{-- Campo Email --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <input type="email" class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                        </div>
-                                        @break
-                                    @case(14)
-                                        {{-- Campo estados --}}
-                                        <div class="form-group">
-                                            <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                            <select class="form-control new_field" name="newfield_{{$question->id}}" @if($question->required) required @endif>
-                                                <option value="0">Selecione</option>
+                                            </div>
+                                            @break
+                                        @case(4)
+                                            {{-- Campo multipla escolha --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
                                                 @foreach ($question->value() as $value)
-                                                    <option>{{$value->value}}</option>
+                                                    <input type="checkbox" name="new_field_checbox[]" @if($question->required) required @endif/> {{$value->value}}
                                                 @endforeach
-                                            </select>
-                                        </div>
-                                        @break
-                                
-                                    @default
-                                        
-                                @endswitch
+                                            </div>
+                                            @break
+                                        @case(5)
+                                            {{-- Campo CPF --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="text" class="form-control new_field cpf_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(6)
+                                            {{-- Campo CNPJ --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="text" class="form-control new_field cnpj_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(7)
+                                            {{-- Campo Data --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="date" class="form-control new_field date_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(8)
+                                            {{-- Campo Telefone --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="text" class="form-control new_field phone_with_ddd_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(9)
+                                            {{-- Campo Número inteiro --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="number" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(10)
+                                            {{-- Campo Número decimal --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="number" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(11)
+                                            {{-- Campo arquivo --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="file" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(12)
+                                            {{-- Campo Textarea --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <textarea class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif></textarea>
+                                            </div>
+                                            @break
+                                        @case(13)
+                                            {{-- Campo Email --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <input type="email" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                            </div>
+                                            @break
+                                        @case(14)
+                                            {{-- Campo estados --}}
+                                            <div class="form-group">
+                                                <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <select class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                    <option value="0">Selecione</option>
+                                                    @foreach ($question->value() as $value)
+                                                        <option>{{$value->value}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @break
+                                    
+                                        @default
+                                    @endswitch
+                                @endforeach
+                                <hr>
                             @endforeach
                         </div>
 
@@ -229,29 +241,43 @@
                             <div class="section-title-header text-center mb-4">
                                 <h2 class="section-title wow fadeInUp animated">Forma de pagamento</h2>
                             </div>
-                            <div class="d-block my-3">
-                                <div class="form-check form-check-inline">
+                            <div class="d-flex d-block my-3">
+                                <div>
+                                    <input type="radio" class="form-check-input" id="creditCard" name="payment_form_check" value="1">
+                                    <label class="form-check-label" for="creditCard">
+                                        <i class="fa-solid fa-credit-card"></i> <br/>
+                                        <strong>Cartão de Crédito</strong>
+                                    </label>
+                                </div>
+                                <div>
+                                    <input type="radio" class="form-check-input" id="boleto" name="payment_form_check" value="2">
+                                    <label class="form-check-label" for="boleto">
+                                        <i class="fa-solid fa-barcode"></i> <br/>
+                                        <strong>Boleto</strong>
+                                    </label>
+                                </div>
+                                {{-- <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="payment_form_check" id="creditCard" value="1">
                                     <label class="form-check-label" for="creditCard"><b>Cartão de crédito</b></label>
                                   </div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="payment_form_check" id="boleto" value="2">
                                     <label class="form-check-label" for="boleto"><b>Boleto</b></label>
-                                </div>
+                                </div> --}}
                             </div>
                             
-                            <div id="payment_form" style="display: none;">
-                                <div class="mb-3">
+                            <div id="payment_form_cc" style="display: none;">
+                                <div class="mb-3 mt-3">
                                     <p class="h4 mb-3"><strong>Dados do cartão de crédito</strong></p>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <label for="cc-name">Nome impresso no cartão*</label>
+                                            <label for="cc_name">Nome impresso no cartão*</label>
                                             <input type="text" class="form-control" id="cc_name" name="cc_name" placeholder="" value="Comprador da Silva">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="cc-number-cc">Número do cartão de crédito*</label>
+                                            <label for="cc_number_cc">Número do cartão de crédito*</label>
                                             <div class="input-group">
                                                 <input class="form-control cc_number_mask" type="text" id="cc_number_cc" name="cc_number_cc"  placeholder="0000 0000 0000 0000" value="4012001037141112">
                                                 <div class="input-group-append">
@@ -262,11 +288,11 @@
                                             </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label for="cc-expiration">Data de expiração*</label>
+                                            <label for="cc_expiration">Data de expiração*</label>
                                             <input type="text" class="form-control expiration_mask" id="cc_expiration" name="cc_expiration" placeholder="00/0000" value="06/2024">
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label for="cc-cvv">CVC*</label>
+                                            <label for="cc_cvc">CVC*</label>
                                             <input type="text" class="form-control cc_cvc_mask" id="cc_cvc" name="cc_cvc" placeholder="000" value="123">
                                             <input type="hidden" id="cc-brand" name="cc-brand">
                                         </div>
@@ -276,16 +302,47 @@
                                     <div id="cc_feedback" style="color:red; display:none;"> Dados do cartão de crédito inválidos! </div>
                                 </div>
                                 <div class="mb-3">
+                                    <p class="h4 mb-3"><strong>Informações do titular do cartão de crédito</strong></p>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="cc_name_info">Nome*</label>
+                                                <input type="text" class="form-control" id="cc_name_info" name="cc_name_info" placeholder="" value="{{ old('cc_name_info') ?? '' }}">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="cc_email_info">E-mail*</label>
+                                                <input type="email" class="form-control" id="cc_email_info" name="cc_email_info" placeholder="" value="{{ old('cc_email_info') ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="cc_cpf_info">CPF*</label>
+                                                <input type="text" class="form-control cpf_mask" id="cc_cpf_info" name="cc_cpf_info" placeholder="" value="{{ old('cc_address') ?? '' }}">
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="cc_date_info">Data de nascimento*</label>
+                                                <input type="date" class="form-control" id="cc_date_info" name="cc_date_info" placeholder="" value="{{ old('cc_date_info') ?? '' }}">
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="cc_phone_info">Telefone*</label>
+                                                <input type="text" class="form-control phone_with_ddd_mask" id="cc_phone_info" name="cc_phone_info" placeholder="" value="{{ old('cc_phone_info') ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
                                     <p class="h4 mb-3"><strong>Endereço de cobrança</strong></p>
                                     <div class="mb-3">
                                         <div class="row">
                                             <div class="col-9">
-                                                <label for="cc_address">Endereço</label>
-                                                <input type="text" class="form-control" id="cc_address" name="cc_address" placeholder="" value="{{ old('cc_address') ?? Auth::user()->cc_address ?? '' }}">
+                                                <label for="cc_address">Endereço*</label>
+                                                <input type="text" class="form-control" id="cc_address" name="cc_address" placeholder="" value="{{ old('cc_address') ?? '' }}">
                                             </div>
                                             <div class="col-3">
-                                                <label for="cc_number">Número</label>
-                                                <input type="text" class="form-control" id="cc_number" name="cc_number" placeholder="" value="{{ old('cc_number') ?? Auth::user()->cc_number ?? '' }}">
+                                                <label for="cc_number">Número*</label>
+                                                <input type="text" class="form-control" id="cc_number" name="cc_number" placeholder="" value="{{ old('cc_number') ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -293,18 +350,18 @@
                                         <div class="row">
                                             <div class="col-8">
                                                 <label for="cc_address2">Complemento </label>
-                                                <input type="text" class="form-control" id="cc_address2" name="cc_address2" placeholder="" value="{{ old('cc_address2') ?? Auth::user()->cc_address2 ?? '' }}">
+                                                <input type="text" class="form-control" id="cc_address2" name="cc_address2" placeholder="" value="{{ old('cc_address2') ?? '' }}">
                                             </div>
                                             <div class="col-4">
-                                                <label for="cc_district">Bairro </label>
-                                                <input type="text" class="form-control" id="cc_district" name="cc_district" placeholder="" value="{{ old('cc_district') ?? Auth::user()->cc_district ?? '' }}">
+                                                <label for="cc_district">Bairro* </label>
+                                                <input type="text" class="form-control" id="cc_district" name="cc_district" placeholder="" value="{{ old('cc_district') ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <div class="row">
                                             <div class="col-4">
-                                                <label for="cc_state">Estado </label>
+                                                <label for="cc_state">Estado* </label>
                                                 <select class="form-control" id="cc_state" name="cc_state">
                                                     <option value="AC">Acre</option>
                                                     <option value="AL">Alagoas</option>
@@ -337,12 +394,118 @@
                                                 {{-- <input type="text" class="form-control" id="cc_state" name="cc_state" placeholder="" value="{{ old('cc_state') ?? Auth::user()->cc_state ?? '' }}"> --}}
                                             </div>
                                             <div class="col-4">
-                                                <label for="cc_city">Cidade </label>
-                                                <input type="text" class="form-control" id="cc_city" name="cc_city" placeholder="" value="{{ old('cc_city') ?? Auth::user()->cc_city ?? '' }}">
+                                                <label for="cc_city">Cidade* </label>
+                                                <input type="text" class="form-control" id="cc_city" name="cc_city" placeholder="" value="{{ old('cc_city') ?? '' }}">
                                             </div>
                                             <div class="col-4">
-                                                <label for="cc_zip">CEP </label>
-                                                <input type="text" class="form-control cep_mask" id="cc_zip" name="cc_zip" placeholder="00000-000" value="{{ old('cc_zip') ?? Auth::user()->cc_zip ?? '' }}">
+                                                <label for="cc_zip">CEP* </label>
+                                                <input type="text" class="form-control cep_mask" id="cc_zip" name="cc_zip" placeholder="00000-000" value="{{ old('cc_zip') ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- <input type="button" value="Validar" id="encrypt"/> --}}
+                            </div>
+                            <div id="payment_form_boleto" style="display: none;">
+                                <div class="mb-3">
+                                    <p class="h4 mb-3"><strong>Informações do titular</strong></p>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="boleto_name_info">Nome*</label>
+                                                <input type="text" class="form-control" id="boleto_name_info" name="boleto_name_info" placeholder="" value="{{ old('boleto_name_info') ?? '' }}">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="boleto_email_info">E-mail*</label>
+                                                <input type="email" class="form-control" id="boleto_email_info" name="boleto_email_info" placeholder="" value="{{ old('boleto_email_info') ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="boleto_cpf_info">CPF*</label>
+                                                <input type="text" class="form-control cpf_mask" id="boleto_cpf_info" name="boleto_cpf_info" placeholder="" value="{{ old('boleto_cpf_info') ?? '' }}">
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="boleto_date_info">Data de nascimento*</label>
+                                                <input type="date" class="form-control" id="boleto_date_info" name="boleto_date_info" placeholder="" value="{{ old('boleto_date_info') ?? '' }}">
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="boleto_phone_info">Telefone*</label>
+                                                <input type="text" class="form-control phone_with_ddd_mask" id="boleto_phone_info" name="boleto_phone_info" placeholder="" value="{{ old('boleto_phone_info') ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="h4 mb-3"><strong>Endereço de cobrança</strong></p>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-9">
+                                                <label for="boleto_address">Endereço*</label>
+                                                <input type="text" class="form-control" id="boleto_address" name="boleto_address" placeholder="" value="{{ old('boleto_address') ?? '' }}">
+                                            </div>
+                                            <div class="col-3">
+                                                <label for="boleto_number">Número*</label>
+                                                <input type="text" class="form-control" id="boleto_number" name="boleto_number" placeholder="" value="{{ old('boleto_number') ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-8">
+                                                <label for="boleto_address2">Complemento </label>
+                                                <input type="text" class="form-control" id="boleto_address2" name="boleto_address2" placeholder="" value="{{ old('boleto_address2') ?? '' }}">
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="boleto_district">Bairro* </label>
+                                                <input type="text" class="form-control" id="boleto_district" name="boleto_district" placeholder="" value="{{ old('boleto_district') ?? '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="boleto_state">Estado* </label>
+                                                <select class="form-control" id="boleto_state" name="boleto_state">
+                                                    <option value="AC">Acre</option>
+                                                    <option value="AL">Alagoas</option>
+                                                    <option value="AP">Amapá</option>
+                                                    <option value="AM">Amazonas</option>
+                                                    <option value="BA">Bahia</option>
+                                                    <option value="CE">Ceará</option>
+                                                    <option value="DF">Distrito Federal</option>
+                                                    <option value="ES">Espírito Santo</option>
+                                                    <option value="GO">Goiás</option>
+                                                    <option value="MA">Maranhão</option>
+                                                    <option value="MT">Mato Grosso</option>
+                                                    <option value="MS">Mato Grosso do Sul</option>
+                                                    <option value="MG">Minas Gerais</option>
+                                                    <option value="PA">Pará</option>
+                                                    <option value="PB">Paraíba</option>
+                                                    <option value="PR">Paraná</option>
+                                                    <option value="PE">Pernambuco</option>
+                                                    <option value="PI">Piauí</option>
+                                                    <option value="RJ">Rio de Janeiro</option>
+                                                    <option value="RN">Rio Grande do Norte</option>
+                                                    <option value="RS">Rio Grande do Sul</option>
+                                                    <option value="RO">Rondônia</option>
+                                                    <option value="RR">Roraima</option>
+                                                    <option value="SC">Santa Catarina</option>
+                                                    <option value="SP">São Paulo</option>
+                                                    <option value="SE">Sergipe</option>
+                                                    <option value="TO">Tocantins</option>
+                                                </select>
+                                                {{-- <input type="text" class="form-control" id="boleto_state" name="boleto_state" placeholder="" value="{{ old('boleto_state') ?? Auth::user()->boleto_state ?? '' }}"> --}}
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="boleto_city">Cidade* </label>
+                                                <input type="text" class="form-control" id="boleto_city" name="boleto_city" placeholder="" value="{{ old('boleto_city') ?? '' }}" required>
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="boleto_zip">CEP* </label>
+                                                <input type="text" class="form-control cep_mask" id="boleto_zip" name="boleto_zip" placeholder="00000-000" value="{{ old('boleto_zip') ?? '' }}" required>
                                             </div>
                                         </div>
                                     </div>
@@ -359,7 +522,7 @@
                         <button type="button" onclick="submitCheckout()" class="btn btn-common sub-btn float-right" id="finalizar_comprar">Finalizar compra</button>
                         <button class="btn btn-common sub-btn float-right d-none" type="button" id="carregando_comprar" disabled>
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            Finalizando...
+                            Enviando...
                           </button>
                     </form>
                 </div>
@@ -393,25 +556,39 @@
     @push('footer')
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
         <script type="text/javascript" src="//assets.moip.com.br/v2/moip.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
         {{-- <script src="assets_conference/js/bootstrap-input-spinner.js"></script>
         <script src="assets_conference/js/custom-editors.js"></script> --}}
         <script>
 
             $(document).ready(function() { 
 
+                $('#checkout_submit').validate({
+                    errorClass: "error fail-alert d-block"
+                });
+
                 $('.form-check-input').change(function(){
                     payment_form_type = $(this).val();
-                    console.log(payment_form_type);
                     if(payment_form_type == 1){
-                        $('#payment_form').fadeIn();
+                        $('#payment_form_cc').fadeIn();
+                        $('#payment_form_boleto').fadeOut();
+                        $("#cc_name_info, #cc_email_info, #cc_cpf_info, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',true);
+                        $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',false);
                     }else{
-                        $('#payment_form').fadeOut();
+                        $('#payment_form_boleto').fadeIn();
+                        $('#payment_form_cc').fadeOut();
+                        $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',true);
+                        $("#cc_name_info, #cc_email_info, #cc_cpf_info, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',false);
                     }
                 });
+
+                $('#finalizar_comprar').show();
+                $('#carregando_comprar').addClass('d-none');
                 
                 // $('.date_mask').mask('00/00/0000', {placeholder: "__/__/____"});
                 // $('.cep').mask('00000-000');
-                $('.phone_with_ddd_mask').mask('(00) 0000-0000');
+                $('.phone_with_ddd_mask').mask('(00) 00000-0000');
                 $('.cpf_mask').mask('000.000.000-00', {reverse: false});
                 $('.cnpj_mask').mask('00.000.000/0000-00', {reverse: false});
                 $('.cep_mask').mask('00000-000');
@@ -610,7 +787,7 @@
                 $('#finalizar_comprar').hide();
                 $('#carregando_comprar').removeClass('d-none');
                 $('#checkout_submit').submit(); 
-
+                $('.fail-alert').html('Esse campo é obrigatório!');
             }
         </script>
     @endpush

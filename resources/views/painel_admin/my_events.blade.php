@@ -4,7 +4,6 @@
         <!-- ======= Breadcrumbs ======= -->
         <section class="breadcrumbs">
           <div class="container">
-    
             <ol>
               <li><a href="index.html">Home</a></li>
               <li>Eventos</li>

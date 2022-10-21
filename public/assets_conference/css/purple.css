@@ -165,3 +165,10 @@ a.back-to-top i{
 .btn-minus, .btn-plus{
   color: #8546c9;
 }
+.form-check-label {
+  border: 2px solid #8546c9;
+}
+.form-check-input:checked + .form-check-label {
+  background: #8546c9;
+  box-shadow: 0px 0px 10px #8546c9;
+}

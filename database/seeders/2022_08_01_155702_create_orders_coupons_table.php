@@ -13,12 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('inscricoes_coupons', function (Blueprint $table) {
+        Schema::create('orders_coupons', function (Blueprint $table) {
             $table->bigIncrements('id');        
-            $table->integer('participante_lote_id');
-            $table->foreign('participante_lote_id')
+            $table->integer('order_id');
+            $table->foreign('order_id')
                 ->references('id')
-                ->on('participantes_lotes')->onDelete('cascade');
+                ->on('orders')->onDelete('cascade');
             $table->integer('coupon_id');
             $table->foreign('coupon_id')
                 ->references('id')

@@ -40,6 +40,7 @@
             </div>
             <div class="row mt-4">
                 <div class="mx-auto">
+                    {{-- {{dd($event->max_event_dates())}} --}}
                     @if($event->max_event_dates() >= \Carbon\Carbon::now())
                     <a href="#inscricoes" class="btn btn-common sub-btn">Inscreva-se</a>
                     @else
@@ -289,6 +290,7 @@
                             <div class="tab-content" id="myTabContent">
                                 <div class="tab-pane fade show active" id="monday" role="tabpanel" aria-labelledby="monday-tab">
                                     <div id="accordion">
+                                        @if(isset($event->owner))
                                         <div class="card">
                                             <div id="headingOne">
                                                 <div class="collapsed card-header">
@@ -308,6 +310,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

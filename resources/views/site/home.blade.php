@@ -1,27 +1,38 @@
 <x-site-layout>
-    <section id="hero" class="hero d-flex align-items-center">
-      
-        <div class="container">
-          <div class="row">
+    <section id="hero" class="hero owl-carousel">
+        <div class="hero_img">
+            <img src="../../site/home1.jpg" alt=""> 
+        </div>
+        <div class="hero_img">
+            <img src="../../site/home2.jpg" alt="">
+        </div>
+        <div class="hero_img">
+            <img src="../../site/home3.jpg" alt="">
+        </div>
+        <div class="hero_img">
+            <img src="../../site/home4.jpg" alt="">
+        </div>
+    </section><!-- End Hero -->
+
+    <div class="container hero_absolute">
+        <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
-              <h1 data-aos="fade-up">Agora ficou muito mais fácil organizar seus próprios eventos!</h1>
-              <h2 data-aos="fade-up" data-aos-delay="400">Crie seu própio evento e comece a lucrar com ele agora mesmo.</h2>
-              <div data-aos="fade-up" data-aos-delay="600">
-                <div class="text-center text-lg-start">
-                  <a href="/cadastro" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
-                    <span>Começar agora!</span>
-                    <i class="bi bi-arrow-right"></i>
-                  </a>
+                <h1 data-aos="fade-up">Agora ficou muito mais fácil organizar seus próprios eventos!</h1>
+                <h2 data-aos="fade-up" data-aos-delay="400">Crie seu própio evento e comece a lucrar com ele agora mesmo.</h2>
+                <div>
+                    <div class="text-center text-lg-start">
+                    <a href="/cadastro" class="btn-get-started d-inline-flex align-items-center justify-content-center align-self-center">
+                        <span>Começar agora!</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    </div>
                 </div>
-              </div>
             </div>
             <div class="col-lg-6 hero-img">
                 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/XOTq6z3QdX8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
-          </div>
         </div>
-    
-    </section><!-- End Hero -->
+    </div>
     
     <main id="main">
         <!-- ======= Values Section ======= -->
@@ -638,8 +649,40 @@
 
     </main><!-- End #main -->
 
+    @push('head')
+        <link rel="stylesheet" href="{{ asset('assets/vendor/owlcarousel/owl.carousel.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('assets/vendor/owlcarousel/owl.theme.default.min.css') }}">
+    @endpush
+
     @push('bootstrap_version')
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @endpush
+        
+    @push('footer')
+        <script src="{{ asset('assets/vendor/owlcarousel/owl.carousel.min.js') }}"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('.owl-carousel').owlCarousel({
+                    loop:true,
+                    autoplay:true,
+                    autoplayTimeout:3000,
+                    animateOut: 'fadeOut',
+                    margin:0,
+                    nav:false,
+                    responsive:{
+                        0:{
+                            items:1
+                        },
+                        600:{
+                            items:1
+                        },
+                        1000:{
+                            items:1
+                        }
+                    }
+                })
+            });
+        </script>
     @endpush
 
 </x-site-layout>

@@ -303,85 +303,51 @@ class EventAdminController extends Controller
 
         foreach($fields as $id => $field){
 
-            // if($field == 'Nome'){
+            preg_match_all("/\(([^\]]*)\)/", $field, $matches);
+            $result_field = $matches[1];
+            $result_field = str_replace("Tipo: ", "", $result_field);
 
-            //     $option = Option::where('option', $field)->first();
-                
-            //     DB::table('questions')->insert([
-            //         'question' => 'Nome',
-            //         'order' => 1,
-            //         'required' => 1,
-            //         'unique' => 0,
-            //         'status' => 1,
-            //         'option_id' => 1,
-            //         'event_id' => $event_id
-            //     ]);
-                
-            // } elseif($field == 'E-mail'){
-                
-            //     $option = Option::where('option', $field)->first();
-                
-            //     DB::table('questions')->insert([
-            //         'question' => 'E-mail',
-            //         'order' => 2,
-            //         'required' => 1,
-            //         'unique' => 1,
-            //         'status' => 1,
-            //         'option_id' => 13,
-            //         'event_id' => $event_id
-            //     ]);
+            $more_fields = explode(';', $field);
 
-            // } else {
-                preg_match_all("/\(([^\]]*)\)/", $field, $matches);
+            $required = 0;
+            if(strpos($field, 'Obrigatório')){
+                $required = 1;
+            }
+
+            $unique = 0;
+            if(strpos($field, 'Único')){
+                $unique = 1;
+            }
+
+            $option = Option::where('option', $result_field[0])->first();
+            $question = Question::create([
+            // DB::table('questions')->insert([
+                'question' => $more_fields[0],
+                'order' => $id + 1,
+                'required' => $required,
+                'unique' => $unique,
+                'status' => 1,
+                'option_id' => $option->id,
+                'event_id' => $event_id
+            ]);
+
+            $id_question = $question->id;
+
+            $result_regex = preg_match_all("/\[([^\]]*)\]/", $field, $matches);
+
+            if($result_regex){
                 $result_field = $matches[1];
-                $result_field = str_replace("Tipo: ", "", $result_field);
+                $result_field = str_replace("Opções: ", "", $result_field);
 
-                $more_fields = explode(';', $field);
+                $array_explode_question = explode(',', $result_field[0]);
 
-                $required = 0;
-                if(strpos($field, 'Obrigatório')){
-                    $required = 1;
+                foreach($array_explode_question as $item_array_explode_question){
+                    DB::table('option_values')->insert([
+                        'value' => trim($item_array_explode_question),
+                        'question_id' => $id_question
+                    ]);
                 }
-
-                $unique = 0;
-                if(strpos($field, 'Único')){
-                    $unique = 1;
-                }
-
-                // dd($result_field[0]);
-
-                $option = Option::where('option', $result_field[0])->first();
-                $question = Question::create([
-                // DB::table('questions')->insert([
-                    'question' => $more_fields[0],
-                    'order' => $id + 1,
-                    'required' => $required,
-                    'unique' => $unique,
-                    'status' => 1,
-                    'option_id' => $option->id,
-                    'event_id' => $event_id
-                ]);
-
-                $id_question = $question->id;
-
-                $result_regex = preg_match_all("/\[([^\]]*)\]/", $field, $matches);
-
-                if($result_regex){
-                    $result_field = $matches[1];
-                    $result_field = str_replace("Opções: ", "", $result_field);
-
-                    $array_explode_question = explode(',', $result_field[0]);
-
-                    foreach($array_explode_question as $item_array_explode_question){
-                        DB::table('option_values')->insert([
-                            'value' => trim($item_array_explode_question),
-                            'question_id' => $id_question
-                        ]);
-                    }
-                }
-
-
-            // }
+            }
         }
 
         $questions = Question::orderBy('order')->where('event_id', $event_id)->get();

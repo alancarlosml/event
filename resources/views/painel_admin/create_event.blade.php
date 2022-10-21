@@ -369,12 +369,12 @@
                                             <label for="name_new_field">Campo 1*</label>
                                             <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
                                         </div>
-                                        <div class="form-group">
+                                        {{-- <div class="form-group">
                                             <label for="name_new_field">Campo 2*</label>
                                             <input type="text" class="form-control new_field" name="new_field[]" id="cpf_new_field" value="CPF; (Tipo: CPF); Obrigatório; Único" readonly>
-                                        </div>
+                                        </div> --}}
                                         <div class="form-group">
-                                            <label for="email_new_field">Campo 3*</label>
+                                            <label for="email_new_field">Campo 2*</label>
                                             <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
                                         </div>
                                     @endif
@@ -383,12 +383,12 @@
                                         <label for="name_new_field">Campo 1*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
                                     </div>
-                                    <div class="form-group">
+                                    {{-- <div class="form-group">
                                         <label for="name_new_field">Campo 2*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="cpf_new_field" value="CPF; (Tipo: CPF); Obrigatório; Único" readonly>
-                                    </div>
+                                    </div> --}}
                                     <div class="form-group">
-                                        <label for="email_new_field">Campo 3*</label>
+                                        <label for="email_new_field">Campo 2*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
                                     </div>
                                 @endif

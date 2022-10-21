@@ -10,8 +10,11 @@
         <title>Laravel</title>
 
         <!-- Favicons -->
-        <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
-        <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+        <link rel="icon" href="{{ asset('assets/img/favicon/favicon.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/favicon/apple-touch-icon.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/favicon/favicon-32x32.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/img/favicon/favicon-16x16.png') }}">
+        <link rel="manifest" href="{{ asset('assets/img/favicon/site.webmanifest') }}">
 
         <!-- Google Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
@@ -21,6 +24,7 @@
         {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"> --}}
         {{-- <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet"> --}}
         
+        @stack('head')
         @stack('bootstrap_version')
 
         {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /> --}}
@@ -35,31 +39,20 @@
         <!-- Template Main CSS File -->
         <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
 
-        @stack('head')
-
-        <style>
-            #start_event i{
-                color: #4154f1;
-                font-size: 2em;
-                margin-bottom: 15px;
-            }
-        </style>
-
-        @stack('head')
     </head>
     <body>
 
         <!-- ======= Header ======= -->
         <header id="header" class="header fixed-top">
-          <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+          <div class="container-fluid container-xl d-flex align-items-center">
       
-            <a href="index.html" class="logo d-flex align-items-center">
-              <img src="assets/img/logo.png" alt="">
-              <span>FlexStart</span>
+            <a href="/" class="logo d-flex align-items-center">
+              <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
+              {{-- <span>FlexStart</span> --}}
             </a>
       
-            <nav id="navbar" class="navbar">
-              <ul>
+            <nav id="navbar" class="navbar d-flex">
+              <ul class="d-flex">
                   <li class="dropdown"><a href="#"><span>Serviços</span> <i class="bi bi-chevron-down"></i></a>
                     <ul>
                       <li><a href="#">Drop Down 1</a></li>
@@ -68,36 +61,42 @@
                       <li><a href="#">Drop Down 4</a></li>
                     </ul>
                   </li>
-                <li><a class="nav-link scrollto active" href="#planos">Planos e Preços</a></li>
+                <li><a class="nav-link scrollto active" href="/#planos">Planos e Preços</a></li>
                 <li><a class="nav-link" href="/eventos">Eventos</a></li>
                 <li><a class="nav-link" href="/contato">Contato</a></li>
                 {{-- <li><a href="blog.html">Blog</a></li> --}}
                 {{-- <li><a class="nav-link" href="/cadastro"></a></li> --}}
-                <li><a class="getstarted" href="{{route('event_home.create_event_link')}}">Criar evento</a></li>
-                @if(!Auth::user())
-                <li><a class="getstarted" href="{{route('login')}}">Entrar</a></li>
-                @else
-                <li class="nav-item dropdown">
-                  <a class="getstarted" data-toggle="dropdown" href="javascript:;">
-                      {{ Auth::user()->name }}
-                  </a>
-                  <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
-                      <a href="{{route('event_home.my_events')}}" class="dropdown-item">
-                          Meus eventos
-                      </a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="{{ route('logout') }}"
-                          onclick="event.preventDefault();
-                          document.getElementById('logout-form').submit();">
-                          Sair
-                      </a>
-                      <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                          @csrf
-                      </form>
-                  </div>
-                </li>
-                @endif
+                {{-- <li><a class="getstarted" href="{{ route('event_home.create_event_link')}}">Criar evento</a></li> --}}
+                
               </ul>
+              <div class="d-flex">
+                <ul>
+                  <li><a class="getstarted" href="{{route('event_home.create_event_link')}}">Criar evento</a></li>
+                  @if(!Auth::user())
+                    <li><a class="nav-link nav-login" href="{{route('login')}}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li>
+                  @else
+                    <li class="nav-item dropdown">
+                      <a class="nav-link nav-login" data-toggle="dropdown" href="javascript:;">
+                        <i class="fa-regular fa-circle-user"></i>&nbsp;{{ Auth::user()->name }}
+                      </a>
+                      <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+                          <a href="{{route('event_home.my_events')}}" class="dropdown-item">
+                              Meus eventos
+                          </a>
+                          <div class="dropdown-divider"></div>
+                          <a class="dropdown-item" href="{{ route('logout') }}"
+                              onclick="event.preventDefault();
+                              document.getElementById('logout-form').submit();">
+                              Sair
+                          </a>
+                          <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                              @csrf
+                          </form>
+                      </div>
+                    </li>
+                  @endif
+                </ul>
+              </div>
               <i class="bi bi-list mobile-nav-toggle"></i>
             </nav><!-- .navbar -->
       
@@ -131,10 +130,9 @@
               <div class="row gy-4">
                 <div class="col-lg-5 col-md-12 footer-info">
                   <a href="index.html" class="logo d-flex align-items-center">
-                    <img src="assets/img/logo.png" alt="">
-                    <span>FlexStart</span>
+                    <img src="assets/img/logo_principal.png" alt="">
                   </a>
-                  <p>Cras fermentum odio eu feugiat lide par naso tierra. Justo eget nada terra videa magna derita valies darta donna mare fermentum iaculis eu non diam phasellus.</p>
+                  <p>Sua nova plataforma de criação e gerenciamento de eventos. </p>
                   <div class="social-links mt-3">
                     <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
                     <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
@@ -144,18 +142,20 @@
                 </div>
       
                 <div class="col-lg-2 col-6 footer-links">
-                  <h4>Useful Links</h4>
+                  <h4>Links úteis</h4>
                   <ul>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Services</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
-                    <li><i class="bi bi-chevron-right"></i> <a href="#">Privacy policy</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/">Home</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/#planos">Planos e Preços</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/eventos">Eventos</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/#faq">Perguntas frequentes</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/contato">Contato</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/politica">Política de privacidade</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/termos">Termos de uso</a></li>
                   </ul>
                 </div>
       
                 <div class="col-lg-2 col-6 footer-links">
-                  <h4>Our Services</h4>
+                  <h4>Nossos serviços</h4>
                   <ul>
                     <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
                     <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
@@ -183,7 +183,7 @@
       
           <div class="container">
             <div class="copyright">
-              &copy; Copyright <strong><span>FlexStart</span></strong>. All Rights Reserved
+              &copy; Copyright <strong><span>Loja de Eventos</span></strong>. All Rights Reserved
             </div>
             <div class="credits">
               <!-- All the links in the footer should remain intact. -->

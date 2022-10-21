@@ -71,10 +71,9 @@ Route::post('painel/eventos/publicar/{hash}', 'App\Http\Controllers\EventAdminCo
 Route::get('painel/eventos/{id}/delete_file','App\Http\Controllers\EventAdminController@deleteFileEvent')->middleware(['auth'])->name('event_home.delete_file_event');
 Route::get('painel/eventos/organizador/{id}/delete_file_icon','App\Http\Controllers\EventAdminController@deleteFileIcon')->middleware(['auth'])->name('event_home.delete_file_icon');
 
-
 Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->name('conference.index');
-Route::get('{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->name('conference.resume');
-Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->name('conference.thanks');
+Route::get('{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth'])->name('conference.resume');
+Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth'])->name('conference.thanks');
 Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');
 Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');
 Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');

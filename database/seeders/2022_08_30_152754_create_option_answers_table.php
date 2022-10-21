@@ -21,6 +21,16 @@ return new class extends Migration
                 ->references('id')
                 ->on('questions')
                 ->onDelete('cascade');
+            $table->integer('participante_lote_id')->unsigned()->index();
+            $table->foreign('participante_lote_id')
+                ->references('id')
+                ->on('participantes_lotes')
+                ->onDelete('cascade');
+            $table->integer('order_id')->unsigned()->index();
+            $table->foreign('order_id')
+                ->references('id')
+                ->on('orders')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

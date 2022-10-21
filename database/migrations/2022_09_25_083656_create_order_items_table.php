@@ -13,19 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->string('hash')->unique();  
-            $table->integer('quantity');  
-            $table->timestamp('date_used');  
-            $table->string('gatway_hash');  
-            $table->string('gatway_reference');  
-            $table->string('gatway_status');  
-            $table->string('gatway_payment_method');  
+            $table->integer('quantity');
+            $table->double('value');
             $table->integer('order_id')->unsigned()->index();
             $table->foreign('order_id')
                 ->references('id')
                 ->on('orders')
+                ->onDelete('cascade');
+            $table->integer('participante_lote_id')->unsigned()->index();
+            $table->foreign('participante_lote_id')
+                ->references('id')
+                ->on('participantes_lotes')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('order_items');
     }
 };

@@ -88,6 +88,7 @@ class ConferenceController extends Controller
         if($dict_lotes)
         {
             $array_lotes = [];
+            $array_lotes_obj = [];
             foreach($dict_lotes as $dict){
 
                 $quantity = $dict['lote_quantity'];
@@ -95,18 +96,30 @@ class ConferenceController extends Controller
 
                 if($quantity > 0){
                     if($lote->tax_servico == 0){
-                        $array = array($quantity, ($lote->value + $lote->value*0.1), $lote->name);
+                        $array = array('id' => $lote->id, 'quantity' => $quantity, 'value' => ($lote->value + $lote->value*0.1), 'name' => $lote->name);
                     }else{
-                        $array = array($quantity, $lote->value, $lote->name);
+                        $array = array('id' => $lote->id, 'quantity' => $quantity,  'value' => $lote->value, 'name' => $lote->name);
                     }
 
                     array_push($array_lotes, $array);
                 }
+
+                if($quantity > 0){
+                    for($j = 0; $j < $quantity; $j++){
+                        if($lote->tax_servico == 0){
+                            $array_obj = array('id' => $lote->id, 'quantity' => 1, 'value' => ($lote->value + $lote->value*0.1), 'name' => $lote->name);
+                        }else{
+                            $array_obj = array('id' => $lote->id, 'quantity' => 1,  'value' => $lote->value, 'name' => $lote->name);
+                        }
+                        array_push($array_lotes_obj, $array_obj);
+                    }
+                }
             }
 
             $request->session()->put('array_lotes', $array_lotes);
+            $request->session()->put('array_lotes_obj', $array_lotes_obj);
 
-            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'coupon', 'subtotal', 'coupon_subtotal', 'total'));
+            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'array_lotes_obj', 'coupon', 'subtotal', 'coupon_subtotal', 'total'));
         
         }else{
 
@@ -250,32 +263,40 @@ class ConferenceController extends Controller
         // dd(Auth::user()->id);
         $input = $request->all();
 
+        // $boleto_phone_info = '(98) 98744-4932';
+        // $phone_info = explode(' ', $boleto_phone_info);
+        // $ddd = str_replace('(', '', $phone_info[0]);
+        // $ddd = str_replace(')', '', $ddd);
+
+        // dd($ddd);
+        // dd(explode(' ', $boleto_phone_info));
+
         // $id = 200;
         // dd($input['newfield_'.$id]);
 
-        $input_name = '';
-        $input_cpf = '';
-        $input_email = '';
-        foreach(array_keys($input) as $field){
+        // $input_name = '';
+        // $input_cpf = '';
+        // $input_email = '';
+        // foreach(array_keys($input) as $field){
 
-            if(str_contains($field, 'newfield_')){
-                $id = explode("_", $field);
-                $id = $id[1];
+        //     if(str_contains($field, 'newfield_')){
+        //         $id = explode("_", $field);
+        //         $id = $id[1];
 
-                $question = Question::where('id', $id)->first();
-                if($question->question == 'Nome'){
-                    $input_name = $input['newfield_'.$id];
-                }
-                if($question->question == 'CPF'){
-                    $input_cpf = $input['newfield_'.$id];
-                    $input_cpf = str_replace('.','',$input_cpf);
-                    $input_cpf = str_replace('-','',$input_cpf);
-                }
-                if($question->question == 'E-mail'){
-                    $input_email = $input['newfield_'.$id];
-                }
-            }
-        }
+        //         $question = Question::where('id', $id)->first();
+        //         if($question->question == 'Nome'){
+        //             $input_name = $input['newfield_'.$id];
+        //         }
+        //         if($question->question == 'CPF'){
+        //             $input_cpf = $input['newfield_'.$id];
+        //             $input_cpf = str_replace('.','',$input_cpf);
+        //             $input_cpf = str_replace('-','',$input_cpf);
+        //         }
+        //         if($question->question == 'E-mail'){
+        //             $input_email = $input['newfield_'.$id];
+        //         }
+        //     }
+        // }
 
         $token = 'OQ2YC58HU5DSJMJUSDKNQAYR028QNCWT';
         $key = '9UUFJOFJPQRA3OZU36KL96CU5X9UXMBYRZYV446O';
@@ -288,28 +309,95 @@ class ConferenceController extends Controller
         $coupon_subtotal = $request->session()->get('coupon_subtotal');
         $total = $request->session()->get('total');
         $dict_lotes = $request->session()->get('dict_lotes');
+        $array_lotes_obj = $request->session()->get('array_lotes_obj');
 
         $event_details = $event->name;
+
+        $name_info = "";
+        $email_info = "";
+        $cpf_info = "";
+        $date_born_info = "";
+        $phone_info = "";
+        $address_info = "";
+        $number_info = "";
+        $district_info = "";
+        $state_info = "";
+        $city_info = "";
+        $zip_info = "";
+
+        if(isset($input['payment_form_check'])){
+
+            if($input['payment_form_check'] == 1){
+
+                $name_info = $input['cc_name_info'];
+                $email_info = $input['cc_email_info'];
+                $cpf_info = $input['cc_cpf_info'];
+                $date_born_info = $input['cc_date_info'];
+                $phone_info = $input['cc_phone_info'];
+                $address_info = $input['cc_address'];
+                $address2_info = $input['cc_address2'];
+                $number_info = $input['cc_number'];
+                $district_info = $input['cc_district'];
+                $state_info = $input['cc_state'];
+                $city_info = $input['cc_city'];
+                $zip_info = $input['cc_zip'];
+
+            }elseif($input['payment_form_check'] == 2){
+
+                $name_info = $input['boleto_name_info'];
+                $email_info = $input['boleto_email_info'];
+                $cpf_info = $input['boleto_cpf_info'];
+                $date_born_info = $input['boleto_date_info'];
+                $phone_info = $input['boleto_phone_info'];
+                $address_info = $input['boleto_address'];
+                $address2_info = $input['boleto_address2'];
+                $number_info = $input['boleto_number'];
+                $district_info = $input['boleto_district'];
+                $state_info = $input['boleto_state'];
+                $city_info = $input['boleto_city'];
+                $zip_info = $input['boleto_zip'];
+            }
+
+            if($cpf_info){
+                $cpf_info = str_replace('.', '', $cpf_info);
+                $cpf_info = str_replace('-', '', $cpf_info);
+            } else {
+                return back()->withErrors(['error' => 'Por favor, preencha o campo CPF']);
+            }
+
+            if($phone_info){
+                $phone_info = explode(' ', $phone_info);
+                $ddd = str_replace('(', '', $phone_info[0]);
+                $ddd = str_replace(')', '', $ddd);
+
+                $number_phone = str_replace('-', '', $phone_info[1]);
+            } else {
+                return back()->withErrors(['error' => 'Por favor, preencha o campo Telefone']);
+            }
+
+        }else{
+            return back()->withErrors(['error' => 'Por favor, selecione o tipo do pagamento']);
+        }
 
         try {
 
             $customer = $moip->customers()->setOwnId(uniqid())
-                ->setFullname($input['cc_name'])
-                ->setEmail($input_email)
-                ->setBirthDate('1988-12-30')
-                ->setTaxDocument($input_cpf)
-                ->setPhone(11, 66778899)
+                ->setFullname($name_info)
+                ->setEmail($email_info)
+                ->setBirthDate($date_born_info)
+                ->setTaxDocument($cpf_info)
+                ->setPhone($ddd, $number_phone)
                 ->addAddress('BILLING',
-                    $input['cc_address'], $input['cc_number'],
-                    $input['cc_district'], $input['cc_city'], $input['cc_state'],
-                    $input['cc_zip'], $input['cc_address2'])
+                        $address_info, $number_info,
+                        $district_info, $city_info, $state_info,
+                        $zip_info, $address2_info)
                 ->create();
 
             $order = $moip->orders()->setOwnId(uniqid());
 
-            foreach($dict_lotes as $dict){
+            foreach($array_lotes_obj as $array_obj){
 
-                $lote = Lote::where('hash', $dict['lote_hash'])->first();
+                $lote = Lote::where('id', $array_obj['id'])->first();
 
                 if($lote->tax_servico == 0){
                     $order->addItem($lote->name, 1, $lote->description, intval(($lote->value + $lote->value*0.1)*100));
@@ -325,52 +413,48 @@ class ConferenceController extends Controller
             if($input['payment_form_check'] == 1){
 
                 $mensagens = [
+                    'cc_name_info.required' => 'O Nome é obrigatório!',
+                    'cc_email_info.required' => 'O Email é obrigatório!',
+                    'cc_cpf_info.required' => 'O CPF é obrigatório!',
+                    'cc_date_info.required' => 'A Data de Nascimento é obrigatória!',
+                    'cc_phone_info.required' => 'O Telefone é obrigatório!',
                     'cc_address.required' => 'O Endereço de cobrança é obrigatório!',
                     'cc_number.required' => 'O Número do Endereço é obrigatório!',
                     'cc_district.required' => 'O Bairro é obrigatório!',
                     'cc_state.required' => 'O Estado é obrigatório!',
                     'cc_city.required' => 'A Cidade é obrigatória!',
                     'cc_zip.required' => 'O CEP é obrigatório!',
-                    'cc_name.required' => 'O Nome Impresso no Cartão é obrigatório!'
+                    'cc_name.required' => 'O Nome Impresso no Cartão é obrigatório!',
+                    'payment_form_check.required' => 'O Tipo do Pagamento é obrigatório!'
                 ];
 
                 $request->validate([
+                    'cc_name_info' => 'required',
+                    'cc_email_info' => 'required',
+                    'cc_cpf_info' => 'required',
+                    'cc_date_info' => 'required',
+                    'cc_phone_info' => 'required',
                     'cc_address' => 'required',
                     'cc_number' => 'required',
                     'cc_district' => 'required',
                     'cc_state' => 'required',
                     'cc_city' => 'required',
                     'cc_zip' => 'required',
-                    'cc_name' => 'required'
+                    'cc_name' => 'required',
+                    'payment_form_check' => 'required'
                 ], $mensagens);
-
-                // $user = Customer::find(\Auth::user()->id);
-
-                // $user->ddd = $request->ddd;
-                // $user->phone = $request->phone;
-                // $user->cc_address = $request->cc_address;
-                // $user->cc_address2 = $request->cc_address2;
-                // $user->cc_number = $request->cc_number;
-                // $user->cc_district = $request->cc_district;
-                // $user->cc_state = $request->cc_state;
-                // $user->cc_city = $request->cc_city;
-                // $user->cc_zip = $request->cc_zip;
-
-                // $user->save();
-
-                // $reference = md5((time() + 1) . $request->cpf);
 
                 $payment_form = 'credit';
                 $hash_cc = $input['encrypted_value'];    
                 
-                $holder = $moip->holders()->setFullname($input['cc_name'])
-                        ->setBirthDate("1990-10-10")
-                        ->setTaxDocument($input_cpf, 'CPF')
-                        ->setPhone(11, 66778899, 55)
+                $holder = $moip->holders()->setFullname($name_info)
+                        ->setBirthDate($date_born_info)
+                        ->setTaxDocument($cpf_info, 'CPF')
+                        ->setPhone($ddd, $number_phone, 55)
                         ->setAddress('BILLING',
-                            $input['cc_address'], $input['cc_number'],
-                            $input['cc_district'], $input['cc_city'], $input['cc_state'],
-                            $input['cc_zip'], $input['cc_address2']);   
+                            $address_info, $number_info,
+                            $district_info, $city_info, $state_info,
+                            $zip_info, $address2_info);   
 
                 $payment = $order->payments()
                     ->setCreditCardHash($hash_cc, $holder)
@@ -379,6 +463,34 @@ class ConferenceController extends Controller
                     ->execute();
     
             }elseif($input['payment_form_check'] == 2) {
+
+                $mensagens = [
+                    'boleto_name_info.required' => 'O Nome é obrigatório!',
+                    'boleto_email_info.required' => 'O Email é obrigatório!',
+                    'boleto_cpf_info.required' => 'O CPF é obrigatório!',
+                    'boleto_date_info.required' => 'A Data de Nascimento é obrigatória!',
+                    'boleto_phone_info.required' => 'O Telefone é obrigatório!',
+                    'boleto_address.required' => 'O Endereço de cobrança é obrigatório!',
+                    'boleto_number.required' => 'O Número do Endereço é obrigatório!',
+                    'boleto_district.required' => 'O Bairro é obrigatório!',
+                    'boleto_state.required' => 'O Estado é obrigatório!',
+                    'boleto_city.required' => 'A Cidade é obrigatória!',
+                    'boleto_zip.required' => 'O CEP é obrigatório!',
+                ];
+
+                $request->validate([
+                    'boleto_name_info' => 'required',
+                    'boleto_email_info' => 'required',
+                    'boleto_cpf_info' => 'required',
+                    'boleto_date_info' => 'required',
+                    'boleto_phone_info' => 'required',
+                    'boleto_address' => 'required',
+                    'boleto_number' => 'required',
+                    'boleto_district' => 'required',
+                    'boleto_state' => 'required',
+                    'boleto_city' => 'required',
+                    'boleto_zip' => 'required',
+                ], $mensagens);
 
                 $payment_form = 'boleto';
                 $logo_uri = 'https://cdn.moip.com.br/wp-content/uploads/2016/05/02163352/logo-moip.png';
@@ -391,6 +503,39 @@ class ConferenceController extends Controller
                     ->execute();
             }
 
+            $order_id = DB::table('orders')->insertGetId([
+                'hash' => md5((time() . $payment->getId()) . md5('papainoel')),
+                'quantity' => 1,
+                'date_used' => null,
+                'gatway_hash' => md5($payment->getId()),
+                'gatway_reference' => $payment->getId(),
+                'gatway_status' => $payment->getStatus(),
+                'gatway_payment_method' => $payment_form,
+                'participante_id' => 1,
+                // 'participante_id' => Auth::user()->id,
+                'created_at' => now()
+            ]);
+
+            if($input['payment_form_check'] == 2){
+
+                $boleto_detail_id = DB::table('boleto_details')->insertGetId([
+                    'value' => $payment->getAmount()->total,
+                    'href' => $payment->getHrefBoleto(),
+                    'line_code' => $payment->getLineCodeBoleto(),
+                    'href_print' => $payment->getHrefPrintBoleto(),
+                    'order_id' => $order_id,
+                    'created_at' => now()
+                ]);
+            }
+
+            if($coupon){
+                $inscricao_coupom_id = DB::table('orders_coupons')->insertGetId([
+                    'order_id' => $order_id,
+                    'coupon_id' => $coupon->id
+                ]);
+            }
+
+            $array_participantes = [];
             foreach($dict_lotes as $i => $dict){
 
                 $lote = Lote::where('hash', $dict['lote_hash'])->first();
@@ -400,56 +545,39 @@ class ConferenceController extends Controller
                     'number' => crc32((time() + $i) . md5('papainoel')),
                     'created_at' => now(),
                     'status' => 1,
-                    // 'participante_id' => 1,
-                    'participante_id' => Auth::user()->id,
+                    'participante_id' => 1,
+                    // 'participante_id' => Auth::user()->id,
                     'lote_id' => $lote->id
                 ]);
 
-                $order_id = DB::table('orders')->insertGetId([
-                    'hash' => md5((time() + $i) . $participantes_lote_id),
+                array_push($array_participantes, $participantes_lote_id);
+
+                $order_item_id = DB::table('order_items')->insertGetId([
                     'quantity' => 1,
-                    'date_used' => null,
-                    'gatway_hash' => md5($payment->getId()),
-                    'gatway_reference' => $payment->getId(),
-                    'gatway_status' => $payment->getStatus(),
-                    'gatway_payment_method' => $payment_form,
+                    'value' => $lote->value,
+                    'order_id' => $order_id,
                     'participante_lote_id' => $participantes_lote_id,
                     'created_at' => now()
                 ]);
+            }
 
-                if($input['payment_form_check'] == 2){
-
-                    $boleto_detail_id = DB::table('boleto_details')->insertGetId([
-                        'value' => $payment->getAmount(),
-                        'href' => $payment->getHrefBoleto(),
-                        'line_code' => $payment->getLineCodeBoleto(),
-                        'href_print' => $payment->getHrefPrintBoleto(),
-                        'order_id' => $order_id,
-                        'created_at' => now()
-                    ]);
-                }
-
-                if($coupon){
-                    $inscricao_coupom_id = DB::table('inscricoes_coupons')->insertGetId([
-                        'participante_lote_id' => $participantes_lote_id,
-                        'coupon_id' => $coupon->id
-                    ]);
-                }
+            foreach($array_participantes as $k => $participante_id){
 
                 foreach(array_keys($input) as $field){
 
                     if(str_contains($field, 'newfield_')){
                         $id = explode("_", $field);
-                        $id = $id[1];
+                        $id = $id[2];
 
                         $question = Question::where('id', $id)->first();
 
-                        if($input['newfield_'.$id] != ""){
+                        if($input['newfield_'. $k+1 . '_'. $id] != ""){
 
                             $option_answer_id = DB::table('option_answers')->insertGetId([
-                                'answer' => $input['newfield_'.$id],
+                                'answer' => $input['newfield_'. $k+1 . '_'. $id],
                                 'question_id' => $question->id,
-                                'inscricao_id' => $participantes_lote_id,
+                                'participante_lote_id' => $participante_id,
+                                'order_id' => $order_id,
                                 'created_at' => now()
                             ]);
                         }
@@ -458,11 +586,11 @@ class ConferenceController extends Controller
             }
 
         } catch (\Moip\Exceptions\UnautorizedException $e) {
-            echo $e->getMessage();
+            return back()->withErrors(['error' => 'Compra não autorizada.']);
         } catch (\Moip\Exceptions\ValidationException $e) {
-            printf($e->__toString());
+            return back()->withErrors(['error' => 'Compra não autorizada.']);
         } catch (\Moip\Exceptions\UnexpectedException $e) {
-            echo $e->getMessage();
+            return back()->withErrors(['error' => 'Compra não autorizada.']);
         }
     }
 }
