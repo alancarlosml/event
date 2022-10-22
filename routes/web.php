@@ -31,6 +31,7 @@ Route::post('painel/places/get-cities-by-state','App\Http\Controllers\EventHomeC
 
 // PAINEL - CRIAR EVENTO
 Route::get('painel/meus-eventos', 'App\Http\Controllers\EventAdminController@myEvents')->middleware(['auth'])->name('event_home.my_events');
+Route::get('painel/meus-eventos', 'App\Http\Controllers\EventAdminController@myEvents')->middleware(['auth'])->name('event_home.my_events');
 Route::get('painel/meus-eventos/{hash}/detalhes', 'App\Http\Controllers\EventAdminController@myEventsShow')->middleware(['auth'])->name('event_home.my_events_show');
 Route::get('painel/meus-eventos/{hash}/contatos', 'App\Http\Controllers\EventAdminController@contacts')->middleware(['auth'])->name('event_home.contacts');
 Route::get('painel/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@myEventsEdit')->middleware(['auth'])->name('event_home.my_events_edit');

@@ -28,29 +28,33 @@
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-geo-alt"></i>
-                                    <h3>Endereço</h3>
-                                    <p>A108 Adam Street,<br>New York, NY 535022</p>
+                                    <h3>Endereço
+                                        <p>A108 Adam Street,<br>New York, NY 535022</p>
+                                    </h3>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-telephone"></i>
-                                    <h3>Telefones</h3>
-                                    <p>+1 5589 55488 55<br>+1 6678 254445 41</p>
+                                    <h3>Telefones
+                                        <p>+1 5589 55488 55<br>+1 6678 254445 41</p>
+                                    </h3>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-envelope"></i>
-                                    <h3>Email</h3>
-                                    <p>info@example.com<br>contact@example.com</p>
+                                    <h3>Email
+                                        <p>info@example.com<br>contact@example.com</p>
+                                    </h3>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-clock"></i>
-                                    <h3>Horário de funcionamento</h3>
-                                    <p>Seg - Sex<br>9:00AM - 05:00PM</p>
+                                    <h3>Funcionamento
+                                        <p>Seg - Sex<br> 9:00AM - 5:00PM</p>
+                                    </h3>
                                 </div>
                             </div>
                         </div>

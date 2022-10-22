@@ -1,16 +1,16 @@
 <x-site-layout>
     <section id="hero" class="hero owl-carousel">
         <div class="hero_img">
-            <img src="../../site/home1.jpg" alt=""> 
+            <img src="{{ asset('site/home1.jpg')}}" alt=""> 
         </div>
         <div class="hero_img">
-            <img src="../../site/home2.jpg" alt="">
+            <img src="{{ asset('site/home2.jpg')}}" alt="">
         </div>
         <div class="hero_img">
-            <img src="../../site/home3.jpg" alt="">
+            <img src="{{ asset('site/home3.jpg')}}" alt="">
         </div>
         <div class="hero_img">
-            <img src="../../site/home4.jpg" alt="">
+            <img src="{{ asset('site/home4.jpg')}}" alt="">
         </div>
     </section><!-- End Hero -->
 
