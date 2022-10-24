@@ -2504,7 +2504,11 @@ footer{
     width:100%
 }
 .footer-logo{
-    margin-bottom:50px
+    margin-bottom:20px
+}
+
+.footer-logo img{
+    width: 200px;
 }
 #count{
     background:#f6f9f9

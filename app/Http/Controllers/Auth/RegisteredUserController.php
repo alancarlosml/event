@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Participante;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -20,6 +20,8 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
+        session()->put('previousUrl', url()->previous());
+
         return view('auth.register');
     }
 
@@ -34,21 +36,28 @@ class RegisteredUserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:participantes',
+            'phone' => 'required|string',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        $user = Participante::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'status' => 2 // cadastrado mas não confirmado ainda
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
+        // Auth::login($user);
 
-        return redirect(RouteServiceProvider::HOME);
+        // $previousUrl = str_replace(url('/'), '', session()->get('previousUrl', '/'));
+
+        return redirect('/painel/login');
+
+        // return redirect()->intended($previousUrl);
     }
 }

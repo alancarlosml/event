@@ -14,15 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::create('order_items', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->integer('quantity');
             $table->double('value');
-            $table->integer('order_id')->unsigned()->index();
+            $table->integer('order_id')->index();
             $table->foreign('order_id')
                 ->references('id')
                 ->on('orders')
                 ->onDelete('cascade');
-            $table->integer('participante_lote_id')->unsigned()->index();
+            $table->integer('participante_lote_id')->index();
             $table->foreign('participante_lote_id')
                 ->references('id')
                 ->on('participantes_lotes')

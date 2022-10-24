@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('lotes', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('name');
             $table->string('description');
             $table->double('value');
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->datetime('datetime_begin');
             $table->datetime('datetime_end');
             $table->integer('order');
-            $table->integer('event_id')->unsigned()->index();;
+            $table->integer('event_id')->index();
             $table->foreign('event_id')
                   ->references('id')
                   ->on('events')

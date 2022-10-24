@@ -13,13 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('option_values', function (Blueprint $table) {
-            $table->id();
-            $table->string('value');
-            $table->integer('question_id')->unsigned()->index();
-            $table->foreign('question_id')
+        Schema::create('boleto_details', function (Blueprint $table) {
+            $table->increments('id');
+            $table->double('value');
+            $table->string('href');
+            $table->string('line_code');
+            $table->string('href_print');
+            $table->timestamp('expiration_date');
+            $table->integer('order_id')->index();
+            $table->foreign('order_id')
                 ->references('id')
-                ->on('questions')
+                ->on('orders')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -32,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('option_values');
+        Schema::dropIfExists('boleto_details');
     }
 };

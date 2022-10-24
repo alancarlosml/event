@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::create('event_times', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->timestamp('time', $precision = 0);
             $table->integer('status');
-            $table->integer('event_dates_id')->unsigned()->index();;
+            $table->integer('event_dates_id')->index()->nullable();
             $table->foreign('event_dates_id')
                   ->references('id')
                   ->on('event_dates')

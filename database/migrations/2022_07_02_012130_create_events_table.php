@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('events', function (Blueprint $table) {
-            $table->id();        
+            $table->increments('id');     
             $table->string('hash')->unique();    
             $table->string('name')->unique();
             $table->string('subtitle');
@@ -25,17 +25,17 @@ return new class extends Migration
             $table->string('max_tickets');
             $table->string('theme');
             $table->integer('status');
-            $table->integer('owner_id')->unsigned()->index();
+            $table->integer('owner_id')->index()->nullable();
             $table->foreign('owner_id')
                 ->references('id')
                 ->on('owners')
                 ->onDelete('cascade');
-            $table->integer('place_id')->unsigned()->index();
+            $table->integer('place_id')->index()->nullable();
             $table->foreign('place_id')
                 ->references('id')
                 ->on('places')
                 ->onDelete('cascade');
-            $table->integer('area_id')->unsigned()->index();
+            $table->integer('area_id')->index()->nullable();
             $table->foreign('area_id')
                   ->references('id')
                   ->on('areas')

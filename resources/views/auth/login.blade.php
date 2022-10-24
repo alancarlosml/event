@@ -4,7 +4,9 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="logo text-center mb-5 mt-5">
-                    <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
+                    <a href="/">
+                        <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
+                    </a>
                 </div>
             </div>
             <div class="row justify-content-center">
@@ -53,7 +55,7 @@
                                     </div>
                                 </div>
                             </form>
-                            <p class="text-center mt-2">Não é cadastrado? <a data-toggle="tab" href="https://preview.colorlib.com/theme/bootstrap/login-form-14/#signup">Cadastrar</a></p>
+                            <p class="text-center mt-2">Não é cadastrado? <a href="/painel/cadastrar">Cadastrar</a></p>
                         </div>
                     </div>
                 </div>

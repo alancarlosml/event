@@ -14,18 +14,18 @@ return new class extends Migration
     public function up()
     {
         Schema::create('questions', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('question');
             $table->integer('required');
             $table->integer('unique');
             $table->integer('order');
             $table->integer('status');
-            $table->integer('option_id')->unsigned()->index();
+            $table->integer('option_id')->index();
             $table->foreign('option_id')
                 ->references('id')
                 ->on('options')
                 ->onDelete('cascade');
-            $table->integer('event_id')->unsigned()->index();
+            $table->integer('event_id')->index();
             $table->foreign('event_id')
                 ->references('id')
                 ->on('events')

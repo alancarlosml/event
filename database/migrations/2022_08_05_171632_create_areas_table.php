@@ -13,19 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email');
-            $table->string('phone');
-            $table->string('subject');
-            $table->text('text');
-            $table->integer('read');
-            $table->integer('event_id')->unsigned()->index();
-            $table->foreign('event_id')
+        Schema::create('areas', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name')->unique();
+            $table->string('slug')->unique();
+            $table->integer('category_id')->index();
+            $table->foreign('category_id')
                 ->references('id')
-                ->on('events')
+                ->on('categories')
                 ->onDelete('cascade');
+            $table->string('status');
             $table->timestamps();
         });
     }
@@ -37,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('areas');
     }
 };

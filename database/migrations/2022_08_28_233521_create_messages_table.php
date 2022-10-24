@@ -13,17 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('boleto_details', function (Blueprint $table) {
-            $table->id();
-            $table->double('value');
-            $table->string('href');
-            $table->string('line_code');
-            $table->string('href_print');
-            $table->timestamp('expiration_date');
-            $table->integer('order_id')->unsigned()->index();
-            $table->foreign('order_id')
+        Schema::create('messages', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('subject');
+            $table->text('text');
+            $table->integer('read');
+            $table->integer('event_id')->index();
+            $table->foreign('event_id')
                 ->references('id')
-                ->on('orders')
+                ->on('events')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -36,6 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('boleto_details');
+        Schema::dropIfExists('messages');
     }
 };

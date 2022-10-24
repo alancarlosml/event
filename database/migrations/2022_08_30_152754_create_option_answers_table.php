@@ -14,19 +14,19 @@ return new class extends Migration
     public function up()
     {
         Schema::create('option_answers', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('answer');
-            $table->integer('question_id')->unsigned()->index();
+            $table->integer('question_id')->index();
             $table->foreign('question_id')
                 ->references('id')
                 ->on('questions')
                 ->onDelete('cascade');
-            $table->integer('participante_lote_id')->unsigned()->index();
+            $table->integer('participante_lote_id')->index();
             $table->foreign('participante_lote_id')
                 ->references('id')
                 ->on('participantes_lotes')
                 ->onDelete('cascade');
-            $table->integer('order_id')->unsigned()->index();
+            $table->integer('order_id')->index();
             $table->foreign('order_id')
                 ->references('id')
                 ->on('orders')

@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('hash')->unique();  
             $table->integer('quantity');  
             $table->timestamp('date_used');  
@@ -22,11 +22,16 @@ return new class extends Migration
             $table->string('gatway_reference');  
             $table->string('gatway_status');  
             $table->string('gatway_payment_method');  
-            $table->integer('order_id')->unsigned()->index();
-            $table->foreign('order_id')
+            $table->integer('participante_lote_id')->index();
+            $table->foreign('participante_lote_id')
                 ->references('id')
-                ->on('orders')
+                ->on('participantes_lotes')
                 ->onDelete('cascade');
+            // $table->integer('participante_id')->index();
+            // $table->foreign('participante_id')
+            //     ->references('id')
+            //     ->on('participantes')
+            //     ->onDelete('cascade');
             $table->timestamps();
         });
     }

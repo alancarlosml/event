@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('coupons', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('hash')->unique();
             $table->string('code')->unique();
             $table->integer('discount_type');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('limit_buy');
             $table->integer('limit_tickets');
             $table->integer('status');
-            $table->integer('event_id')->unsigned()->index();
+            $table->integer('event_id')->index();
             $table->foreign('event_id')
                   ->references('id')
                   ->on('events')

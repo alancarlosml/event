@@ -13,16 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('orders_coupons', function (Blueprint $table) {
-            $table->bigIncrements('id');        
-            $table->integer('order_id');
-            $table->foreign('order_id')
-                ->references('id')
-                ->on('orders')->onDelete('cascade');
-            $table->integer('coupon_id');
+        Schema::create('coupons_lotes', function (Blueprint $table) {
+            $table->increments('id');       
+            $table->integer('coupon_id')->index();
             $table->foreign('coupon_id')
                 ->references('id')
                 ->on('coupons')->onDelete('cascade');
+            $table->integer('lote_id')->index();
+            $table->foreign('lote_id')
+                ->references('id')
+                ->on('lotes')->onDelete('cascade');
         });
     }
 
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('inscricoes_coupons');
+        Schema::dropIfExists('coupons_lotes');
     }
 };

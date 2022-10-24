@@ -55,7 +55,7 @@
             }
 
             .ftco-section .img, .ftco-section .login-wrap {
-                width: 50%; 
+                width: 100%; 
             }
             @media (max-width: 991.98px) {
                 .ftco-section .img, .ftco-section .login-wrap {
@@ -229,15 +229,15 @@
             }
 
             .ftco-section .btn.btn-primary {
-                background: #e3b04b !important;
-                border: 1px solid #e3b04b !important;
+                background: #ea1d25 !important;
+                border: 1px solid #f75e63 !important;
                 color: #fff !important; 
             }
 
             .ftco-section .btn.btn-primary:hover {
-                border: 1px solid #e3b04b;
-                background: transparent;
-                color: #e3b04b; 
+                border: 1px solid #ea1d25;
+                background: #f75e63 !important;
+                /* color: #f75e63;  */
             }
 
             .ftco-section .btn.btn-primary.btn-outline-primary {

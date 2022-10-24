@@ -98,71 +98,60 @@
         {{$slot}}
         <footer>
             <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8 col-md-12 col-xs-12">
-                        <div class="subscribe-inner wow fadeInDown animated" data-wow-delay="0.3s" style="visibility: visible;-webkit-animation-delay: 0.3s; -moz-animation-delay: 0.3s; animation-delay: 0.3s;">
-                            <h2 class="subscribe-title">To Get Nearly Updates</h2>
-                            <form class="text-center form-inline">
-                                <input class="mb-20 form-control" name="email" placeholder="Enter Your Email Here">
-                                <button type="submit" class="btn btn-common sub-btn" data-style="zoom-in" data-spinner-size="30" name="submit" id="submit">
-                                <span class="ladda-label"><i class="lni-check-box"></i> Subscribe</span>
-                                </button>
-                            </form>
-                        </div>
+                <div class="row justify-content-center gy-4">
+                    <div class="col-lg-5 col-md-12">
                         <div class="footer-logo">
-                            {{-- <img src="assets_conference/logo.png" alt=""> --}}
+                            <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
                         </div>
                         <div class="social-icons-footer">
                             <ul>
                                 <li class="facebook"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-facebook-filled"></i></a></li>
                                 <li class="twitter"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-twitter-filled"></i></a></li>
                                 <li class="linkedin"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-linkedin-original"></i></a></li>
-                                <li class="google"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-google"></i></a></li>
-                                <li class="pinterest"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-pinterest"></i></a></li>
                             </ul>
                         </div>
-                        <div class="site-info">
-                            <p>Designed and Developed by <a href="http://uideck.com/" rel="nofollow">UIdeck</a></p>
-                        </div>
                     </div>
+                    <div class="col-lg-2 col-6 footer-links">
+                        <h4>Links úteis</h4>
+                        <ul>
+                          <li><i class="bi bi-chevron-right"></i> <a href="/">Home</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="/#planos">Planos e Preços</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="/eventos">Eventos</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="/#faq">Perguntas frequentes</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="/contato">Contato</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="/politica">Política de privacidade</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="/termos">Termos de uso</a></li>
+                        </ul>
+                      </div>
+            
+                      <div class="col-lg-2 col-6 footer-links">
+                        <h4>Nossos serviços</h4>
+                        <ul>
+                          <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="#">Product Management</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="#">Marketing</a></li>
+                          <li><i class="bi bi-chevron-right"></i> <a href="#">Graphic Design</a></li>
+                        </ul>
+                      </div>
+            
+                      <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+                        <h4>Contact Us</h4>
+                        <p>
+                          A108 Adam Street <br>
+                          New York, NY 535022<br>
+                          United States <br><br>
+                          <strong>Phone:</strong> +1 5589 55488 55<br>
+                          <strong>Email:</strong> info@example.com<br>
+                        </p>
+            
+                      </div>
                 </div>
             </div>
         </footer>
         <a href="#" class="back-to-top" style="display: block;">
             <i class="fa-solid fa-arrow-up"></i>
         </a>
-        <div id="preloader" style="display: none;">
-            <div class="sk-circle">
-                <div class="sk-circle1 sk-child"></div>
-                <div class="sk-circle2 sk-child"></div>
-                <div class="sk-circle3 sk-child"></div>
-                <div class="sk-circle4 sk-child"></div>
-                <div class="sk-circle5 sk-child"></div>
-                <div class="sk-circle6 sk-child"></div>
-                <div class="sk-circle7 sk-child"></div>
-                <div class="sk-circle8 sk-child"></div>
-                <div class="sk-circle9 sk-child"></div>
-                <div class="sk-circle10 sk-child"></div>
-                <div class="sk-circle11 sk-child"></div>
-                <div class="sk-circle12 sk-child"></div>
-            </div>
-        </div>
-        {{-- <script src="assets_conference/jquery-min.js.download"></script>
-        <script src="assets_conference/popper.min.js.download"></script>
-        <script src="assets_conference/bootstrap.min.js.download"></script>
-        <script src="assets_conference/color-switcher.js.download"></script>
-        <script src="assets_conference/jquery.countdown.min.js.download"></script>
-        <script src="assets_conference/waypoints.min.js.download"></script>
-        <script src="assets_conference/jquery.counterup.min.js.download"></script>
-        <script src="assets_conference/jquery.nav.js.download"></script>
-        <script src="assets_conference/jquery.easing.min.js.download"></script>
-        <script src="assets_conference/wow.js.download"></script>
-        <script src="assets_conference/jquery.slicknav.js.download"></script>
-        <script src="assets_conference/nivo-lightbox.js.download"></script>
-        <script src="assets_conference/video.js.download"></script>
-        <script src="assets_conference/main.js.download"></script>
-        <script src="assets_conference/form-validator.min.js.download"></script>
-        <script src="assets_conference/contact-form-script.min.js.download"></script> --}}
     </body>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>

@@ -171,6 +171,8 @@ class EventAdminController extends Controller
             $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('papainoel'));
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
             $validatedDataEvent['status'] = 0;
+
+            // dd($validatedDataEvent);
             
             $event = new Event();
             $event->fill($validatedDataEvent);
