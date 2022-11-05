@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('events', function (Blueprint $table) {
             $table->increments('id');     
             $table->string('hash')->unique();    
@@ -25,17 +27,21 @@ return new class extends Migration
             $table->string('max_tickets');
             $table->string('theme');
             $table->integer('status');
-            $table->integer('owner_id')->index()->nullable();
+            // $table->foreignId('owner_id')->nullable()
+            //     ->constrained('owners')
+            //     ->onDelete('set null');
+
+            $table->integer('owner_id')->index()->nullable()->unsigned();
             $table->foreign('owner_id')
                 ->references('id')
                 ->on('owners')
                 ->onDelete('cascade');
-            $table->integer('place_id')->index()->nullable();
+            $table->integer('place_id')->index()->nullable()->unsigned();
             $table->foreign('place_id')
                 ->references('id')
                 ->on('places')
                 ->onDelete('cascade');
-            $table->integer('area_id')->index()->nullable();
+            $table->integer('area_id')->index()->nullable()->unsigned();
             $table->foreign('area_id')
                   ->references('id')
                   ->on('areas')

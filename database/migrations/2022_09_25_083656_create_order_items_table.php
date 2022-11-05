@@ -13,22 +13,26 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('order_items', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('quantity');
             $table->double('value');
-            $table->integer('order_id')->index();
+            $table->integer('order_id')->index()->unsigned();
             $table->foreign('order_id')
                 ->references('id')
                 ->on('orders')
                 ->onDelete('cascade');
-            $table->integer('participante_lote_id')->index();
+            $table->integer('participante_lote_id')->index()->unsigned();
             $table->foreign('participante_lote_id')
                 ->references('id')
                 ->on('participantes_lotes')
                 ->onDelete('cascade');
             $table->timestamps();
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

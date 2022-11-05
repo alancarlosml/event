@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('places', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
@@ -21,7 +23,7 @@ return new class extends Migration
             $table->string('district');
             $table->string('zip');
             $table->string('complement');
-            $table->integer('city_id')->index();
+            $table->integer('city_id')->index()->unsigned();
             $table->foreign('city_id')
                   ->references('id')
                   ->on('cities')

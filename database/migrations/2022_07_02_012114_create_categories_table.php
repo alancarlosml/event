@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('categories', function (Blueprint $table) {
             $table->increments('id');
             $table->string('description')->unique();

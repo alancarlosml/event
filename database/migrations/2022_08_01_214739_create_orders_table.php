@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id');
             $table->string('hash')->unique();  
@@ -22,7 +24,7 @@ return new class extends Migration
             $table->string('gatway_reference');  
             $table->string('gatway_status');  
             $table->string('gatway_payment_method');  
-            $table->integer('participante_lote_id')->index();
+            $table->integer('participante_lote_id')->index()->unsigned();
             $table->foreign('participante_lote_id')
                 ->references('id')
                 ->on('participantes_lotes')

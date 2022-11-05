@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('configurations', function (Blueprint $table) {
             $table->increments('id');
             $table->double('tax');

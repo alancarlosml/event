@@ -13,10 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('option_values', function (Blueprint $table) {
             $table->increments('id');
             $table->string('value');
-            $table->integer('question_id')->index();
+            $table->integer('question_id')->index()->unsigned();
             $table->foreign('question_id')
                 ->references('id')
                 ->on('questions')

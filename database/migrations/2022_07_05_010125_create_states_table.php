@@ -13,8 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('states', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('code');
+            $table->string('name');
+            $table->string('uf');
+            $table->integer('region');
             $table->timestamps();
         });
     }

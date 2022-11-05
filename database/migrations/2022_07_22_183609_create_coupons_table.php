@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('coupons', function (Blueprint $table) {
             $table->increments('id');
             $table->string('hash')->unique();
@@ -22,7 +24,7 @@ return new class extends Migration
             $table->integer('limit_buy');
             $table->integer('limit_tickets');
             $table->integer('status');
-            $table->integer('event_id')->index();
+            $table->integer('event_id')->index()->unsigned();
             $table->foreign('event_id')
                   ->references('id')
                   ->on('events')

@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('boleto_details', function (Blueprint $table) {
             $table->increments('id');
             $table->double('value');
@@ -20,7 +22,7 @@ return new class extends Migration
             $table->string('line_code');
             $table->string('href_print');
             $table->timestamp('expiration_date');
-            $table->integer('order_id')->index();
+            $table->integer('order_id')->index()->unsigned();
             $table->foreign('order_id')
                 ->references('id')
                 ->on('orders')

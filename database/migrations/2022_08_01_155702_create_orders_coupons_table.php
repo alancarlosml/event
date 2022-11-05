@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('orders_coupons', function (Blueprint $table) {
             $table->increments('id');      
-            $table->integer('order_id')->index();
+            $table->integer('order_id')->index()->unsigned();
             $table->foreign('order_id')
                 ->references('id')
                 ->on('orders')->onDelete('cascade');
-            $table->integer('coupon_id')->index();
+            $table->integer('coupon_id')->index()->unsigned();
             $table->foreign('coupon_id')
                 ->references('id')
                 ->on('coupons')->onDelete('cascade');

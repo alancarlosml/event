@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('messages', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
@@ -21,7 +23,7 @@ return new class extends Migration
             $table->string('subject');
             $table->text('text');
             $table->integer('read');
-            $table->integer('event_id')->index();
+            $table->integer('event_id')->index()->unsigned();
             $table->foreign('event_id')
                 ->references('id')
                 ->on('events')

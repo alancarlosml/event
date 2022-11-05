@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('event_dates', function (Blueprint $table) {
             $table->increments('id');
             $table->date('date');
             $table->timestamp('time_begin', $precision = 0);
             $table->timestamp('time_end', $precision = 0);
             $table->integer('status');
-            $table->integer('event_id')->index()->nullable();
+            $table->integer('event_id')->index()->nullable()->unsigned();
             $table->foreign('event_id')
                   ->references('id')
                   ->on('events')

@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('questions', function (Blueprint $table) {
             $table->increments('id');
             $table->string('question');
@@ -20,12 +22,12 @@ return new class extends Migration
             $table->integer('unique');
             $table->integer('order');
             $table->integer('status');
-            $table->integer('option_id')->index();
+            $table->integer('option_id')->index()->unsigned();
             $table->foreign('option_id')
                 ->references('id')
                 ->on('options')
                 ->onDelete('cascade');
-            $table->integer('event_id')->index();
+            $table->integer('event_id')->index()->unsigned();
             $table->foreign('event_id')
                 ->references('id')
                 ->on('events')

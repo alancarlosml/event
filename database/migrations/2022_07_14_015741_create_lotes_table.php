@@ -13,6 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('lotes', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
@@ -30,7 +32,7 @@ return new class extends Migration
             $table->datetime('datetime_begin');
             $table->datetime('datetime_end');
             $table->integer('order');
-            $table->integer('event_id')->index();
+            $table->integer('event_id')->index()->unsigned();
             $table->foreign('event_id')
                   ->references('id')
                   ->on('events')

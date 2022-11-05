@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        
         Schema::create('areas', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name')->unique();
             $table->string('slug')->unique();
-            $table->integer('category_id')->index();
+            $table->integer('category_id')->index()->unsigned();
             $table->foreign('category_id')
                 ->references('id')
                 ->on('categories')
