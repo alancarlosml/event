@@ -1,39 +1,57 @@
-<x-guest-layout>
-    <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
+<x-guestsite-layout>
 
-        <div class="mb-4 text-sm text-gray-600">
-            {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-        </div>
-
-        @if (session('status') == 'verification-link-sent')
-            <div class="mb-4 font-medium text-sm text-green-600">
-                {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-            </div>
-        @endif
-
-        <div class="mt-4 flex items-center justify-between">
-            <form method="POST" action="{{ route('verification.send') }}">
-                @csrf
-
-                <div>
-                    <x-button>
-                        {{ __('Resend Verification Email') }}
-                    </x-button>
+    <section class="ftco-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="logo text-center mb-5 mt-5">
+                    <a href="/">
+                        <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
+                    </a>
                 </div>
-            </form>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-12 col-lg-10">
+                    <div class="wrap d-md-flex">
+                        <div class="login-wrap p-4 p-md-5">
+                            <div class="d-flex">
+                                <div class="w-100">
+                                    <h3 class="mb-4">Verique seu email</h3>
+                                </div>
+                            </div>
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-
-                <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900">
-                    {{ __('Log Out') }}
-                </button>
-            </form>
+                            <div>
+                        
+                                <div class="mb-4 text-sm text-gray-600">
+                                    {{ __('Obrigado por se cadastrar na Loja de Eventos! Antes de começar, você poderia verificar seu endereço de e-mail clicando no link que acabamos de enviar para você? Se você não recebeu o e-mail, teremos o prazer de lhe enviar outro.') }}
+                                </div>
+                        
+                                @if (session('status') == 'verification-link-sent')
+                                    <div class="mb-4 font-medium text-sm text-green-600">
+                                        {{ __('Um novo link de verificação foi enviado para o endereço de e-mail fornecido durante o registro.') }}
+                                    </div>
+                                @endif
+                        
+                                <div class="mt-4 d-flex items-center justify-between">
+                                    <form method="POST" action="{{ route('verification.send') }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary">
+                                            {{ __('Reenviar email') }}
+                                        </button> &nbsp;&nbsp;&nbsp;
+                                    </form>
+                        
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-secondary">
+                                            {{ __('Sair') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </x-auth-card>
-</x-guest-layout>
+    </section>
+
+</x-guestsite-layout>

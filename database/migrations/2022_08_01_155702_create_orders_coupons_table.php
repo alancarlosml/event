@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::disableForeignKeyConstraints();
-        
+
         Schema::create('orders_coupons', function (Blueprint $table) {
             $table->increments('id');      
             $table->integer('order_id')->index()->unsigned();
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('inscricoes_coupons');
+        Schema::dropIfExists('orders_coupons');
     }
 };

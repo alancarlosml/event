@@ -14,8 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'admin',
-        'passwords' => 'users',
+        'guard' => 'participante',
+        'passwords' => 'participantes',
     ],
 
     /*
@@ -36,11 +36,11 @@ return [
     */
 
     'guards' => [
-        'web' => [
+        'participante' => [
             'driver' => 'session',
-            'provider' => 'owners',
+            'provider' => 'participantes',
         ],
-        'admin' => [
+        'web' => [
             'driver' => 'session',
             'provider' => 'users',
         ],
@@ -64,9 +64,9 @@ return [
     */
 
     'providers' => [
-        'owners' => [
+        'participantes' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Owner::class,
+            'model' => App\Models\Participante::class,
         ],
         'users' => [
             'driver' => 'eloquent',
@@ -95,9 +95,9 @@ return [
     */
 
     'passwords' => [
-        'owners' => [
-            'provider' => 'owners',
-            'table' => 'owners_password_resets',
+        'participantes' => [
+            'provider' => 'participantes',
+            'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
         ],

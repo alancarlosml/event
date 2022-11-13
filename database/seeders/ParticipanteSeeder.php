@@ -17,59 +17,53 @@ class ParticipanteSeeder extends Seeder
     public function run()
     {
         DB::table('participantes')->insert([
-            'name' => Str::random(10),
-            'email' => Str::random(10).'@gmail.com',
+            'name' => 'Participante 1',
+            'email' => 'participante1@gmail.com',
             'password' => Hash::make('password'),
+            'cpf' => '02587763520',
             'phone' => '8955554544',
-            'status' => 1
+            'status' => 1,
+            'created_at' => date("Y-m-d H:i:s")
         ]);
 
         DB::table('participantes')->insert([
-            'name' => Str::random(10),
-            'email' => Str::random(10).'@gmail.com',
+            'name' => 'Participante 2',
+            'email' => 'participante2@gmail.com',
             'password' => Hash::make('password'),
+            'cpf' => '02587763520',
             'phone' => '8955554544',
-            'status' => 1
+            'status' => 1,
+            'created_at' => date("Y-m-d H:i:s")
         ]);
 
         DB::table('participantes')->insert([
-            'name' => Str::random(10),
-            'email' => Str::random(10).'@gmail.com',
+            'name' => 'Participante 3',
+            'email' => 'participante3@gmail.com',
             'password' => Hash::make('password'),
+            'cpf' => '02587763520',
             'phone' => '8955554544',
-            'status' => 1
+            'status' => 1,
+            'created_at' => date("Y-m-d H:i:s")
         ]);
 
         DB::table('participantes')->insert([
-            'name' => Str::random(10),
-            'email' => Str::random(10).'@gmail.com',
+            'name' => 'Participante 4',
+            'email' => 'participante4@gmail.com',
             'password' => Hash::make('password'),
+            'cpf' => '02587763520',
             'phone' => '8955554544',
-            'status' => 1
+            'status' => 0,
+            'created_at' => date("Y-m-d H:i:s")
         ]);
 
         DB::table('participantes')->insert([
-            'name' => Str::random(10),
-            'email' => Str::random(10).'@gmail.com',
+            'name' => 'Participante 5',
+            'email' => 'participante5@gmail.com',
             'password' => Hash::make('password'),
+            'cpf' => '02587763520',
             'phone' => '8955554544',
-            'status' => 1
-        ]);
-
-        DB::table('participantes')->insert([
-            'name' => Str::random(10),
-            'email' => Str::random(10).'@gmail.com',
-            'password' => Hash::make('password'),
-            'phone' => '8955554544',
-            'status' => 1
-        ]);
-
-        DB::table('participantes')->insert([
-            'name' => Str::random(10),
-            'email' => Str::random(10).'@gmail.com',
-            'password' => Hash::make('password'),
-            'phone' => '8955554544',
-            'status' => 1
+            'status' => 0,
+            'created_at' => date("Y-m-d H:i:s")
         ]);
     }
 }

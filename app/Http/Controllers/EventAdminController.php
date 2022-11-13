@@ -28,6 +28,24 @@ use Illuminate\Support\Facades\Auth;
 
 class EventAdminController extends Controller
 {
+
+    public function myRegistrations(){
+
+        $events = DB::table('orders')
+            ->join('participantes_lotes', 'orders.participante_lote_id', '=', 'participantes_lotes.id')
+            ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+            ->join('events', 'lotes.event_id', '=', 'events.id')
+            ->select('events.*', 
+                    'lotes.name as lote_name'
+                )
+            ->where('participantes.id', Auth::user()->id)
+            ->where('participantes_events.status', 1)
+            ->orderBy('events.*')
+            ->get();
+
+        return view('painel_admin.my_registrations', compact('events'));
+    }
+
     public function myEvents(){
         
         $events = DB::table('events')

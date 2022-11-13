@@ -28,8 +28,8 @@ class DashboardController extends Controller
             ->join('events', 'events.id', '=', 'lotes.event_id')
             ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
             ->join('participantes', 'participantes.id', '=', 'participantes_lotes.participante_id')
-            ->leftJoin('inscricoes_coupons', 'inscricoes_coupons.participante_lote_id', '=', 'participantes_lotes.id')
-            ->leftJoin('coupons', 'inscricoes_coupons.coupon_id', '=', 'coupons.id')
+            ->leftJoin('orders_coupons', 'orders.id', '=', 'orders_coupons.order_id')
+            ->leftJoin('coupons', 'orders_coupons.coupon_id', '=', 'coupons.id')
             ->selectRaw(DB::raw('max(MONTH(event_dates.date)) teste'))
             ->selectRaw("count(case when participantes_lotes.status = 1 then 1 end) as confirmado")
             ->selectRaw("sum(case 

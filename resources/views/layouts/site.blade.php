@@ -83,6 +83,9 @@
                           <a href="{{route('event_home.my_events')}}" class="dropdown-item">
                               Meus eventos
                           </a>
+                          <a href="{{route('event_home.my_registrations')}}" class="dropdown-item">
+                              Minhas inscrições
+                          </a>
                           <div class="dropdown-divider"></div>
                           <a class="dropdown-item" href="{{ route('logout') }}"
                               onclick="event.preventDefault();

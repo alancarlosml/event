@@ -42,15 +42,15 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = Participante::create([
+        $participante = Participante::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'status' => 2 // cadastrado mas não confirmado ainda
+            'status' => 1 // cadastrado mas não confirmado ainda
         ]);
 
-        event(new Registered($user));
+        event(new Registered($participante));
 
         // Auth::login($user);
 

@@ -291,6 +291,11 @@ section {
   text-decoration: none;
 }
 
+.dropdown-menu {
+
+    min-width: 12em !important;
+}
+
 .navbar .dropdown ul {
   display: block;
   position: absolute;

@@ -211,7 +211,7 @@
                     {
                         extend: 'csv',
                         text: 'CSV',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Situação do pagamento dos inscritos',
                         exportOptions: {
                             modifier: {
                                 page: 'current'
@@ -231,7 +231,7 @@
                     {
                         extend: 'excel',
                         text: 'Excel',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Situação do pagamento dos inscritos',
                         exportOptions: {
                             modifier: {
                                 page: 'current'
@@ -250,7 +250,7 @@
                     {
                         extend: 'pdf',
                         text: 'PDF',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Situação do pagamento dos inscritos',
                         exportOptions: {
                             modifier: {
                                 page: 'current'
@@ -262,7 +262,7 @@
                     {
                         extend: 'print',
                         text: 'Imprimir',
-                        title: 'Situação do pagamento dos inscritos - {{ $event->name }}',
+                        title: 'Situação do pagamento dos inscritos',
                         exportOptions: {
                             modifier: {
                                 page: 'current'

@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::disableForeignKeyConstraints();
-        
+
         Schema::create('participantes', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->string('role');
+            $table->string('cpf');
             $table->string('phone');
             $table->integer('status');
             $table->timestamps();

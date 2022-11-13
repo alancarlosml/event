@@ -14,12 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::disableForeignKeyConstraints();
-        
+
         Schema::create('participantes_lotes', function (Blueprint $table) {
             $table->increments('id');       
             $table->string('hash')->unique(); 
             $table->integer('number')->unique();        
-            $table->timestamp('created_at');        
             $table->integer('status');        
             $table->integer('participante_id')->index()->unsigned();
             $table->foreign('participante_id')
@@ -29,6 +28,7 @@ return new class extends Migration
             $table->foreign('lote_id')
                 ->references('id')
                 ->on('lotes')->onDelete('cascade');
+            $table->timestamp('created_at');        
         });
     }
 

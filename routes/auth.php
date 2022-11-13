@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Route;
 // Route::get('login', 'App\Http\Controllers\Auth\AuthenticatedSessionController@create')->name('login');
 
 Route::middleware('guest')->group(function () {
-    Route::get('painel/cadastrar', [RegisteredUserController::class, 'create'])
-    ->name('register');
+
+    Route::get('painel/cadastrar', [RegisteredUserController::class, 'create'])->name('register');
     
     Route::post('painel/cadastrar', [RegisteredUserController::class, 'store']);
     
@@ -22,24 +22,19 @@ Route::middleware('guest')->group(function () {
 
     Route::post('painel/login', [AuthenticatedSessionController::class, 'store'])->name('login');
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-                ->name('password.request');
+    Route::get('painel/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
 
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-                ->name('password.email');
+    Route::post('painel/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-                ->name('password.reset');
+    Route::get('painel/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-                ->name('password.update');
+    Route::post('painel/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('verify-email', [EmailVerificationPromptController::class, '__invoke'])
-                ->name('verification.notice');
+Route::middleware('auth:participante')->group(function () {
+    Route::get('painel/verify-email', [EmailVerificationPromptController::class, '__invoke'])->name('verification.notice');
 
-    Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
+    Route::get('painel/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
                 ->middleware(['signed', 'throttle:6,1'])
                 ->name('verification.verify');
 
@@ -47,11 +42,9 @@ Route::middleware('auth')->group(function () {
                 ->middleware('throttle:6,1')
                 ->name('verification.send');
 
-    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
-                ->name('password.confirm');
+    Route::get('painel/confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
 
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+    Route::post('painel/confirm-password', [ConfirmablePasswordController::class, 'store']);
 
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-                ->name('logout');
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

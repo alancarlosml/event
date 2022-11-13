@@ -12,6 +12,7 @@ use App\Models\Contact;
 use App\Models\Event;
 use App\Models\State;
 // use App\Models\Faq;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -22,6 +23,8 @@ class HomeController extends Controller
         // $url = url('/');
         // $description = 'Bilhete Mania - Venda de ingressos online';
         // $image = url('img/favicon/favicon-96x96.png');
+
+        // dd(Auth::getDefaultDriver());
 
         $category = new Category;
         // $event = new Event;
