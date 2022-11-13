@@ -50,14 +50,21 @@ class RegisteredUserController extends Controller
             'status' => 1 // cadastrado mas não confirmado ainda
         ]);
 
+        $email_participante = $request->email;
+
         event(new Registered($participante));
 
         // Auth::login($user);
 
         // $previousUrl = str_replace(url('/'), '', session()->get('previousUrl', '/'));
 
-        return redirect('/painel/login');
+        return redirect('/cadastro/sucesso')->with($email_participante);
 
         // return redirect()->intended($previousUrl);
+    }
+
+    public function verify(Request $request){
+
+        return view('auth.verify');
     }
 }

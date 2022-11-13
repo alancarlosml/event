@@ -14,21 +14,24 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
 
+    Route::get('cadastro/sucesso', [RegisteredUserController::class, 'verify'])->name('register.success');
+    
     Route::get('painel/cadastrar', [RegisteredUserController::class, 'create'])->name('register');
     
     Route::post('painel/cadastrar', [RegisteredUserController::class, 'store']);
     
     Route::get('painel/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-
+    
     Route::post('painel/login', [AuthenticatedSessionController::class, 'store'])->name('login');
-
+    
     Route::get('painel/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-
+    
     Route::post('painel/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
-
+    
     Route::get('painel/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-
+    
     Route::post('painel/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+    
 });
 
 Route::middleware('auth:participante')->group(function () {
