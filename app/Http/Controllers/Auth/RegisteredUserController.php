@@ -58,7 +58,8 @@ class RegisteredUserController extends Controller
 
         // $previousUrl = str_replace(url('/'), '', session()->get('previousUrl', '/'));
 
-        return redirect('/cadastro/sucesso')->with($email_participante);
+        return view('auth.verify', compact('email_participante'));
+        // return redirect('/cadastro/sucesso')->with('email_participante');
 
         // return redirect()->intended($previousUrl);
     }

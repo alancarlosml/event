@@ -32,7 +32,7 @@ class CategoryController extends Controller
 
         $input = $request->all();
 
-        $input['slug'] = $slug = Str::slug($input['description'], '-');
+        $input['slug'] = Str::slug($input['description'], '-');
 
         if(isset($input['status'])){
             $input['status'] = 1;
@@ -62,7 +62,7 @@ class CategoryController extends Controller
 
         $input = $request->all();
 
-        $input['slug'] = $slug = Str::slug($input['description'], '-');
+        $input['slug'] = Str::slug($input['description'], '-');
 
         if(isset($input['status'])){
             $input['status'] = 1;

@@ -51,11 +51,11 @@
                         <div class="card-body">
                           <div class="form-group">
                             <label for="name">Nome</label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Nome">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Nome" value="{{ old('name') ?? '' }}">
                           </div>
                           <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="text" class="form-control" id="email" name="email" placeholder="Email">
+                            <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="{{ old('email') ?? '' }}">
                           </div>
                           <div class="form-group">
                             <label for="password">Senha</label>

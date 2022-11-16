@@ -65,6 +65,10 @@
                                 <label for="phone">Telefone</label>
                                 <input type="text" class="form-control" id="phone" name="phone" placeholder="Telefone" value="{{$participante->phone}}">
                             </div>
+                            <div class="form-group">
+                                <label for="cpf">CPF</label>
+                                <input type="text" class="form-control" id="cpf" name="cpf" placeholder="CPF" value="{{$participante->cpf}}">
+                            </div>
                         </div>
                         <!-- /.card-body -->
                         <div class="form-check pb-3">

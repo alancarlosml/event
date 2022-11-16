@@ -23,6 +23,7 @@ class Participante extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'phone',
         'password',
         'status'

@@ -51,7 +51,7 @@
                         <div class="card-body">
                           <div class="form-group">
                             <label for="description">Descrição</label>
-                            <input type="text" class="form-control" id="description" name="description" placeholder="Descrição" value="{{$category->description}}">
+                            <input type="text" class="form-control" id="description" name="description" placeholder="Descrição" value="{{$category->description}}" value="{{ old('description') ?? $category->description }}">
                           </div>
                         </div>
                         <!-- /.card-body -->

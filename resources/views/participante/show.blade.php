@@ -61,6 +61,12 @@
                         </p>
                     </div>
                     <div class="form-group">
+                        <label for="cpf">CPF</label>
+                        <p class="text-muted" style="font-size: 18px">
+                            {{$participante->cpf}}
+                        </p>
+                    </div>
+                    <div class="form-group">
                         <label for="status">Ativo</label>
                         <p class="text-muted" style="font-size: 18px">
                             @if($participante->status == 1) 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 use App\Models\Area;
 use App\Models\Category;
@@ -36,6 +37,8 @@ class AreaController extends Controller
 
         $input = $request->all();
 
+        $input['slug'] = Str::slug($input['name'], '-');
+
         $input['category_id'] = $category_id;
 
         Area::create($input);
@@ -63,6 +66,8 @@ class AreaController extends Controller
         ]);
 
         $input = $request->all();
+
+        $input['slug'] = Str::slug($input['name'], '-');
 
         if(isset($input['status'])){
             $input['status'] = 1;

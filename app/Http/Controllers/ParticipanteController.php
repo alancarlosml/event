@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 use App\Models\Participante;
 
@@ -37,7 +38,11 @@ class ParticipanteController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required'
+            'name' => 'required',
+            'email' => 'required|email|unique:participantes,email',
+            'password' => 'required|min:8',
+            'cpf' => 'required',
+            'phone' => 'required'
         ]);
 
         $input = $request->all();
@@ -59,7 +64,11 @@ class ParticipanteController extends Controller
         $participante = Participante::findOrFail($id);
 
         $this->validate($request, [
-            'name' => 'required'
+            'name' => 'required',
+            'email' => 'required|email|unique:participantes,email,' . $participante->id,
+            'password' => 'nullable|min:8',
+            'cpf' => 'required',
+            'phone' => 'required'
         ]);
 
         $input = $request->all();
@@ -68,6 +77,12 @@ class ParticipanteController extends Controller
             $input['status'] = 1;
         }else{
             $input['status'] = 0;
+        }
+
+        if( empty( $input['password'] ) ){
+            unset($input['password']);
+        }else{
+            Hash::make($input['password']);
         }
 
         $participante->fill($input)->save();

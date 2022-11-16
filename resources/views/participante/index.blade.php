@@ -210,6 +210,12 @@
 
     @push('footer')
         <script>
+            function removeData(id){
+                $('#modalMsgRemove-' + id).modal('show');
+            }
+            function removeSucc(id){
+                $('#btn-remove-hidden-' + id).click();
+            }
             $(document).ready(function() {
             });
         </script>

@@ -11,6 +11,7 @@ class Area extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'category_id',
         'status'
     ];
