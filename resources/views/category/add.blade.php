@@ -50,7 +50,7 @@
                         @csrf
                         <div class="card-body">
                           <div class="form-group">
-                            <label for="description">Descrição</label>
+                            <label for="description">Descrição*</label>
                             <input type="text" class="form-control" id="description" name="description" placeholder="Descrição" value="{{ old('description') ?? '' }}">
                           </div>
                         </div>

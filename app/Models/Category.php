@@ -24,7 +24,7 @@ class Category extends Model
     public function getAll(){
         
         $categories = Category::where('categories.status', 1)
-                        ->orderBy('categories.created_at','ASC')
+                        ->orderBy('categories.description','ASC')
                         ->get();
 
         return $categories;

@@ -19,7 +19,7 @@
                                 </div>
                             </div>
 
-                            <div class="mb-4 text-sm text-gray-600">
+                            <div class="mb-4 text-lg text-gray-600">
                                 {{ __('Esqueceu sua senha? Sem problemas. Basta nos informar seu endereço de e-mail e nós lhe enviaremos um link de redefinição de senha que permitirá que você escolha uma nova.') }}
                             </div>
                     
@@ -29,7 +29,7 @@
                             <!-- Validation Errors -->
                             <x-auth-validation-errors class="mb-4" :errors="$errors" />
                     
-                            <form method="POST" action="{{ route('password.email') }}">
+                            <form method="POST" action="{{ route('password.email') }}" id="form-submit">
                                 @csrf
                     
                                 <!-- Email Address -->
@@ -40,7 +40,7 @@
                                 </div>
                     
                                 <div class="flex items-center justify-end mt-4">
-                                    <x-button class="btn btn-primary">
+                                    <x-button class="btn btn-primary" id="btn-submit">
                                         {{ __('Enviar email') }}
                                     </x-button>
                                 </div>
@@ -51,5 +51,13 @@
             </div>
         </div>
     </section>
-
+    @push('footer')
+        <script>
+            $(document).ready(function() {
+                $(document).on('submit', '#form-submit', function() {
+                    $('#btn-submit').attr('disabled', 'disabled');
+                });
+            });
+        </script>
+    @endpush
 </x-guestsite-layout>

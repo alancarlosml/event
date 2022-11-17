@@ -17,6 +17,16 @@
         @stack('head')
 
         <style>
+            .text-red-600 { color: #e53e3e; }
+            .text-green-600 { color: #38a169; }
+            .text-gray-600 { color: #718096; }
+
+            .text-base { font-size: 1rem; }
+            .text-sm { font-size: .875rem; }
+            .text-lg { font-size: 1.125rem; }
+            .text-xl { font-size: 1.25rem; }
+            .font-medium { font-weight: 500; }
+
             .ftco-section .ftco-section {
                 padding: 7em 0; 
             }

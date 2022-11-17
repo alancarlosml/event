@@ -31,7 +31,7 @@
                             <x-auth-session-status class="mb-4" :status="session('status')" />
                             <!-- Validation Errors -->
                             <x-auth-validation-errors class="mb-4" :errors="$errors" />
-                            <form method="POST" action="{{ route('login') }}" class="signin-form">
+                            <form method="POST" action="{{ route('login') }}" class="signin-form" id="form-submit">
                                 @csrf
                                 <div class="form-group mb-3">
                                     <label class="label" for="email">Email</label>
@@ -42,7 +42,7 @@
                                     <input type="password" class="form-control" name="password" placeholder="Senha" required="">
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="form-control btn btn-primary rounded submit px-3">Entrar</button>
+                                    <button type="submit" id="btn-submit" class="form-control btn btn-primary rounded submit px-3">Entrar</button>
                                 </div>
                                 <div class="form-group d-flex mt-2">
                                     <div class="w-50 text-left">
@@ -62,4 +62,13 @@
             </div>
         </div>
     </section>
+    @push('footer')
+        <script>
+            $(document).ready(function() {
+                $(document).on('submit', '#form-submit', function() {
+                    $('#btn-submit').attr('disabled', 'disabled');
+                });
+            });
+        </script>
+    @endpush
 </x-guestsite-layout>

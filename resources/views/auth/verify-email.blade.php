@@ -21,7 +21,7 @@
 
                             <div>
                         
-                                <div class="mb-4 text-sm text-gray-600">
+                                <div class="mb-4 text-lg text-gray-600">
                                     {{ __('Obrigado por se cadastrar na Loja de Eventos! Antes de começar, você poderia verificar seu endereço de e-mail clicando no link que acabamos de enviar para você? Se você não recebeu o e-mail, teremos o prazer de lhe enviar outro.') }}
                                 </div>
                         
@@ -32,9 +32,9 @@
                                 @endif
                         
                                 <div class="mt-4 d-flex items-center justify-between">
-                                    <form method="POST" action="{{ route('verification.send') }}">
+                                    <form method="POST" action="{{ route('verification.send') }}" id="form-submit">
                                         @csrf
-                                        <button type="submit" class="btn btn-primary">
+                                        <button type="submit" class="btn btn-primary" id="btn-submit">
                                             {{ __('Reenviar email') }}
                                         </button> &nbsp;&nbsp;&nbsp;
                                     </form>
@@ -53,5 +53,13 @@
             </div>
         </div>
     </section>
-
+    @push('footer')
+        <script>
+            $(document).ready(function() {
+                $(document).on('submit', '#form-submit', function() {
+                    $('#btn-submit').attr('disabled', 'disabled');
+                });
+            });
+        </script>
+    @endpush
 </x-guestsite-layout>

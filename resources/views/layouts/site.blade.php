@@ -132,7 +132,7 @@
             <div class="container">
               <div class="row gy-4">
                 <div class="col-lg-5 col-md-12 footer-info">
-                  <a href="index.html" class="logo d-flex align-items-center">
+                  <a href="/" class="logo d-flex align-items-center">
                     <img src="assets/img/logo_principal.png" alt="">
                   </a>
                   <p>Sua nova plataforma de criação e gerenciamento de eventos. </p>
@@ -152,6 +152,7 @@
                     <li><i class="bi bi-chevron-right"></i> <a href="/eventos">Eventos</a></li>
                     <li><i class="bi bi-chevron-right"></i> <a href="/#faq">Perguntas frequentes</a></li>
                     <li><i class="bi bi-chevron-right"></i> <a href="/contato">Contato</a></li>
+                    <li><i class="bi bi-chevron-right"></i> <a href="/painel/cadastrar">Cadastro</a></li>
                     <li><i class="bi bi-chevron-right"></i> <a href="/politica">Política de privacidade</a></li>
                     <li><i class="bi bi-chevron-right"></i> <a href="/termos">Termos de uso</a></li>
                   </ul>
@@ -186,7 +187,7 @@
       
           <div class="container">
             <div class="copyright">
-              &copy; Copyright <strong><span>Loja de Eventos</span></strong>. All Rights Reserved
+              &copy; Copyright <strong><span>Loja de Eventos</span></strong>. Todos os direitos reservados
             </div>
             <div class="credits">
               <!-- All the links in the footer should remain intact. -->

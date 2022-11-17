@@ -17,10 +17,10 @@ return new class extends Migration
 
         Schema::create('states', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('code');
             $table->string('name');
             $table->string('uf');
-            $table->integer('region');
+            $table->integer('ibge');
+            $table->string('ddd');
             $table->timestamps();
         });
     }

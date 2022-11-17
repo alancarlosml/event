@@ -50,23 +50,23 @@
                         @csrf
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="name">Nome</label>
+                                <label for="name">Nome*</label>
                                 <input type="text" class="form-control" id="name" name="name" placeholder="Nome">
                             </div>
                             <div class="form-group">
-                                <label for="email">Email</label>
+                                <label for="email">Nome*</label>
                                 <input type="text" class="form-control" id="email" name="email" placeholder="Email">
                             </div>
                             <div class="form-group">
-                                <label for="password">Senha</label>
+                                <label for="password">Nome*</label>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="Senha">
                             </div>
                             <div class="form-group">
-                                <label for="phone">Telefone</label>
+                                <label for="phone">Telefone*</label>
                                 <input type="text" class="form-control" id="phone" name="phone" placeholder="Telefone">
                             </div>
                             <div class="form-group">
-                                <label for="cpf">CPF</label>
+                                <label for="cpf">CPF*</label>
                                 <input type="text" class="form-control" id="cpf" name="cpf" placeholder="CPF">
                             </div>
                         </div>

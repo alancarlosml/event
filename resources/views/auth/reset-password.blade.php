@@ -21,7 +21,7 @@
 
                             <x-auth-validation-errors class="mb-4" :errors="$errors" />
 
-                            <form method="POST" action="{{ route('password.update') }}">
+                            <form method="POST" action="{{ route('password.update') }}" id="form-submit">
                                 @csrf
 
                                 <!-- Password Reset Token -->
@@ -51,7 +51,7 @@
                                 </div>
 
                                 <div class="flex items-center justify-end mt-4">
-                                    <x-button>
+                                    <x-button id="btn-submit">
                                         {{ __('Reset Password') }}
                                     </x-button>
                                 </div>
@@ -62,5 +62,13 @@
             </div>
         </div>
     </section>
-
+    @push('footer')
+        <script>
+            $(document).ready(function() {
+                $(document).on('submit', '#form-submit', function() {
+                    $('#btn-submit').attr('disabled', 'disabled');
+                });
+            });
+        </script>
+    @endpush
 </x-guestsite-layout>

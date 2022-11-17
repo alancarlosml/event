@@ -50,23 +50,24 @@
                         @csrf
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="name">Nome</label>
+                                <label for="name">Nome*</label>
                                 <input type="text" class="form-control" id="name" name="name" placeholder="Nome" value="{{$participante->name}}">
                             </div>
                             <div class="form-group">
-                                <label for="email">Email</label>
+                                <label for="email">Email*</label>
                                 <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="{{$participante->email}}">
                             </div>
                             <div class="form-group">
                                 <label for="password">Senha</label>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="Senha">
+                                <small id="passwordHelp" class="form-text text-muted">Deixar a senha em branco caso não queira alterá-la.</small>
                             </div>
                             <div class="form-group">
-                                <label for="phone">Telefone</label>
+                                <label for="phone">Telefone*</label>
                                 <input type="text" class="form-control" id="phone" name="phone" placeholder="Telefone" value="{{$participante->phone}}">
                             </div>
                             <div class="form-group">
-                                <label for="cpf">CPF</label>
+                                <label for="cpf">CPF*</label>
                                 <input type="text" class="form-control" id="cpf" name="cpf" placeholder="CPF" value="{{$participante->cpf}}">
                             </div>
                         </div>
