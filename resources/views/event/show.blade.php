@@ -58,18 +58,24 @@
                         <div class="form-group">
                             <label for="slug">URL do evento</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{$event->slug}}
+                                http://www.lojadeeventos.com.br/<b>{{$event->slug}}</b>
                             </p>
                         </div>
                         <div class="form-group">
                             <label for="description">Descrição</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{$event->description}}
+                                {!!$event->description!!}
                             </p>
                         </div>
                         <div class="form-group">
                             <label for="banner">Banner</label> <br/>
-                            <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
+                            @if ($event->banner != "")
+                                <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
+                            @else
+                                <p class="text-muted" style="font-size: 18px">
+                                    Sem banner cadastrado
+                                </p>
+                            @endif
                         </div>
                         <div class="form-group">
                             <label for="max_tickets">N° máximo de ingressos</label>
@@ -84,9 +90,9 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label for="max_tickets">Organizador</label>
+                            <label for="max_tickets">Responsável</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{$event->owner->name}} - {{$event->owner->email}}
+                                {{$event->get_participante_admin()->name}}
                             </p>
                         </div>
                         <div class="form-group">

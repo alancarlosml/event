@@ -17,7 +17,7 @@ class PlaceController extends Controller
 
         $places = DB::table('places')
             ->join('cities', 'cities.id', '=', 'places.city_id')
-            ->join('states', 'states.uf', '=', 'cities.uf')
+            ->join('states', 'states.id', '=', 'cities.uf')
             ->select('places.*', 'cities.name as city_name', 'states.uf as city_uf')
             ->orderBy('name')
             ->get();

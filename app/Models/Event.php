@@ -107,8 +107,6 @@ class Event extends Model
             });
         }
 
-        
-
         if($category_val != '0') {
             $events = $events->join('areas', 'areas.id', '=', 'events.area_id');
             $events = $events->join('categories', 'categories.id', '=', 'areas.category_id');

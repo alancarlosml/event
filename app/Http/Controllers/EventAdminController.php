@@ -252,6 +252,7 @@ class EventAdminController extends Controller
         $validatedDataPlace['name'] = $validatedDataPlace['place_name'];
         $validatedDataPlace['city_id'] = $validatedDataPlace['city_id_hidden'];
         $validatedDataPlace['place_id'] = $validatedDataPlace['place_id_hidden'];
+        $validatedDataPlace['status'] = 1;
         
         $event_id = $request->session()->get('event_id');
 
@@ -376,6 +377,23 @@ class EventAdminController extends Controller
 
         /*********************************************/
         /************* END SAVE QUESTIONS ************/
+        /*********************************************/
+
+        /*********************************************/
+        /*************** SAVE USER ADMIN *************/
+        /*********************************************/
+
+        DB::table('participantes_events')->insert([
+            'hash' => md5(Auth::user()->name . date("Y-m-d H:i:s") . md5('papainoel')),
+            'role' => 'admin',
+            'status' => 1,
+            'created_at' => date("Y-m-d H:i:s"),
+            'participante_id' => Auth::user()->id,
+            'event_id' => $event_id,
+        ]);
+
+        /*********************************************/
+        /************* END SAVE USER ADMIN ***********/
         /*********************************************/
 
         return redirect()->route('event_home.create.step.two');

@@ -112,12 +112,14 @@ class EventController extends Controller
         $event = DB::table('events')
             ->join('places', 'places.id', '=', 'events.place_id')
             ->join('cities', 'cities.id', '=', 'places.city_id')
-            ->join('states', 'states.uf', '=', 'cities.uf')
-            ->join('owners', 'owners.id', '=', 'events.owner_id')
+            ->join('states', 'states.id', '=', 'cities.uf')
+            ->join('participantes_events', 'participantes_events.event_id', '=', 'events.id')
+            ->join('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
             ->join('areas', 'areas.id', '=', 'events.area_id')
             ->join('categories', 'categories.id', '=', 'areas.category_id')
             ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
             ->where('events.id', $id)
+            ->where('participantes_events.role', 'admin')
             ->select(
                 'events.*', 
                 'categories.id as category_id',
@@ -129,7 +131,7 @@ class EventController extends Controller
                 'places.zip as place_zip', 
                 'cities.id as city_id', 
                 'states.uf as city_uf',
-                'owners.email as owner_email'
+                'participantes.email as participante_email'
                 )
             ->first();
 
@@ -230,7 +232,7 @@ class EventController extends Controller
         }
         EventDate::insert($finalArray);       
                 
-        $owner = Owner::where('email', $input['owner_email'])->first();
+        // $participante = Participante::where('email', $input['participante_email'])->first();
 
         if(isset($input['status'])){
             $input['status'] = 1;
@@ -238,7 +240,7 @@ class EventController extends Controller
             $input['status'] = 0;
         }
 
-        $input['owner_id'] = $owner->id;
+        // $input['owner_id'] = $owner->id;
 
         $event->fill($input)->save();
     

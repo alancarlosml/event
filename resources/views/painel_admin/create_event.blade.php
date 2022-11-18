@@ -243,7 +243,7 @@
                                         <select id="state" class="form-control" name="state" @if($place) readonly @endif required>
                                             <option>Selecione</option>
                                             @foreach ($states as $state)
-                                                <option value="{{$state->uf}}" @if(isset($place)) @if($place->get_city()->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
+                                                <option value="{{$state->id}}" @if(isset($place)) @if($place->get_city()->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>

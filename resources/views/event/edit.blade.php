@@ -113,8 +113,8 @@
                                 </select>
                             </div> --}}
                             <div class="form-group">
-                                <label for="owner_email">Organizador*</label>
-                                <input type="text" class="form-control col-lg-6 col-sm-12" id="owner_email" name="owner_email" placeholder="Organizador" value="{{$event->owner_email}}">
+                                <label for="participante_email">Responsável*</label>
+                                <input type="text" class="form-control col-lg-6 col-sm-12" id="participante_email" name="participante_email" placeholder="Participante" value="{{$event->participante_email}}">
                             </div>
                             <div class="form-group">
                                 <label for="banner">Banner do evento*</label>
