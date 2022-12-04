@@ -123,6 +123,7 @@
                                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                                 </div>
                                             </div>
+                                            <input type="hidden" name="date_id[]" value="{{$date['id']}}">
                                         </div>
                                         <div class="form-group col-md-2">
                                             <label for="number">Hora início</label>
@@ -343,12 +344,14 @@
                                                 <div class="form-group">
                                                     <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
                                                     <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
+                                                    <input type="hidden" name="new_field_id[]" value="{{$question->id}}"/>
                                                 </div>
                                             @else
                                                 <div class="row">
                                                     <div class="form-group col-9">
                                                         <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
                                                         <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
+                                                        <input type="hidden" name="new_field_id[]" value="{{$question->id}}"/>
                                                     </div>
                                                     <div class="form-group col-3">
                                                         <a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px;" href="javascript:;">
@@ -368,6 +371,7 @@
                                         <div class="form-group">
                                             <label for="name_new_field">Campo 1*</label>
                                             <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
+                                            <input type="hidden" name="new_field_id[]" value=""/>
                                         </div>
                                         {{-- <div class="form-group">
                                             <label for="name_new_field">Campo 2*</label>
@@ -376,12 +380,14 @@
                                         <div class="form-group">
                                             <label for="email_new_field">Campo 2*</label>
                                             <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
+                                            <input type="hidden" name="new_field_id[]" value=""/>
                                         </div>
                                     @endif
                                 @else
                                     <div class="form-group">
                                         <label for="name_new_field">Campo 1*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
+                                        <input type="hidden" name="new_field_id[]" value=""/>
                                     </div>
                                     {{-- <div class="form-group">
                                         <label for="name_new_field">Campo 2*</label>
@@ -390,6 +396,7 @@
                                     <div class="form-group">
                                         <label for="email_new_field">Campo 2*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
+                                        <input type="hidden" name="new_field_id[]" value=""/>
                                     </div>
                                 @endif
                             </div>
@@ -669,6 +676,7 @@
                     '<div class="form-group col-9">'+
                         '<label for="field_'+i_field+'">Campo ' + i_field + required_star + '</label>' +
                         '<input type="text" class="form-control new_field" name="new_field[]" value="'+field+'; ' + field_text + '' + field_options + '' + field_required + '' + field_unique +'" readonly>' +
+                        '<input type="hidden" name="new_field_id[]" value="">' +
                     '</div>'+
                     '<div class="form-group col-3">'+
                         '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px; margin-left: 17px;" href="javascript:;">'+
@@ -883,6 +891,7 @@
             });
 
             $('body').on('mousedown',".datetimepicker_hour_end", function(){
+                console.log('sd');
                 $(this).datetimepicker({
                     datepicker:false,
                     format:'H:i',

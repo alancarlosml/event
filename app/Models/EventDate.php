@@ -12,7 +12,9 @@ class EventDate extends Model
     protected $fillable = [
       'date',
       'time_begin',
-      'time_end'
+      'time_end',
+      'status',
+      'event_id'
     ];
 
     public function event()

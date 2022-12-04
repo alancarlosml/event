@@ -77,7 +77,7 @@
                                 <select id="state" class="form-control" name="state">
                                   <option>Selecione</option>
                                   @foreach ($states as $state)
-                                    <option value="{{$state->uf}}" @if($place->city_uf == $state->uf) selected @endif>{{$state->name}}</option>
+                                    <option value="{{$state->id}}" @if($place->city_uf == $state->uf) selected @endif>{{$state->name}}</option>
                                   @endforeach
                                 </select>
                               </div>

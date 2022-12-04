@@ -61,7 +61,8 @@
                                     <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y') }}</td>
                                     <td>
                                         @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "")
-                                            <span class="badge badge-danger">Incompleto</span> 
+                                            {{-- <span class="badge badge-danger">Incompleto</span> --}}
+                                            <a href="#" class="badge badge-danger" data-toggle="popover" data-trigger="hover" title="O que falta?" data-content="@if ($event->place_name == "") - Cadastrar local do evento @endif @if ($event->event_date == "") - Cadastrar data do evento @endif @if ($event->lote_name == "") - Cadastrar lotes @endif">Incompleto</a>
                                         @else
                                             @if($event->status == 1) 
                                                 <span class="badge badge-success">Ativo</span> 
@@ -177,9 +178,12 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 
         <script>
         $(document).ready(function() {
+
+            $('[data-toggle="popover"]').popover();
 
             $('#list_events').DataTable({
                 language: {

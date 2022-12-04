@@ -383,8 +383,6 @@ class EventHomeController extends Controller
         return redirect()->route('event_home.create.step.two');
     }
 
-
-
     // public function store(Request $request)
     // {
     //     $request->validate([

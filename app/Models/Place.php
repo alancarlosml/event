@@ -34,7 +34,7 @@ class Place extends Model
 
     public function get_city()
     {
-        return City::join('states', 'cities.uf', '=', 'states.uf')
+        return City::join('states', 'cities.uf', '=', 'states.id')
                 ->where('cities.id', $this->city_id)
                 ->selectRaw('cities.name, states.uf')->first();
     }

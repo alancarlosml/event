@@ -58,7 +58,7 @@
                                 <label for="slug">URL do evento*</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                      <span class="input-group-text" id="basic-addon3">https://example.com/userss/</span>
+                                      <span class="input-group-text" id="basic-addon3">http://www.lojadeeventos.com.br/</span>
                                     </div>
                                     <input type="text" class="form-control col-lg-4 col-sm-12" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" required>
                                   </div>
@@ -213,7 +213,7 @@
                                   <select id="state" class="form-control" name="state" required>
                                     <option>Selecione</option>
                                     @foreach ($states as $state)
-                                      <option value="{{$state->uf}}">{{$state->name}}</option>
+                                      <option value="{{$state->id}}">{{$state->name}}</option>
                                     @endforeach
                                   </select>
                                 </div>
@@ -261,7 +261,7 @@
                                     <select id="state" class="form-control" name="state">
                                       <option>Selecione</option>
                                       @foreach ($states as $state)
-                                        <option value="{{$state->uf}}">{{$state->name}}</option>
+                                        <option value="{{$state->id}}">{{$state->name}}</option>
                                       @endforeach
                                     </select>
                                   </div>

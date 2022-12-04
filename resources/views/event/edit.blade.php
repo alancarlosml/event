@@ -65,7 +65,7 @@
                                 <label for="slug">URL do evento*</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                      <span class="input-group-text" id="basic-addon3">https://example.com/users/</span>
+                                      <span class="input-group-text" id="basic-addon3">http://www.lojadeeventos.com.br/</span>
                                     </div>
                                     <input type="text" class="form-control col-lg-4 col-sm-12" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" value="{{$event->slug}}">
                                   </div>
@@ -117,10 +117,10 @@
                                 <input type="text" class="form-control col-lg-6 col-sm-12" id="participante_email" name="participante_email" placeholder="Participante" value="{{$event->participante_email}}">
                             </div>
                             <div class="form-group">
-                                <label for="banner">Banner do evento*</label>
+                                <label for="banner">Banner do evento*</label><br>
                                 @if(!$event->banner)
-                                    <input type="file" class="custom-file-input" id="banner" required>
-                                    <label class="custom-file-label" for="banner">Choose file</label>
+                                    <input type="file" name="banner" id="banner" required>
+                                    {{-- <label for="banner">Choose file</label> --}}
                                 @else
                                 <div class="form-group">
                                     <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
@@ -281,7 +281,7 @@
                                         <select id="state" class="form-control" name="state" required>
                                         <option>Selecione</option>
                                         @foreach ($states as $state)
-                                            <option value="{{$state->uf}}" @if($event->city_uf == $state->uf) selected @endif>{{$state->name}}</option>
+                                            <option value="{{$state->id}}" @if($event->city_uf == $state->id) selected @endif>{{$state->name}}</option>
                                         @endforeach
                                         </select>
                                     </div>
