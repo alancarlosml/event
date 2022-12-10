@@ -2892,3 +2892,7 @@ input.error.fail-alert{
 label.error.fail-alert{
     color: red !important;
 }
+
+.nav-tabs {
+    margin-bottom: -1px !important;
+  }

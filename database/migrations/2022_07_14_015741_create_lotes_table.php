@@ -17,6 +17,7 @@ return new class extends Migration
         
         Schema::create('lotes', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('hash');
             $table->string('name');
             $table->string('description');
             $table->double('value');
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->integer('visibility');
             $table->integer('tax_parcelamento');
             $table->integer('tax_service');
+            $table->string('form_pagamento');
             $table->integer('limit_min');
             $table->integer('limit_max');
             $table->datetime('datetime_begin');

@@ -362,11 +362,11 @@ section {
   }
 }
 
-.dropdown-item:active,
+/* .dropdown-item:active,
 .dropdown-item:focus,
 .dropdown-item:hover {
   background-color: transparent;
-}
+} */
 
 /**
 * Mobile Navigation 

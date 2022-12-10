@@ -55,18 +55,22 @@
                         <div class="form-group">
                             <label for="slug">URL do evento</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{$event->slug}}
+                                http://www.lojadeeventos.com.br/{{$event->slug}}
                             </p>
                         </div>
                         <div class="form-group">
                             <label for="description">Descrição</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{$event->description}}
+                                {!!$event->description!!}
                             </p>
                         </div>
                         <div class="form-group">
                             <label for="banner">Banner</label> <br/>
-                            <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
+                            @if($event->banner == "")
+                                Nenhum banner cadastrado até o momento.
+                            @else
+                                <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
+                            @endif
                         </div>
                         <div class="form-group">
                             <label for="max_tickets">N° máximo de ingressos</label>
@@ -78,6 +82,12 @@
                             <label for="max_tickets">Local do evento</label>
                             <p class="text-muted" style="font-size: 18px">
                                 {{$event->place->name}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_tickets">Data do evento</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                @if($event->min_event_dates() == $event->max_event_dates()){{ \Carbon\Carbon::parse($event->min_event_dates())->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->min_event_dates())->format('j/m/Y') }} a {{ \Carbon\Carbon::parse($event->max_event_dates())->format('j/m/Y') }} @endif
                             </p>
                         </div>
                         <div class="form-group">

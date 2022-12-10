@@ -116,6 +116,14 @@
                             </li>
                         </ul>
                     </div> --}}
+                    <ul class="nav nav-tabs">
+                        @foreach ($event->event_dates as $event_date)
+                            <li class="nav-item">
+                                <a class="nav-link event_date_nav @if($total_dates == 1) active @endif" href="javascript:;" data-tab="{{$event_date->id}}">{{\Carbon\Carbon::parse($event_date->date)->format('d/m')}}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <input type="hidden" name="event_date_result" id="event_date_result" value="@if($total_dates == 1) {{$date_min->id}} @endif">
                     <div class="table-responsive">
                         <table class="table">
                             <tbody>
@@ -407,7 +415,38 @@
         
         <script>
 
-            $(document).ready(function() {  
+            $(document).ready(function() { 
+                
+                $('.event_date_nav').click(function(){
+
+                    $('.event_date_nav').removeClass('active');
+                    $(this).addClass('active');
+                    $('#event_date_result').val($(this).attr('data-tab'));
+
+                    let event_date_result = $('#event_date_result').val();
+                    let _token = '{{csrf_token()}}';
+
+                    $.ajax({
+                    // url: "/getSubTotal",
+                        url:"{{route('conference.setEventDate')}}",
+                        type:"POST",
+                        data:{
+                            event_date_result:event_date_result,
+                            _token: _token
+                        },
+                        success:function(response){
+                            if(response.success) {
+                                console.log(response);
+                                // $('.success').text(response.success);
+                            }
+
+                            if(response.error) {
+                                location.reload();
+                            }
+                        },
+                    });
+                });
+
                 $(".inp-number").inputSpinner({buttonsOnly: true, autoInterval: undefined});
                 
                 $("input[type=number].inp-number").change(function (e) {
@@ -578,6 +617,15 @@
 
                     $('#cupomModal').modal('show');
                     $('#modal_txt').text('Por favor, selecione ao menos um ingresso.');
+                    $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
+                    return false;
+                }
+
+                var event_date_result = $('#event_date_result').val();
+                if (event_date_result === "") {
+
+                    $('#cupomModal').modal('show');
+                    $('#modal_txt').text('Por favor, selecione ao menos uma data válida.');
                     $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                     return false;
                 }

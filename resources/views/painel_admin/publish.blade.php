@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
                                 <div id="banner_container">
-                                    @if(isset($event->banner) == false)
+                                    @if($event->banner == "")
                                         <input class="form-control" type="file" id="banner" name="banner">
                                     @else
                                     <div class="form-group">

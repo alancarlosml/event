@@ -50,7 +50,7 @@
                                     <td>{{$event->id}}</td>
                                     <td>
                                         <b>Nome:</b> {{$event->name}} <br/>
-                                        <b>Data evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif
+                                        <b>Data do evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif
                                     </td>
                                     <td>
                                         {{$event->admin_name}} <br>
@@ -181,6 +181,15 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 
         <script>
+
+        function removeData(id){
+            $('#modalMsgRemove-' + id).modal('show');
+        }
+
+        function removeSucc(id){
+            $('#btn-remove-hidden-' + id).click();
+        }
+
         $(document).ready(function() {
 
             $('[data-toggle="popover"]').popover();

@@ -43,47 +43,47 @@ class ConferenceController extends Controller
 
         $event = Event::where('slug', $slug)->first();
 
+        $request->session()->forget('coupon');
+        $request->session()->forget('subtotal');
+        $request->session()->forget('coupon_subtotal');
+        $request->session()->forget('total');
+        $request->session()->forget('dict_lotes');
+        $request->session()->forget('event_date_result');
+
         if($event)
         {
+            $total_dates = count($event->event_dates);
+            $date_min = EventDate::select('id')->where('date', $event->min_event_dates())->first();
+            // if($event->event_dates());
             // $coupon = $request->session()->get('coupon');
             // $subtotal = $request->session()->get('subtotal');
             // $coupon_subtotal = $request->session()->get('coupon_subtotal');
             // $total = $request->session()->get('total');
 
-            $request->session()->forget('coupon');
-            $request->session()->forget('subtotal');
-            $request->session()->forget('coupon_subtotal');
-            $request->session()->forget('total');
-            $request->session()->forget('dict_lotes');
-
             // return view('site.event', compact('event', 'coupon', 'subtotal', 'coupon_subtotal', 'total'));
-            return view('site.event', compact('event'));
+            return view('site.event', compact('event', 'total_dates', 'date_min'));
         
         }else{
 
-            $request->session()->forget('coupon');
-            $request->session()->forget('subtotal');
-            $request->session()->forget('coupon_subtotal');
-            $request->session()->forget('total');
-            $request->session()->forget('dict_lotes');
-
             return redirect()->back(); //view de evento não encontrado
         }
-        
     }
 
     public function resume(Request $request, $slug)
     {
-        $event = Event::where('slug', $slug)->first();
-        $request->session()->put('event', $event);
-
-        $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
+        
 
         $coupon = $request->session()->get('coupon');
         $subtotal = $request->session()->get('subtotal');
         $coupon_subtotal = $request->session()->get('coupon_subtotal');
         $total = $request->session()->get('total');
         $dict_lotes = $request->session()->get('dict_lotes');
+        $event_date_result = $request->session()->get('event_date_result');
+
+        $event = Event::where('slug', $slug)->first();
+        $request->session()->put('event', $event);
+        $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
+        $eventDate = EventDate::where('id', $event_date_result)->first();
 
         if($dict_lotes)
         {
@@ -119,7 +119,7 @@ class ConferenceController extends Controller
             $request->session()->put('array_lotes', $array_lotes);
             $request->session()->put('array_lotes_obj', $array_lotes_obj);
 
-            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'array_lotes_obj', 'coupon', 'subtotal', 'coupon_subtotal', 'total'));
+            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'array_lotes_obj', 'coupon', 'subtotal', 'coupon_subtotal', 'total', 'eventDate'));
         
         }else{
 
@@ -128,9 +128,30 @@ class ConferenceController extends Controller
             $request->session()->forget('coupon_subtotal');
             $request->session()->forget('total');
             $request->session()->forget('dict_lotes');
+            $request->session()->forget('event_date_result');
 
             return redirect()->route('conference.index', $event->slug);
         }
+    }
+
+    public function setEventDate(Request $request){
+
+        $data = $request->all();
+
+        $event_date_result = $data['event_date_result'];
+
+        $request->session()->put('event_date_result', $event_date_result);
+        
+        if($event_date_result){
+
+            return response()->json(['success'=>'Ajax request submitted successfully']);
+        
+        }else{
+
+            return redirect()->back();
+        }
+        
+        return redirect()->back();
     }
 
     public function getSubTotal(Request $request){
@@ -310,6 +331,7 @@ class ConferenceController extends Controller
         $total = $request->session()->get('total');
         $dict_lotes = $request->session()->get('dict_lotes');
         $array_lotes_obj = $request->session()->get('array_lotes_obj');
+        $event_date_result = $request->session()->get('event_date_result');
 
         $event_details = $event->name;
 
@@ -511,8 +533,9 @@ class ConferenceController extends Controller
                 'gatway_reference' => $payment->getId(),
                 'gatway_status' => $payment->getStatus(),
                 'gatway_payment_method' => $payment_form,
-                'participante_id' => 1,
-                // 'participante_id' => Auth::user()->id,
+                // 'participante_id' => 1,
+                'event_date_id' => $event_date_result->id,
+                'participante_id' => Auth::user()->id,
                 'created_at' => now()
             ]);
 

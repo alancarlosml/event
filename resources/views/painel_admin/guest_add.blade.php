@@ -9,7 +9,7 @@
               <li><a href="index.html">Home</a></li>
               <li>Eventos</li>
             </ol>
-            <h2>Criar um novo usuário convidado</h2>
+            <h2>Gerenciar usuários convidados</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
@@ -34,12 +34,14 @@
                 </div>
                 <div class="card-body table-responsive p-0">
                     <div class="card-body">
+                        <h4>Adicionar novo usuário convidado</h4>
                         <form method="POST" action="{{route('event_home.guest_store', $event->hash)}}">
                             @csrf
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="email">Email do convidado*</label>
-                                    <input type="text" class="form-control col-5" id="email" name="email" placeholder="Email">
+                                    <input type="email" class="form-control col-5" id="email" name="email" placeholder="Email" required>
+                                    <small id="emailHelp" class="form-text text-muted">Antes de realizar a adição, certifique-se de que o usuário já possui cadastro no site.</small>
                                 </div>
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-primary">Salvar</button>

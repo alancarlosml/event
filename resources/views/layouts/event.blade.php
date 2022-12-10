@@ -49,9 +49,16 @@
                                     </a>
                                 </li>
                                 <li class="mt-2">
-                                    <a class="btn btn-common sub-btn" href="javacript:;">
-                                        Entrar
-                                    </a>
+                                    @if(!Auth::user())
+                                        {{-- <li><a class="nav-link nav-login" href="{{route('login')}}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li> --}}
+                                        <a class="btn btn-common sub-btn" href="{{route('login')}}">
+                                            Entrar
+                                        </a>
+                                        @else
+                                        <a class="btn btn-common sub-btn" href="javascript:;">
+                                            {{ Auth::user()->name }}
+                                        </a>
+                                    @endif
                                 </li>
                             </ul>
                         </div>

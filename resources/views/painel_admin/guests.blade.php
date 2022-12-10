@@ -22,6 +22,11 @@
                             <strong>{{ $message }}</strong>
                         </div>
                     @endif
+                    @if ($message = Session::get('error'))
+                        <div class="alert alert-danger">
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @endif
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul>
@@ -59,21 +64,23 @@
                                         <td>@if($usuario->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                         <td>
                                             <div class="d-flex">
-                                                <a class="btn btn-info btn-sm mr-1" href="{{route('event_home.guest_edit', $usuario->id)}}">
+                                                {{-- <a class="btn btn-info btn-sm mr-1" href="{{route('event_home.guest_edit', $usuario->id)}}">
                                                     <i class="fas fa-pencil-alt">
                                                     </i>
                                                     Editar
-                                                </a>
-                                                <form action="{{ route('event_home.destroy_guest', $usuario->id) }}" method="POST">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$usuario->id}})">
-                                                        <i class="fas fa-trash">
-                                                        </i>
-                                                        Remover
-                                                    </a>
-                                                    <button class="d-none" id="btn-remove-hidden-{{$usuario->id}}">Remover</button>
-                                                </form>
+                                                </a> --}}
+                                                @if($usuario->role == 'guest')
+                                                    <form action="{{ route('event_home.destroy_guest', $usuario->id) }}" method="POST">
+                                                        <input type="hidden" name="_method" value="DELETE">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                        <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$usuario->id}})">
+                                                            <i class="fas fa-trash">
+                                                            </i>
+                                                            Remover
+                                                        </a>
+                                                        <button class="d-none" id="btn-remove-hidden-{{$usuario->id}}">Remover</button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                         <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$usuario->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">

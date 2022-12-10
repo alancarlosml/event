@@ -9,7 +9,7 @@
               <li><a href="index.html">Home</a></li>
               <li>Eventos</li>
             </ol>
-            <h2>Editar usuário convidado</h2>
+            <h2>Gerenciar usuários convidados</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
@@ -34,6 +34,7 @@
                 </div>
                 <div class="card-body table-responsive p-0">
                     <div class="card-body">
+                        <h4>Editar usuário convidado</h4>
                         <form method="POST" action="">
                             @csrf
                             <div class="card-body">

@@ -470,14 +470,21 @@ class EventAdminController extends Controller
         /*************** SAVE USER ADMIN *************/
         /*********************************************/
 
-        DB::table('participantes_events')->insert([
-            'hash' => md5(Auth::user()->name . date("Y-m-d H:i:s") . md5('papainoel')),
-            'role' => 'admin',
-            'status' => 1,
-            'created_at' => date("Y-m-d H:i:s"),
-            'participante_id' => Auth::user()->id,
-            'event_id' => $event_id,
-        ]);
+        $participante_evento = ParticipanteEvent::where('role', 'admin')
+                                ->where('participante_id', Auth::user()->id)
+                                ->where('event_id', $event_id)
+                                ->get();
+
+        if($participante_evento->count() == 0){
+            DB::table('participantes_events')->insert([
+                'hash' => md5(Auth::user()->name . date("Y-m-d H:i:s") . md5('papainoel')),
+                'role' => 'admin',
+                'status' => 1,
+                'created_at' => date("Y-m-d H:i:s"),
+                'participante_id' => Auth::user()->id,
+                'event_id' => $event_id,
+            ]);
+        }
 
         /*********************************************/
         /************* END SAVE USER ADMIN ***********/
@@ -569,11 +576,10 @@ class EventAdminController extends Controller
         if($validatedData['type'] == 0) {
             $validatedData['tax'] = doubleval($validatedData['value']) * $taxa_juros;
             $validatedData['final_value'] = doubleval($validatedData['value']) - doubleval($validatedData['value']) * $taxa_juros;
+            $validatedData['form_pagamento'] = implode(",", $validatedData['form_pagamento']);
         }
 
         $validatedData['hash'] = md5($validatedData['name'] . $validatedData['description'] . md5('papainoel'));
-
-        $validatedData['form_pagamento'] = implode(",", $validatedData['form_pagamento']);
 
         $lote = new Lote();
         $lote->fill($validatedData);
@@ -649,14 +655,13 @@ class EventAdminController extends Controller
             ]);
         }
 
-        $input['form_pagamento'] = implode(",", $input['form_pagamento']);
-
         $input['datetime_begin'] = date('Y-m-d H:m', strtotime(str_replace('/', '-', $input['datetime_begin'])));
         $input['datetime_end'] = date('Y-m-d H:m', strtotime(str_replace('/', '-', $input['datetime_end'])));
 
         if($input['type'] == 0) {
             $input['tax'] = doubleval($input['value']) * $taxa_juros;
             $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
+            $input['form_pagamento'] = implode(",", $input['form_pagamento']);
         }
 
         if(isset($input['status'])){
@@ -1004,9 +1009,12 @@ class EventAdminController extends Controller
         $input = $request->all();
 
         $participante = Participante::where('email', $input['email'])->first();
-
+        $msgType = "";
+        $msgContent = "";
         if($participante){
             if($participante->status == 0){
+                $msgType = "error";
+                $msgContent = "A conta do usuário convidado está desativada. Entre em contato para regularização.";
                 //ENVIAR EMAIL SOLICITANDO REATIVAÇÃO DA CONTA
             }else{
                 DB::table('participantes_events')->insert([
@@ -1017,12 +1025,16 @@ class EventAdminController extends Controller
                     'participante_id' => $participante->id,
                     'event_id' => $event->id,
                 ]);
+                $msgType = "success";
+                $msgContent = "Usuário convidado adicionado com sucesso!";
             }
         }else{
             //ENVIAR EMAIL SOLICITANDO A CRIAÇÃO DA CONTA
+            $msgType = "error";
+            $msgContent = "Não foi possível adicionar usuário. Usuário não possui um cadastro na Loja de Eventos.";
         }
 
-        return redirect()->route('event_home.guests', $event->hash)->with('success', 'Usuário convidado adicionado com sucesso!');   
+        return redirect()->route('event_home.guests', $event->hash)->with($msgType, $msgContent);   
     }
 
     public function editGuest($id)
@@ -1218,7 +1230,7 @@ class EventAdminController extends Controller
         $situacao_participantes = Participante::orderBy('participantes.name')
                     ->join('participantes_lotes', 'participantes_lotes.participante_id', '=', 'participantes.id')
                     ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
-                    ->join('orders', 'participantes_lotes.participante_id', '=', 'orders.participante_id')
+                    ->join('orders', 'participantes_lotes.id', '=', 'orders.participante_lote_id')
                     ->join('events', 'events.id', '=', 'lotes.event_id')
                     ->leftJoin('coupons_lotes', 'coupons_lotes.lote_id', '=', 'participantes_lotes.lote_id')
                     ->leftJoin('coupons', 'coupons_lotes.coupon_id', '=', 'coupons.id')
@@ -1231,7 +1243,7 @@ class EventAdminController extends Controller
                     // dd($situacao_participantes);
         
         $payment_methods = Order::orderBy('orders.gatway_payment_method')
-                    ->join('participantes_lotes', 'participantes_lotes.participante_id', '=', 'orders.participante_id')
+                    ->join('participantes_lotes', 'participantes_lotes.id', '=', 'orders.participante_lote_id')
                     ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
                     ->join('events', 'events.id', '=', 'lotes.event_id')
                     ->where('events.hash', $hash)
