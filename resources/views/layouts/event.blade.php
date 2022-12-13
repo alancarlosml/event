@@ -17,19 +17,24 @@
         <link rel="stylesheet" href="{{ asset('assets_conference/css/color-switcher.css') }}" type="text/css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     </head>
-    <body>
+    <body data-spy="scroll" data-target="#navbarCollapse">
         <header id="header-wrap">
             <nav class="navbar navbar-expand-lg bg-inverse fixed-top scrolling-navbar top-nav-collapse">
                 <div class="container">
                     <div class="theme-header clearfix">
-                        {{-- <a href="javascript:;" class="navbar-brand"><img src="assets_conference/logo.png" alt=""></a> --}}
+                        <a href="/" class="navbar-brand"><img src="assets/img/logo_principal.png" alt=""></a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                         <i class="lni-menu"></i>
                         </button>
-                        <div class="collapse navbar-collapse" id="navbarCollapse">
+                        <div class="collapse navbar-collapse navbarCollapse" id="navbarCollapse">
                             <ul class="navbar-nav mr-auto w-100 justify-content-end">
-                                <li class="nav-item active">
-                                    <a class="nav-link" href="javascript:;">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#home">
+                                        Home
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#sobre">
                                         Sobre o evento
                                     </a>
                                 </li>
@@ -48,9 +53,37 @@
                                         Contato
                                     </a>
                                 </li>
-                                <li class="mt-2">
+                                <li class="nav-item mt-2">
+                                    <div class="d-flex">
+                                        <ul>
+                                          @if(!Auth::user())
+                                            <li><a class="btn btn-common sub-btn" href="{{route('login')}}">Entrar</a></li>
+                                          @else
+                                            <li class="nav-item dropdown">
+                                              <a class="btn btn-common sub-btn" data-toggle="dropdown" href="javascript:;">
+                                                {{ Auth::user()->name }}
+                                              </a>
+                                              <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+                                                  <a href="{{route('event_home.my_registrations')}}" class="dropdown-item">
+                                                      Minhas inscrições
+                                                  </a>
+                                                  <div class="dropdown-divider"></div>
+                                                  <a class="dropdown-item" href="{{ route('logout') }}"
+                                                      onclick="event.preventDefault();
+                                                      document.getElementById('logout-form').submit();">
+                                                      Sair
+                                                  </a>
+                                                  <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                                      @csrf
+                                                  </form>
+                                              </div>
+                                            </li>
+                                          @endif
+                                        </ul>
+                                    </div>
+                                </li>
+                                {{-- <li class="mt-2">
                                     @if(!Auth::user())
-                                        {{-- <li><a class="nav-link nav-login" href="{{route('login')}}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li> --}}
                                         <a class="btn btn-common sub-btn" href="{{route('login')}}">
                                             Entrar
                                         </a>
@@ -59,20 +92,24 @@
                                             {{ Auth::user()->name }}
                                         </a>
                                     @endif
-                                </li>
+                                </li> --}}
                             </ul>
                         </div>
                     </div>
                 </div>
-                {{-- <div class="mobile-menu" data-logo="assets/img/logo.png"> --}}
                 <div class="mobile-menu">
                     <div class="slicknav_menu">
-                        {{-- <div class="slicknav_brand"><a href="javascript:;"><img src="assets_conference/logo.png" class="img-responsive" alt="logo"></a></div> --}}
+                        <div class="slicknav_brand"><a href="/"><img src="assets/img/logo_principal.png" class="img-responsive" alt="logo"></a></div>
                         <a href="javascript:;" aria-haspopup="true" role="button" tabindex="0" class="slicknav_btn slicknav_collapsed" style=""><span class="slicknav_menutxt"></span><span class="slicknav_icon slicknav_no-text"><span class="slicknav_icon-bar"></span><span class="slicknav_icon-bar"></span><span class="slicknav_icon-bar"></span></span></a>
-                        <div class="slicknav_nav slicknav_hidden" aria-hidden="true" role="menu" style="display: none;">
+                        <div class="navbarCollapse slicknav_nav slicknav_hidden none" aria-hidden="true" role="menu"  id="navbarCollapseMobile">
                             <ul class="navbar-nav mr-auto w-100 justify-content-end">
-                                <li class="nav-item active">
-                                    <a class="nav-link" href="javascript:;" role="menuitem">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#home" role="menuitem">
+                                        Home
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#sobre" role="menuitem">
                                         Sobre o evento
                                     </a>
                                 </li>
@@ -170,6 +207,107 @@
             $('html, body').animate({scrollTop:0},600);
             return false;
         });
+        $('.slicknav_btn').on('click',function(event){
+            event.preventDefault();
+            $('.slicknav_nav').toggle();
+        });
+
+        (function() {
+        "use strict";
+
+            const select = (el, all = false) => {
+                el = el.trim()
+                if (all) {
+                return [...document.querySelectorAll(el)]
+                } else {
+                return document.querySelector(el)
+                }
+            }
+
+            /**
+             * Easy event listener function
+             */
+            const on = (type, el, listener, all = false) => {
+                let selectEl = select(el, all)
+                if (selectEl) {
+                if (all) {
+                    selectEl.forEach(e => e.addEventListener(type, listener))
+                } else {
+                    selectEl.addEventListener(type, listener)
+                }
+                }
+            }
+
+            /**
+             * Easy on scroll event listener 
+            */
+            const onscroll = (el, listener) => {
+                el.addEventListener('scroll', listener);
+            }
+
+            /**
+             * Navbar links active state on scroll
+             */
+            let navbarlinks = select('.navbarCollapse .nav-link', true);
+            const navbarlinksActive = () => {
+                let position = window.scrollY + 200;
+                navbarlinks.forEach(navbarlink => {
+                // console.log(navbarlinks);
+                if (!navbarlink.hash) return
+                let section = select(navbarlink.hash)
+                if (!section) return
+                if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
+                    // console.log(navbarlink.parentElement.classList);
+                    navbarlink.parentElement.classList.add('active')
+                } else {
+                    navbarlink.parentElement.classList.remove('active')
+                }
+                })
+            }
+            window.addEventListener('load', navbarlinksActive)
+            onscroll(document, navbarlinksActive)
+
+             /**
+             * Scrolls to an element with header offset
+             */
+            const scrollto = (el) => {
+                let header = select('#header-wrap')
+                let offset = header.offsetHeight
+
+                let elementPos = select(el).offsetTop
+                window.scrollTo({
+                top: elementPos - offset,
+                behavior: 'smooth'
+                })
+            }
+
+            on('click', '.nav-link', function(e) {
+                if (select(this.hash)) {
+                    e.preventDefault()  
+                    scrollto(this.hash)
+                }
+            }, true)
+
+            /**
+             * Scroll with ofset on page load with hash links in the url
+             */
+            window.addEventListener('load', () => {
+                if (window.location.hash) {
+                if (select(window.location.hash)) {
+                    scrollto(window.location.hash)
+                }
+                }
+            });
+
+
+
+        
+        })()
+
+        // $(document).ready(function() {
+        //     $('body').scrollspy({ target: '#navbarCollapse' })
+        // });
+
     </script>
     @stack('footer')
 </html>

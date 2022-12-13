@@ -72,6 +72,7 @@ Route::get('painel/eventos/{id}/delete_file','App\Http\Controllers\EventAdminCon
 Route::get('painel/eventos/organizador/{id}/delete_file_icon','App\Http\Controllers\EventAdminController@deleteFileIcon')->middleware(['auth:participante', 'verified'])->name('event_home.delete_file_icon');
 
 Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->name('conference.index');
+Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->name('contact_event');
 Route::get('{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
 Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
 Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');

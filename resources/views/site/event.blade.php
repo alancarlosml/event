@@ -1,5 +1,5 @@
 <x-event-layout>
-    <div class="hero-image">
+    <div class="hero-image" id="home">
         <img src="{{ URL::asset('storage/'.$event->banner) }}" alt="{{ $event->name}}" class="img-fluid">
     </div>
     <section id="information-bar">
@@ -50,7 +50,7 @@
             </div>
         </div>
     </section>
-    <section id="about" class="section-padding mt-4">
+    <section id="sobre" class="section-padding mt-4">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-xs-12">
@@ -251,7 +251,7 @@
             </div>
         </div>
     </section>
-    <section id="contato">
+    <section>
         <div class="container">
             <div class="row contact-wrapper">
                 <p><b>{{$event->place->name}}.</b> {{$event->place->address}}, {{$event->place->number}}. Bairro: {{$event->place->district}}. CEP: {{$event->place->zip}}. {{$event->place->get_city()->name}}-{{$event->place->get_city()->uf}} </p>
@@ -282,7 +282,7 @@
             </div>
         </div>
     </section>
-    <section id="contact-map" class="section-padding">
+    <section id="contato" class="section-padding">
         <div class="container">
             <div class="row">
                 <div class="col-12">
@@ -329,7 +329,8 @@
                 <div class="col-lg-12 col-md-12 col-xs-12">
                     <div class="container-form wow fadeInLeft animated" data-wow-delay="0.2s" style="visibility: visible;-webkit-animation-delay: 0.2s; -moz-animation-delay: 0.2s; animation-delay: 0.2s;">
                         <div class="form-wrapper">
-                            <form role="form" method="post" id="contactForm" name="contact-form" data-toggle="validator" novalidate="true">
+                            <form role="form" method="post" id="contactForm" name="contact-form" action="{{route('contact_event', $event->hash)}}">
+                                @csrf
                                 <div class="row">
                                     <div class="col-md-6 form-line">
                                         <div class="form-group">
@@ -343,15 +344,21 @@
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
-                                    <div class="col-md-12 form-line">
+                                    <div class="col-md-6 form-line">
                                         <div class="form-group">
-                                            <input type="tel" class="form-control" id="msg_subject" name="subject" placeholder="Assunto" required="" data-error="Please enter your message subject">
+                                            <input type="text" class="form-control" id="msg_subject" name="subject" placeholder="Assunto" required="" data-error="Please enter your message subject">
+                                            <div class="help-block with-errors"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 form-line">
+                                        <div class="form-group">
+                                            <input type="phone" class="form-control" id="msg_phone" name="phone" placeholder="Telefone" required="" data-error="Please enter your message subject">
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="4" id="message" name="message" required="" data-error="Write your message"></textarea>
+                                            <textarea class="form-control" rows="4" id="message" name="message" required="" data-error="Write your message" placeholder="Mensagem"></textarea>
                                         </div>
                                         <div class="form-submit">
                                             <button type="submit" class="btn btn-common" id="form-submit" style="pointer-events: all; cursor: pointer;"><i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar</button>

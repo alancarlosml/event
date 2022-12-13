@@ -18,7 +18,7 @@ use App\Models\Participante;
 use App\Models\ParticipanteLote;
 use App\Models\Place;
 use App\Models\Question;
-use App\Models\Option;
+use App\Models\Message;
 use App\Models\Order;
 use App\Models\Owner;
 use App\Models\User;
@@ -69,10 +69,23 @@ class ConferenceController extends Controller
         }
     }
 
+    public function send(Request $request, $hash){
+
+        $event = Event::where('hash', $hash)->first();
+
+        $input = $request->all();
+
+        $input['event_id'] = $event->id;
+        $input['read'] = 0;
+
+        $message = Message::create($input);
+
+        return response()->json(['ok' => 'OK']);
+    }
+
     public function resume(Request $request, $slug)
     {
         
-
         $coupon = $request->session()->get('coupon');
         $subtotal = $request->session()->get('subtotal');
         $coupon_subtotal = $request->session()->get('coupon_subtotal');
