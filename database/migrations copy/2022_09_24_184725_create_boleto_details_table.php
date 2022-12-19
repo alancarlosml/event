@@ -15,18 +15,17 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         
-        Schema::create('option_answers', function (Blueprint $table) {
+        Schema::create('boleto_details', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('answer');
-            $table->integer('question_id')->index()->unsigned();
-            $table->foreign('question_id')
+            $table->double('value');
+            $table->string('href');
+            $table->string('line_code');
+            $table->string('href_print');
+            $table->timestamp('expiration_date');
+            $table->integer('order_id')->index()->unsigned();
+            $table->foreign('order_id')
                 ->references('id')
-                ->on('questions')
-                ->onDelete('cascade');
-            $table->integer('order_item_id')->index()->unsigned();
-            $table->foreign('order_item_id')
-                ->references('id')
-                ->on('order_items')
+                ->on('orders')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -39,6 +38,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('option_answers');
+        Schema::dropIfExists('boleto_details');
     }
 };

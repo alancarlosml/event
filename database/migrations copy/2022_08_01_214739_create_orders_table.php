@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id');
             $table->string('hash')->unique();  
-            $table->integer('status');  
+            $table->integer('quantity');  
             $table->timestamp('date_used');  
             $table->string('gatway_hash');  
             $table->string('gatway_reference');  
@@ -29,15 +29,11 @@ return new class extends Migration
                 ->references('id')
                 ->on('event_dates')
                 ->onDelete('cascade');
-            $table->integer('participante_id')->index()->unsigned();
-            $table->foreign('participante_id')
+            $table->integer('participante_lote_id')->index()->unsigned();
+            $table->foreign('participante_lote_id')
                 ->references('id')
-                ->on('participantes')
+                ->on('participantes_lotes')
                 ->onDelete('cascade');
-            $table->integer('coupon_id')->index()->unsigned();
-                $table->foreign('coupon_id')
-                    ->references('id')
-                    ->on('coupons')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -2832,3 +2832,7 @@ section {
 .text-success {
   color: #28a745!important;
 }
+
+.contact_event tr {
+  cursor: pointer;
+}

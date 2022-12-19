@@ -353,6 +353,8 @@ class ConferenceController extends Controller
         $cpf_info = "";
         $date_born_info = "";
         $phone_info = "";
+        $ddd = ""; 
+        $number_phone = "";
         $address_info = "";
         $number_info = "";
         $district_info = "";
@@ -410,7 +412,7 @@ class ConferenceController extends Controller
                 return back()->withErrors(['error' => 'Por favor, preencha o campo Telefone']);
             }
 
-        }else{
+        } else{
             return back()->withErrors(['error' => 'Por favor, selecione o tipo do pagamento']);
         }
 
@@ -428,8 +430,9 @@ class ConferenceController extends Controller
                         $zip_info, $address2_info)
                 ->create();
 
+                
             $order = $moip->orders()->setOwnId(uniqid());
-
+            
             foreach($array_lotes_obj as $array_obj){
 
                 $lote = Lote::where('id', $array_obj['id'])->first();
@@ -532,10 +535,17 @@ class ConferenceController extends Controller
                 $expiration_date = (new \DateTime())->add(new \DateInterval('P3D'));
                 $instruction_lines = ['INSTRUÇÃO 1', 'INSTRUÇÃO 2', 'INSTRUÇÃO 3'];
 
+                dd($order);
+
                 // Creating payment to order
                 $payment = $order->payments()
                     ->setBoleto($expiration_date, $logo_uri, $instruction_lines)
                     ->execute();
+            }
+
+            $coupon_id = null;
+            if($coupon){
+                $coupon_id = $coupon->id;
             }
 
             $order_id = DB::table('orders')->insertGetId([
@@ -546,9 +556,9 @@ class ConferenceController extends Controller
                 'gatway_reference' => $payment->getId(),
                 'gatway_status' => $payment->getStatus(),
                 'gatway_payment_method' => $payment_form,
-                // 'participante_id' => 1,
                 'event_date_id' => $event_date_result->id,
                 'participante_id' => Auth::user()->id,
+                'coupon_id' => $coupon_id,
                 'created_at' => now()
             ]);
 
@@ -564,40 +574,19 @@ class ConferenceController extends Controller
                 ]);
             }
 
-            if($coupon){
-                $inscricao_coupom_id = DB::table('orders_coupons')->insertGetId([
-                    'order_id' => $order_id,
-                    'coupon_id' => $coupon->id
-                ]);
-            }
-
-            $array_participantes = [];
             foreach($dict_lotes as $i => $dict){
 
                 $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
-                $participantes_lote_id = DB::table('participantes_lotes')->insertGetId([
+                $order_item_id = DB::table('order_items')->insertGetId([
                     'hash' => md5((time() + $i) . md5('papainoel')),
                     'number' => crc32((time() + $i) . md5('papainoel')),
-                    'created_at' => now(),
-                    'status' => 1,
-                    'participante_id' => 1,
-                    // 'participante_id' => Auth::user()->id,
-                    'lote_id' => $lote->id
-                ]);
-
-                array_push($array_participantes, $participantes_lote_id);
-
-                $order_item_id = DB::table('order_items')->insertGetId([
                     'quantity' => 1,
                     'value' => $lote->value,
                     'order_id' => $order_id,
-                    'participante_lote_id' => $participantes_lote_id,
+                    'lote_id' => $lote->id,
                     'created_at' => now()
                 ]);
-            }
-
-            foreach($array_participantes as $k => $participante_id){
 
                 foreach(array_keys($input) as $field){
 
@@ -612,14 +601,75 @@ class ConferenceController extends Controller
                             $option_answer_id = DB::table('option_answers')->insertGetId([
                                 'answer' => $input['newfield_'. $k+1 . '_'. $id],
                                 'question_id' => $question->id,
-                                'participante_lote_id' => $participante_id,
-                                'order_id' => $order_id,
+                                'order_item_id' => $order_item_id,
                                 'created_at' => now()
                             ]);
                         }
                     }
                 }
+
             }
+
+
+
+
+
+            // if($coupon){
+            //     $inscricao_coupom_id = DB::table('orders_coupons')->insertGetId([
+            //         'order_id' => $order_id,
+            //         'coupon_id' => $coupon->id
+            //     ]);
+            // }
+
+            // $array_participantes = [];
+            // foreach($dict_lotes as $i => $dict){
+
+            //     $lote = Lote::where('hash', $dict['lote_hash'])->first();
+
+            //     $participantes_lote_id = DB::table('participantes_lotes')->insertGetId([
+            //         'hash' => md5((time() + $i) . md5('papainoel')),
+            //         'number' => crc32((time() + $i) . md5('papainoel')),
+            //         'created_at' => now(),
+            //         'status' => 1,
+            //         'participante_id' => 1,
+            //         // 'participante_id' => Auth::user()->id,
+            //         'lote_id' => $lote->id
+            //     ]);
+
+            //     array_push($array_participantes, $participantes_lote_id);
+
+            //     $order_item_id = DB::table('order_items')->insertGetId([
+            //         'quantity' => 1,
+            //         'value' => $lote->value,
+            //         'order_id' => $order_id,
+            //         'participante_lote_id' => $participantes_lote_id,
+            //         'created_at' => now()
+            //     ]);
+            // }
+
+            // foreach($array_participantes as $k => $participante_id){
+
+            //     foreach(array_keys($input) as $field){
+
+            //         if(str_contains($field, 'newfield_')){
+            //             $id = explode("_", $field);
+            //             $id = $id[2];
+
+            //             $question = Question::where('id', $id)->first();
+
+            //             if($input['newfield_'. $k+1 . '_'. $id] != ""){
+
+            //                 $option_answer_id = DB::table('option_answers')->insertGetId([
+            //                     'answer' => $input['newfield_'. $k+1 . '_'. $id],
+            //                     'question_id' => $question->id,
+            //                     'participante_lote_id' => $participante_id,
+            //                     'order_id' => $order_id,
+            //                     'created_at' => now()
+            //                 ]);
+            //             }
+            //         }
+            //     }
+            // }
 
         } catch (\Moip\Exceptions\UnautorizedException $e) {
             return back()->withErrors(['error' => 'Compra não autorizada.']);

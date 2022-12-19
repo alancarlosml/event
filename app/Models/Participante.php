@@ -48,14 +48,14 @@ class Participante extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
-    public function lotes()
-    {
-        return $this->belongsToMany(
-            Lote::class,
-            'participantes_lotes',
-            'participante_id',
-            'lote_id');
-    }
+    // public function lotes()
+    // {
+    //     return $this->belongsToMany(
+    //         Lote::class,
+    //         'participantes_lotes',
+    //         'participante_id',
+    //         'lote_id');
+    // }
 
     public function eventos()
     {

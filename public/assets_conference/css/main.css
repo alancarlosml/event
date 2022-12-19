@@ -2308,6 +2308,48 @@ blockquote .quote-text{
 .container-form textarea{
     border-radius:4px!important
 }
+
+.container-form .error-message {
+    display: none;
+    color: #fff;
+    background: #ed3c0d;
+    text-align: left;
+    padding: 15px;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  
+  .container-form .sent-message {
+    display: none;
+    color: #fff;
+    background: #18d26e;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  
+  .container-form .loading {
+    display: none;
+    background: #fff;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 24px;
+  }
+  
+  .container-form .loading:before {
+    content: "";
+    display: inline-block;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    margin: 0 10px -6px 0;
+    border: 3px solid #18d26e;
+    border-top-color: #eee;
+    -webkit-animation: animate-loading 1s linear infinite;
+    animation: animate-loading 1s linear infinite;
+  }
+  
 .form-submit .btn-common{
     width:100%
 }
@@ -2384,8 +2426,25 @@ blockquote .quote-text{
     display:block
 }
 footer{
-    background:#161e26;
-    text-align:center
+    background:#eee;
+    text-align:center;
+    padding: 30px 0;
+    border-top: 1px solid rgba(0,0,0,.125);
+}
+footer .footer-links h4, footer .footer-contact h4 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 12px;
+    text-align: left;
+}
+footer .footer-links ul, footer .footer-contact p {
+    text-align: left;
+}
+footer .footer-links ul, footer .footer-contact p {
+    text-align: left;
 }
 .site-info{
     position:relative;
@@ -2432,9 +2491,9 @@ footer{
     border-color:#1da1f2;
     color:#1da1f2
 }
-.social-icons-footer .linkedin a:hover{
-    border-color:#0077b5;
-    color:#0077b5
+.social-icons-footer .instagram a:hover{
+    border-color:#E1306C;
+    color:#E1306C
 }
 .social-icons-footer .google a:hover{
     border-color:#ea4335;

@@ -44,12 +44,12 @@ class Lote extends Model
             'coupon_id');
     }
 
-    public function participantes()
-    {
-        return $this->belongsToMany(
-            Participante::class,
-            'participantes_lotes',
-            'lote_id',
-            'participante_id');
-    }
+    // public function participantes()
+    // {
+    //     return $this->belongsToMany(
+    //         Participante::class,
+    //         'participantes_lotes',
+    //         'lote_id',
+    //         'participante_id');
+    // }
 }

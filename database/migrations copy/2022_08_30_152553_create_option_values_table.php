@@ -15,18 +15,13 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         
-        Schema::create('option_answers', function (Blueprint $table) {
+        Schema::create('option_values', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('answer');
+            $table->string('value');
             $table->integer('question_id')->index()->unsigned();
             $table->foreign('question_id')
                 ->references('id')
                 ->on('questions')
-                ->onDelete('cascade');
-            $table->integer('order_item_id')->index()->unsigned();
-            $table->foreign('order_item_id')
-                ->references('id')
-                ->on('order_items')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -39,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('option_answers');
+        Schema::dropIfExists('option_values');
     }
 };

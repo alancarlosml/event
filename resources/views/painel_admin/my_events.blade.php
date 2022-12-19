@@ -5,10 +5,10 @@
         <section class="breadcrumbs">
           <div class="container">
             <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/painel/meus-eventos">Meus eventos</a></li>
             </ol>
-            <h2>Meus eventos</h2>
+            <h2>Listar todos</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->

@@ -5,11 +5,7 @@
         <section class="breadcrumbs">
           <div class="container">
     
-            <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
-            </ol>
-            <h2>Todos os eventos</h2>
+            <h2 class="mt-4">Contato</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
@@ -77,7 +73,7 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <input type="text" class="form-control" name="phone" placeholder="Telefone" required>
+                                    <input type="text" class="form-control" name="phone" id="phone" placeholder="Telefone" required>
                                 </div>
                 
                                 <div class="col-md-12">
@@ -104,8 +100,14 @@
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         @endpush
 
-        @push('head')
-            
+        @push('footer')
+            <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
+            <script>
+                $(document).ready(function() { 
+
+                    $('#phone').mask('(00) 00000-0000');
+                });
+            </script>
         @endpush
 
 </x-site-layout>

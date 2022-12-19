@@ -15,15 +15,20 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         
-        Schema::create('event_times', function (Blueprint $table) {
+        Schema::create('places', function (Blueprint $table) {
             $table->increments('id');
-            $table->timestamp('time', $precision = 0);
-            $table->integer('status');
-            $table->integer('event_dates_id')->index()->nullable()->unsigned();
-            $table->foreign('event_dates_id')
+            $table->string('name');
+            $table->string('address');
+            $table->integer('number');
+            $table->string('district');
+            $table->string('zip');
+            $table->string('complement');
+            $table->integer('city_id')->index()->unsigned();
+            $table->foreign('city_id')
                   ->references('id')
-                  ->on('event_dates')
+                  ->on('cities')
                   ->onDelete('cascade');
+            $table->integer('status');
             $table->timestamps();
         });
     }
@@ -35,6 +40,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('event_times');
+        Schema::dropIfExists('places');
     }
 };

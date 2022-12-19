@@ -17,32 +17,46 @@ class DashboardController extends Controller
             ->where('event_dates.date', '>', now())
             ->where('events.status', '1')
             ->select('events.id',
-            DB::raw("MAX(event_dates.date) AS total_ativo"))
+                DB::raw("MAX(event_dates.date) AS total_ativo"))
             ->groupBy('events.id')
             ->get();
-        
-        $ingressos_vendidos = Order::where('participantes.status', '1')
-            // ->where(DB::raw('max(MONTH(event_dates.date))'), 'MONTH(now())')
-            ->join('participantes_lotes', 'participantes_lotes.id', '=', 'orders.participante_lote_id')
-            ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
-            ->join('events', 'events.id', '=', 'lotes.event_id')
-            ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
-            ->join('participantes', 'participantes.id', '=', 'participantes_lotes.participante_id')
-            ->leftJoin('orders_coupons', 'orders.id', '=', 'orders_coupons.order_id')
-            ->leftJoin('coupons', 'orders_coupons.coupon_id', '=', 'coupons.id')
-            ->selectRaw(DB::raw('max(MONTH(event_dates.date)) teste'))
-            ->selectRaw("count(case when participantes_lotes.status = 1 then 1 end) as confirmado")
-            ->selectRaw("sum(case 
+
+        $ingressos_vendidos = $resumo = DB::table('lotes')
+        ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')
+        ->join('orders', 'orders.id', '=', 'order_items.order_id')
+        ->join('events', 'events.id', '=', 'lotes.event_id')
+        ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+        ->selectRaw("count(case when orders.status = 1 then 1 end) as confirmado")
+        ->selectRaw("sum(case 
                                 when 
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value)
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value 
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
+                                when    
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value
                                 end
                             ) as total_confirmado"
                         )
-            // ->having('teste', '=', 'MONTH(now())')
-            // ->groupBy('event_dates.date')
-            ->first();
+        ->first();
+        
+        // $ingressos_vendidos = Order::where('participantes.status', '1')
+        //     ->join('order_items', 'order_items.order_id', '=', 'orders.id')
+        //     ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+        //     ->join('events', 'events.id', '=', 'lotes.event_id')
+        //     ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
+        //     ->join('participantes', 'participantes.id', '=', 'orders.participante_id')
+        //     ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+        //     ->selectRaw(DB::raw('max(MONTH(event_dates.date)) teste'))
+        //     ->selectRaw("count(case when orders.status = 1 then 1 end) as confirmado")
+        //     ->selectRaw("sum(case 
+        //                         when 
+        //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value)
+        //                         when    
+        //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value 
+        //                         end
+        //                     ) as total_confirmado"
+        //                 )
+        //     ->first();
 
         // dd($ingressos_vendidos);
 

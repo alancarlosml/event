@@ -15,19 +15,16 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         
-        Schema::create('option_answers', function (Blueprint $table) {
+        Schema::create('areas', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('answer');
-            $table->integer('question_id')->index()->unsigned();
-            $table->foreign('question_id')
+            $table->string('name')->unique();
+            $table->string('slug')->unique();
+            $table->integer('category_id')->index()->unsigned();
+            $table->foreign('category_id')
                 ->references('id')
-                ->on('questions')
+                ->on('categories')
                 ->onDelete('cascade');
-            $table->integer('order_item_id')->index()->unsigned();
-            $table->foreign('order_item_id')
-                ->references('id')
-                ->on('order_items')
-                ->onDelete('cascade');
+            $table->string('status');
             $table->timestamps();
         });
     }
@@ -39,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('option_answers');
+        Schema::dropIfExists('areas');
     }
 };

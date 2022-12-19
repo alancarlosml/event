@@ -32,15 +32,21 @@ class EventAdminController extends Controller
     public function myRegistrations(){
 
         $events = DB::table('orders')
-            ->join('participantes_lotes', 'orders.participante_lote_id', '=', 'participantes_lotes.id')
-            ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->join('participantes', 'participantes.id', '=', 'orders.participante_id')
+            ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
             ->join('events', 'lotes.event_id', '=', 'events.id')
+            ->join('places', 'places.id', '=', 'events.place_id')
             ->select('events.*', 
-                    'lotes.name as lote_name'
+                    'lotes.name as lote_name',
+                    'event_dates.date as data_chosen',
+                    'places.name as place_name'
                 )
             ->where('participantes.id', Auth::user()->id)
             ->where('participantes_events.status', 1)
-            ->orderBy('events.*')
+            ->orderBy('events.id', 'desc')
             ->get();
 
         return view('painel_admin.my_registrations', compact('events'));
@@ -1124,7 +1130,16 @@ class EventAdminController extends Controller
 
         $messages = Message::where('event_id', $event_id)->get();
 
-        return view('painel_admin.contacts', compact('messages'));
+        return view('painel_admin.contacts', compact('messages', 'event'));
+    }
+
+    public function showMessage(Request $request, $id)
+    {
+        $contact = Message::find($id);
+
+        Message::where('id', $id)->update(array('read' => 1));
+
+        return view('painel_admin.contact', compact('contact'));
     }
 
     public function reports(Request $request, $hash)
@@ -1136,81 +1151,81 @@ class EventAdminController extends Controller
         $taxa_juros = $config->tax;
 
         $resumo = DB::table('lotes')
+                ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')
+                ->join('orders', 'orders.id', '=', 'order_items.order_id')
                 ->join('events', 'events.id', '=', 'lotes.event_id')
-                ->leftJoin('participantes_lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
-                ->leftJoin('coupons_lotes', 'coupons_lotes.lote_id', '=', 'participantes_lotes.lote_id')
-                ->leftJoin('coupons', 'coupons_lotes.coupon_id', '=', 'coupons.id')
+                ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
                 ->where('events.hash', $hash)
                 ->selectRaw('count(*) as total')
-                ->selectRaw("count(case when participantes_lotes.status = 1 then 1 end) as confirmado")
-                ->selectRaw("count(case when participantes_lotes.status = 2 then 1 end) as pendente")
-                ->selectRaw("count(case when ((participantes_lotes.status = 1 or participantes_lotes.status = 2)) then 1 end) as geral")
-                // ->selectRaw("sum(case when participantes_lotes.status = 1 then 1 * lotes.value end) as total_confirmado")
+                ->selectRaw("count(case when orders.status = 1 then 1 end) as confirmado")
+                ->selectRaw("count(case when orders.status = 2 then 1 end) as pendente")
+                ->selectRaw("count(case when ((orders.status = 1 or orders.status = 2)) then 1 end) as geral")
+                // ->selectRaw("sum(case when orders.status = 1 then 1 * lotes.value end) as total_confirmado")
                 ->selectRaw("sum(case 
                                 when 
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value)
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value 
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type is null and coupons.code is null then lotes.value 
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value
                                 end
                             ) as total_confirmado"
                         )
-                // ->selectRaw("sum(case when participantes_lotes.status = 2 then 1 * lotes.value end) as total_pendente")
+                // ->selectRaw("sum(case when orders.status = 2 then 1 * lotes.value end) as total_pendente")
                 ->selectRaw("sum(case 
                                 when 
-                                    lotes.type = 0 and participantes_lotes.status = 2 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value)
+                                    lotes.type = 0 and orders.status = 2 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 2 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value 
+                                    lotes.type = 0 and orders.status = 2 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 2 and coupons.discount_type is null and coupons.code is null then lotes.value 
+                                    lotes.type = 0 and orders.status = 2 and coupons.discount_type is null and coupons.code is null then order_items.value 
                                 end
                             ) as total_pendente"
                         )
-                ->selectRaw("sum(case when ((participantes_lotes.status = 1 or participantes_lotes.status = 2)) then 1 * lotes.value end) as total_geral")
-                // ->selectRaw("sum(CASE WHEN participantes_lotes.status = 1 THEN 1 * lotes.value * $taxa_juros END) as total_taxa")
+                ->selectRaw("sum(case when ((orders.status = 1 or orders.status = 2)) then 1 * order_items.value end) as total_geral")
+                // ->selectRaw("sum(CASE WHEN orders.status = 1 THEN 1 * order_items.value * $taxa_juros END) as total_taxa")
                 ->selectRaw("sum(case 
                                 when 
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then (lotes.value - (coupons.discount_value * lotes.value)) * $taxa_juros
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then (order_items.value - (coupons.discount_value * order_items.value)) * $taxa_juros
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then (lotes.value - coupons.discount_value) * $taxa_juros
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then (order_items.value - coupons.discount_value) * $taxa_juros
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type is null and coupons.code is null then lotes.value * $taxa_juros
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value * $taxa_juros
                                 end
                             ) as total_taxa"
                         )
                 ->selectRaw("sum(case 
                                 when 
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then (lotes.value - (coupons.discount_value * lotes.value)) - ((lotes.value - (coupons.discount_value * lotes.value)) * $taxa_juros)
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then (order_items.value - (coupons.discount_value * order_items.value)) - ((order_items.value - (coupons.discount_value * order_items.value)) * $taxa_juros)
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then (lotes.value - coupons.discount_value) - ((lotes.value - coupons.discount_value) * $taxa_juros)
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then (order_items.value - coupons.discount_value) - ((order_items.value - coupons.discount_value) * $taxa_juros)
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type is null and coupons.code is null then lotes.value - (lotes.value * $taxa_juros)
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value - (order_items.value * $taxa_juros)
                                 end
                             ) as total_liquido"
                         )
-                // ->selectRaw("sum((CASE WHEN participantes_lotes.status = 1 THEN 1 END) * lotes.value) - (sum(CASE WHEN participantes_lotes.status = 1 THEN 1 * lotes.value * $taxa_juros END)) as total_liquido")
+                // ->selectRaw("sum((CASE WHEN orders.status = 1 THEN 1 END) * lotes.value) - (sum(CASE WHEN orders.status = 1 THEN 1 * lotes.value * $taxa_juros END)) as total_liquido")
                 ->first();
 
         $lotes = Lote::orderBy('order')
+                ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')
+                ->join('orders', 'orders.id', '=', 'order_items.order_id')
                 ->join('events', 'events.id', '=', 'lotes.event_id')
-                ->leftJoin('participantes_lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
-                ->leftJoin('coupons_lotes', 'coupons_lotes.lote_id', '=', 'participantes_lotes.lote_id')
-                ->leftJoin('coupons', 'coupons_lotes.coupon_id', '=', 'coupons.id')
+                ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
                 ->where('events.hash', $hash)
                 ->select('lotes.id', 'lotes.name', 'lotes.quantity',
-                    DB::raw("COUNT(CASE WHEN participantes_lotes.status = 1 THEN 1 END) AS confirmado"),
-                    DB::raw("COUNT(CASE WHEN participantes_lotes.status = 2 THEN 1 END) AS pendente"),
-                    DB::raw("COUNT(CASE WHEN participantes_lotes.status = 3 THEN 1 END) AS cancelado"),
-                    DB::raw("lotes.quantity - COUNT(CASE WHEN (participantes_lotes.status = 1 or participantes_lotes.status = 2) THEN 1 END) AS restante"),
-                    // DB::raw("(COUNT(CASE WHEN participantes_lotes.status = 1 THEN 1 END) * lotes.value) AS total_confirmado"))
+                    DB::raw("COUNT(CASE WHEN orders.status = 1 THEN 1 END) AS confirmado"),
+                    DB::raw("COUNT(CASE WHEN orders.status = 2 THEN 1 END) AS pendente"),
+                    DB::raw("COUNT(CASE WHEN orders.status = 3 THEN 1 END) AS cancelado"),
+                    DB::raw("lotes.quantity - COUNT(CASE WHEN (orders.status = 1 or orders.status = 2) THEN 1 END) AS restante"),
+                    // DB::raw("(COUNT(CASE WHEN orders.status = 1 THEN 1 END) * lotes.value) AS total_confirmado"))
                     DB::raw("sum(case 
                                 when 
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value)
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value 
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
                                 when    
-                                    lotes.type = 0 and participantes_lotes.status = 1 and coupons.discount_type is null and coupons.code is null then lotes.value 
+                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value 
                                 end
                             ) as total_confirmado"
                         ))
@@ -1218,49 +1233,49 @@ class EventAdminController extends Controller
                 ->get();
 
         $participantes = Participante::orderBy('participantes.name')
-                    ->join('participantes_lotes', 'participantes_lotes.participante_id', '=', 'participantes.id')
-                    ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+                    ->join('orders', 'orders.participante_id', '=', 'participantes.id')
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
                     ->join('events', 'events.id', '=', 'lotes.event_id')
-                    ->leftJoin('coupons_lotes', 'coupons_lotes.lote_id', '=', 'participantes_lotes.lote_id')
-                    ->leftJoin('coupons', 'coupons_lotes.coupon_id', '=', 'coupons.id')
+                    ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
                     ->where('events.hash', $hash)
-                    ->select('lotes.name as lote_name', 'participantes_lotes.id', 'participantes_lotes.number as inscricao', 'participantes_lotes.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+                    ->select('lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
                     ->get();
         
         $situacao_participantes = Participante::orderBy('participantes.name')
-                    ->join('participantes_lotes', 'participantes_lotes.participante_id', '=', 'participantes.id')
-                    ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
-                    ->join('orders', 'participantes_lotes.id', '=', 'orders.participante_lote_id')
+                    ->join('orders', 'orders.participante_id', '=', 'participantes.id')
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
                     ->join('events', 'events.id', '=', 'lotes.event_id')
-                    ->leftJoin('coupons_lotes', 'coupons_lotes.lote_id', '=', 'participantes_lotes.lote_id')
-                    ->leftJoin('coupons', 'coupons_lotes.coupon_id', '=', 'coupons.id')
+                    ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
                     ->where('events.hash', $hash)
-                    ->select('orders.gatway_status', 'lotes.value as lote_value','lotes.name as lote_name', 'participantes_lotes.id', 'participantes_lotes.number as inscricao', 'participantes_lotes.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
-                    ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value) else '' end as valor_porcentagem")
-                    ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value else '' end as valor_desconto")
+                    ->select('orders.gatway_status', 'order_items.value as lote_value','lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+                    ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value) else '' end as valor_porcentagem")
+                    ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value else '' end as valor_desconto")
                     ->get();
 
                     // dd($situacao_participantes);
         
         $payment_methods = Order::orderBy('orders.gatway_payment_method')
-                    ->join('participantes_lotes', 'participantes_lotes.id', '=', 'orders.participante_lote_id')
-                    ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
                     ->join('events', 'events.id', '=', 'lotes.event_id')
                     ->where('events.hash', $hash)
+                    ->where('lotes.type', 0)
                     ->select('orders.gatway_payment_method', DB::raw('count(*) as payment_methods_total'))
                     ->groupBy('orders.gatway_payment_method')
                     ->get();
 
         $situacao_coupons  = Coupon::orderBy('coupons.id')
-                    ->join('coupons_lotes', 'coupons_lotes.coupon_id', '=', 'coupons.id')
-                    ->join('participantes_lotes', 'participantes_lotes.lote_id', '=', 'coupons_lotes.lote_id')
-                    ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+                    ->join('orders', 'orders.coupon_id', '=', 'coupons.id')
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
                     ->join('events', 'events.id', '=', 'lotes.event_id')
                     ->where('coupons.status', '1')
                     ->where('events.hash', $hash)
                     ->select('coupons.id', 'coupons.code','coupons.limit_buy', 'coupons.discount_type', 'coupons.discount_value',
-                    DB::raw("COUNT(CASE WHEN participantes_lotes.status = 1 THEN 1 END) AS confirmado"),
-                    DB::raw("COUNT(CASE WHEN participantes_lotes.status = 2 THEN 1 END) AS pendente"))
+                    DB::raw("COUNT(CASE WHEN orders.status = 1 THEN 1 END) AS confirmado"),
+                    DB::raw("COUNT(CASE WHEN orders.status = 2 THEN 1 END) AS pendente"))
                     ->get();
 
         // dd($payment_methods);

@@ -6,8 +6,8 @@
           <div class="container">
     
             <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/painel/meus-eventos">Meus eventos</a></li>
             </ol>
             <h2>Relatórios financeiros: {{$event->name}}</h2>
     
@@ -394,14 +394,6 @@
                             <div class="row pl-3 pr-2">
                                 <h4>Vendas por meio de pagamento</h4>
                                 <div class="table-responsive">
-                                    {{-- <table class="table">
-                                        @foreach ($payment_methods as $payment_method)
-                                            <tr>
-                                                <th style="width:50%">{{$payment_method->gatway_payment_method}}</th>
-                                                <td class="text-right">{{$payment_method->payment_methods_total}}</td>
-                                            </tr>
-                                        @endforeach
-                                    </table> --}}
                                     <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                                 </div>
                             </div>

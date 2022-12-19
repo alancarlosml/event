@@ -14,26 +14,18 @@ return new class extends Migration
     public function up()
     {
         Schema::disableForeignKeyConstraints();
-
-        Schema::create('order_items', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('number')->unique(); 
-            $table->integer('quantity');
-            $table->double('value');
-            $table->integer('order_id')->index()->unsigned();
-            $table->foreign('order_id')
+        
+        Schema::create('coupons_lotes', function (Blueprint $table) {
+            $table->increments('id');       
+            $table->integer('coupon_id')->index()->unsigned();
+            $table->foreign('coupon_id')
                 ->references('id')
-                ->on('orders')
-                ->onDelete('cascade');
+                ->on('coupons')->onDelete('cascade');
             $table->integer('lote_id')->index()->unsigned();
             $table->foreign('lote_id')
                 ->references('id')
-                ->on('lotes')
-                ->onDelete('cascade');
-            $table->timestamps();
+                ->on('lotes')->onDelete('cascade');
         });
-
-        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -43,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('order_items');
+        Schema::dropIfExists('coupons_lotes');
     }
 };

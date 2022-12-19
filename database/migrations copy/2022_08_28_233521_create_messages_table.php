@@ -15,18 +15,18 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         
-        Schema::create('option_answers', function (Blueprint $table) {
+        Schema::create('messages', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('answer');
-            $table->integer('question_id')->index()->unsigned();
-            $table->foreign('question_id')
+            $table->string('name');
+            $table->string('email');
+            $table->string('phone');
+            $table->string('subject');
+            $table->text('text');
+            $table->integer('read');
+            $table->integer('event_id')->index()->unsigned();
+            $table->foreign('event_id')
                 ->references('id')
-                ->on('questions')
-                ->onDelete('cascade');
-            $table->integer('order_item_id')->index()->unsigned();
-            $table->foreign('order_item_id')
-                ->references('id')
-                ->on('order_items')
+                ->on('events')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -39,6 +39,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('option_answers');
+        Schema::dropIfExists('messages');
     }
 };

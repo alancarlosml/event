@@ -33,69 +33,50 @@
                     @endif
                 </div>
                 <div class="card-body table-responsive p-0">
-                    <table class="table table-head-fixed text-wrap hover contact_event" id="list_events">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Telefone</th>
-                                <th>Assunto</th>
-                                <th>Data Criação</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($messages as $message)
-                                <tr @if($message->read == 0) style="background:#eeefff; font-weight:bold" @endif onclick="window.location='{{route('event_home.show_message', $message->id)}}';">
-                                    <td>{{$message->id}}</td>
-                                    <td>{{$message->name}}</td>
-                                    <td>{{$message->email}}</td>
-                                    <td>{{$message->phone}}</td>
-                                    <td>{{$message->subject}}</td>
-                                    <td>{{ \Carbon\Carbon::parse($message->created_at)->format('j/m/Y H:i') }}</td>
-                                    <td>
-                                        <div class="d-flex">
-                                            <a class="btn btn-primary btn-sm mr-1" href="{{route('event_home.show_message', $message->id)}}">
-                                                <i class="fa-solid fa-envelope"></i>
-                                                Abrir
-                                            </a>
-                                            <form action="{{ route('event_home.destroy_message', $message->id) }}" method="POST">
-                                                <input type="hidden" name="_method" value="DELETE">
-                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$message->id}})">
-                                                    <i class="fas fa-trash">
-                                                    </i>
-                                                    Remover
-                                                </a>
-                                                {{-- <a class="btn btn-danger m-1 btn-remove" href="javascript:;" onclick="removeData({{$category->id}})">Remover</a> --}}
-                                                <button class="d-none" id="btn-remove-hidden-{{$message->id}}">Remover</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                    <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$message->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de evento</h5>
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Deseja realmente remover essa mensagem?
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$message->id}}" onclick="removeSucc({{$message->id}})">Sim</button>
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="id">ID</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$contact->id}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Nome</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$contact->name}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$contact->email}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Telefone</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$contact->phone}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Assunto</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$contact->subject}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="text">Texto</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$contact->text}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="created_at">Data de criação</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{ \Carbon\Carbon::parse($contact->created_at)->format('j/m/Y H:i') }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

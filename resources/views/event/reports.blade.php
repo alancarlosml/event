@@ -46,7 +46,7 @@
                             @endif
                             <div class="card-body">
                                 <div class="row pt-3">
-                                    <div class="col-12 col-md-12 col-lg-8 order-2 order-md-1 pr-3">
+                                    <div class="col-12 col-md-12 col-lg-12">
                                         <h4>Resumo financeiro</h4>
                                         <div class="row">
                                             <div class="col-12 col-sm-4">
@@ -74,6 +74,42 @@
                                                         <span class="info-box-number text-center text-primary mb-0 h5">@money($resumo->total_confirmado + $resumo->total_pendente)</span>
                                                         <small class="text-center mb-0">{{$resumo->geral}} participantes</small>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr/>
+                                        <div class="row">
+                                            <div class="col-6 border-right">
+                                                <h4>Valor total</h4>
+                                                <div class="table-responsive">
+                                                <table class="table">
+                                                    <tr>
+                                                    <th style="width:50%">Confirmado:</th>
+                                                    <td class="text-right">@money($resumo->total_confirmado)</td>
+                                                    </tr>
+                                                    <tr>
+                                                    <th>Total da taxa ({{number_format($config->tax*100, 2, ',')}}%)</th>
+                                                    <td class="text-right">- @money($resumo->total_taxa)</td>
+                                                    </tr>
+                                                    <tr style="border-top: solid 2px #666">
+                                                    <th>Líquido:</th>
+                                                    <td class="text-right"> @money($resumo->total_liquido)</td>
+                                                    </tr>
+                                                </table>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <h4 class="text-center">Vendas por meio de pagamento</h4>
+                                                <div class="table-responsive">
+                                                    {{-- <table class="table">
+                                                        @foreach ($payment_methods as $payment_method)
+                                                            <tr>
+                                                                <th style="width:50%">{{$payment_method->gatway_payment_method}}</th>
+                                                                <td class="text-right">{{$payment_method->payment_methods_total}}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </table> --}}
+                                                    <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                                                 </div>
                                             </div>
                                         </div>
@@ -365,7 +401,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-12 col-md-12 col-lg-4 order-1 order-md-2 border-left">
+                                    {{-- <div class="col-12 col-md-12 col-lg-4 order-1 order-md-2 border-left">
                                         <div class="row pl-3 pr-2">
                                             <h4>Valor total</h4>
                                             <div class="table-responsive">
@@ -389,18 +425,10 @@
                                         <div class="row pl-3 pr-2">
                                             <h4>Vendas por meio de pagamento</h4>
                                             <div class="table-responsive">
-                                                {{-- <table class="table">
-                                                    @foreach ($payment_methods as $payment_method)
-                                                        <tr>
-                                                            <th style="width:50%">{{$payment_method->gatway_payment_method}}</th>
-                                                            <td class="text-right">{{$payment_method->payment_methods_total}}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </table> --}}
                                                 <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                         </div>

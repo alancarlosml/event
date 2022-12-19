@@ -76,46 +76,7 @@
                 </div>
             </div>
             <div class="row intro-wrapper">
-                {{-- @foreach ($event->event_dates as $event_date)
-                    {{$event_date->date}}
-                @endforeach --}}
                 <div class="col-lg-8 col-sm-12">
-                    {{-- <div class="col-12 mb-5 text-center">
-                        <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="monday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#monday" role="tab" aria-controls="monday" aria-expanded="true">
-                                    <div class="item-text">
-                                        <h4>Day 01</h4>
-                                        <h5>14 February 2020</h5>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tuesday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#tuesday" role="tab" aria-controls="tuesday">
-                                    <div class="item-text">
-                                        <h4>Day 02</h4>
-                                        <h5>15 February 2020</h5>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="wednesday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#wednesday" role="tab" aria-controls="wednesday">
-                                    <div class="item-text">
-                                        <h4>Day 03</h4>
-                                        <h5>16 February 2020</h5>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="thursday-tab" data-toggle="tab" href="https://preview.uideck.com/items/event-up/multi-page/index.html#thursday" role="tab" aria-controls="thursday">
-                                    <div class="item-text">
-                                        <h4>Day 04</h4>
-                                        <h5>17 February 2020</h5>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </div> --}}
                     <ul class="nav nav-tabs">
                         @foreach ($event->event_dates as $event_date)
                             <li class="nav-item">
@@ -148,7 +109,7 @@
                                                     <p class="fw-bold text-uppercase"> <b>{{$lote->name}} </b></p>
                                                     @if($lote->description)<p class="fw-bold"> {{$lote->description}} </p>@endif
                                                     <em> 
-                                                        @if($lote->datetime_end >= \Carbon\Carbon::now())
+                                                        @if($event->max_event_dates() >= \Carbon\Carbon::now())
                                                             Disponível até 
                                                         @else
                                                             Finalizado em 
@@ -159,7 +120,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            @if($lote->datetime_end >= \Carbon\Carbon::now())
+                                            @if($event->max_event_dates() >= \Carbon\Carbon::now())
                                             <div class="d-flex">
                                                 <p class="pe-3">
                                                     <span class="red">@money($lote->value)</span><br/>
@@ -172,7 +133,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center justify-content-center"> 
-                                                @if($lote->datetime_end >= \Carbon\Carbon::now())
+                                                @if($event->max_event_dates() >= \Carbon\Carbon::now())
                                                 <span class="pe-3 ml-2"> 
                                                     <input class="inp-number" name="inp-number" type="number" style="min-width: 1.5rem" value="{{old('inp-number', 0)}}" min="0" max="{{$lote->limit_max}}"/>
                                                     {{-- <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"> --}}
@@ -244,8 +205,11 @@
             </div>
         </div>
         <div class="container-fluid">
+            <div class="text-center mb-3" style="font-size: 18px">
+                <b>{{$event->place->name}}.</b> {{$event->place->address}}, {{$event->place->number}}. Bairro: {{$event->place->district}}. CEP: {{$event->place->zip}}. {{$event->place->get_city()->name}}-{{$event->place->get_city()->uf}} 
+            </div>
             <div class="row">
-                <div class="col-12">
+                <div class="col-12" id="map_canvas">
                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3985.841148750037!2d-44.311417949527524!3d-2.5584934981266056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7f6860324886045%3A0x1024f6caa9406aaa!2sUniversidade%20Federal%20do%20Maranh%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1659628612287!5m2!1spt-BR!2sbr" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
@@ -254,7 +218,7 @@
     <section>
         <div class="container">
             <div class="row contact-wrapper">
-                <p><b>{{$event->place->name}}.</b> {{$event->place->address}}, {{$event->place->number}}. Bairro: {{$event->place->district}}. CEP: {{$event->place->zip}}. {{$event->place->get_city()->name}}-{{$event->place->get_city()->uf}} </p>
+                
                 {{-- <div class="col-lg-4 col-md-5 col-xs-12">
                     <ul>
                         <li>
@@ -340,31 +304,42 @@
                                     </div>
                                     <div class="col-md-6 form-line">
                                         <div class="form-group">
-                                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required="" data-error="Please enter your Email">
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required data-error="Please enter your Email">
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6 form-line">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" id="msg_subject" name="subject" placeholder="Assunto" required="" data-error="Please enter your message subject">
+                                            <input type="text" class="form-control" id="msg_subject" name="subject" placeholder="Assunto" required data-error="Please enter your message subject">
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6 form-line">
                                         <div class="form-group">
-                                            <input type="phone" class="form-control" id="msg_phone" name="phone" placeholder="Telefone" required="" data-error="Please enter your message subject">
+                                            <input type="text" class="form-control" id="msg_phone" name="phone" placeholder="Telefone" required data-error="Please enter your message subject">
                                             <div class="help-block with-errors"></div>
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-12 form-line">
                                         <div class="form-group">
-                                            <textarea class="form-control" rows="4" id="message" name="message" required="" data-error="Write your message" placeholder="Mensagem"></textarea>
+                                            <textarea class="form-control" rows="4" id="text" name="text" required data-error="Write your message" placeholder="Mensagem"></textarea>
                                         </div>
+                                    </div>
+                                    <div class="col-md-12 text-center">
+                                        <div class="loading">Carregando...</div>
+                                        <div class="error-message"></div>
+                                        <div class="sent-message">Sua mensagem foi enviada. Obrigado!</div>
+                    
+                                        <button type="submit" class="btn btn-common">Enviar mensagem</button>
+                                    </div>
+
+                                    {{-- <div class="col-md-12">
+                                        
                                         <div class="form-submit">
                                             <button type="submit" class="btn btn-common" id="form-submit" style="pointer-events: all; cursor: pointer;"><i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar</button>
                                             <div id="msgSubmit" class="h3 text-center hidden"></div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </form>
                         </div>
@@ -419,10 +394,66 @@
     @push('footer')
         <script src="{{ asset('assets_conference/js/bootstrap-input-spinner.js') }}"></script>
         <script src="{{ asset('assets_conference/js/custom-editors.js') }}"></script>
+        <script src="{{ asset('assets_conference/js/validate.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
+        <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk"></script>
         
         <script>
 
+            // var geocoder;
+            // var map;
+            // var address = "San Diego, CA";
+
+            // function initialize() {
+            // geocoder = new google.maps.Geocoder();
+            // var latlng = new google.maps.LatLng(-34.397, 150.644);
+            // var myOptions = {
+            //     zoom: 8,
+            //     center: latlng,
+            //     mapTypeControl: true,
+            //     mapTypeControlOptions: {
+            //     style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+            //     },
+            //     navigationControl: true,
+            //     mapTypeId: google.maps.MapTypeId.ROADMAP
+            // };
+            // map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+            // if (geocoder) {
+            //     geocoder.geocode({
+            //     'address': address
+            //     }, function(results, status) {
+            //     if (status == google.maps.GeocoderStatus.OK) {
+            //         if (status != google.maps.GeocoderStatus.ZERO_RESULTS) {
+            //         map.setCenter(results[0].geometry.location);
+
+            //         var infowindow = new google.maps.InfoWindow({
+            //             content: '<b>' + address + '</b>',
+            //             size: new google.maps.Size(150, 50)
+            //         });
+
+            //         var marker = new google.maps.Marker({
+            //             position: results[0].geometry.location,
+            //             map: map,
+            //             title: address
+            //         });
+            //         google.maps.event.addListener(marker, 'click', function() {
+            //             infowindow.open(map, marker);
+            //         });
+
+            //         } else {
+            //         alert("No results found");
+            //         }
+            //     } else {
+            //         alert("Geocode was not successful for the following reason: " + status);
+            //     }
+            //     });
+            // }
+            // }
+            // google.maps.event.addDomListener(window, 'load', initialize);
+
             $(document).ready(function() { 
+
+                $('#msg_phone').mask('(00) 00000-0000');
                 
                 $('.event_date_nav').click(function(){
 

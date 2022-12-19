@@ -15,18 +15,22 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         
-        Schema::create('option_answers', function (Blueprint $table) {
+        Schema::create('questions', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('answer');
-            $table->integer('question_id')->index()->unsigned();
-            $table->foreign('question_id')
+            $table->string('question');
+            $table->integer('required');
+            $table->integer('unique');
+            $table->integer('order');
+            $table->integer('status');
+            $table->integer('option_id')->index()->unsigned();
+            $table->foreign('option_id')
                 ->references('id')
-                ->on('questions')
+                ->on('options')
                 ->onDelete('cascade');
-            $table->integer('order_item_id')->index()->unsigned();
-            $table->foreign('order_item_id')
+            $table->integer('event_id')->index()->unsigned();
+            $table->foreign('event_id')
                 ->references('id')
-                ->on('order_items')
+                ->on('events')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -39,6 +43,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('option_answers');
+        Schema::dropIfExists('questions');
     }
 };

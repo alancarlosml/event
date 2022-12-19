@@ -22,7 +22,7 @@
             <nav class="navbar navbar-expand-lg bg-inverse fixed-top scrolling-navbar top-nav-collapse">
                 <div class="container">
                     <div class="theme-header clearfix">
-                        <a href="/" class="navbar-brand"><img src="assets/img/logo_principal.png" alt=""></a>
+                        <a href="/" class="navbar-brand"><img src="{{ asset('assets/img/logo_principal.png')}}" alt=""></a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                         <i class="lni-menu"></i>
                         </button>
@@ -143,15 +143,18 @@
         <footer>
             <div class="container">
                 <div class="row justify-content-center gy-4">
-                    <div class="col-lg-5 col-md-12">
+                    <div class="col-lg-3 col-md-12 text-left">
                         <div class="footer-logo">
-                            <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
+                            <a href="/" class="logo d-flex align-items-center">
+                                <img src="{{ asset('assets/img/logo_principal_sf.png') }}" alt="">
+                            </a>
                         </div>
+                        <p>Sua nova plataforma de criação e gerenciamento de eventos. </p>
                         <div class="social-icons-footer">
                             <ul>
-                                <li class="facebook"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-facebook-filled"></i></a></li>
-                                <li class="twitter"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-twitter-filled"></i></a></li>
-                                <li class="linkedin"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="lni-linkedin-original"></i></a></li>
+                                <li class="facebook"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-facebook"></i></a></li>
+                                <li class="twitter"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-twitter"></i></a></li>
+                                <li class="instagram"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-instagram"></i></a></li>
                             </ul>
                         </div>
                     </div>
@@ -180,7 +183,7 @@
                       </div>
             
                       <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
-                        <h4>Contact Us</h4>
+                        <h4>Contato</h4>
                         <p>
                           A108 Adam Street <br>
                           New York, NY 535022<br>

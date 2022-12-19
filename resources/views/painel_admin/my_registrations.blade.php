@@ -5,8 +5,8 @@
         <section class="breadcrumbs">
           <div class="container">
             <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/painel/meus-eventos">Meus eventos</a></li>
             </ol>
             <h2>Minhas inscrições</h2>
     
@@ -49,7 +49,8 @@
                                     <td>{{$event->id}}</td>
                                     <td>
                                         <b>Nome:</b> {{$event->name}} <br/>
-                                        <b>Data evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif
+                                        <b>Data evento:</b> {{ \Carbon\Carbon::parse($event->data_chosen)->format('j/m/Y') }}
+                                        {{-- <b>Data evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif --}}
                                     </td>
                                     <td>{{$event->place_name}}</td>
                                     {{-- <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif</td> --}}

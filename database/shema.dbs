@@ -1,0 +1,1250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="MariaDb" id="Project-1261" database="MariaDb" >
+	<schema name="lojao" >
+		<table name="areas" row_count="7" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="slug" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="category_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="status" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_areas" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="areas_name_unique" unique="UNIQUE_KEY" >
+				<column name="name" />
+			</index>
+			<index name="areas_slug_unique" unique="UNIQUE_KEY" >
+				<column name="slug" />
+			</index>
+			<index name="areas_category_id_index" unique="NORMAL" >
+				<column name="category_id" />
+			</index>
+			<fk name="areas_category_id_foreign" to_schema="lojao" to_table="categories" delete_action="cascade" options="" >
+				<fk_column name="category_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="boleto_details" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="value" type="DOUBLE" jt="8" mandatory="y" />
+			<column name="href" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="line_code" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="href_print" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="expiration_date" type="TIMESTAMP" jt="93" mandatory="y" >
+				<defo><![CDATA[current_timestamp()]]></defo>
+				<column_options><![CDATA[ON UPDATE current_timestamp]]></column_options>
+			</column>
+			<column name="order_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_boleto_details" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="boleto_details_order_id_index" unique="NORMAL" >
+				<column name="order_id" />
+			</index>
+			<fk name="boleto_details_order_id_foreign" to_schema="lojao" to_table="orders" delete_action="cascade" options="" >
+				<fk_column name="order_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="categories" row_count="3" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="description" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="slug" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_categories" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="categories_description_unique" unique="UNIQUE_KEY" >
+				<column name="description" />
+			</index>
+			<index name="categories_slug_unique" unique="UNIQUE_KEY" >
+				<column name="slug" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="cities" row_count="5595" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="uf" type="INT" length="2" jt="4" mandatory="y" />
+			<column name="ibge" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_cities" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=5611 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="configurations" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="tax" type="DOUBLE" jt="8" mandatory="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_configurations" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="contacts" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="email" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="phone" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="subject" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="text" type="TEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_contacts" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="coupons" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="code" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="discount_type" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="discount_value" type="DOUBLE" jt="8" mandatory="y" />
+			<column name="limit_buy" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="limit_tickets" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="event_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_coupons" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="coupons_hash_unique" unique="UNIQUE_KEY" >
+				<column name="hash" />
+			</index>
+			<index name="coupons_code_unique" unique="UNIQUE_KEY" >
+				<column name="code" />
+			</index>
+			<index name="coupons_event_id_index" unique="NORMAL" >
+				<column name="event_id" />
+			</index>
+			<fk name="coupons_event_id_foreign" to_schema="lojao" to_table="events" delete_action="cascade" options="" >
+				<fk_column name="event_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="coupons_lotes" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="coupon_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="lote_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<index name="pk_coupons_lotes" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="coupons_lotes_coupon_id_index" unique="NORMAL" >
+				<column name="coupon_id" />
+			</index>
+			<index name="coupons_lotes_lote_id_index" unique="NORMAL" >
+				<column name="lote_id" />
+			</index>
+			<fk name="coupons_lotes_coupon_id_foreign" to_schema="lojao" to_table="coupons" delete_action="cascade" options="" >
+				<fk_column name="coupon_id" pk="id" />
+			</fk>
+			<fk name="coupons_lotes_lote_id_foreign" to_schema="lojao" to_table="lotes" delete_action="cascade" options="" >
+				<fk_column name="lote_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="event_dates" row_count="3" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="date" type="DATE" jt="91" mandatory="y" />
+			<column name="time_begin" type="TIME" jt="92" />
+			<column name="time_end" type="TIME" jt="92" />
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="event_id" type="INT" length="10" jt="4" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_event_dates" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="event_dates_event_id_index" unique="NORMAL" >
+				<column name="event_id" />
+			</index>
+			<fk name="event_dates_event_id_foreign" to_schema="lojao" to_table="events" delete_action="cascade" options="" >
+				<fk_column name="event_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="event_times" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="time" type="TIMESTAMP" jt="93" mandatory="y" >
+				<defo><![CDATA[current_timestamp()]]></defo>
+				<column_options><![CDATA[ON UPDATE current_timestamp]]></column_options>
+			</column>
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="event_dates_id" type="INT" length="10" jt="4" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_event_times" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="event_times_event_dates_id_index" unique="NORMAL" >
+				<column name="event_dates_id" />
+			</index>
+			<fk name="event_times_event_dates_id_foreign" to_schema="lojao" to_table="event_dates" delete_action="cascade" options="" >
+				<fk_column name="event_dates_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="events" row_count="1" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="subtitle" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="slug" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="description" type="TEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="banner" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="banner_option" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="max_tickets" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="theme" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="owner_id" type="INT" length="10" jt="4" unsigned="y" />
+			<column name="place_id" type="INT" length="10" jt="4" unsigned="y" />
+			<column name="area_id" type="INT" length="10" jt="4" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_events" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="events_hash_unique" unique="UNIQUE_KEY" >
+				<column name="hash" />
+			</index>
+			<index name="events_name_unique" unique="UNIQUE_KEY" >
+				<column name="name" />
+			</index>
+			<index name="events_slug_unique" unique="UNIQUE_KEY" >
+				<column name="slug" />
+			</index>
+			<index name="events_owner_id_index" unique="NORMAL" >
+				<column name="owner_id" />
+			</index>
+			<index name="events_place_id_index" unique="NORMAL" >
+				<column name="place_id" />
+			</index>
+			<index name="events_area_id_index" unique="NORMAL" >
+				<column name="area_id" />
+			</index>
+			<fk name="events_area_id_foreign" to_schema="lojao" to_table="areas" delete_action="cascade" options="" >
+				<fk_column name="area_id" pk="id" />
+			</fk>
+			<fk name="events_owner_id_foreign" to_schema="lojao" to_table="owners" delete_action="cascade" options="" >
+				<fk_column name="owner_id" pk="id" />
+			</fk>
+			<fk name="events_place_id_foreign" to_schema="lojao" to_table="places" delete_action="cascade" options="" >
+				<fk_column name="place_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="failed_jobs" row_count="0" spec="" >
+			<column name="id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="uuid" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="connection" type="TEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="queue" type="TEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="payload" type="LONGTEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="exception" type="LONGTEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="failed_at" type="TIMESTAMP" jt="93" mandatory="y" >
+				<defo><![CDATA[current_timestamp()]]></defo>
+			</column>
+			<index name="pk_failed_jobs" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="failed_jobs_uuid_unique" unique="UNIQUE_KEY" >
+				<column name="uuid" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="lotes" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="VARCHAR" length="200" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="description" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="value" type="DOUBLE" jt="8" mandatory="y" />
+			<column name="tax" type="DOUBLE" jt="8" mandatory="y" />
+			<column name="final_value" type="DOUBLE" jt="8" mandatory="y" />
+			<column name="type" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="quantity" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="visibility" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="tax_parcelamento" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="tax_service" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="form_pagamento" type="VARCHAR" length="20" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="limit_min" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="limit_max" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="datetime_begin" type="DATETIME" jt="93" mandatory="y" />
+			<column name="datetime_end" type="DATETIME" jt="93" mandatory="y" />
+			<column name="order" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="event_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_lotes" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="lotes_event_id_index" unique="NORMAL" >
+				<column name="event_id" />
+			</index>
+			<fk name="lotes_event_id_foreign" to_schema="lojao" to_table="events" delete_action="cascade" options="" >
+				<fk_column name="event_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="messages" row_count="2" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="email" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="phone" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="subject" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="text" type="TEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="read" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="event_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_messages" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="messages_event_id_index" unique="NORMAL" >
+				<column name="event_id" />
+			</index>
+			<fk name="messages_event_id_foreign" to_schema="lojao" to_table="events" delete_action="cascade" options="" >
+				<fk_column name="event_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="migrations" row_count="31" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="migration" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="batch" type="INT" length="11" jt="4" mandatory="y" />
+			<index name="pk_migrations" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="model_has_permissions" row_count="0" spec="" >
+			<column name="permission_id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" />
+			<column name="model_type" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="model_id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" />
+			<index name="pk_model_has_permissions" unique="PRIMARY_KEY" >
+				<column name="permission_id" />
+				<column name="model_id" />
+				<column name="model_type" />
+			</index>
+			<index name="model_has_permissions_model_id_model_type_index" unique="NORMAL" >
+				<column name="model_id" />
+				<column name="model_type" />
+			</index>
+			<fk name="model_has_permissions_permission_id_foreign" to_schema="lojao" to_table="permissions" delete_action="cascade" options="" >
+				<fk_column name="permission_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="model_has_roles" row_count="0" spec="" >
+			<column name="role_id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" />
+			<column name="model_type" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="model_id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" />
+			<index name="pk_model_has_roles" unique="PRIMARY_KEY" >
+				<column name="role_id" />
+				<column name="model_id" />
+				<column name="model_type" />
+			</index>
+			<index name="model_has_roles_model_id_model_type_index" unique="NORMAL" >
+				<column name="model_id" />
+				<column name="model_type" />
+			</index>
+			<fk name="model_has_roles_role_id_foreign" to_schema="lojao" to_table="roles" delete_action="cascade" options="" >
+				<fk_column name="role_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="option_answers" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="answer" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="question_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="participante_lote_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="order_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_option_answers" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="option_answers_question_id_index" unique="NORMAL" >
+				<column name="question_id" />
+			</index>
+			<index name="option_answers_participante_lote_id_index" unique="NORMAL" >
+				<column name="participante_lote_id" />
+			</index>
+			<index name="option_answers_order_id_index" unique="NORMAL" >
+				<column name="order_id" />
+			</index>
+			<fk name="option_answers_order_id_foreign" to_schema="lojao" to_table="orders" delete_action="cascade" options="" >
+				<fk_column name="order_id" pk="id" />
+			</fk>
+			<fk name="option_answers_participante_lote_id_foreign" to_schema="lojao" to_table="participantes_lotes" delete_action="cascade" options="" >
+				<fk_column name="participante_lote_id" pk="id" />
+			</fk>
+			<fk name="option_answers_question_id_foreign" to_schema="lojao" to_table="questions" delete_action="cascade" options="" >
+				<fk_column name="question_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="option_values" row_count="3" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="value" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="question_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_option_values" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="option_values_question_id_index" unique="NORMAL" >
+				<column name="question_id" />
+			</index>
+			<fk name="option_values_question_id_foreign" to_schema="lojao" to_table="questions" delete_action="cascade" options="" >
+				<fk_column name="question_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="options" row_count="14" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="option" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="value" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="tag" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_options" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="order_items" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="quantity" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="value" type="DOUBLE" jt="8" mandatory="y" />
+			<column name="order_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="participante_lote_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_order_items" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="order_items_order_id_index" unique="NORMAL" >
+				<column name="order_id" />
+			</index>
+			<index name="order_items_participante_lote_id_index" unique="NORMAL" >
+				<column name="participante_lote_id" />
+			</index>
+			<fk name="order_items_order_id_foreign" to_schema="lojao" to_table="orders" delete_action="cascade" options="" >
+				<fk_column name="order_id" pk="id" />
+			</fk>
+			<fk name="order_items_participante_lote_id_foreign" to_schema="lojao" to_table="participantes_lotes" delete_action="cascade" options="" >
+				<fk_column name="participante_lote_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="orders" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="quantity" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="date_used" type="TIMESTAMP" jt="93" mandatory="y" >
+				<defo><![CDATA[current_timestamp()]]></defo>
+				<column_options><![CDATA[ON UPDATE current_timestamp]]></column_options>
+			</column>
+			<column name="gatway_hash" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="gatway_reference" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="gatway_status" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="gatway_payment_method" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="event_date_id" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="participante_lote_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_orders" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="orders_hash_unique" unique="UNIQUE_KEY" >
+				<column name="hash" />
+			</index>
+			<index name="orders_participante_lote_id_index" unique="NORMAL" >
+				<column name="participante_lote_id" />
+			</index>
+			<fk name="orders_participante_lote_id_foreign" to_schema="lojao" to_table="participantes_lotes" delete_action="cascade" options="" >
+				<fk_column name="participante_lote_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="orders_coupons" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="order_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="coupon_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<index name="pk_orders_coupons" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="orders_coupons_order_id_index" unique="NORMAL" >
+				<column name="order_id" />
+			</index>
+			<index name="orders_coupons_coupon_id_index" unique="NORMAL" >
+				<column name="coupon_id" />
+			</index>
+			<fk name="orders_coupons_coupon_id_foreign" to_schema="lojao" to_table="coupons" delete_action="cascade" options="" >
+				<fk_column name="coupon_id" pk="id" />
+			</fk>
+			<fk name="orders_coupons_order_id_foreign" to_schema="lojao" to_table="orders" delete_action="cascade" options="" >
+				<fk_column name="order_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="owners" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="description" type="TEXT" jt="-1" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="icon" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_owners" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="participantes" row_count="16" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="email" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="email_verified_at" type="TIMESTAMP" jt="93" />
+			<column name="password" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="remember_token" type="VARCHAR" length="100" jt="12" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="cpf" type="VARCHAR" length="255" jt="12" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="phone" type="VARCHAR" length="255" jt="12" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_participantes" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="participantes_email_unique" unique="UNIQUE_KEY" >
+				<column name="email" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="participantes_events" row_count="1" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="role" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="participante_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="event_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" mandatory="y" >
+				<defo><![CDATA[current_timestamp()]]></defo>
+				<column_options><![CDATA[ON UPDATE current_timestamp]]></column_options>
+			</column>
+			<index name="pk_participantes_events" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="participantes_events_hash_unique" unique="UNIQUE_KEY" >
+				<column name="hash" />
+			</index>
+			<index name="participantes_events_participante_id_index" unique="NORMAL" >
+				<column name="participante_id" />
+			</index>
+			<index name="participantes_events_event_id_index" unique="NORMAL" >
+				<column name="event_id" />
+			</index>
+			<fk name="participantes_events_event_id_foreign" to_schema="lojao" to_table="events" delete_action="cascade" options="" >
+				<fk_column name="event_id" pk="id" />
+			</fk>
+			<fk name="participantes_events_participante_id_foreign" to_schema="lojao" to_table="participantes" delete_action="cascade" options="" >
+				<fk_column name="participante_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="participantes_lotes" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="hash" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="number" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="participante_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="lote_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" mandatory="y" >
+				<defo><![CDATA[current_timestamp()]]></defo>
+				<column_options><![CDATA[ON UPDATE current_timestamp]]></column_options>
+			</column>
+			<index name="pk_participantes_lotes" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="participantes_lotes_hash_unique" unique="UNIQUE_KEY" >
+				<column name="hash" />
+			</index>
+			<index name="participantes_lotes_number_unique" unique="UNIQUE_KEY" >
+				<column name="number" />
+			</index>
+			<index name="participantes_lotes_participante_id_index" unique="NORMAL" >
+				<column name="participante_id" />
+			</index>
+			<index name="participantes_lotes_lote_id_index" unique="NORMAL" >
+				<column name="lote_id" />
+			</index>
+			<fk name="participantes_lotes_lote_id_foreign" to_schema="lojao" to_table="lotes" delete_action="cascade" options="" >
+				<fk_column name="lote_id" pk="id" />
+			</fk>
+			<fk name="participantes_lotes_participante_id_foreign" to_schema="lojao" to_table="participantes" delete_action="cascade" options="" >
+				<fk_column name="participante_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="password_resets" row_count="2" spec="" >
+			<column name="email" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="token" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<index name="password_resets_email_index" unique="NORMAL" >
+				<column name="email" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="permissions" row_count="0" spec="" >
+			<column name="id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="guard_name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_permissions" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="permissions_name_guard_name_unique" unique="UNIQUE_KEY" >
+				<column name="name" />
+				<column name="guard_name" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="personal_access_tokens" row_count="0" spec="" >
+			<column name="id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="tokenable_type" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="tokenable_id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" />
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="token" type="VARCHAR" length="64" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="abilities" type="TEXT" jt="-1" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="last_used_at" type="TIMESTAMP" jt="93" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_personal_access_tokens" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="personal_access_tokens_token_unique" unique="UNIQUE_KEY" >
+				<column name="token" />
+			</index>
+			<index name="personal_access_tokens_tokenable_type_tokenable_id_index" unique="NORMAL" >
+				<column name="tokenable_type" />
+				<column name="tokenable_id" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="places" row_count="0" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="address" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="number" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="district" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="zip" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="complement" type="VARCHAR" length="255" jt="12" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="city_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_places" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="places_city_id_index" unique="NORMAL" >
+				<column name="city_id" />
+			</index>
+			<fk name="places_city_id_foreign" to_schema="lojao" to_table="cities" delete_action="cascade" options="" >
+				<fk_column name="city_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="questions" row_count="5" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="question" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="required" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="unique" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="order" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="option_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="event_id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_questions" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="questions_option_id_index" unique="NORMAL" >
+				<column name="option_id" />
+			</index>
+			<index name="questions_event_id_index" unique="NORMAL" >
+				<column name="event_id" />
+			</index>
+			<fk name="questions_event_id_foreign" to_schema="lojao" to_table="events" delete_action="cascade" options="" >
+				<fk_column name="event_id" pk="id" />
+			</fk>
+			<fk name="questions_option_id_foreign" to_schema="lojao" to_table="options" delete_action="cascade" options="" >
+				<fk_column name="option_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=193 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="role_has_permissions" row_count="0" spec="" >
+			<column name="permission_id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" />
+			<column name="role_id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" />
+			<index name="pk_role_has_permissions" unique="PRIMARY_KEY" >
+				<column name="permission_id" />
+				<column name="role_id" />
+			</index>
+			<index name="role_has_permissions_role_id_foreign" unique="NORMAL" >
+				<column name="role_id" />
+			</index>
+			<fk name="role_has_permissions_permission_id_foreign" to_schema="lojao" to_table="permissions" delete_action="cascade" options="" >
+				<fk_column name="permission_id" pk="id" />
+			</fk>
+			<fk name="role_has_permissions_role_id_foreign" to_schema="lojao" to_table="roles" delete_action="cascade" options="" >
+				<fk_column name="role_id" pk="id" />
+			</fk>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="roles" row_count="0" spec="" >
+			<column name="id" type="BIGINT" length="20" jt="-5" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="guard_name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_roles" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="roles_name_guard_name_unique" unique="UNIQUE_KEY" >
+				<column name="name" />
+				<column name="guard_name" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+		<table name="states" row_count="28" spec="" >
+			<comment><![CDATA[Unidades Federativas]]></comment>
+			<column name="id" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="name" type="VARCHAR" length="75" jt="12" />
+			<column name="uf" type="VARCHAR" length="2" jt="12" />
+			<column name="ibge" type="INT" length="2" jt="4" />
+			<column name="ddd" type="VARCHAR" length="50" jt="12" />
+			<index name="pk_states" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<options><![CDATA[ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Unidades Federativas']]></options>
+		</table>
+		<table name="users" row_count="4" spec="" >
+			<column name="id" type="INT" length="10" jt="4" mandatory="y" unsigned="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="name" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="email" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="email_verified_at" type="TIMESTAMP" jt="93" />
+			<column name="password" type="VARCHAR" length="255" jt="12" mandatory="y" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="remember_token" type="VARCHAR" length="100" jt="12" >
+				<column_options><![CDATA[COLLATE utf8mb4_unicode_ci]]></column_options>
+			</column>
+			<column name="status" type="INT" length="11" jt="4" mandatory="y" />
+			<column name="created_at" type="TIMESTAMP" jt="93" />
+			<column name="updated_at" type="TIMESTAMP" jt="93" />
+			<index name="pk_users" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="users_email_unique" unique="UNIQUE_KEY" >
+				<column name="email" />
+			</index>
+			<options><![CDATA[ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci]]></options>
+		</table>
+	</schema>
+	<connector name="MariaDb" database="MariaDb" driver_class="org.mariadb.jdbc.Driver" driver_jar="mariadb-java-client-3.0.6.jar" driver_desc="Standard" host="localhost" port="3306" user="root" useSystemProxy="false" />
+	<layout name="Main Layout" id="Layout-2046" show_relation="columns" >
+		<entity schema="lojao" name="areas" color="F4DDBE" x="448" y="208" />
+		<entity schema="lojao" name="boleto_details" color="C7F4BE" x="880" y="544" />
+		<entity schema="lojao" name="categories" color="F4DDBE" x="640" y="208" />
+		<entity schema="lojao" name="cities" color="F4DDBE" x="448" y="928" />
+		<entity schema="lojao" name="configurations" color="BED3F4" x="1616" y="1168" />
+		<entity schema="lojao" name="contacts" color="BED3F4" x="1808" y="1168" />
+		<entity schema="lojao" name="coupons" color="BED3F4" x="2256" y="208" />
+		<entity schema="lojao" name="coupons_lotes" color="BED3F4" x="2064" y="528" />
+		<entity schema="lojao" name="event_dates" color="F4DDBE" x="448" y="608" />
+		<entity schema="lojao" name="event_times" color="F4DDBE" x="640" y="608" />
+		<entity schema="lojao" name="events" color="F4DDBE" x="240" y="208" />
+		<entity schema="lojao" name="failed_jobs" color="BED3F4" x="1616" y="1376" />
+		<entity schema="lojao" name="lotes" color="BED3F4" x="2464" y="208" />
+		<entity schema="lojao" name="messages" color="F4DDBE" x="48" y="608" />
+		<entity schema="lojao" name="migrations" color="BED3F4" x="1424" y="1376" />
+		<entity schema="lojao" name="model_has_permissions" color="BEBEF4" x="2272" y="1104" />
+		<entity schema="lojao" name="model_has_roles" color="BEBEF4" x="2704" y="880" />
+		<entity schema="lojao" name="option_answers" color="C7F4BE" x="1376" y="544" />
+		<entity schema="lojao" name="option_values" color="D1BEF4" x="1072" y="1184" />
+		<entity schema="lojao" name="options" color="D1BEF4" x="1072" y="880" />
+		<entity schema="lojao" name="order_items" color="C7F4BE" x="1104" y="544" />
+		<entity schema="lojao" name="orders" color="C7F4BE" x="1104" y="208" />
+		<entity schema="lojao" name="orders_coupons" color="BED3F4" x="2256" y="528" />
+		<entity schema="lojao" name="owners" color="F4DDBE" x="48" y="352" />
+		<entity schema="lojao" name="participantes" color="C7F4BE" x="1584" y="208" />
+		<entity schema="lojao" name="participantes_events" color="C7F4BE" x="1808" y="208" />
+		<entity schema="lojao" name="participantes_lotes" color="C7F4BE" x="1376" y="208" />
+		<entity schema="lojao" name="password_resets" color="BED3F4" x="1408" y="1184" />
+		<entity schema="lojao" name="permissions" color="BEBEF4" x="2064" y="880" />
+		<entity schema="lojao" name="personal_access_tokens" color="BED3F4" x="1376" y="880" />
+		<entity schema="lojao" name="places" color="F4DDBE" x="240" y="608" />
+		<entity schema="lojao" name="questions" color="D1BEF4" x="880" y="880" />
+		<entity schema="lojao" name="role_has_permissions" color="BEBEF4" x="2272" y="880" />
+		<entity schema="lojao" name="roles" color="BEBEF4" x="2496" y="880" />
+		<entity schema="lojao" name="states" color="BED3F4" x="1616" y="944" />
+		<entity schema="lojao" name="users" color="BED3F4" x="1808" y="880" />
+		<callout x="240" y="80" pointer="Round" >
+			<comment><![CDATA[A layout is a diagram with data and query tools. 
+- Get a better understanding of the schema by creating multiple layouts 
+- Drag tables to the layout from the project tree. One table may show in multiple layouts 
+- Right-click the layout to create new tables 
+- Double-click table headers, columns, or foreign keys to edit]]></comment>
+		</callout>
+		<group name="configurations" color="ECF0F7" >
+			<entity schema="lojao" name="configurations" />
+			<entity schema="lojao" name="contacts" />
+			<entity schema="lojao" name="failed_jobs" />
+			<entity schema="lojao" name="migrations" />
+			<entity schema="lojao" name="password_resets" />
+			<entity schema="lojao" name="personal_access_tokens" />
+			<entity schema="lojao" name="states" />
+			<entity schema="lojao" name="users" />
+		</group>
+		<group name="questions" color="F0ECF7" >
+			<entity schema="lojao" name="questions" />
+			<entity schema="lojao" name="options" />
+			<entity schema="lojao" name="option_values" />
+		</group>
+		<group name="permissions" color="ECECF7" >
+			<entity schema="lojao" name="permissions" />
+			<entity schema="lojao" name="role_has_permissions" />
+			<entity schema="lojao" name="roles" />
+			<entity schema="lojao" name="model_has_permissions" />
+			<entity schema="lojao" name="model_has_roles" />
+		</group>
+		<group name="coupons" color="ECF0F7" >
+			<entity schema="lojao" name="coupons" />
+			<entity schema="lojao" name="lotes" />
+			<entity schema="lojao" name="orders_coupons" />
+			<entity schema="lojao" name="coupons_lotes" />
+		</group>
+		<group name="events" color="F7F2EC" >
+			<entity schema="lojao" name="events" />
+			<entity schema="lojao" name="areas" />
+			<entity schema="lojao" name="event_dates" />
+			<entity schema="lojao" name="places" />
+			<entity schema="lojao" name="categories" />
+			<entity schema="lojao" name="messages" />
+			<entity schema="lojao" name="event_times" />
+			<entity schema="lojao" name="owners" />
+			<entity schema="lojao" name="cities" />
+		</group>
+		<group name="orders" color="EEF7EC" >
+			<entity schema="lojao" name="orders" />
+			<entity schema="lojao" name="participantes_lotes" />
+			<entity schema="lojao" name="option_answers" />
+			<entity schema="lojao" name="order_items" />
+			<entity schema="lojao" name="participantes" />
+			<entity schema="lojao" name="participantes_events" />
+			<entity schema="lojao" name="boleto_details" />
+		</group>
+	</layout>
+	<layout name="~Layout with Sample Tools" id="Layout-1d09" show_column_type="y" show_relation="columns" >
+		<entity schema="lojao" name="areas" color="F4DDBE" x="576" y="304" />
+		<entity schema="lojao" name="boleto_details" color="C7F4BE" x="1136" y="384" />
+		<entity schema="lojao" name="categories" color="F4DDBE" x="832" y="304" />
+		<entity schema="lojao" name="cities" color="F4DDBE" x="576" y="1024" />
+		<entity schema="lojao" name="configurations" color="BED3F4" x="2032" y="1008" />
+		<entity schema="lojao" name="contacts" color="BED3F4" x="2288" y="1008" />
+		<entity schema="lojao" name="coupons" color="BED3F4" x="2832" y="48" />
+		<entity schema="lojao" name="coupons_lotes" color="BED3F4" x="2624" y="368" />
+		<entity schema="lojao" name="event_dates" color="F4DDBE" x="576" y="704" />
+		<entity schema="lojao" name="event_times" color="F4DDBE" x="832" y="704" />
+		<entity schema="lojao" name="events" color="F4DDBE" x="304" y="304" />
+		<entity schema="lojao" name="failed_jobs" color="BED3F4" x="2032" y="1216" />
+		<entity schema="lojao" name="lotes" color="BED3F4" x="3088" y="48" />
+		<entity schema="lojao" name="messages" color="F4DDBE" x="48" y="400" />
+		<entity schema="lojao" name="migrations" color="BED3F4" x="1760" y="1216" />
+		<entity schema="lojao" name="model_has_permissions" color="BEBEF4" x="2912" y="944" />
+		<entity schema="lojao" name="model_has_roles" color="BEBEF4" x="3440" y="720" />
+		<entity schema="lojao" name="option_answers" color="C7F4BE" x="1776" y="384" />
+		<entity schema="lojao" name="option_values" color="D1BEF4" x="1392" y="1024" />
+		<entity schema="lojao" name="options" color="D1BEF4" x="1392" y="720" />
+		<entity schema="lojao" name="order_items" color="C7F4BE" x="1424" y="384" />
+		<entity schema="lojao" name="orders" color="C7F4BE" x="1424" y="48" />
+		<entity schema="lojao" name="orders_coupons" color="BED3F4" x="2832" y="368" />
+		<entity schema="lojao" name="owners" color="F4DDBE" x="48" y="48" />
+		<entity schema="lojao" name="participantes" color="C7F4BE" x="2032" y="48" />
+		<entity schema="lojao" name="participantes_events" color="C7F4BE" x="2336" y="48" />
+		<entity schema="lojao" name="participantes_lotes" color="C7F4BE" x="1776" y="48" />
+		<entity schema="lojao" name="password_resets" color="BED3F4" x="1776" y="1024" />
+		<entity schema="lojao" name="permissions" color="BEBEF4" x="2624" y="720" />
+		<entity schema="lojao" name="personal_access_tokens" color="BED3F4" x="1728" y="720" />
+		<entity schema="lojao" name="places" color="F4DDBE" x="288" y="704" />
+		<entity schema="lojao" name="questions" color="D1BEF4" x="1136" y="720" />
+		<entity schema="lojao" name="role_has_permissions" color="BEBEF4" x="2912" y="720" />
+		<entity schema="lojao" name="roles" color="BEBEF4" x="3152" y="720" />
+		<entity schema="lojao" name="states" color="BED3F4" x="2032" y="784" />
+		<entity schema="lojao" name="users" color="BED3F4" x="2288" y="720" />
+		<script name="SQL Editor" id="Editor-337" language="SQL" >
+			<string><![CDATA[SELECT
+	id, hash, name, subtitle, slug, description, banner, banner_option, max_tickets, theme, `status`, owner_id, place_id, 
+	area_id, created_at, updated_at
+FROM
+	lojao.events s;]]></string>
+		</script>
+		<browser id="Browse-137c" name="Relational Data Explorer" confirm_updates="y" >
+			<browse_table schema="lojao" entity="events" x="20" y="20" width="400" height="300" >
+				<browse_table schema="lojao" entity="coupons" fk="coupons_event_id_foreign" x="440" y="20" width="500" height="350" >
+					<browse_table schema="lojao" entity="coupons_lotes" fk="coupons_lotes_coupon_id_foreign" x="960" y="20" width="500" height="350" />
+				</browse_table>
+			</browse_table>
+		</browser>
+		<query id="Query-1a76" name="Query Builder" >
+			<query_table schema="lojao" name="events" alias="e" x="48" y="48" >
+				<column name="id" />
+				<column name="hash" />
+				<column name="name" />
+				<column name="subtitle" />
+				<column name="slug" />
+				<column name="description" />
+				<column name="banner" />
+				<column name="banner_option" />
+				<column name="max_tickets" />
+				<column name="theme" />
+				<column name="status" />
+				<column name="owner_id" />
+				<column name="place_id" />
+				<column name="area_id" />
+				<column name="created_at" />
+				<column name="updated_at" />
+				<query_table schema="lojao" name="coupons" alias="c" x="256" y="48" fk="coupons_event_id_foreign" type="Inner Join" >
+					<column name="id" />
+					<column name="hash" />
+					<column name="code" />
+					<column name="discount_type" />
+					<column name="discount_value" />
+					<column name="limit_buy" />
+					<column name="limit_tickets" />
+					<column name="status" />
+					<column name="event_id" />
+					<column name="created_at" />
+					<column name="updated_at" />
+					<query_table schema="lojao" name="coupons_lotes" alias="cl" x="464" y="48" fk="coupons_lotes_coupon_id_foreign" type="Inner Join" >
+						<column name="id" />
+						<column name="coupon_id" />
+						<column name="lote_id" />
+					</query_table>
+				</query_table>
+			</query_table>
+		</query>
+		<form name="Report" id="Report-128c" template="Page" css="container-fluid" view="frame" >
+			<var name="samplePageNumber" type="4" value="0" mandatory="n" />
+			<var name="sampleRecordsPerPage" type="4" value="100" mandatory="n" />
+			<body name="Body" template="Grid" pos="0,0,0,0,f,f" layout="{{-2,-2,-2,-2,-1},{-2,-2,-2,-2}}" scroll="n" html="n" >
+				<cell type="label" name="Events Data" template="H3" pos="0,0,1,0,l,c" />
+				<cell type="chart" name="Pie" template="Pie" pos="0,1,4,1,l,c" max_records="20" >
+					<form_script type="DataSource" language="SQL" >
+						<var name="id" type="4" />
+						<var name="hash" />
+						<var name="name" />
+						<var name="subtitle" />
+						<var name="slug" />
+						<var name="description" type="-1" />
+						<var name="banner" />
+						<var name="banner_option" type="4" />
+						<var name="max_tickets" />
+						<var name="theme" />
+						<var name="status" type="4" />
+						<var name="owner_id" type="4" />
+						<var name="place_id" type="4" />
+						<var name="area_id" type="4" />
+						<var name="created_at" type="93" />
+						<var name="updated_at" type="93" />
+						<script ><![CDATA[SELECT * FROM lojao.events]]></script>
+					</form_script>
+					<param name="i0" value="theme" />
+					<param name="width" value="100%" />
+					<param name="v0" value="status" />
+					<param name="title" value="Sample Chart" />
+					<param name="height" value="400px" />
+				</cell>
+				<tableview name="sample" template="Table" css="table table-striped table-sm table-hover" pos="0,2,4,2,f,f" layout="{{-2,-2,-2,-2,-2,-2,-2},{-2,-2}}" scroll="n" html="n" header_rows="1" >
+					<form_script type="DataSource" language="SQL" >
+						<var name="id" type="4" />
+						<var name="hash" />
+						<var name="name" />
+						<var name="subtitle" />
+						<var name="slug" />
+						<var name="description" type="-1" />
+						<var name="banner" />
+						<var name="banner_option" type="4" />
+						<var name="max_tickets" />
+						<var name="theme" />
+						<var name="status" type="4" />
+						<var name="owner_id" type="4" />
+						<var name="place_id" type="4" />
+						<var name="area_id" type="4" />
+						<var name="created_at" type="93" />
+						<var name="updated_at" type="93" />
+						<script ><![CDATA[SELECT * FROM lojao.events]]></script>
+					</form_script>
+					<cell type="label" name="id" pos="0,0,0,0,c,c" />
+					<cell type="label" name="hash" pos="1,0,1,0,c,c" />
+					<cell type="label" name="name" pos="2,0,2,0,c,c" />
+					<cell type="label" name="subtitle" pos="3,0,3,0,c,c" />
+					<cell type="label" name="slug" pos="4,0,4,0,c,c" />
+					<cell type="label" name="description" pos="5,0,5,0,c,c" />
+					<cell type="label" name="Button can open other pages." pos="6,0,6,0,c,c" />
+					<cell type="label" name="${id}" template="Plain" pos="0,1,0,1,l,c" />
+					<cell type="label" name="${hash}" template="Plain" pos="1,1,1,1,l,c" />
+					<cell type="label" name="${name}" template="Plain" pos="2,1,2,1,l,c" />
+					<cell type="label" name="${subtitle}" template="Plain" pos="3,1,3,1,l,c" />
+					<cell type="label" name="${slug}" template="Plain" pos="4,1,4,1,l,c" />
+					<cell type="label" name="${description}" template="Plain" pos="5,1,5,1,l,c" />
+					<cell type="button" name="More" template="Plain" css="btn btn-default btn-success" pos="6,1,6,1,c,c" ref_id="Report-128c" />
+				</tableview>
+				<cell type="href" name="" disabled="${samplePageNumber&lt;1}" pos="0,3,0,3,l,c" glyph="bi-chevron_double_left" ref_id="Report-128c" >
+					<var name="samplePageNumber" value="0" />
+				</cell>
+				<cell type="href" name="" disabled="${samplePageNumber&lt;1}" pos="1,3,1,3,l,c" glyph="bi-chevron_left" ref_id="Report-128c" >
+					<var name="samplePageNumber" value="${Math.max(0,samplePageNumber-1)}" />
+				</cell>
+				<cell type="label" name="Page ${samplePageNumber+1}" pos="2,3,2,3,l,c" />
+				<cell type="href" name="" disabled="${!sampleHasNextPage}" pos="3,3,3,3,l,c" glyph="bi-chevron_right" ref_id="Report-128c" >
+					<var name="samplePageNumber" value="${( samplePageNumber+1 )}" />
+				</cell>
+			</body>
+		</form>
+	</layout>
+</project>

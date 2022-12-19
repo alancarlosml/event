@@ -6,8 +6,8 @@
           <div class="container">
     
             <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/painel/meus-eventos">Meus eventos</a></li>
             </ol>
             <h2>Gerenciar usuários convidados</h2>
     
@@ -39,7 +39,7 @@
                 </div>
                 <div class="card-body table-responsive p-0">
                     <div class="card-body">
-                        <h4>Listagem dos usuários</h4>
+                        {{-- <h4>Listar todos</h4> --}}
                         <div class="form-group text-right">
                             <a href="{{route('event_home.guest_add', $event->hash)}}" class="btn btn-success">Cadastrar novo usuário</a>
                         </div>

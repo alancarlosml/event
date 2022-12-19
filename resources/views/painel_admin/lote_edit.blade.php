@@ -6,8 +6,8 @@
           <div class="container">
     
             <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/painel/meus-eventos">Meus eventos</a></li>
             </ol>
             <h2>Editar lote: {{$lote->name}}</h2>
     

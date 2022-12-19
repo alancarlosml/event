@@ -21,7 +21,7 @@
                 <h2 data-aos="fade-up" data-aos-delay="400">Crie seu própio evento e comece a lucrar com ele agora mesmo.</h2>
                 <div>
                     <div class="text-center text-lg-start">
-                    <a href="/painel/cadastrar" class="btn-get-started d-inline-flex align-items-center justify-content-center align-self-center">
+                    <a href="@if(!Auth::user()) {{route('register')}} @else {{route('event_home.create_event_link')}} @endif" class="btn-get-started d-inline-flex align-items-center justify-content-center align-self-center">
                         <span>Começar agora!</span>
                         <i class="bi bi-arrow-right"></i>
                     </a>

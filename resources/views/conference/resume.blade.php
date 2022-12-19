@@ -36,7 +36,7 @@
                         @foreach ($array_lotes as $array_lote)
                         <li class="list-group-item">
                             <div class="d-flex justify-content-between">
-                                <div>{{$array_lote['id']}} @if ($array_lote['id'] == 1) ingresso @else ingressos @endif</div>
+                                <div>{{$array_lote['quantity']}} @if ($array_lote['quantity'] == 1) ingresso @else ingressos @endif</div>
                                 @if($array_lote['value'] == 0)
                                 <div class="text-muted">Grátis</div>
                                 @else

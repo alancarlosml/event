@@ -5,19 +5,18 @@
         <section class="breadcrumbs">
           <div class="container">
     
-            <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
-            </ol>
-            <h2>Todos os eventos</h2>
+            <h2 class="mt-4"> Todos os eventos</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
     
         <section class="inner-page search" id="event-list">
             <div class="container">
+                <header class="section-header">
+                    <p>Busque mais eventos</p>
+                </header>
                 <div class="row">
-                    <h6 class="text-left display-5">Busque mais eventos</h6>
+                    {{-- <h6 class="text-left display-5">Busque mais eventos</h6> --}}
                     <div class="info-box bg-light">
                         <div class="container-fluid info-box-content">
                             <form action="enhanced-results.html">
