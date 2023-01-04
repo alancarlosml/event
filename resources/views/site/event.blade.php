@@ -77,6 +77,7 @@
             </div>
             <div class="row intro-wrapper">
                 <div class="col-lg-8 col-sm-12">
+                    @if($event->max_event_dates() >= \Carbon\Carbon::now())
                     <ul class="nav nav-tabs">
                         @foreach ($event->event_dates as $event_date)
                             <li class="nav-item">
@@ -84,6 +85,7 @@
                             </li>
                         @endforeach
                     </ul>
+                    @endif
                     <input type="hidden" name="event_date_result" id="event_date_result" value="@if($total_dates == 1) {{$date_min->id}} @endif">
                     <div class="table-responsive">
                         <table class="table">

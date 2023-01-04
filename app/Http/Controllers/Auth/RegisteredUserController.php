@@ -40,6 +40,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|email|max:255|unique:participantes',
             'phone' => 'required|string',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'g-recaptcha-response' => 'required|recaptchav3:register,0.5'
         ]);
 
         $participante = Participante::create([

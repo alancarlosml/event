@@ -340,10 +340,9 @@
         </section><!-- End Counts Section --> --}}
     
         <!-- ======= Pricing Section ======= -->
-        <section id="planos" class="pricing" style="background: #4154f1;">
+        {{-- <section id="planos" class="pricing" style="background: #4154f1;">
             <div class="container" data-aos="fade-up">
                 <header class="section-header">
-                    {{-- <h2>Planos e preços</h2> --}}
                     <p style="color: #ffffff">Planos e preços</p>
                 </header>
         
@@ -353,10 +352,9 @@
                         <div class="box">
                             <h3 style="color: #07d5c0;">Eventos gratuitos</h3>
                             <div class="price">Grátis</div>
-                            {{-- <img src="assets/img/pricing-free.png" class="img-fluid" alt=""> --}}
                             <ul>
-                            <li>Limite de 3 mil inscrições por evento.</li>
-                            <li>Em eventos com inscrições gratuitas, não cobramos taxa de serviço. Utilize a plataforma sem custo!</li>
+                                <li>Limite de 3 mil inscrições por evento.</li>
+                                <li>Em eventos com inscrições gratuitas, não cobramos taxa de serviço. Utilize a plataforma sem custo!</li>
                             </ul>
                             <a href="#" class="btn-buy">Saiba mais</a>
                         </div>
@@ -366,17 +364,16 @@
                         <div class="box">
                             <h3 style="color: #ff0071;">Eventos pagos</h3>
                             <div class="price">10%</div>
-                            {{-- <img src="assets/img/pricing-ultimate.png" class="img-fluid" alt=""> --}}
                             <ul>
-                            <li>Pague apenas 10% por inscrição vendida e utilize todas as ferramentas. Custos de meios de pagamentos inclusos.</li>
-                            <li><small><a href="#">Sem tarifa mínima.</a></small></li>
+                                <li>Pague apenas 10% por inscrição vendida e utilize todas as ferramentas. Custos de meios de pagamentos inclusos.</li>
+                                <li><small><a href="#">Sem tarifa mínima.</a></small></li>
                             </ul>
                             <a href="#" class="btn-buy">Saiba mais</a>
                         </div>
                     </div>
                 </div>
             </div>
-        </section><!-- End Pricing Section -->
+        </section><!-- End Pricing Section --> --}}
     
         <!-- ======= F.A.Q Section ======= -->
         <section id="faq" class="faq">

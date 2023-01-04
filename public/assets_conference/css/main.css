@@ -2961,4 +2961,8 @@ label.error.fail-alert{
 
 .nav-tabs {
     margin-bottom: -1px !important;
-  }
+ }
+
+.validation-error {
+    border-color: red;
+}

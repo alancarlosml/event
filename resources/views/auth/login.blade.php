@@ -42,6 +42,7 @@
                                     <input type="password" class="form-control" name="password" placeholder="Senha" required="">
                                 </div>
                                 <div class="form-group">
+                                    {!! RecaptchaV3::field('login') !!}
                                     <button type="submit" id="btn-submit" class="form-control btn btn-primary rounded submit px-3">Entrar</button>
                                 </div>
                                 <div class="form-group d-flex mt-2">

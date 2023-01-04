@@ -23,7 +23,7 @@
         <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
         {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"> --}}
         {{-- <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet"> --}}
-        
+        {!! RecaptchaV3::initJs() !!}
         @stack('head')
         @stack('bootstrap_version')
 
@@ -61,7 +61,7 @@
                       <li><a href="#">Drop Down 4</a></li>
                     </ul>
                   </li>
-                <li><a class="nav-link scrollto active" href="/#planos">Planos e Preços</a></li>
+                {{-- <li><a class="nav-link scrollto active" href="/#planos">Planos e Preços</a></li> --}}
                 <li><a class="nav-link" href="/eventos">Eventos</a></li>
                 <li><a class="nav-link" href="/contato">Contato</a></li>
                 {{-- <li><a href="blog.html">Blog</a></li> --}}
@@ -217,7 +217,7 @@
   
     <!-- Template Main JS File -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
-
+    
     @stack('footer')
       
 </html>

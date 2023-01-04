@@ -256,6 +256,13 @@
                                         <strong>Boleto</strong>
                                     </label>
                                 </div>
+                                <div>
+                                    <input type="radio" class="form-check-input" id="pix" name="payment_form_check" value="3">
+                                    <label class="form-check-label" for="pix">
+                                        <i class="fa-solid fa-qrcode"></i> <br/>
+                                        <strong>Pix</strong>
+                                    </label>
+                                </div>
                                 {{-- <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" name="payment_form_check" id="creditCard" value="1">
                                     <label class="form-check-label" for="creditCard"><b>Cartão de crédito</b></label>
@@ -299,35 +306,48 @@
                                         <textarea id="public_key" name="public_key" style="display:none;">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl/Ui7+/93mmx9PKXcfHrAgTmaHdL3qfp39UQw590zWQGOWH9O5ERWomkv2jtX1Ydxo+hNDg9UIqRqwCmqjgsxRBFXj8dm/tg2clwlPishn/kSbs5+I70hPFUoH6gNj+6w8pCnSqfQM33MBkAe5Y0r6YetdXi8TLJVWvtW97fIdJxK+TG3etMIIdjubnJJk48Gsr21ZoXv0hg4ML12yZBcHJgiRalDqg54R96utuFXGE7snp4PKKPvAF6lgKiO1YlxPQkfg156Q4jXdcNyUITGF1VxlcaTQH36mP3vea1/nm5qD4YcY/i5SUoGXUyNg5fHIilmvQlg+2ZLDBLDITJJQIDAQAB</textarea>
                                         <input type="hidden" name="encrypted_value" id="encrypted_value">
                                     </div>
-                                    <div id="cc_feedback" style="color:red; display:none;"> Dados do cartão de crédito inválidos! </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="cc_name">Parcelas*</label>
+                                            <select class="form-control" id="cc_installments" name="cc_installments"></select>
+                                        </div>
+                                    </div>
+                                    <div id="issuerInput" class="form-group col-sm-12 d-none">
+                                        <select id="cc_issuer" name="issuer" class="form-control"></select>
+                                    </div>
+                                    <div id="cc_feedback" style="color:red;"> </div>
                                 </div>
                                 <div class="mb-3">
                                     <p class="h4 mb-3"><strong>Informações do titular do cartão de crédito</strong></p>
                                     <div class="mb-3">
                                         <div class="row">
-                                            <div class="col-6">
+                                            {{-- <div class="col-6">
                                                 <label for="cc_name_info">Nome*</label>
                                                 <input type="text" class="form-control" id="cc_name_info" name="cc_name_info" placeholder="" value="{{ old('cc_name_info') ?? '' }}">
-                                            </div>
-                                            <div class="col-6">
+                                            </div> --}}
+                                            <div class="col-8">
                                                 <label for="cc_email_info">E-mail*</label>
                                                 <input type="email" class="form-control" id="cc_email_info" name="cc_email_info" placeholder="" value="{{ old('cc_email_info') ?? '' }}">
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="cc_phone_info">Telefone*</label>
+                                                <input type="text" class="form-control phone_with_ddd_mask" id="cc_phone_info" name="cc_phone_info" placeholder="" value="{{ old('cc_phone_info') ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <div class="row">
                                             <div class="col-4">
-                                                <label for="cc_cpf_info">CPF*</label>
-                                                <input type="text" class="form-control cpf_mask" id="cc_cpf_info" name="cc_cpf_info" placeholder="" value="{{ old('cc_address') ?? '' }}">
+                                                <label for="cc_identificationType">Tipo do documento*</label>
+                                                <select class="form-control" id="cc_identificationType" name="cc_identificationType"></select>
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="cc_identificationNumber">Número do documento*</label>
+                                                <input type="text" class="form-control cpf_mask" id="cc_identificationNumber" name="cc_identificationNumber" placeholder="" value="{{ old('cc_identificationNumber') ?? '' }}">
                                             </div>
                                             <div class="col-4">
                                                 <label for="cc_date_info">Data de nascimento*</label>
                                                 <input type="date" class="form-control" id="cc_date_info" name="cc_date_info" placeholder="" value="{{ old('cc_date_info') ?? '' }}">
-                                            </div>
-                                            <div class="col-4">
-                                                <label for="cc_phone_info">Telefone*</label>
-                                                <input type="text" class="form-control phone_with_ddd_mask" id="cc_phone_info" name="cc_phone_info" placeholder="" value="{{ old('cc_phone_info') ?? '' }}">
                                             </div>
                                         </div>
                                     </div>
@@ -336,11 +356,11 @@
                                     <p class="h4 mb-3"><strong>Endereço de cobrança</strong></p>
                                     <div class="mb-3">
                                         <div class="row">
-                                            <div class="col-9">
+                                            <div class="col-8">
                                                 <label for="cc_address">Endereço*</label>
                                                 <input type="text" class="form-control" id="cc_address" name="cc_address" placeholder="" value="{{ old('cc_address') ?? '' }}">
                                             </div>
-                                            <div class="col-3">
+                                            <div class="col-4">
                                                 <label for="cc_number">Número*</label>
                                                 <input type="text" class="form-control" id="cc_number" name="cc_number" placeholder="" value="{{ old('cc_number') ?? '' }}">
                                             </div>
@@ -519,6 +539,7 @@
                         <input type="hidden" name="card_token" id="card_token" value="">
                         <input type="hidden" name="installmentValue" id="installmentValue" value=""> --}}
                         {{-- <a href="/finish" class="btn_next float-right">Finalizar compra</a> --}}
+                        {{-- <div id="validation-error-messages"></div> --}}
                         <button type="button" onclick="submitCheckout()" class="btn btn-common sub-btn float-right" id="finalizar_comprar">Finalizar compra</button>
                         <button class="btn btn-common sub-btn float-right d-none" type="button" id="carregando_comprar" disabled>
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -528,6 +549,31 @@
                 </div>
             </div>
         </div>
+
+        {{-- <form id="form-checkout" action="/process_payment" method="POST">
+            <div id="form-checkout__cardNumber" class="container_form_submit"></div>
+            <div id="form-checkout__expirationDate" class="container_form_submit"></div>
+            <div id="form-checkout__securityCode" class="container_form_submit"></div>
+            <input type="text" id="form-checkout__cardholderName" placeholder="Titular do cartão" />
+            <select id="form-checkout__issuer" name="issuer">
+              <option value="" disabled selected>Banco emissor</option>
+            </select>
+            <select id="form-checkout__installments" name="installments">
+              <option value="" disabled selected>Parcelas</option>
+            </select>
+            <select id="form-checkout__identificationType" name="identificationType">
+              <option value="" disabled selected>Tipo de documento</option>
+            </select>
+            <input type="text" id="form-checkout__identificationNumber" name="identificationNumber" placeholder="Número do documento" />
+            <input type="email" id="form-checkout__email" name="email" placeholder="E-mail" />
+        
+            <input id="token" name="token" type="hidden">
+            <input id="paymentMethodId" name="paymentMethodId" type="hidden">
+            <input id="transactionAmount" name="transactionAmount" type="hidden" value="100">
+            <input id="description" name="description" type="hidden" value="Nome do Produto">
+        
+            <button type="submit" id="form-checkout__submit">Pagar</button>
+          </form> --}}
     
     </section><!-- End Contact Section -->
 
@@ -550,12 +596,12 @@
     @endpush
 
     @push('head')
-
     @endpush
 
     @push('footer')
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
-        <script type="text/javascript" src="//assets.moip.com.br/v2/moip.min.js"></script>
+        {{-- <script type="text/javascript" src="//assets.moip.com.br/v2/moip.min.js"></script> --}}
+        <script src="https://sdk.mercadopago.com/js/v2"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
         {{-- <script src="assets_conference/js/bootstrap-input-spinner.js"></script>
@@ -573,13 +619,22 @@
                     if(payment_form_type == 1){
                         $('#payment_form_cc').fadeIn();
                         $('#payment_form_boleto').fadeOut();
-                        $("#cc_name_info, #cc_email_info, #cc_cpf_info, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',true);
+                        $('#payment_form_pix').fadeOut();
+                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',true);
                         $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',false);
-                    }else{
+                    }else if(payment_form_type == 2){
                         $('#payment_form_boleto').fadeIn();
                         $('#payment_form_cc').fadeOut();
+                        $('#payment_form_pix').fadeOut();
                         $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',true);
-                        $("#cc_name_info, #cc_email_info, #cc_cpf_info, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',false);
+                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',false);
+                    }else if(payment_form_type == 3){
+                        $('#payment_form_pix').fadeIn();
+                        $('#payment_form_cc').fadeOut();
+                        $('#payment_form_boleto').fadeOut();
+                        $("#pix_name_info, #pix_email_info, #pix_cpf_info, #pix_date_info, #pix_phone_info, #pix_address, #pix_number, #pix_district, #pix_state, #pix_city, #pix_zip").prop('required',true);
+                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',false);
+                        $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',false);
                     }
                 });
 
@@ -603,32 +658,201 @@
                     }
                 });
 
-                $('#cc_name, #cc_number_cc, #cc_expiration, #cc_cvc').change(function(){
+                const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}');
 
-                    let cc_name = $('#cc_name').val();
-                    let cc_number_cc = $('#cc_number_cc').val();
-                    let cc_expiration = $('#cc_expiration').val();
-                    let cc_cvc = $('#cc_cvc').val();
+                const productCost = '100';
+                const productDescription = 'Camisa';
+                const payButton = document.getElementById("finalizar_comprar");
+                const validationErrorMessages = document.getElementById('cc_feedback');
 
-                    if(cc_name && cc_number_cc && cc_expiration && cc_cvc){
-                        var cc = new Moip.CreditCard({
-                            number  : cc_number_cc,
-                            cvc     : cc_cvc,
-                            expMonth: cc_expiration.split("/")[0],
-                            expYear : cc_expiration.split("/")[1],
-                            pubKey  : $("#public_key").val()
-                        });
-                        if( cc.isValid()){
-                            $("#encrypted_value").val(cc.hash());
-                            $('#cc_feedback').hide();
+                const form = {
+                    id: "checkout_submit",
+                    cardholderName: {
+                        id: "cc_name",
+                    },
+                    cardholderEmail: {
+                        id: "cc_email_info",
+                    },
+                    cardNumber: {
+                        id: "cc_number_cc",
+                    },
+                    expirationDate: {
+                        id: "cc_expiration",
+                    },
+                    securityCode: {
+                        id: "cc_cvc",
+                    },
+                    installments: {
+                        id: "cc_installments",
+                    },
+                    identificationType: {
+                        id: "cc_identificationType",
+                    },
+                    identificationNumber: {
+                        id: "cc_identificationNumber",
+                    },
+                    issuer: {
+                        id: "cc_issuer",
+                    },
+                };
+
+                const cardForm = mp.cardForm({
+                    amount: productCost,
+                    iframe: true,
+                    form,
+                    callbacks: {
+                        onFormMounted: error => {
+                            if (error)
+                                return console.warn("Form Mounted handling error: ", error);
+                            console.log("Form mounted");
+                        },
+                        onSubmit: event => {
+                            event.preventDefault();
+                            document.getElementById("loading-message").style.display = "block";
+
+                            const {
+                                paymentMethodId,
+                                issuerId,
+                                cardholderEmail: email,
+                                amount,
+                                token,
+                                installments,
+                                identificationNumber,
+                                identificationType,
+                            } = cardForm.getCardFormData();
+
+                            fetch("/process_payment", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    token,
+                                    issuerId,
+                                    paymentMethodId,
+                                    transactionAmount: Number(amount),
+                                    installments: Number(installments),
+                                    description: productDescription,
+                                    payer: {
+                                        email,
+                                        identification: {
+                                            type: identificationType,
+                                            number: identificationNumber,
+                                        },
+                                    },
+                                }),
+                            })
+                            .then(response => {
+                                return response.json();
+                            })
+                            .then(result => {
+                                if(!result.hasOwnProperty("error_message")) {
+                                    document.getElementById("success-response").style.display = "block";
+                                    document.getElementById("payment-id").innerText = result.id;
+                                    document.getElementById("payment-status").innerText = result.status;
+                                    document.getElementById("payment-detail").innerText = result.detail;
+                                } else {
+                                    document.getElementById("error-message").textContent = result.error_message;
+                                    document.getElementById("fail-response").style.display = "block";
+                                }
+                                
+                                $('.container__payment').fadeOut(500);
+                                setTimeout(() => { $('.container__result').show(500).fadeIn(); }, 500);
+                            })
+                            .catch(error => {
+                                alert("Unexpected error\n"+JSON.stringify(error));
+                            });
+                        },
+                        onFetching: (resource) => {
+                            console.log("Fetching resource: ", resource);
+                            payButton.setAttribute('disabled', true);
+                            return () => {
+                                payButton.removeAttribute("disabled");
+                            };
+                        },
+                        onCardTokenReceived: (errorData, token) => {
+                            if (errorData && errorData.error.fieldErrors.length !== 0) {
+                                errorData.error.fieldErrors.forEach(errorMessage => {
+                                    alert(errorMessage);
+                                });
+                            }
+
+                            return token;
+                        },
+                        onValidityChange: (error, field) => {
+                            const input = document.getElementById(form[field].id);
+                            removeFieldErrorMessages(input, validationErrorMessages);
+                            addFieldErrorMessages(input, validationErrorMessages, error);
+                            enableOrDisablePayButton(validationErrorMessages, payButton);
                         }
-                        else{
-                            $("#encrypted_value").val('');
-                            $('#cc_feedback').show();
-                        }
-                    }
+                    },
                 });
 
+                function removeFieldErrorMessages(input, validationErrorMessages) {
+                    Array.from(validationErrorMessages.children).forEach(child => {
+                        const shouldRemoveChild = child.id.includes(input.id);
+                        if (shouldRemoveChild) {
+                            validationErrorMessages.removeChild(child);
+                        }
+                    });
+                }
+
+                function addFieldErrorMessages(input, validationErrorMessages, error) {
+                    if (error) {
+                        input.classList.add('validation-error');
+                        error.forEach((e, index) => {
+                            const p = document.createElement('p');
+                            p.id = `${input.id}-${index}`;
+                            p.innerText = e.message;
+                            validationErrorMessages.appendChild(p);
+                        });
+                    } else {
+                        input.classList.remove('validation-error');
+                    }
+                }
+
+                function enableOrDisablePayButton(validationErrorMessages, payButton) {
+                    if (validationErrorMessages.children.length > 0) {
+                        payButton.setAttribute('disabled', true);
+                    } else {
+                        payButton.removeAttribute('disabled');
+                    }
+                }
+                
+
+
+
+
+
+                // $('#cc_name, #cc_number_cc, #cc_expiration, #cc_cvc').change(function(){
+
+                //     let cc_name = $('#cc_name').val();
+                //     let cc_number_cc = $('#cc_number_cc').val();
+                //     let cc_expiration = $('#cc_expiration').val();
+                //     let cc_cvc = $('#cc_cvc').val();
+
+                //     if(cc_name && cc_number_cc && cc_expiration && cc_cvc){
+                        // var cc = new Moip.CreditCard({
+                        //     number  : cc_number_cc,
+                        //     cvc     : cc_cvc,
+                        //     expMonth: cc_expiration.split("/")[0],
+                        //     expYear : cc_expiration.split("/")[1],
+                        //     pubKey  : $("#public_key").val()
+                        // });
+                        // if( cc.isValid()){
+                        //     $("#encrypted_value").val(cc.hash());
+                        //     $('#cc_feedback').hide();
+                        // }
+                        // else{
+                        //     $("#encrypted_value").val('');
+                        //     $('#cc_feedback').show();
+                        // }
+                    // }
+                // });
+
+                
+
+                
                 // $("#encrypt").click(function() {
                 //     var cc = new Moip.CreditCard({
                 //         number  : $("#cc_number_cc").val(),
@@ -647,91 +871,18 @@
                 //     }
                 // });
 
-                const settings = {
-                    async: true,
-                    crossDomain: true,
-                    url: 'https://sandbox.moip.com.br/v2/channels',
-                    method: 'POST',
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: 'Basic T1EyWUM1OEhVNURTSk1KVVNES05RQVlSMDI4UU5DV1Q6OVVVRkpPRkpQUVJBM09aVTM2S0w5NkNVNVg5VVhNQllSWllWNDQ2Tw==',
-                        'Content-Type': 'application/json'
-                    },
-                    processData: false,
-                    data: '{"name":"site","description":"descricao","site":"www.site.com","redirectUri":"www.site.com"}'
-                };
-
-                $.ajax(settings).done(function (response) {
-                    console.log(response);
-                });
-
-                // const settings_order = {
-                //     async: true,
-                //     crossDomain: true,
-                //     url: 'https://sandbox.moip.com.br/v2/orders/123456/payments',
-                //     method: 'POST',
-                //     headers: {
-                //         accept: 'application/json',
-                //         Authorization: 'Basic T1EyWUM1OEhVNURTSk1KVVNES05RQVlSMDI4UU5DV1Q6OVVVRkpPRkpQUVJBM09aVTM2S0w5NkNVNVg5VVhNQllSWllWNDQ2Tw==',
-                //         'Content-Type': 'application/json'
-                //     },
-                //     processData: false,
-                //     data: '{"fundingInstrument":{"creditCard":{"holder":{"fullname":"Alan Lima","birthdate":"1987-06-24"},"number":4012001037141112,"expirationMonth":6,"expirationYear":2024,"cvc":123,"hash":"AfPwF3XnmLoWsPLIiLqN7Oc2YG2Ea6BjE3/SiY1+3FcXeDtgNRbHWXcFyCV3sO8rDKDCX5YI7LmLmXri8jkk2fnSMyR1rHbJmfG8P7VlUFmGU71juOIxiuURDt4bh5qciM/CfB6gXJIj83GgSTz2q5HPuxd/F0XG9n64AlnTyfb6nE3qJDvN2Dczs11umR+pZhKy3rSSnAyDXAYDXzvEItY7uQYZET1Qq7QVm729DOL54e5t+w1SLL7frUvWAi4pN08FgZm3JOxzU2LNGXePJWyWtUMGeYaqIOvSw39E3l63Jb9UOWUEUx4DYG+V4N/I+EBWld5grdnqhUsKKbFwLw=="},"method":"CREDIT_CARD"},"installmentCount":1}'
-                // };
-
-                // $.ajax(settings_order).done(function (response) {
-                // console.log(response);
-                // });
-
-                    // const settings_account = {
-                    //     async: true,
-                    //     crossDomain: true,
-                    //     url: 'https://sandbox.moip.com.br/v2/orders',
-                    //     method: 'POST',
-                    //     headers: {
-                    //         accept: 'application/json',
-                    //         Authorization: 'Basic T1EyWUM1OEhVNURTSk1KVVNES05RQVlSMDI4UU5DV1Q6OVVVRkpPRkpQUVJBM09aVTM2S0w5NkNVNVg5VVhNQllSWllWNDQ2Tw==',
-                    //         'Content-Type': 'application/json'
-                    //     },
-                    //     processData: false,
-                    //     data: '{"amount":{"currency":"BRL"},"items":[{"product":"ingresso1","quantity":"1","price":"100","detail":"teste do ingresso"}],"customer":{"taxDocument":{"type":"CPF","number":"02686685310"},"phone":{"countryCode":"55","areaCode":"98","number":"983446042"},"shippingAddress":{"street":"Rua Tangará. Bonavita Prime.","streetNumber":"3","city":"São José de Ribamar","state":"MA","zipCode":"65110000","district":"Araçagy","country":"BRA"},"ownId":"345","fullname":"Alan Lima","email":"alancarlosml@gmail.com","birthDate":"1987-06-24"},"ownId":"123456"}'
-                    // };
-
-                    // $.ajax(settings_account).done(function (response) {
-                    // console.log(response);
-                    // });
-
-                // const settings_account = {
-                //     async: true,
-                //     crossDomain: true,
-                //     url: 'https://sandbox.moip.com.br/v2/accounts',
-                //     method: 'POST',
-                //     headers: {
-                //         accept: 'application/json',
-                //         Authorization: 'Basic T1EyWUM1OEhVNURTSk1KVVNES05RQVlSMDI4UU5DV1Q6OVVVRkpPRkpQUVJBM09aVTM2S0w5NkNVNVg5VVhNQllSWllWNDQ2Tw==',
-                //         'Content-Type': 'application/json'
-                //     },
-                //     processData: false,
-                //     data: '{"email":{"address":"alancarlosml@gmail.com"},"person":{"taxDocument":{"type":"CPF","number":"02686685310"},"phone":{"countryCode":"55","areaCode":"98","number":"983446042"},"address":{"street":"Rua Tangará. Bonavita Prime.","streetNumber":"3","zipCode":"65110000","city":"São José de Ribamar","state":"MA","district":"Araçagy","country":"BRA"},"name":"Alan","lastName":"Lima","birthDate":"1987-06-24"},"transparentAccount":true,"type":"MERCHANT"}'
-                // };
-
-                // $.ajax(settings_account).done(function (response) {
-                //     console.log(response);
-                // });
-
-
                 // const settings = {
                 //     async: true,
                 //     crossDomain: true,
-                //     url: 'https://sandbox.moip.com.br/v2/accounts',
+                //     url: 'https://sandbox.moip.com.br/v2/channels',
                 //     method: 'POST',
                 //     headers: {
                 //         accept: 'application/json',
-                //         Authorization: 'Basic OVVVRkpPRkpQUVJBM09aVTM2S0w5NkNVNVg5VVhNQllSWllWNDQ2Tw==',
+                //         Authorization: 'Basic T1EyWUM1OEhVNURTSk1KVVNES05RQVlSMDI4UU5DV1Q6OVVVRkpPRkpQUVJBM09aVTM2S0w5NkNVNVg5VVhNQllSWllWNDQ2Tw==',
                 //         'Content-Type': 'application/json'
                 //     },
                 //     processData: false,
-                //     data: '{"transparentAccount":true,"type":"MERCHANT"}'
+                //     data: '{"name":"site","description":"descricao","site":"www.site.com","redirectUri":"www.site.com"}'
                 // };
 
                 // $.ajax(settings).done(function (response) {
@@ -739,23 +890,6 @@
                 // });
 
                 
-                // const settings = {
-                //     async: true,
-                //     crossDomain: true,
-                //     url: 'https://sandbox.moip.com.br/v2/accounts',
-                //     method: 'POST',
-                //     headers: {
-                //         accept: 'application/json',
-                //         Authorization: 'Basic OVVVRkpPRkpQUVJBM09aVTM2S0w5NkNVNVg5VVhNQllSWllWNDQ2Tw==',
-                //         'Content-Type': 'application/json'
-                //     },
-                //     processData: false,
-                //     data: undefined
-                // };
-
-                // $.ajax(settings).done(function (response) {
-                //     console.log(response);
-                // });
             });
 
             // function validSubmition(){

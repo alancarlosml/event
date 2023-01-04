@@ -58,6 +58,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    {!! RecaptchaV3::field('register') !!}
                                     <button type="submit" id="btn-submit" class="form-control btn btn-primary rounded submit px-3">Cadastrar</button>
                                 </div>
                             </form>

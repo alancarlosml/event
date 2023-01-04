@@ -84,7 +84,7 @@
                                     <div class="loading">Carregando...</div>
                                     <div class="error-message"></div>
                                     <div class="sent-message">Sua mensagem foi enviada. Obrigado!</div>
-                
+                                    {!! RecaptchaV3::field('contact') !!}
                                     <button type="submit">Enviar mensagem</button>
                                 </div>
                             </div>
