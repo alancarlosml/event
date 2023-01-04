@@ -121,14 +121,14 @@
                                             {{-- Campo texto --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="text" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required="required" @endif>
+                                                <input type="text" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required="required" title="Este campo é obrigatório" @endif>
                                             </div>
                                             @break
                                         @case(2)
                                             {{-- Campo seleção --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <select class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <select class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                                     <option value="0">Selecione</option>
                                                     @foreach ($question->value() as $value)
                                                         <option>{{$value->value}}</option>
@@ -141,7 +141,7 @@
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label><br/>
                                                 @foreach ($question->value() as $value)
-                                                    <input type="radio" name="new_field_radio" @if($question->required) required @endif/> {{$value->value}}
+                                                    <input type="radio" name="new_field_radio" @if($question->required) required title="Este campo é obrigatório" @endif/> {{$value->value}}
                                                 @endforeach
                                             </div>
                                             @break
@@ -150,7 +150,7 @@
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
                                                 @foreach ($question->value() as $value)
-                                                    <input type="checkbox" name="new_field_checbox[]" @if($question->required) required @endif/> {{$value->value}}
+                                                    <input type="checkbox" name="new_field_checbox[]" @if($question->required) required title="Este campo é obrigatório" @endif/> {{$value->value}}
                                                 @endforeach
                                             </div>
                                             @break
@@ -158,70 +158,70 @@
                                             {{-- Campo CPF --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="text" class="form-control new_field cpf_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="text" class="form-control new_field cpf_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                             @break
                                         @case(6)
                                             {{-- Campo CNPJ --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="text" class="form-control new_field cnpj_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="text" class="form-control new_field cnpj_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                             @break
                                         @case(7)
                                             {{-- Campo Data --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="date" class="form-control new_field date_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="date" class="form-control new_field date_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                             @break
                                         @case(8)
                                             {{-- Campo Telefone --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="text" class="form-control new_field phone_with_ddd_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="text" class="form-control new_field phone_with_ddd_mask" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório"  @endif>
                                             </div>
                                             @break
                                         @case(9)
                                             {{-- Campo Número inteiro --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="number" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="number" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório"  @endif>
                                             </div>
                                             @break
                                         @case(10)
                                             {{-- Campo Número decimal --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="number" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="number" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                             @break
                                         @case(11)
                                             {{-- Campo arquivo --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="file" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="file" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                             @break
                                         @case(12)
                                             {{-- Campo Textarea --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <textarea class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif></textarea>
+                                                <textarea class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif></textarea>
                                             </div>
                                             @break
                                         @case(13)
                                             {{-- Campo Email --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <input type="email" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <input type="email" class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                             @break
                                         @case(14)
                                             {{-- Campo estados --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
-                                                <select class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required @endif>
+                                                <select class="form-control new_field" name="newfield_{{$k+1}}_{{$question->id}}" @if($question->required) required title="Este campo é obrigatório" @endif>
                                                     <option value="0">Selecione</option>
                                                     @foreach ($question->value() as $value)
                                                         <option>{{$value->value}}</option>
@@ -286,7 +286,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="cc_number_cc">Número do cartão de crédito*</label>
                                             <div class="input-group">
-                                                <input class="form-control cc_number_mask" type="text" id="cc_number_cc" name="cc_number_cc"  placeholder="0000 0000 0000 0000" value="4012001037141112">
+                                                <input class="form-control cc_number_mask" type="text" id="cc_number_cc" name="cc_number_cc"  placeholder="0000 0000 0000 0000" value="5031 4332 1540 6351">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text brand-img p-2">
                                                         <img src="{{ asset('assets_conference/imgs/credit-card.png') }}" alt="" width="24px" height="24px">
@@ -296,7 +296,7 @@
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label for="cc_expiration">Data de expiração*</label>
-                                            <input type="text" class="form-control expiration_mask" id="cc_expiration" name="cc_expiration" placeholder="00/0000" value="06/2024">
+                                            <input type="text" class="form-control expiration_mask" id="cc_expiration" name="cc_expiration" placeholder="00/0000" value="11/2025">
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label for="cc_cvc">CVC*</label>
@@ -540,12 +540,34 @@
                         <input type="hidden" name="installmentValue" id="installmentValue" value=""> --}}
                         {{-- <a href="/finish" class="btn_next float-right">Finalizar compra</a> --}}
                         {{-- <div id="validation-error-messages"></div> --}}
-                        <button type="button" onclick="submitCheckout()" class="btn btn-common sub-btn float-right" id="finalizar_comprar">Finalizar compra</button>
+                        {{-- <button type="button" onclick="submitCheckout()" class="btn btn-common sub-btn float-right" id="finalizar_comprar">Finalizar compra</button> --}}
+                        <button type="submit" class="btn btn-common sub-btn float-right" id="finalizar_comprar">Finalizar compra</button>
                         <button class="btn btn-common sub-btn float-right d-none" type="button" id="carregando_comprar" disabled>
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             Enviando...
                           </button>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade mt-5" id="cupomModal" tabindex="-1" role="dialog" aria-labelledby="cupomModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <strong class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="/assets_conference/imgs/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></strong>
+                        {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&#10005;</span>
+                        </button> --}}
+                    </div>
+                    {{-- <div class="modal-body">
+                    ...
+                    </div> --}}
+                    <div class="modal-footer">
+                        <button type="button" id="modal_close" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                        {{-- <button type="button" class="btn btn-primary">Ok</button> --}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -620,20 +642,20 @@
                         $('#payment_form_cc').fadeIn();
                         $('#payment_form_boleto').fadeOut();
                         $('#payment_form_pix').fadeOut();
-                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',true);
+                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip, #cc_identificationType").prop('required',true).prop('title', 'Este campo é obrigatório');
                         $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',false);
                     }else if(payment_form_type == 2){
                         $('#payment_form_boleto').fadeIn();
                         $('#payment_form_cc').fadeOut();
                         $('#payment_form_pix').fadeOut();
-                        $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',true);
-                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',false);
+                        $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',true).prop('title', 'Este campo é obrigatório');
+                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip, #cc_identificationType").prop('required',false);
                     }else if(payment_form_type == 3){
                         $('#payment_form_pix').fadeIn();
                         $('#payment_form_cc').fadeOut();
                         $('#payment_form_boleto').fadeOut();
-                        $("#pix_name_info, #pix_email_info, #pix_cpf_info, #pix_date_info, #pix_phone_info, #pix_address, #pix_number, #pix_district, #pix_state, #pix_city, #pix_zip").prop('required',true);
-                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip").prop('required',false);
+                        $("#pix_name_info, #pix_email_info, #pix_cpf_info, #pix_date_info, #pix_phone_info, #pix_address, #pix_number, #pix_district, #pix_state, #pix_city, #pix_zip").prop('required',true).prop('title', 'Este campo é obrigatório');
+                        $("#cc_name_info, #cc_email_info, #cc_identificationNumber, #cc_date_info, #cc_phone_info, #cc_address, #cc_number, #cc_district, #cc_state, #cc_city, #cc_zip, #cc_identificationType").prop('required',false);
                         $("#boleto_name_info, #boleto_email_info, #boleto_cpf_info, #boleto_date_info, #boleto_phone_info, #boleto_address, #boleto_number, #boleto_district, #boleto_state, #boleto_city, #boleto_zip").prop('required',false);
                     }
                 });
@@ -756,8 +778,6 @@
                                     document.getElementById("fail-response").style.display = "block";
                                 }
                                 
-                                $('.container__payment').fadeOut(500);
-                                setTimeout(() => { $('.container__result').show(500).fadeIn(); }, 500);
                             })
                             .catch(error => {
                                 alert("Unexpected error\n"+JSON.stringify(error));
@@ -780,6 +800,7 @@
                             return token;
                         },
                         onValidityChange: (error, field) => {
+                            console.log(form[field]);
                             const input = document.getElementById(form[field].id);
                             removeFieldErrorMessages(input, validationErrorMessages);
                             addFieldErrorMessages(input, validationErrorMessages, error);
@@ -914,15 +935,26 @@
             //     return true;
             // }
 
-            
+            $(document).on('submit', '#checkout_submit', function() {
+                
+                if ($(".form-check-input").is(":checked")) {
+                    $('#finalizar_comprar').attr('disabled', 'disabled');
+                } else {
+                    $('#modal_txt').text('Por favor, selecione ao menos uma forma de pagamento.');
+                    $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
+                    $('#cupomModal').modal('show');
+                }
+                // $('#finalizar_comprar').hide();
+                // $('#carregando_comprar').removeClass('d-none');
+            });
 
-            function submitCheckout(){ 
+            // function submitCheckout(){ 
 
-                $('#finalizar_comprar').hide();
-                $('#carregando_comprar').removeClass('d-none');
-                $('#checkout_submit').submit(); 
-                $('.fail-alert').html('Esse campo é obrigatório!');
-            }
+            //     $('#finalizar_comprar').hide();
+            //     $('#carregando_comprar').removeClass('d-none');
+            //     $('#checkout_submit').submit(); 
+            //     $('.fail-alert').html('Esse campo é obrigatório!');
+            // }
         </script>
     @endpush
 

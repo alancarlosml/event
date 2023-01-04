@@ -40,13 +40,13 @@
                         <li id="confirm"><strong>Publicar</strong></li>
                     </ul>
                     {{-- {{dd($event->get_category())}} --}}
-                    <form method="POST" action="{{ route('event_home.create.step.one') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('event_home.create.step.one') }}">
                         @csrf
                         <div class="card-body">
                             <h4>Sobre o evento</h4>
                             <div class="form-group">
                                 <label for="name">Nome*</label>
-                                <input type="text" class="form-control col-12" id="name" name="name" placeholder="Nome" value="{{ $event->name ?? '' }}" required>
+                                <input type="text" class="form-control col-12" id="name" name="name" placeholder="Nome" value="{{ $event->name ?? '' }}" required="required" title="press">
                             </div>
                             <div class="form-group">
                                 <label for="slug">URL do evento*</label>
