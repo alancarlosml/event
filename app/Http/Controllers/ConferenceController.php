@@ -130,6 +130,7 @@ class ConferenceController extends Controller
                 }
             }
 
+            $request->session()->put('event_date', $eventDate);
             $request->session()->put('array_lotes', $array_lotes);
             $request->session()->put('array_lotes_obj', $array_lotes_obj);
 
@@ -291,6 +292,85 @@ class ConferenceController extends Controller
         $subtotal = $request->session()->get('subtotal');
 
         return response()->json(['success'=>'Cupom removido com sucesso.', 'subtotal' => $subtotal]);
+    }
+
+    public function payment(Request $request)
+    {
+        $input = $request->all();
+
+        $event = $request->session()->get('event');
+        $coupon = $request->session()->get('coupon');
+        $subtotal = $request->session()->get('subtotal');
+        $coupon_subtotal = $request->session()->get('coupon_subtotal');
+        $total = $request->session()->get('total');
+        $dict_lotes = $request->session()->get('dict_lotes');
+        $array_lotes_obj = $request->session()->get('array_lotes_obj');
+        $event_date = $request->session()->get('event_date');
+
+        $coupon_id = null;
+        if($coupon){
+            $coupon_id = $coupon->id;
+        }
+
+        $order_id = DB::table('orders')->insertGetId([
+            'hash' => md5(time() . uniqid() . md5('papainoel')),
+            'status' => 2,
+            'date_used' => null,
+            'gatway_hash' => null,
+            'gatway_reference' => null,
+            'gatway_status' => null,
+            'gatway_payment_method' => null,
+            'event_date_id' => $event_date->id,
+            'participante_id' => Auth::user()->id,
+            'coupon_id' => $coupon_id,
+            'created_at' => now()
+        ]);
+
+        foreach($dict_lotes as $i => $dict){
+
+            $lote = Lote::where('hash', $dict['lote_hash'])->first();
+
+            $order_item_id = DB::table('order_items')->insertGetId([
+                'hash' => md5((time() . uniqid() . $i) . md5('papainoel')),
+                'number' => crc32(md5(time() . uniqid() . $i) . md5('papainoel')),
+                'quantity' => 1,
+                'value' => $lote->value,
+                'order_id' => $order_id,
+                'lote_id' => $lote->id,
+                'created_at' => now()
+            ]);
+            
+            foreach(array_keys($input) as $field){
+
+                if(str_contains($field, 'newfield_')){
+                    $id = explode("_", $field);
+                    $k = $id[1];
+                    $id = $id[2];
+
+                    $question = Question::where('id', $id)->first();
+
+                    if($input['newfield_'. $k . '_'. $id] != ""){
+
+                        $option_answer_id = DB::table('option_answers')->insertGetId([
+                            'answer' => $input['newfield_'. $k . '_'. $id],
+                            'question_id' => $question->id,
+                            'order_item_id' => $order_item_id,
+                            'created_at' => now()
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // return view('conference.payment', compact('event', 'order_id', 'total'));
+        return redirect()->route('conference.payment', $event->slug);
+    }
+
+    public function paymentView(Request $request)
+    {
+        $event = $request->session()->get('event');
+
+        return view('conference.payment', compact('event'));
     }
 
     public function thanks(Request $request)
