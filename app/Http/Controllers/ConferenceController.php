@@ -380,30 +380,52 @@ class ConferenceController extends Controller
 
         MercadoPago\SDK::setAccessToken(env('MERCADO_PAGO_ACCESS_TOKEN', ''));
         
-        $payment = new MercadoPago\Payment();
-        $payment->transaction_amount = (float)$_POST['transactionAmount'];
-        $payment->token = $_POST['token'];
-        $payment->description = $_POST['description'];
-        $payment->installments = (int)$_POST['installments'];
-        $payment->payment_method_id = $_POST['paymentMethodId'];
-        $payment->issuer_id = (int)$_POST['issuer'];
+        try {
+            $payment = new MercadoPago\Payment();
+            $payment->transaction_amount = (float)$_POST['transactionAmount'];
+            $payment->token = $_POST['token'];
+            $payment->description = $_POST['description'];
+            $payment->installments = (int)$_POST['installments'];
+            $payment->payment_method_id = $_POST['paymentMethodId'];
+            $payment->issuer_id = (int)$_POST['issuer'];
+            
+            $payer = new MercadoPago\Payer();
+            $payer->email = $_POST['email'];
+            $payer->identification = array(
+                "type" => $_POST['identificationType'],
+                "number" => $_POST['identificationNumber']
+            );
+            $payment->payer = $payer;
+            
+            $payment->save();
+
+            if($payment->id === null) {
+                $error_message = 'Unknown error cause';
         
-        $payer = new MercadoPago\Payer();
-        $payer->email = $_POST['email'];
-        $payer->identification = array(
-            "type" => $_POST['identificationType'],
-            "number" => $_POST['identificationNumber']
-        );
-        $payment->payer = $payer;
+                if($payment->error !== null) {
+                    $sdk_error_message = $payment->error->message;
+                    $error_message = $sdk_error_message !== null ? $sdk_error_message : $error_message;
+                }
         
-        $payment->save();
-        
-        $response = array(
-            'status' => $payment->status,
-            'status_detail' => $payment->status_detail,
-            'id' => $payment->id
-        );
-        echo json_encode($response);
+                throw new Exception($error_message);
+            }   
+            
+            $response = array(
+                'status' => $payment->status,
+                'status_detail' => $payment->status_detail,
+                'id' => $payment->id
+            );
+
+            // echo json_encode($response);
+
+            return $response;
+
+        } catch(Exception $exception) {
+            
+            $response = array('error_message' => $exception->getMessage());
+    
+            return $response;
+        }
 
         // $token = 'OQ2YC58HU5DSJMJUSDKNQAYR028QNCWT';
         // $key = '9UUFJOFJPQRA3OZU36KL96CU5X9UXMBYRZYV446O';

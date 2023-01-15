@@ -1,35 +1,46 @@
-<x-event-layout>
-    <section id="checkout" class="section-bg" style="margin-top: 120px">
-        <div class="container pb-5">
-            <div class="py-5 text-center">
-                <div class="section-header">
-                    <h2>Finalizar compra</h2>
-                </div>
-            </div>
+<x-guestsite-layout>
+    <section class="ftco-section">
+        <div class="container">
             <div class="row justify-content-center">
-                <div class="col-8">
-                    <div class="mb-4 mt-5">
-                        <div id="paymentBrick_container"></div>
-                    </div>
+                <div class="logo text-center mb-5 mt-5">
+                    <a href="/">
+                        <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
+                    </a>
                 </div>
             </div>
-        </div>
-
-        <!-- Modal -->
-        <div class="modal fade mt-5" id="cupomModal" tabindex="-1" role="dialog" aria-labelledby="cupomModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <strong class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="/assets_conference/imgs/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></strong>
+            <section id="checkout" class="section-bg">
+                <div class="container pb-5">
+                    <div class="py-5 text-center">
+                        <div class="section-header">
+                            <h2>Finalizar compra</h2>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" id="modal_close" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                    <div class="row justify-content-center">
+                        <div class="col-8">
+                            <div class="mb-4 mt-5">
+                                <div id="paymentBrick_container"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-    </section><!-- End Contact Section -->
+                <!-- Modal -->
+                <div class="modal fade mt-5" id="cupomModal" tabindex="-1" role="dialog" aria-labelledby="cupomModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <strong class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="/assets_conference/imgs/success.png" style="max-height: 48px"> <span id="modal_txt">Cupom adicionado com sucesso!</span></strong>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="modal_close" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section><!-- End Contact Section -->
+        </div>
+    </section>
 
     @push('bootstrap_version')
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -91,68 +102,69 @@
 
                 const bricksBuilder = mp.bricks();
                 const renderPaymentBrick = async (bricksBuilder) => {
-                const settings = {
-                initialization: {
-                    amount: 100, // valor total a ser pago
-                    locale: 'pt-BR',
-                },
-                customization: {
-                    maxInstallments: 10,
-                    paymentMethods: {
-                        creditCard: 'all',
-                        ticket: ['bolbradesco'],
-                        bankTransfer: ['pix'],
-                    },
-                    visual: {
-                        hideFormTitle: true,
-                        style: {
-                        theme: 'bootstrap', // | 'dark' | 'bootstrap' | 'flat'
-                        }
-                    },
-                },
-                callbacks: {
-                    onReady: () => {
-                        /*
-                        Callback chamado quando o Brick estiver pronto.
-                        Aqui você pode ocultar loadings do seu site, por exemplo.
-                        */
-                    },
-                    onSubmit: ({ selectedPaymentMethod, formData }) => {
-                    // callback chamado ao clicar no botão de submissão dos dados
-                    
-                        return new Promise((resolve, reject) => {
-                        fetch("/processar-pago", {
-                            method: "POST",
-                            headers: {
-                            "Content-Type": "application/json",
+                    const settings = {
+                        initialization: {
+                            amount: 100, // valor total a ser pago
+                            locale: 'pt-BR'
+                        },
+                        customization: {
+                            //maxInstallments: 10,
+                            paymentMethods: {
+                                creditCard: 'all',
+                                ticket: ['bolbradesco'],
+                                bankTransfer: ['pix'],
                             },
-                            body: JSON.stringify(formData)
-                        })
-                            .then((response) => {
-                            // receber o resultado do pagamento
-                            resolve();
-                            })
-                            .catch((error) => {
-                            // lidar com a resposta de erro ao tentar criar o pagamento
-                            reject();
-                            })
-                        });
-                    
-                    },
-                    onError: (error) => {
-                        // callback chamado para todos os casos de erro do Brick
-                        console.error(error);
-                    },
-                },
-                };
-                window.paymentBrickController = await bricksBuilder.create(
-                    'payment',
-                    'paymentBrick_container',
-                    settings
-                    );
+                            visual: {
+                                hideFormTitle: true,
+                                style: {
+                                    theme: 'bootstrap', // | 'dark' | 'bootstrap' | 'flat'
+                                }
+                            },
+                        },
+                        callbacks: {
+                            onFormUnmounted: () =>{
+                                console.log('sds');
+                            },
+                            onReady: () => {
+                                /*
+                                Callback chamado quando o Brick estiver pronto.
+                                Aqui você pode ocultar loadings do seu site, por exemplo.
+                                */
+                            },
+                            onSubmit: ({ selectedPaymentMethod, formData }) => {
+                            // callback chamado ao clicar no botão de submissão dos dados
+                            
+                                return new Promise((resolve, reject) => {
+                                    fetch("{{route('conference.thanks', $event->slug)}}", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        "_token": "csrf_token()",
+                                        body: JSON.stringify(formData) 
+                                    })
+                                    .then((response) => {
+                                        console.log(response);
+                                        resolve();
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                        reject();
+                                    })
+                                });
+                            },
+                            onError: (error) => {
+                                // callback chamado para todos os casos de erro do Brick
+                                console.error(error);
+                            },
+                        },
+                    };
+                    window.paymentBrickController = await bricksBuilder.create(
+                        'payment',
+                        'paymentBrick_container',
+                        settings);
                 };
                 renderPaymentBrick(bricksBuilder);
-
             });
 
 
@@ -170,4 +182,4 @@
         </script>
     @endpush
 
-</x-event-layout>
+</x-guestsite-layout>

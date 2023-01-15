@@ -76,7 +76,7 @@ Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')-
 Route::get('{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
 Route::get('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.payment');
 Route::post('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@payment')->middleware(['auth:participante', 'verified'])->name('conference.payment');
-Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
+// Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
 Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');
 Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');
 Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');
