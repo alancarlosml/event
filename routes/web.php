@@ -18,7 +18,7 @@ Route::get('/', 'App\Http\Controllers\HomeController@home')->name('home');
 Route::get('/contato', 'App\Http\Controllers\HomeController@show_contact_form');
 Route::post('/contato', 'App\Http\Controllers\HomeController@send')->name('contact');
 Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
-Route::get('/get-more-events', 'App\Http\Controllers\EventHomeController@getMoreEvents')->name('event_home.get-more-events');
+Route::get('/eventos/get-more-events', 'App\Http\Controllers\EventHomeController@getMoreEvents')->name('event_home.get-more-events');
 
 Route::post('painel/get-areas-by-category','App\Http\Controllers\HomeController@getAreas')->name('event_home.get_areas_by_category');
 Route::get('painel/autocomplete_place', 'App\Http\Controllers\EventHomeController@autocomplete_place')->name('event_home.autocomplete_place');

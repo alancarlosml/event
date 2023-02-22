@@ -91,6 +91,9 @@
                 <div id="event_data">
                     @include('site.events_data')
                 </div>
+                        <div class="container d-flex justify-content-center">
+                            {{ $events->links("pagination::bootstrap-4") }}
+                        </div>
             </div>
         </section>
     
@@ -370,8 +373,11 @@
                     'period_val': period_val
                 },
                 url: "{{ route('event_home.get-more-events') }}" + "?page=" + page,
+                    beforeSend: function() {
+                        $('#event_data').html('<div class="d-flex justify-content-center" style="padding: 100px 0"><div class="spinner-border text-danger" role="status"><span class="sr-only">Loading...</span></div></div>');
+                    },
                     success:function(data) {
-                        $('#event_data').html(data);
+                        $('#event_data').html(data.events_list);
                     }
             });
         }
@@ -384,6 +390,7 @@
             //     console.log(page);
             //     getMoreEvents(page);
             // });
+            getMoreEvents(1);
             $('#event_name_search').on('keyup', function() {
                 $value = $(this).val();
                 getMoreEvents(1);

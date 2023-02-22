@@ -99,69 +99,77 @@ class Event extends Model
 
     public static function getEvents($event_val, $category_val, $area_val, $state_val, $period_val) {
         
-        $events = Event::where('events.status', 1);
+        $events = Event::join('areas', 'areas.id', '=', 'events.area_id')
+                            ->join('categories', 'categories.id', '=', 'areas.category_id')
+                            ->join('places', 'places.id', '=', 'events.place_id')
+                            ->join('cities', 'cities.id', '=', 'places.city_id')
+                            ->join('states', 'states.id', '=', 'cities.uf')
+                            ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
+                            ->select('events.name as event_name',
+                                     'events.slug as event_slug', 
+                                     'events.banner as event_banner', 
+                                     'categories.description as category_description', 
+                                     'areas.name as area_name', 
+                                     'places.name as place_name', 
+                                     'cities.name as city_name', 
+                                     'states.uf as state_uf', 
+                                     DB::raw('min(event_dates.date) as min_date'), 
+                                     DB::raw('min(event_dates.time_begin) as min_time')
+                                    )
+                            ->where('events.status', 1);
+
+        // dd($events->get());
 
         if($event_val && !empty($event_val)) {
-            $events->where(function($q) use ($event_val) {
-                $q->where('events.name', 'like', "'%{$event_val}%'");
-            });
+
+            $events->where('events.name', 'like', "%{$event_val}%");
         }
 
         if($category_val != '0') {
-            $events = $events->join('areas', 'areas.id', '=', 'events.area_id');
-            $events = $events->join('categories', 'categories.id', '=', 'areas.category_id');
-            $events = $events->where('categories.id', $category_val);
+            $events->where('categories.id', $category_val);
         }
 
-        // dd($area_val);
-
-        
         if($area_val && $area_val != '0') {
-            $events = $events->where('events.area_id', $area_val);
+            $events->where('events.area_id', $area_val);
         }
         
         if($state_val != '0') {
-            $events = $events->join('places', 'places.id', '=', 'events.place_id');
-            $events = $events->join('cities', 'cities.id', '=', 'places.city_id');
-            $events = $events->join('states', 'states.uf', '=', 'cities.uf');
-            $events = $events->where('states.uf', $state_val);
+            $events->where('states.uf', $state_val);
         }
 
         if($period_val != '0') {
-
-            $events = $events->join('event_dates', 'event_dates.event_id', '=', 'events.id');
 
             $today = date('Y-m-d');
 
             switch( $period_val ) {
                 case 'any':
-                    $events = $events;
+                    $events;
                     break;
                 case 'today':
-                    $events = $events->where('event_dates.date', $today);
+                    $events->where('event_dates.date', $today);
                     break;
                 case 'tomorrow':
-                    $events = $events->where('event_dates.date', date('Y-m-d', strtotime("+1 day")));
+                    $events->where('event_dates.date', date('Y-m-d', strtotime("+1 day")));
                     break;
                 case 'week':
-                    $events = $events->where(DB::raw("week(event_dates.date)"), DB::raw("week(CURDATE())"));
+                    $events->where(DB::raw("week(event_dates.date)"), DB::raw("week(CURDATE())"));
                     break;
                 case 'month':
-                    $events = $events->where(DB::raw("month(event_dates.date)"), DB::raw("month(CURDATE())"));
+                    $events->where(DB::raw("month(event_dates.date)"), DB::raw("month(CURDATE())"));
                     break;
                 case 'year':
-                    $events = $events->where(DB::raw("year(event_dates.date)"), DB::raw("year(CURDATE())"));
+                    $events->where(DB::raw("year(event_dates.date)"), DB::raw("year(CURDATE())"));
                     break;
                 default:
-                    $events = $events->where(DB::raw("LOWER(MONTHNAME(event_dates.date))"), $period_val);
+                    $events->where(DB::raw("LOWER(MONTHNAME(event_dates.date))"), $period_val);
                     break;
             }
-
         }
-        
+                
         // dd($events->get());
 
-        return $events->paginate(2);
+        // return $events->get();
+        return $events->paginate(10);
     }
 
     public function get_participante_admin()

@@ -63,9 +63,11 @@ class EventHomeController extends Controller
         $area_val = $request->area_val;
         $state_val = $request->state_val;
         $period_val = $request->period_val;
+
         if($request->ajax()) {
             $events = Event::getEvents($event_val, $category_val, $area_val, $state_val, $period_val);
-            return view('site.events_data', compact('events'))->render();
+            $events_list = view('site.events_data', compact('events'))->render();
+            return response()->json(['succes' => true, 'events_list' => $events_list]);
         }
     }
 
