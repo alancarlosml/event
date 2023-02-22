@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>EventUp - Event and Conference Template</title>
+        <title>Loja de Eventos</title>
         <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/bootstrap.min.css') }}">
         {{-- <link rel="stylesheet" type="text/css" href="assets_conference/css/line-icons.css"> --}}
         <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/slicknav.css') }}">

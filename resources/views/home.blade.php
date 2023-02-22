@@ -58,8 +58,6 @@
                 <li><a class="nav-link scrollto active" href="#planos">Planos e Preços</a></li>
                 <li><a class="nav-link" href="/eventos">Eventos</a></li>
                 <li><a class="nav-link" href="/contato">Contato</a></li>
-                {{-- <li><a href="blog.html">Blog</a></li> --}}
-                {{-- <li><a class="nav-link" href="/cadastro"></a></li> --}}
                 <li><a class="getstarted" href="/login">Criar evento</a></li>
               </ul>
               <i class="bi bi-list mobile-nav-toggle"></i>

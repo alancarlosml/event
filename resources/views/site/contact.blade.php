@@ -100,6 +100,10 @@
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         @endpush
 
+        @push('head')
+            {!! RecaptchaV3::initJs() !!}
+        @endpush
+
         @push('footer')
             <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
             <script>

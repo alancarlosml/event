@@ -51,7 +51,18 @@ class HomeController extends Controller
 
     public function send(Request $request){
 
-        $contact = Contact::create($request->all());
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string|email',
+            'phone' => 'required|string',
+            'subject' => 'required',
+            'text' => 'required',
+            'g-recaptcha-response' => 'required|recaptchav3:register,0.5'
+        ]);
+
+        $input = $request->all();
+
+        $contact = Contact::create($input);
 
         return response()->json(['ok' => 'OK']);
 

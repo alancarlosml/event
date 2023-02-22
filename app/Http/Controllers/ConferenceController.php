@@ -74,6 +74,15 @@ class ConferenceController extends Controller
 
         $event = Event::where('hash', $hash)->first();
 
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string|email',
+            'phone' => 'required|string',
+            'subject' => 'required',
+            'text' => 'required',
+            'g-recaptcha-response' => 'required|recaptchav3:register,0.5'
+        ]);
+
         $input = $request->all();
 
         $input['event_id'] = $event->id;

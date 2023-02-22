@@ -7,7 +7,7 @@
         <meta content="" name="keywords">
         <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-        <title>Laravel</title>
+        <title>Loja de Eventos</title>
 
         <!-- Favicons -->
         <link rel="icon" href="{{ asset('assets/img/favicon/favicon.png') }}">
@@ -23,7 +23,7 @@
         <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
         {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"> --}}
         {{-- <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet"> --}}
-        {!! RecaptchaV3::initJs() !!}
+        <!-- {!! RecaptchaV3::initJs() !!} -->
         @stack('head')
         @stack('bootstrap_version')
 
@@ -52,7 +52,7 @@
             </a>
       
             <nav id="navbar" class="navbar d-flex">
-              <ul class="d-flex">
+              {{--<ul class="d-flex">
                   <li class="dropdown"><a href="#"><span>Serviços</span> <i class="bi bi-chevron-down"></i></a>
                     <ul>
                       <li><a href="#">Drop Down 1</a></li>
@@ -61,19 +61,28 @@
                       <li><a href="#">Drop Down 4</a></li>
                     </ul>
                   </li>
-                {{-- <li><a class="nav-link scrollto active" href="/#planos">Planos e Preços</a></li> --}}
+                 <li><a class="nav-link scrollto active" href="/#planos">Planos e Preços</a></li> 
                 <li><a class="nav-link" href="/eventos">Eventos</a></li>
                 <li><a class="nav-link" href="/contato">Contato</a></li>
-                {{-- <li><a href="blog.html">Blog</a></li> --}}
-                {{-- <li><a class="nav-link" href="/cadastro"></a></li> --}}
-                {{-- <li><a class="getstarted" href="{{ route('event_home.create_event_link')}}">Criar evento</a></li> --}}
-                
-              </ul>
-              <div class="d-flex">
+                <li><a href="blog.html">Blog</a></li>
+                <li><a class="nav-link" href="/cadastro"></a></li>
+                <li><a class="getstarted" href="{{ route('event_home.create_event_link')}}">Criar evento</a></li> 
+              </ul>--}}
+              <div class="d-flex" style="margin-left: auto;">
                 <ul>
+                  <li class="dropdown"><a href="#"><span>Serviços</span> <i class="bi bi-chevron-down"></i></a>
+                    <ul>
+                      <li><a href="#">Drop Down 1</a></li>
+                      <li><a href="#">Drop Down 2</a></li>
+                      <li><a href="#">Drop Down 3</a></li>
+                      <li><a href="#">Drop Down 4</a></li>
+                    </ul>
+                  </li>
+                  <li><a class="nav-link" href="/eventos">Eventos</a></li>
+                  <li><a class="nav-link" href="/contato">Contato</a></li>
                   <li><a class="getstarted" href="{{route('event_home.create_event_link')}}">Criar evento</a></li>
                   @if(!Auth::user())
-                    <li><a class="nav-link nav-login" href="{{route('login')}}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li>
+                    <li class="nav-li"><a class="nav-link nav-login" href="{{route('login')}}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li>
                   @else
                     <li class="nav-item dropdown">
                       <a class="nav-link nav-login" data-toggle="dropdown" href="javascript:;">
