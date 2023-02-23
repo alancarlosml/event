@@ -37,6 +37,16 @@ class DashboardController extends Controller
                                 end
                             ) as total_confirmado"
                         )
+        ->selectRaw("sum(case 
+                                when 
+                                    lotes.type = 0 and orders.status = 2 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
+                                when    
+                                    lotes.type = 0 and orders.status = 2 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
+                                when    
+                                    lotes.type = 0 and orders.status = 2 and coupons.discount_type is null and coupons.code is null then order_items.value
+                                end
+                            ) as total_pendente"
+                        )
         ->first();
         
         // $ingressos_vendidos = Order::where('participantes.status', '1')

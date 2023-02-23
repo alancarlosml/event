@@ -553,6 +553,9 @@
                     $('#modal_txt').text('Por favor, insira um cupom válido.');
                     $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                     $('#cupomModal').modal('show');
+                    $('#cupomModal').css('padding-right', '0');
+                    $('body').css('padding-right', '0');
+                    $('.navbar').css('padding-right', '0');
 
                     return;
                 }
@@ -571,6 +574,9 @@
                             $('#modal_txt').text(response.success);
                             $('#modal_icon').attr('src', '/assets_conference/imgs/success.png');
                             $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
                             $('#cupom_field').show();
                             let coupon_code = response.coupon[0]['code'];
                             let coupon_type = response.coupon[0]['type'];
@@ -584,12 +590,18 @@
                             $('#modal_txt').text(response.error);
                             $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
                             $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
                         }
 
                         if(response.alert) {
                             $('#modal_txt').text(response.alert);
                             $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                             $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
                         }
                     },
 
@@ -599,6 +611,9 @@
                             $('#modal_txt').text(response.error);
                             $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
                             $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
                         }
                     },
                 });
@@ -619,6 +634,9 @@
                             $('#modal_txt').text(response.success);
                             $('#modal_icon').attr('src', '/assets_conference/imgs/success.png');
                             $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
                             $('#cupom_field').hide();
                             $('#subtotal').text(response.subtotal);
                         }
@@ -627,6 +645,9 @@
                             $('#modal_txt').text(response.error);
                             $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
                             $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
                         }
                     },
 
@@ -636,6 +657,9 @@
                             $('#modal_txt').text(response.error);
                             $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
                             $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
                         }
                     },
                 });
@@ -656,6 +680,9 @@
                 if (count === 0) {
 
                     $('#cupomModal').modal('show');
+                    $('#cupomModal').css('padding-right', '0');
+                    $('body').css('padding-right', '0');
+                    $('.navbar').css('padding-right', '0');
                     $('#modal_txt').text('Por favor, selecione ao menos um ingresso.');
                     $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                     return false;
@@ -665,6 +692,9 @@
                 if (event_date_result === "") {
 
                     $('#cupomModal').modal('show');
+                    $('#cupomModal').css('padding-right', '0');
+                    $('body').css('padding-right', '0');
+                    $('.navbar').css('padding-right', '0');
                     $('#modal_txt').text('Por favor, selecione ao menos uma data válida.');
                     $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
                     return false;

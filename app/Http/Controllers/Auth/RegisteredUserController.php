@@ -42,6 +42,9 @@ class RegisteredUserController extends Controller
             'terms' => 'required',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'g-recaptcha-response' => 'required|recaptchav3:register,0.5'
+        ], [
+            'terms.required' => 'Você deve aceitar os termos e política de privacidade para se registrar.',
+            'g-recaptcha-response.recaptchav3' => 'Por favor, verifique se você não é um robô.'
         ]);
 
         $participante = Participante::create([

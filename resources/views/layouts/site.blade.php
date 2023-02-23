@@ -84,7 +84,7 @@
                   @if(!Auth::user())
                     <li class="nav-li"><a class="nav-link nav-login" href="{{route('login')}}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li>
                   @else
-                    <li class="nav-item dropdown">
+                    <li class="nav-li dropdown">
                       <a class="nav-link nav-login" data-toggle="dropdown" href="javascript:;">
                         <i class="fa-regular fa-circle-user"></i>&nbsp;{{ Auth::user()->name }}
                       </a>

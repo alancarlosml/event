@@ -70,9 +70,9 @@
                     </ul>
                     <div class="mb-3">
                         <div class="row">
-                            <div class="col-12 text-right">
+                            <div class="col-12 d-flex justify-content-between">
                                 <strong>Compra 100% segura!&nbsp;&nbsp;&nbsp;</strong>
-                                <img src="/assets_conference/imgs/moip-logo.png" alt="Moip By PagSeguro" height="80px"/>
+                                <img src="/assets_conference/imgs/mercado-pago-logo.png" alt="Mercado Pago" height="30px"/>
                             </div>
                         </div>
                     </div>
@@ -127,18 +127,22 @@
                                             {{-- Campo marcação --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label><br/>
+                                                <p class='container_radio'>
                                                 @foreach ($question->value() as $value)
                                                     <input type="radio" name="new_field_radio" @if($question->required) required title="Este campo é obrigatório" @endif/> {{$value->value}}
                                                 @endforeach
+                                                </p>
                                             </div>
                                             @break
                                         @case(4)
                                             {{-- Campo multipla escolha --}}
                                             <div class="form-group">
                                                 <label for="new_field">{{$question->question}}@if($question->required == 1)* @endif</label>
+                                                <p class='container_checkbox'>
                                                 @foreach ($question->value() as $value)
                                                     <input type="checkbox" name="new_field_checbox[]" @if($question->required) required title="Este campo é obrigatório" @endif/> {{$value->value}}
                                                 @endforeach
+                                                </p>
                                             </div>
                                             @break
                                         @case(5)
@@ -279,7 +283,18 @@
             $(document).ready(function() { 
 
                 $('#checkout_submit').validate({
-                    errorClass: "error fail-alert d-block"
+                    errorClass: "error fail-alert",
+                    
+                    errorPlacement: function(error, element) 
+                    {
+                        if ( element.is(":radio") ) {
+                            error.insertAfter( element.parents('.container_radio') );
+                        } else if ( element.is(":checkbox") ) {
+                            error.insertAfter( element.parents('.container_checkbox') );
+                        }else { // This is the default behavior 
+                            error.insertAfter( element );
+                        }
+                    }
                 });
 
                 $('#finalizar_comprar').show();
@@ -302,67 +317,67 @@
                     }
                 });
 
-                const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}', {
-                    locale: 'pt-BR'
-                });
+                // const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}', {
+                //     locale: 'pt-BR'
+                // });
 
-                const bricksBuilder = mp.bricks();
-                const renderPaymentBrick = async (bricksBuilder) => {
-                const settings = {
-                initialization: {
-                    amount: 100, // valor total a ser pago
-                    locale: 'pt-BR',
-                },
-                customization: {
-                    maxInstallments: 10,
-                    paymentMethods: {
-                        creditCard: 'all',
-                        ticket: ['bolbradesco'],
-                        bankTransfer: ['pix'],
-                    },
-                },
-                callbacks: {
-                    onReady: () => {
-                        /*
-                        Callback chamado quando o Brick estiver pronto.
-                        Aqui você pode ocultar loadings do seu site, por exemplo.
-                        */
-                    },
-                    onSubmit: ({ selectedPaymentMethod, formData }) => {
-                    // callback chamado ao clicar no botão de submissão dos dados
+                // const bricksBuilder = mp.bricks();
+                // const renderPaymentBrick = async (bricksBuilder) => {
+                // const settings = {
+                // initialization: {
+                //     amount: 100, // valor total a ser pago
+                //     locale: 'pt-BR',
+                // },
+                // customization: {
+                //     maxInstallments: 10,
+                //     paymentMethods: {
+                //         creditCard: 'all',
+                //         ticket: ['bolbradesco'],
+                //         bankTransfer: ['pix'],
+                //     },
+                // },
+                // callbacks: {
+                //     onReady: () => {
+                //         /*
+                //         Callback chamado quando o Brick estiver pronto.
+                //         Aqui você pode ocultar loadings do seu site, por exemplo.
+                //         */
+                //     },
+                //     onSubmit: ({ selectedPaymentMethod, formData }) => {
+                //     // callback chamado ao clicar no botão de submissão dos dados
                     
-                        return new Promise((resolve, reject) => {
-                        fetch("/processar-pago", {
-                            method: "POST",
-                            headers: {
-                            "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(formData)
-                        })
-                            .then((response) => {
-                            // receber o resultado do pagamento
-                            resolve();
-                            })
-                            .catch((error) => {
-                            // lidar com a resposta de erro ao tentar criar o pagamento
-                            reject();
-                            })
-                        });
+                //         return new Promise((resolve, reject) => {
+                //         fetch("/processar-pago", {
+                //             method: "POST",
+                //             headers: {
+                //             "Content-Type": "application/json",
+                //             },
+                //             body: JSON.stringify(formData)
+                //         })
+                //             .then((response) => {
+                //             // receber o resultado do pagamento
+                //             resolve();
+                //             })
+                //             .catch((error) => {
+                //             // lidar com a resposta de erro ao tentar criar o pagamento
+                //             reject();
+                //             })
+                //         });
                     
-                    },
-                    onError: (error) => {
-                    // callback chamado para todos os casos de erro do Brick
-                    console.error(error);
-                    },
-                },
-                };
-                window.paymentBrickController = await bricksBuilder.create(
-                    'payment',
-                    'paymentBrick_container',
-                    settings
-                    );
-                };
-                renderPaymentBrick(bricksBuilder);
+                //     },
+                //     onError: (error) => {
+                //     // callback chamado para todos os casos de erro do Brick
+                //     console.error(error);
+                //     },
+                // },
+                // };
+                // window.paymentBrickController = await bricksBuilder.create(
+                //     'payment',
+                //     'paymentBrick_container',
+                //     settings
+                //     );
+                // };
+                // renderPaymentBrick(bricksBuilder);
 
             });
 

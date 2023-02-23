@@ -55,7 +55,7 @@
                         <!-- ./col -->
                         <div class="col-lg-3 col-6">
                           <!-- small box -->
-                          <div class="small-box bg-success">
+                          <div class="small-box bg-warning">
                             <div class="inner">
                               <h3>{{$ingressos_vendidos->confirmado}}</h3>
               
@@ -70,11 +70,11 @@
                         <!-- ./col -->
                         <div class="col-lg-3 col-6">
                           <!-- small box -->
-                          <div class="small-box bg-warning">
+                          <div class="small-box bg-danger">
                             <div class="inner">
-                              <h3>@money($ingressos_vendidos->total_confirmado)</h3>
+                              <h3>@money($ingressos_vendidos->total_pendente)</h3>
               
-                              <p>Valor total do ingressos vendidos no mês</p>
+                              <p>Valor total pendente no mês</p>
                             </div>
                             <div class="icon">
                               <i class="ion ion-person-add"></i>
@@ -85,11 +85,11 @@
                         <!-- ./col -->
                         <div class="col-lg-3 col-6">
                           <!-- small box -->
-                          <div class="small-box bg-danger">
+                          <div class="small-box bg-success">
                             <div class="inner">
-                              <h3>65</h3>
+                            <h3>@money($ingressos_vendidos->total_confirmado)</h3>
               
-                              <p>Unique Visitors</p>
+                            <p>Valor total do ingressos vendidos no mês</p>
                             </div>
                             <div class="icon">
                               <i class="ion ion-pie-graph"></i>
