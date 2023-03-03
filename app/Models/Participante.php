@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
+use App\Notifications\ResetPasswordNotification;
 
 class Participante extends Authenticatable implements MustVerifyEmail
 {
@@ -65,5 +66,10 @@ class Participante extends Authenticatable implements MustVerifyEmail
             'participantes_events',
             'participante_id',
             'event_id');
+    }
+    
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

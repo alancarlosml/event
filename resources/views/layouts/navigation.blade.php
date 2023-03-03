@@ -13,7 +13,7 @@
             <i class="fa-solid fa-user p-1 mr-1"></i> <b>{{ Auth::user()->name }}</b>
         </a>
         <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
-            <a href="#" class="dropdown-item">
+            <a href="{{route('user.edit', Auth::user()->id)}}" class="dropdown-item">
                 <i class="fa-solid fa-id-card"></i> Perfil
             </a>
             <div class="dropdown-divider"></div>

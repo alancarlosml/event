@@ -29,7 +29,7 @@
             <div class="row">
                 <div class="col-md-4 order-md-2 mb-4">
                     <div class="section-title-header text-center">
-                        <h2 class="section-title wow fadeInUp animated">Total da compra</h2>
+                        <h2 class="section-title wow fadeInUp animated">Resumo da compra</h2>
                     </div>
                     <ul class="list-group mb-3">
                         @foreach ($array_lotes as $array_lote)
@@ -63,7 +63,7 @@
                             </span>
                         </li>
                         @endif
-                        <li class="list-group-item d-flex justify-content-between">
+                        <li class="list-group-item d-flex justify-content-between" style="border-top: solid 1px #999">
                             <strong>Total</strong>
                             <strong>@money($total)</strong>
                         </li>

@@ -177,7 +177,7 @@ class Event extends Model
         return Participante::join('participantes_events', 'participantes_events.participante_id', '=', 'participantes.id')
                 ->where('participantes_events.event_id', $this->id)
                 ->where('participantes_events.role', 'admin')
-                ->selectRaw('participantes.name, participantes.email')
+                ->selectRaw('participantes.id, participantes.name, participantes.email')
                 ->first();
     }
 

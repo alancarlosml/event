@@ -69,6 +69,10 @@
                                                     <i class="fa-solid fa-gear"></i> Configurações
                                                 </button>
                                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
+                                                    <a class="dropdown-item" href="{{route('event_home.my_events_show', $event->hash)}}" target="_blank">
+                                                        <i class="fas fa-print"></i>
+                                                        Imprimir voucher
+                                                    </a>
                                                     <a class="dropdown-item" href="{{route('event_home.my_events_show', $event->hash)}}">
                                                         <i class="fas fa-eye"></i>
                                                         Detalhes

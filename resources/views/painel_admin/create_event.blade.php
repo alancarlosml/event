@@ -113,7 +113,7 @@
                             <h4>Data e hora do evento</h4>
                             @if(isset($eventDate))
                                 @foreach ($eventDate as $date)
-                            {{-- {{dd($date['date'])}} --}}
+                                 {{--dd($date['id'])--}}
                                     <div class="form-row">
                                         <div class="form-group col-md-3">
                                             <label for="number">Data</label>

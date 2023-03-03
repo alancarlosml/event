@@ -371,6 +371,10 @@
         </div>
     </section>
 
+    @push('event_name')
+        {{$event->name}}
+    @endpush
+
     @push('bootstrap_version')
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     @endpush

@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+
+use App\Mail\EventAdminControllerMail;
+use App\Mail\GuestControllerMail;
 
 use App\Models\Category;
 use App\Models\Configuration;
@@ -20,33 +25,33 @@ use App\Models\ParticipanteEvent;
 use App\Models\Place;
 use App\Models\Option;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Owner;
 use App\Models\Question;
 use App\Models\User;
 use App\Models\State;
-use Illuminate\Support\Facades\Auth;
 
 class EventAdminController extends Controller
 {
 
     public function myRegistrations(){
 
-        $events = DB::table('orders')
+        $events = Order::orderBy('events.created_at', 'desc')
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
-            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            // ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
             ->join('participantes', 'participantes.id', '=', 'orders.participante_id')
-            ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
-            ->join('events', 'lotes.event_id', '=', 'events.id')
+            // ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
+            ->join('events', 'event_dates.event_id', '=', 'events.id')
             ->join('places', 'places.id', '=', 'events.place_id')
             ->select('events.*', 
-                    'lotes.name as lote_name',
+                    // 'lotes.name as lote_name',
                     'event_dates.date as data_chosen',
                     'places.name as place_name'
                 )
             ->where('participantes.id', Auth::user()->id)
-            ->where('participantes_events.status', 1)
-            ->orderBy('events.id', 'desc')
+            ->groupBy('events.id')
+            // ->where('participantes_events.status', 1)
             ->get();
 
         return view('painel_admin.my_registrations', compact('events'));
@@ -157,12 +162,13 @@ class EventAdminController extends Controller
         $eventDate = null;
         if(isset($event)){
             $eventDate = EventDate::where('event_id', $event['id'])
-                    ->selectRaw('date, DATE_FORMAT(time_begin, "%H:%i") time_begin, DATE_FORMAT(time_end, "%H:%i") time_end')
+                    ->selectRaw('id, date, DATE_FORMAT(time_begin, "%H:%i") time_begin, DATE_FORMAT(time_end, "%H:%i") time_end')
                     ->where('status', '1')
                     ->get();
 
             if(isset($eventDate)){
                 foreach($eventDate as $date){
+                    $date['id'] = $date['id'];
                     $date['date'] = date("d/m/Y", strtotime($date['date']));
                 }
             }
@@ -209,6 +215,9 @@ class EventAdminController extends Controller
             $event_id = $event->id;
             $request->session()->put('event', $event);
             $request->session()->put('event_id', $event_id);
+             //ENVIAR EMAIL - EVENTO CRIADO
+
+             Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
 
         }else{
 
@@ -240,6 +249,8 @@ class EventAdminController extends Controller
             $event->fill($validatedDataEvent);
             $request->session()->put('event', $event);
             $event->save();
+
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
         }
 
         /*********************************************/
@@ -313,6 +324,9 @@ class EventAdminController extends Controller
                     ->map
                     ->only('id')
                     ->toArray();
+
+        // dd($date_ids);
+        // dd($date_ids_db);
 
         foreach($date_ids_db as $date_id_db){
 
@@ -970,6 +984,12 @@ class EventAdminController extends Controller
         
         Event::where('id', $event->id)->update(array('owner_id' => $owner_id));
 
+        if(isset($validatedEvent['status'])){
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
+        }else{
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
+        }
+        
         return redirect()->route('event_home.my_events')->with('success', 'Evento salvo com sucesso!');   ;
     }
 
@@ -1022,7 +1042,7 @@ class EventAdminController extends Controller
                 $msgType = "error";
                 $msgContent = "A conta do usuário convidado está desativada. Entre em contato para regularização.";
                 //ENVIAR EMAIL SOLICITANDO REATIVAÇÃO DA CONTA
-            }else{
+            }elseif($participante->status == 1){
                 DB::table('participantes_events')->insert([
                     'hash' => md5($participante->name . date("Y-m-d H:i:s") . md5('papainoel')),
                     'role' => 'guest',
@@ -1033,6 +1053,8 @@ class EventAdminController extends Controller
                 ]);
                 $msgType = "success";
                 $msgContent = "Usuário convidado adicionado com sucesso!";
+
+                Mail::to($participante->email)->send(new GuestControllerMail($event, 'Você foi convidado', $participante, Auth::user()));
             }
         }else{
             //ENVIAR EMAIL SOLICITANDO A CRIAÇÃO DA CONTA
@@ -1232,27 +1254,56 @@ class EventAdminController extends Controller
                 ->groupBy('lotes.id')
                 ->get();
 
-        $participantes = Participante::orderBy('participantes.name')
-                    ->join('orders', 'orders.participante_id', '=', 'participantes.id')
-                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
-                    ->join('events', 'events.id', '=', 'lotes.event_id')
-                    ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
-                    ->where('events.hash', $hash)
-                    ->select('lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
-                    ->get();
-        
+        // $participantes = Participante::orderBy('participantes.name')
+        //             ->join('orders', 'orders.participante_id', '=', 'participantes.id')
+        //             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+        //             ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+        //             ->join('events', 'events.id', '=', 'lotes.event_id')
+        //             ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+        //             ->where('events.hash', $hash)
+        //             ->select('lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+        //             ->get();
+
+        $all_orders = Order::orderBy('orders.created_at', 'asc')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+            ->where('event_dates.event_id', $event->id)
+            // ->select('lotes.name as lote_name', 'orders.id', 'orders.status as situacao', 'order_items.id as order_item_id', 'order_items.number as inscricao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+            ->select('orders.id as order_id', 'orders.status as situacao', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
+            ->get();
+
         $situacao_participantes = Participante::orderBy('participantes.name')
-                    ->join('orders', 'orders.participante_id', '=', 'participantes.id')
-                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
-                    ->join('events', 'events.id', '=', 'lotes.event_id')
-                    ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
-                    ->where('events.hash', $hash)
-                    ->select('orders.gatway_status', 'order_items.value as lote_value','lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
-                    ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value) else '' end as valor_porcentagem")
-                    ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value else '' end as valor_desconto")
-                    ->get();
+            ->join('orders', 'orders.participante_id', '=', 'participantes.id')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->join('events', 'events.id', '=', 'lotes.event_id')
+            ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+            ->where('events.hash', $hash)
+            ->select('orders.gatway_status', 'order_items.value as lote_value','lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+            ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value) else '' end as valor_porcentagem")
+            ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value else '' end as valor_desconto")
+            ->get();
+
+        $situacao_participantes_lotes = OrderItem::orderBy('order_items.created_at', 'desc')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->join('events', 'events.id', '=', 'lotes.event_id')
+            // ->join('option_answers', 'option_answers.order_item_id', '=', 'order_items.id')
+            ->where('events.hash', $hash)
+            ->select('order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
+            ->get();
+        
+        // $situacao_participantes = Participante::orderBy('participantes.name')
+        //             ->join('orders', 'orders.participante_id', '=', 'participantes.id')
+        //             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+        //             ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+        //             ->join('events', 'events.id', '=', 'lotes.event_id')
+        //             ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+        //             ->where('events.hash', $hash)
+        //             ->select('orders.gatway_status', 'order_items.value as lote_value','lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+        //             ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value) else '' end as valor_porcentagem")
+        //             ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value else '' end as valor_desconto")
+        //             ->get();
 
                     // dd($situacao_participantes);
         
@@ -1280,11 +1331,25 @@ class EventAdminController extends Controller
 
         // dd($payment_methods);
 
-        $participantes_json = response()->json($participantes);
+        $participantes_json = response()->json($all_orders);
         $payment_methods_json = response()->json($payment_methods);
 
         // dd($payment_methods_json);
 
-        return view('painel_admin.reports', compact('event', 'lotes', 'resumo', 'participantes', 'participantes_json', 'config', 'situacao_participantes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
+        return view('painel_admin.reports', compact('event', 'lotes', 'resumo', 'all_orders', 'participantes_json', 'config', 'situacao_participantes', 'situacao_participantes_lotes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
+    }
+
+    public function order_details(Request $request, $hash)
+    {
+        $order = Order::orderBy('orders.created_at', 'asc')
+                    ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+                    ->join('events', 'events.id', '=', 'lotes.event_id')
+                    ->where('orders.hash', $hash)
+                    ->select('events.id as event_id', 'orders.id as order_id', 'orders.hash as order_hash', 'orders.status as situacao', 'orders.gatway_hash as gatway_hash', 'orders.gatway_reference as gatway_reference', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
+                    ->first();
+    
+        return view('painel_admin.order_detail', compact('order'));
     }
 }

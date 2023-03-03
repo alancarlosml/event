@@ -18,8 +18,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id');
             $table->string('hash')->unique();  
-            $table->integer('status');  
-            $table->timestamp('date_used');  
+            $table->integer('status');  // 1 - confirmado / 2 - pendente / 3 - cancelado  
             $table->string('gatway_hash');  
             $table->string('gatway_reference');  
             $table->string('gatway_status');  

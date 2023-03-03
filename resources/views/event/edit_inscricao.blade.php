@@ -53,7 +53,7 @@
                     @endif
                 </div>
                 <div class="card-body table-responsive p-0">
-                    <form method="POST" action="{{route('event.participantes.update', $participanteLote->participantes_lotes_id)}}">
+                    <form method="POST" action="{{route('event.participantes.update', $participanteLote->order_item_id)}}">
                         @csrf
                         <div class="card-body">
                             <div class="form-group">

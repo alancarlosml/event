@@ -17,9 +17,11 @@ return new class extends Migration
 
         Schema::create('order_items', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('number')->unique(); 
+            $table->string('number')->unique(); 
             $table->integer('quantity');
             $table->double('value');
+            $table->timestamp('date_use'); 
+            $table->integer('status');  // 1 - confirmado / 2 - pendente / 3 - cancelado / 4 - estornado
             $table->integer('order_id')->index()->unsigned();
             $table->foreign('order_id')
                 ->references('id')

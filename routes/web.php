@@ -57,6 +57,7 @@ Route::get('painel/eventos/lote/{hash}/editar', 'App\Http\Controllers\EventAdmin
 Route::post('painel/eventos/lote/{hash}/editar', 'App\Http\Controllers\EventAdminController@updateLote')->middleware(['auth:participante', 'verified'])->name('event_home.lote_update');
 Route::delete('painel/eventos/lote/{hash}/excluir', 'App\Http\Controllers\EventAdminController@deleteLote')->middleware(['auth:participante', 'verified'])->name('event_home.lote_delete');
 Route::post('painel/eventos/{event_id}/save_lotes', 'App\Http\Controllers\EventAdminController@save_lotes')->middleware(['auth:participante', 'verified'])->name('event_home.save_lotes');
+Route::get('painel/eventos/vendas/detalhes/{order_hash}', 'App\Http\Controllers\EventAdminController@order_details')->middleware(['auth:participante', 'verified'])->name('event_home.order.details');
 
 Route::get('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@createStepThree')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.three');
 Route::post('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@postCreateStepThree')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.three');
@@ -157,6 +158,7 @@ Route::post('admin/events/store_file/{id}','App\Http\Controllers\EventController
 Route::get('admin/events/delete_file/{id}','App\Http\Controllers\EventController@delete_file')->middleware(['auth:web'])->name('event.delete_file');
 Route::get('admin/eventos/participantes/editar/{id}', 'App\Http\Controllers\EventController@participantes_edit')->middleware(['auth:web'])->name('event.participantes.edit');
 Route::post('admin/eventos/participantes/update/{id}', 'App\Http\Controllers\EventController@participantes_update')->middleware(['auth:web'])->name('event.participantes.update');
+Route::get('admin/eventos/vendas/detalhes/{id}', 'App\Http\Controllers\EventController@order_details')->middleware(['auth:web'])->name('event.orders.details');
 
 Route::get('admin/events/{id}/coupons', 'App\Http\Controllers\CouponController@coupons')->middleware(['auth:web'])->name('event.coupons');
 Route::get('admin/events/{id}/create_coupon', 'App\Http\Controllers\CouponController@create_coupon')->middleware(['auth:web'])->name('event.create_coupon');

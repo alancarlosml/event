@@ -324,7 +324,6 @@ class ConferenceController extends Controller
         $order_id = DB::table('orders')->insertGetId([
             'hash' => md5(time() . uniqid() . md5('papainoel')),
             'status' => 2,
-            'date_used' => null,
             'gatway_hash' => null,
             'gatway_reference' => null,
             'gatway_status' => null,
@@ -341,9 +340,11 @@ class ConferenceController extends Controller
 
             $order_item_id = DB::table('order_items')->insertGetId([
                 'hash' => md5((time() . uniqid() . $i) . md5('papainoel')),
-                'number' => crc32(md5(time() . uniqid() . $i) . md5('papainoel')),
+                'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('papainoel')), 36),
                 'quantity' => 1,
                 'value' => $lote->value,
+                'date_use' => null,
+                'status' => 2,
                 'order_id' => $order_id,
                 'lote_id' => $lote->id,
                 'created_at' => now()

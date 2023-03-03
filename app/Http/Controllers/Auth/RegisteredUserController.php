@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use App\Notifications\WelcomeEmailNotification;
 
 class RegisteredUserController extends Controller
 {
@@ -39,25 +40,27 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:participantes',
             'phone' => 'required|string',
-            'terms' => 'required',
+            'read_terms' => 'required',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'g-recaptcha-response' => 'required|recaptchav3:register,0.5'
+            // 'g-recaptcha-response' => 'required|recaptchav3:register,0.5'
         ], [
-            'terms.required' => 'Você deve aceitar os termos e política de privacidade para se registrar.',
-            'g-recaptcha-response.recaptchav3' => 'Por favor, verifique se você não é um robô.'
+            'read_terms.required' => 'Você deve aceitar os termos e política de privacidade para se registrar.',
+            // 'g-recaptcha-response.recaptchav3' => 'Por favor, verifique se você não é um robô.'
         ]);
 
         $participante = Participante::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'read_terms' => $request->terms,
+            'read_terms' => $request->read_terms,
             'password' => Hash::make($request->password),
             'status' => 1 // cadastrado mas não confirmado ainda
         ]);
 
         $email_participante = $request->email;
 
+        $participante->notify(new WelcomeEmailNotification($participante));
+        
         event(new Registered($participante));
 
         // Auth::login($user);

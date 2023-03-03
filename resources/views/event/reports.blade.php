@@ -133,43 +133,9 @@
                                             </div>
                                         </div> --}}
                                         <hr/>
-                                        <div class="row pt-3">
-                                            <div class="col-12">
-                                                <h4>Resumo de inscritos por lote</h4>
-                                                <div class="card-body table-responsive p-0">
-                                                    <table class="table table-head-fixed text-nowrap display">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>ID</th>
-                                                                <th>Lote</th>
-                                                                <th>Limite</th>
-                                                                <th>Confirmados</th>
-                                                                <th>Pendentes</th>
-                                                                <th>Restante</th>
-                                                                <th>Total confirmado</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach($lotes as $lote)
-                                                                <tr>
-                                                                    <td>{{$lote->id}}</td>
-                                                                    <td>{{$lote->name}}</td>
-                                                                    <td>{{$lote->quantity}}</td>
-                                                                    <td>{{$lote->confirmado}}</td>
-                                                                    <td>{{$lote->pendente}}</td>
-                                                                    <td>{{$lote->restante}}</td>
-                                                                    <td>@money($lote->total_confirmado)</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr class="mt-5"/>
                                         <div class="row">
                                             <div class="col-12">
-                                                <h4 class="mb-3">Listagem de inscritos por lote</h4>
+                                                <h4 class="mb-3">Listagem de vendas realizadas ({{count($all_orders)}})</h4>
                                                 {{-- <div class="info-box bg-light" style="margin-top: 20px">
                                                     <div class="container-fluid info-box-content">
                                                         <h6 class="text-left display-5">Opções de busca</h6>
@@ -228,29 +194,65 @@
                                                     <table class="table table-head-fixed text-nowrap display" id="participantes_table">
                                                         <thead>
                                                             <tr>
-                                                                <th>N°</th>
-                                                                <th>Nome</th>
-                                                                <th>Lote</th>
+                                                                <th>#</th>
+                                                                <th>Hash</th>
+                                                                <th>Comprador</th>
+                                                                <th>Forma pagamento</th>
                                                                 <th>Situação</th>
-                                                                <th>Ação</th>
+                                                                <th>Data da compra</th>
+                                                                <th>Mais detalhes</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @foreach($participantes as $participante)
+                                                            @foreach($all_orders as $order)
                                                                 <tr>
-                                                                    <td>{{$participante->inscricao}}</td>
-                                                                    <td>
-                                                                        {{$participante->participante_name}} <br/><small>{{$participante->participante_email}}</small><br/>@if($participante->code)<small><b>Cupom:</b> {{$participante->code}}</small>@endif
+                                                                    <td> {{$order->order_id}} </td>
+                                                                    <td> {{$order->order_hash}} </td>
+                                                                    <td> {{$order->participante_name}} ({{$order->participante_cpf}}) <br/>
+                                                                         {{$order->participante_email}} 
                                                                     </td>
-                                                                    <td>{{$participante->lote_name}}</td>
-                                                                    <td>@if($participante->situacao == 1) <span class="badge badge-success">Confirmado</span> @elseif($participante->situacao == 2) <span class="badge badge-warning">Pendente</span> @else <span class="badge badge-danger">Cancelado</span> @endif</td>
-                                                                    <td>
-                                                                        <a class="btn btn-info btn-sm mr-1" href="{{route('event.participantes.edit', $participante->id)}}">
-                                                                            <i class="fas fa-pencil-alt">
-                                                                            </i>
-                                                                            Editar
+                                                                    <td> @if($order->gatway_payment_method == 'credit') Crédito @elseif($order->gatway_payment_method == 'boleto') Boleto @elseif($order->gatway_payment_method == 'pix') Pix @else  Não informado @endif</td>
+                                                                    <td> @if($order->situacao == 1) <span class="badge badge-success">Confirmado</span> @elseif($order->situacao == 2) <span class="badge badge-warning">Pendente</span> @elseif($order->situacao == 2) <span class="badge badge-danger">Cancelado</span> @else - @endif</td>
+                                                                    <td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}</td>
+                                                                    <td> <a class="btn btn-info btn-sm mr-1" href="{{route('event.orders.details', $order->order_id)}}">
+                                                                            <i class="fa-solid fa-plus"></i>
+                                                                            Info
                                                                         </a>
-                                                                    </td>
+                                                                    </td>                                                                  
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="mt-5"/>
+                                        <div class="row pt-3">
+                                            <div class="col-12">
+                                                <h4>Resumo de inscritos por lote</h4>
+                                                <div class="card-body table-responsive p-0">
+                                                    <table class="table table-head-fixed text-nowrap display">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>Lote</th>
+                                                                <th>Limite</th>
+                                                                <th>Confirmados</th>
+                                                                <th>Pendentes</th>
+                                                                <th>Restante</th>
+                                                                <th>Total confirmado</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($lotes as $lote)
+                                                                <tr>
+                                                                    <td>{{$lote->id}}</td>
+                                                                    <td>{{$lote->name}}</td>
+                                                                    <td>{{$lote->quantity}}</td>
+                                                                    <td>{{$lote->confirmado}}</td>
+                                                                    <td>{{$lote->pendente}}</td>
+                                                                    <td>{{$lote->restante}}</td>
+                                                                    <td>@money($lote->total_confirmado)</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
@@ -261,61 +263,54 @@
                                         <hr class="mt-5"/>
                                         <div class="row">
                                             <div class="col-12">
+                                                <h4 class="mb-3">Listagem de inscritos por lote</h4>
+                                                <div class="card-body table-responsive p-0">
+                                                    <table class="table table-head-fixed text-nowrap display" id="participantes_situacao">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Nº inscrição</th>
+                                                                <!-- <th>Nome</th>
+                                                                <th>Email</th> -->
+                                                                <th>Lote</th>
+                                                                <th>Situação</th>
+                                                                <th>Ação</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($situacao_participantes_lotes as $participante)
+                                                                <tr>
+                                                                    <td>{{$participante->number}}</td>
+                                                                    {{--<td>@if(isset($participante->answers[0])){{$participante->answers[0]->answer}} @else - @endif</td>
+                                                                    <td>@if(isset($participante->answers[1])) {{$participante->answers[1]->answer}} @else - @endif</td>--}}
+                                                                    <td>{{$participante->lote_name}}</td>
+                                                                    <td> @if($participante->status_item == 1) <span class="badge badge-success">Confirmado</span> @elseif($participante->status_item == 2) <span class="badge badge-warning">Pendente</span> @elseif($participante->status_item == 3) <span class="badge badge-info">Cancelado</span> @elseif($participante->status_item == 4) <span class="badge badge-warning">Estornado</span>@else - @endif</td>
+                                                                    <td>
+                                                                        @if($participante->status_item == 2)
+                                                                            <div class="d-flex">
+                                                                                <a class="btn btn-warning btn-sm mr-1" href="{{route('event.participantes.edit', $participante->id)}}">
+                                                                                    <i class="fas fa-plus">
+                                                                                    </i>
+                                                                                    Nova cobrança
+                                                                                </a>
+                                                                                <a class="btn btn-warning btn-sm mr-1" href="{{route('event.participantes.edit', $participante->id)}}">
+                                                                                    <i class="fas fa-plus">
+                                                                                    </i>
+                                                                                    Editar
+                                                                                </a>
+                                                                            </div>
+                                                                        @endif
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="mt-5"/>
+                                        {{--<div class="row">
+                                            <div class="col-12">
                                                 <h4 class="mb-3">Situação do pagamento dos inscritos</h4>
-                                                {{-- <div class="info-box bg-light" style="margin-top: 20px">
-                                                    <div class="container-fluid info-box-content">
-                                                        <h6 class="text-left display-5">Opções de busca</h6>
-                                                        <form action="enhanced-results.html">
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="row">
-                                                                        <div class="col-6">
-                                                                            <div class="form-group">
-                                                                                <label>Ativo</label>
-                                                                                <select class="form-control select2" style="width: 100%;">
-                                                                                    <option>Selecione</option>
-                                                                                    <option>Images</option>
-                                                                                    <option>Video</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-3">
-                                                                            <div class="form-group">
-                                                                                <label>Pago</label>
-                                                                                <select class="form-control select2" style="width: 100%;">
-                                                                                    <option>Selecione</option>
-                                                                                    <option>ASC</option>
-                                                                                    <option>DESC</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-3">
-                                                                            <div class="form-group">
-                                                                                <label>Lote</label>
-                                                                                <select class="form-control select2" style="width: 100%;">
-                                                                                    <option>Selecione</option>
-                                                                                    <option>Date</option>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="col-10">
-                                                                            <div class="form-group">
-                                                                                <div class="input-group">
-                                                                                    <input type="search" class="form-control" placeholder="N° inscrição, nome, e-mail"/>
-                                                                                </div>
-                                                                            </div> 
-                                                                        </div>
-                                                                        <div class="col-2 text-right">
-                                                                            <input class="btn btn-primary" type="submit" value="Buscar" style="width: 100%;">
-                                                                        </div> 
-                                                                    </div>  
-                                                                </div>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div> --}}
                                                 <div class="card-body table-responsive p-0">
                                                     <table class="table table-head-fixed text-nowrap display" id="participantes_situacao">
                                                         <thead>
@@ -364,7 +359,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <hr class="mt-5"/>
+                                        <hr class="mt-5"/>--}}
                                         <div class="row">
                                             <div class="col-12">
                                                 <h4 class="mb-3">Resumo de inscritos por cupom de desconto</h4>

@@ -58,8 +58,8 @@
                                     </div>
                                 </div>
                                 <div class="form-group form-check mb-3 col-md-6">
-                                    <input type="checkbox" class="form-check-input" id="read_terms">
-                                    <label class="form-check-label" for="read_terms" name="read_terms">Eu concordo com os <a href="/termos">termos</a> e <a href="/politica">política de privacidade</a></label>
+                                    <input type="checkbox" class="form-check-input" id="read_terms" name="read_terms">
+                                    <label class="form-check-label" for="read_terms">Eu concordo com os <a href="/termos">termos</a> e <a href="/politica">política de privacidade</a></label>
                                 </div>
                                 <div class="form-group">
                                     {!! RecaptchaV3::field('register') !!}

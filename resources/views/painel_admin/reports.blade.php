@@ -104,41 +104,7 @@
                             <hr/>
                             <div class="row pt-3">
                                 <div class="col-12">
-                                    <h4>Resumo de inscritos por lote</h4>
-                                    <div class="card-body table-responsive p-0">
-                                        <table class="table table-head-fixed text-nowrap display">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Lote</th>
-                                                    <th>Limite</th>
-                                                    <th>Confirmados</th>
-                                                    <th>Pendentes</th>
-                                                    <th>Restante</th>
-                                                    <th>Total confirmado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($lotes as $lote)
-                                                    <tr>
-                                                        <td>{{$lote->id}}</td>
-                                                        <td>{{$lote->name}}</td>
-                                                        <td>{{$lote->quantity}}</td>
-                                                        <td>{{$lote->confirmado}}</td>
-                                                        <td>{{$lote->pendente}}</td>
-                                                        <td>{{$lote->restante}}</td>
-                                                        <td>@money($lote->total_confirmado)</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr class="mt-5"/>
-                            <div class="row">
-                                <div class="col-12">
-                                    <h4 class="mb-3">Listagem de inscritos por lote</h4>
+                                    <h4 class="mb-3">Listagem de vendas realizadas ({{count($all_orders)}})</h4>
                                     {{-- <div class="info-box bg-light" style="margin-top: 20px">
                                         <div class="container-fluid info-box-content">
                                             <h6 class="text-left display-5">Opções de busca</h6>
@@ -197,29 +163,65 @@
                                         <table class="table table-head-fixed text-nowrap display" id="participantes_table">
                                             <thead>
                                                 <tr>
-                                                    <th>N°</th>
-                                                    <th>Nome</th>
-                                                    <th>Lote</th>
+                                                    <th>#</th>
+                                                    <th>Hash</th>
+                                                    <th>Comprador</th>
+                                                    <th>Forma pagamento</th>
                                                     <th>Situação</th>
-                                                    <th>Ação</th>
+                                                    <th>Data da compra</th>
+                                                    <th>Mais detalhes</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($participantes as $participante)
+                                                @foreach($all_orders as $order)
                                                     <tr>
-                                                        <td>{{$participante->inscricao}}</td>
-                                                        <td>
-                                                            {{$participante->participante_name}} <br/><small>{{$participante->participante_email}}</small><br/>@if($participante->code)<small><b>Cupom:</b> {{$participante->code}}</small>@endif
+                                                        <td> {{$order->order_id}} </td>
+                                                        <td> {{$order->order_hash}} </td>
+                                                        <td> {{$order->participante_name}} ({{$order->participante_cpf}}) <br/>
+                                                                {{$order->participante_email}} 
                                                         </td>
-                                                        <td>{{$participante->lote_name}}</td>
-                                                        <td>@if($participante->situacao == 1) <span class="badge badge-success">Confirmado</span> @elseif($participante->situacao == 2) <span class="badge badge-warning">Pendente</span> @else <span class="badge badge-danger">Cancelado</span> @endif</td>
-                                                        <td>
-                                                            <a class="btn btn-info btn-sm mr-1" href="{{route('event.participantes.edit', $participante->id)}}">
-                                                                <i class="fas fa-pencil-alt">
-                                                                </i>
-                                                                Editar
+                                                        <td> @if($order->gatway_payment_method == 'credit') Crédito @elseif($order->gatway_payment_method == 'boleto') Boleto @elseif($order->gatway_payment_method == 'pix') Pix @else  Não informado @endif</td>
+                                                        <td> @if($order->situacao == 1) <span class="badge badge-success">Confirmado</span> @elseif($order->situacao == 2) <span class="badge badge-warning">Pendente</span> @elseif($order->situacao == 2) <span class="badge badge-danger">Cancelado</span> @else - @endif</td>
+                                                        <td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}</td>
+                                                        <td> <a class="btn btn-info btn-sm mr-1" href="{{route('event_home.order.details', $order->order_hash)}}">
+                                                                <i class="fa-solid fa-plus"></i>
+                                                                Info
                                                             </a>
-                                                        </td>
+                                                        </td>                                                                  
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="mt-5"/>
+                            <div class="row pt-3">
+                                <div class="col-12">
+                                    <h4>Resumo de inscritos por lote</h4>
+                                    <div class="card-body table-responsive p-0">
+                                        <table class="table table-head-fixed text-nowrap display">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Lote</th>
+                                                    <th>Limite</th>
+                                                    <th>Confirmados</th>
+                                                    <th>Pendentes</th>
+                                                    <th>Restante</th>
+                                                    <th>Total confirmado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($lotes as $lote)
+                                                    <tr>
+                                                        <td>{{$lote->id}}</td>
+                                                        <td>{{$lote->name}}</td>
+                                                        <td>{{$lote->quantity}}</td>
+                                                        <td>{{$lote->confirmado}}</td>
+                                                        <td>{{$lote->pendente}}</td>
+                                                        <td>{{$lote->restante}}</td>
+                                                        <td>@money($lote->total_confirmado)</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -230,61 +232,54 @@
                             <hr class="mt-5"/>
                             <div class="row">
                                 <div class="col-12">
+                                    <h4 class="mb-3">Listagem de inscritos por lote</h4>
+                                    <div class="card-body table-responsive p-0">
+                                        <table class="table table-head-fixed text-nowrap display" id="participantes_situacao">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nº inscrição</th>
+                                                    <!-- <th>Nome</th>
+                                                    <th>Email</th> -->
+                                                    <th>Lote</th>
+                                                    <th>Situação</th>
+                                                    <th>Ação</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($situacao_participantes_lotes as $participante)
+                                                    <tr>
+                                                        <td>{{$participante->number}}</td>
+                                                        {{--<td>@if(isset($participante->answers[0])){{$participante->answers[0]->answer}} @else - @endif</td>
+                                                        <td>@if(isset($participante->answers[1])) {{$participante->answers[1]->answer}} @else - @endif</td>--}}
+                                                        <td>{{$participante->lote_name}}</td>
+                                                        <td> @if($participante->status_item == 1) <span class="badge badge-success">Confirmado</span> @elseif($participante->status_item == 2) <span class="badge badge-warning">Pendente</span> @elseif($participante->status_item == 3) <span class="badge badge-info">Cancelado</span> @elseif($participante->status_item == 4) <span class="badge badge-warning">Estornado</span>@else - @endif</td>
+                                                        <td>
+                                                            @if($participante->status_item == 2)
+                                                                <div class="d-flex">
+                                                                    <a class="btn btn-warning btn-sm mr-1" href="{{route('event.participantes.edit', $participante->id)}}">
+                                                                        <i class="fas fa-plus">
+                                                                        </i>
+                                                                        Nova cobrança
+                                                                    </a>
+                                                                    <a class="btn btn-warning btn-sm mr-1" href="{{route('event.participantes.edit', $participante->id)}}">
+                                                                        <i class="fas fa-plus">
+                                                                        </i>
+                                                                        Editar
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="mt-5"/>
+                            {{--<div class="row">
+                                <div class="col-12">
                                     <h4 class="mb-3">Situação do pagamento dos inscritos</h4>
-                                    {{-- <div class="info-box bg-light" style="margin-top: 20px">
-                                        <div class="container-fluid info-box-content">
-                                            <h6 class="text-left display-5">Opções de busca</h6>
-                                            <form action="enhanced-results.html">
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="row">
-                                                            <div class="col-6">
-                                                                <div class="form-group">
-                                                                    <label>Ativo</label>
-                                                                    <select class="form-control select2" style="width: 100%;">
-                                                                        <option>Selecione</option>
-                                                                        <option>Images</option>
-                                                                        <option>Video</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-3">
-                                                                <div class="form-group">
-                                                                    <label>Pago</label>
-                                                                    <select class="form-control select2" style="width: 100%;">
-                                                                        <option>Selecione</option>
-                                                                        <option>ASC</option>
-                                                                        <option>DESC</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-3">
-                                                                <div class="form-group">
-                                                                    <label>Lote</label>
-                                                                    <select class="form-control select2" style="width: 100%;">
-                                                                        <option>Selecione</option>
-                                                                        <option>Date</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-10">
-                                                                <div class="form-group">
-                                                                    <div class="input-group">
-                                                                        <input type="search" class="form-control" placeholder="N° inscrição, nome, e-mail"/>
-                                                                    </div>
-                                                                </div> 
-                                                            </div>
-                                                            <div class="col-2 text-right">
-                                                                <input class="btn btn-primary" type="submit" value="Buscar" style="width: 100%;">
-                                                            </div> 
-                                                        </div>  
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div> --}}
                                     <div class="card-body table-responsive p-0">
                                         <table class="table table-head-fixed text-nowrap display" id="participantes_situacao">
                                             <thead>
@@ -333,7 +328,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr class="mt-5"/>
+                            <hr class="mt-5"/>--}}
                             <div class="row">
                                 <div class="col-12">
                                     <h4 class="mb-3">Resumo de inscritos por cupom de desconto</h4>
@@ -435,15 +430,16 @@
 
         <script>
 
-        function removeData(id){
-            $('#modalMsgRemove-' + id).modal('show');
-        }
+            function removeData(id){
+                $('#modalMsgRemove-' + id).modal('show');
+            }
 
-        function removeSucc(id){
-            $('#btn-remove-hidden-' + id).click();
-        }
+            function removeSucc(id){
+                $('#btn-remove-hidden-' + id).click();
+            }
 
-        $(document).ready(function() {
+            $(document).ready(function() {
+                
                 $('.order_lote').change(function(){
                     id = $(this).attr('id');
                     value = $(this).val();
@@ -681,349 +677,6 @@
                     }
                 });
             });
-
-        // $(document).ready(function() {
-
-        //     $('.order_lote').change(function(){
-        //         id = $(this).attr('id');
-        //         value = $(this).val();
-        //         console.log(value);
-        //         $('#lote_' + id).val(id + '_' + value);
-        //     });
-
-        //     $(".up,.down").click(function () {
-               
-        //        var $element = this;
-        //        var row = $($element).parents("tr:first");
-
-               
-        //        if($(this).is('.up')){
-        //             hash_this = $(this).parents('tr').find('.lote_hash').text();
-        //             hash_prev = row.prev().find('.lote_hash').text();
-        //             if(hash_prev != ''){
-        //                 console.log(hash_prev);
-        //                     val_this = $('#lote_' + hash_this).val();
-        //                     val_prev = $('#lote_' + hash_prev).val();
-        //                     id_this = parseInt(val_this.split('_')[1]) - 1;
-        //                     id_prev = parseInt(val_prev.split('_')[1]) + 1;
-        //                     $('#lote_' + hash_this).val(hash_this + '_' + id_this);
-        //                     $('#lote_' + hash_prev).val(hash_prev + '_' + id_prev);
-        //                     console.log(id_this);
-        //                     console.log(id_prev);
-        //                     row.insertBefore(row.prev());
-        //             }
-        //        }
-        //        else{
-        //             hash_this = $(this).parents('tr').find('.lote_hash').text();
-        //             hash_next = row.next().find('.lote_hash').text();
-        //             if(hash_next != ''){
-        //                 console.log(hash_next);
-        //                     val_this = $('#lote_' + hash_this).val();
-        //                     val_next = $('#lote_' + hash_next).val();
-        //                     id_this = parseInt(val_this.split('_')[1]) + 1;
-        //                     id_next = parseInt(val_next.split('_')[1]) - 1;
-        //                     $('#lote_' + hash_this).val(hash_this + '_' + id_this);
-        //                     $('#lote_' + hash_next).val(hash_next + '_' + id_next);
-        //                     console.log(id_this);
-        //                     console.log(id_next);
-        //                     row.insertAfter(row.next());
-        //             }
-        //        }
-        //   });
-
-            // $('#description').summernote({
-            //     placeholder: 'Descreva em detalhes o evento',
-            //     tabsize: 2,
-            //     height: 200
-            // });
-
-            // $('#name').keyup(function(e) {
-            //     $.get('{{ route('event_home.check_slug') }}', 
-            //         { 'title': $(this).val() }, 
-            //         function( data ) {
-            //             $('#slug').val(data.slug);
-            //             if(data.slug_exists == '1'){
-            //                 $('#slug').removeClass('is-valid');
-            //                 $('#slug').addClass('is-invalid');
-            //                 $('#slugHelp').removeClass('d-none');
-            //             }else{
-            //                 $('#slug').removeClass('is-invalid');
-            //                 $('#slug').addClass('is-valid');
-            //                 $('#slugHelp').addClass('d-none');
-            //             }
-            //         }
-            //     );
-            // });
-
-            // $('#slug').keyup(function(e) {
-            //     $.get('{{ route('event_home.create_slug') }}', 
-            //         { 'title': $(this).val() }, 
-            //         function( data ) {
-            //             if(data.slug_exists == '1'){
-            //                 $('#slug').removeClass('is-valid');
-            //                 $('#slug').addClass('is-invalid');
-            //             }else{
-            //                 $('#slug').removeClass('is-invalid');
-            //                 $('#slug').addClass('is-valid');
-            //             }
-            //         }
-            //     );
-            // });
-
-            // $('#category').on('change', function() {
-            //     var category_id = this.value;
-            //     $("#area_id").html('');
-            //     $.ajax({
-            //         url:"{{route('event_home.get_areas_by_category')}}",
-            //         type: "POST",
-            //         data: {
-            //             category_id: category_id,
-            //             _token: '{{csrf_token()}}' 
-            //         },
-            //         dataType : 'json',
-            //         success: function(result){
-            //             $('#area_id').html('<option value="">Selecione</option>'); 
-            //             $.each(result.areas,function(key,value){
-            //                 $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
-            //             });
-            //         }
-            //     });
-            // });
-
-            // $('#cmd').click(function(){
-            //     $('#card-date').append('<div class="form-row">' + 
-            //             '<div class="form-group col-md-3">' +
-            //                 '<label for="number">Data</label>'+
-            //                 '<div class="input-group date" data-target-input="nearest">'+
-            //                     '<input class="form-control datetimepicker-input datetimepicker_day" name="date[]" value=""/>'+
-            //                     '<div class="input-group-append" data-toggle="datetimepicker">'+
-            //                         '<div class="input-group-text"><i class="fa fa-calendar"></i></div>'+
-            //                     '</div>'+
-            //                 '</div>'+
-            //             '</div>'+
-            //             '<div class="form-group col-md-2">'+
-            //                 '<label for="number">Hora início</label>'+
-            //                 '<div class="input-group date" data-target-input="nearest">'+
-            //                     '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" value=""/>'+
-            //                     '<div class="input-group-append" data-toggle="datetimepicker">'+
-            //                         '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
-            //                     '</div>'+
-            //                 '</div>'+
-            //             '</div>'+
-            //             '<div class="form-group col-md-2">'+
-            //                 '<label for="number">Hora fim</label>'+
-            //                 '<div class="input-group date" data-target-input="nearest">'+
-            //                     '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" value=""/>'+
-            //                     '<div class="input-group-append" data-toggle="datetimepicker">'+
-            //                         '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
-            //                     '</div>'+
-            //                 '</div>'+
-            //             '</div>'+
-            //             '<div class="form-group col-md-2">'+
-            //                 '<a class="btn btn-danger btn-sm mr-1 btn-remove" style="margin-top: 35px" href="javascript:;">'+
-            //                     '<i class="fa-solid fa-remove"></i>'+
-            //                     ' Remover'+
-            //                 '</a>'+
-            //             '</div>'+ 
-            //         '</div>'
-            //     );
-            // });
-
-            // var i_field = 2;
-            // $('#add_new_field').click(function(){
-            //     var field = $(this).parent().parent().find('#question').val();
-            //     var option = $(this).parent().parent().find('#option').val();
-            //     var option_text = $(this).parent().parent().find('#option:selected').text();
-            //     var required = $(this).parent().parent().find('#required').is(":checked");
-            //     var unique = $(this).parent().parent().find('#unique').is(":checked");
-
-            //     if(field === ''){
-
-            //         alert('preencha');
-            //         return false;
-            //     }
-
-            //     var required_star = required ? '*':'';
-            //     var field_text = '';
-            //     var field_name = '';
-            //     i_field = i_field+1;
-
-            //     $('#question').val('');
-            //     $('#option').prop('selectedIndex',0);
-            //     $('#required').prop('checked',false);
-            //     $('#unique').prop('checked',false);
-
-            //     switch(option){
-            //         case '1':
-            //             field_text = '(Tipo: Texto (Até 200 caracteres))';
-            //             field_name = 'text';
-            //             break;
-            //         case '2':
-            //             field_text = '(Tipo: Seleção)';
-            //             field_name = 'select';
-            //             break;
-            //         case '3':
-            //             field_text = '(Tipo: Marcação)';
-            //             field_name = 'checkbox';
-            //             break;
-            //         case '4':
-            //             field_text = '(Tipo: Múltipla escolha)';
-            //             field_name = 'multiselect';
-            //             break;
-            //         case '5':
-            //             field_text = '(Tipo: CPF)';
-            //             field_name = 'cpf';
-            //             break;
-            //         case '6':
-            //             field_text = '(Tipo: CNPJ)';
-            //             field_name = 'cnpj';
-            //             break;
-            //         case '7':
-            //             field_text = '(Tipo: Data)';
-            //             field_name = 'date';
-            //             break;
-            //         case '8':
-            //             field_text = '(Tipo: Telefone)';
-            //             field_name = 'phone';
-            //             break;
-            //         case '9':
-            //             field_text = '(Tipo: Número inteiro)';
-            //             field_name = 'integer';
-            //             break;
-            //         case '10':
-            //             field_text = '(Tipo: Número decimal)';
-            //             field_name = 'decimal';
-            //             break;
-            //         case '11':
-            //             field_text = '(Tipo: Arquivo)';
-            //             field_name = 'file';
-            //             break;
-            //         case '12':
-            //             field_text = '(Tipo: Textarea (+ de 200 caracteres))';
-            //             field_name = 'textearea';
-            //             break;
-            //         case '13':
-            //             field_text = '(Tipo: Email)';
-            //             field_name = 'new_email';
-            //             break;
-            //         case '14':
-            //             field_text = '(Tipo: Estados (BRA))';
-            //             field_name = 'states';
-            //             break;
-            //     }
-
-            //     $('#card-new-field').append('<div class="form-row">' +
-            //         '<div class="form-group col-10">'+
-            //             '<label for="field_'+i_field+'">Campo ' + i_field + required_star + '</label>' +
-            //             '<input type="text" class="form-control" name="'+field_name+'_new_field" value="'+field+' '+field_text +'" readonly>' +
-            //         '</div>'+
-            //         '<div class="form-group col-2">'+
-            //             '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px" href="javascript:;">'+
-            //                 '<i class="fa-solid fa-remove"></i>'+
-            //                 ' Remover'+
-            //             '</a>'+
-            //         '</div>'+
-            //     '</div>');
-            // });
-
-            // $('#add_place').click(function(){
-            //         $('#event_address').toggle();                    
-            //     });
-
-            // var path = "{{route('event_home.autocomplete_place')}}";
-            // $("#place_name").autocomplete({
-            //     source: function( request, response ) {
-            //         $.ajax({
-            //             url: path,
-            //             type: 'GET',
-            //             dataType: "json",
-            //             data: {
-            //                 search: request.term
-            //             },
-            //             success: function( data ) {
-            //                 response(data);
-            //             }
-            //         });
-            //     },
-            //     select: function (event, ui) {
-            //         $('#place_name').val(ui.item.label);
-            //         $('#address').val(ui.item.address);
-            //         $('#number').val(ui.item.number);
-            //         $('#district').val(ui.item.district);
-            //         $('#complement').val(ui.item.complement);
-            //         $('#zip').val(ui.item.zip);
-
-            //         $('#state option[value="'+ui.item.uf+'"]').prop("selected", true);
-                    
-            //         var uf = $("#state").val();
-            //         $("#city").html('');
-            //         $.ajax({
-            //             url:"{{url('admin/places/get-cities-by-state')}}",
-            //             type: "POST",
-            //             data: {
-            //                 uf: uf,
-            //                 _token: '{{csrf_token()}}' 
-            //             },
-            //             dataType : 'json',
-            //             success: function(result){
-            //                 $('#city').html('<option value="">Selecione</option>'); 
-            //                 city_id = $('#city_id_hidden').val();
-
-            //                 $.each(result.cities,function(key,value){
-            //                     $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
-            //                 });
-
-            //                 $('#city option[value="'+ui.item.city_id+'"]').prop("selected", true);
-            //             }
-            //         });
-
-            //         return false;
-            //     }
-            // });
-
-            // $('body').on('click',".btn-remove-field", function(){
-            //     $(this).parent().parent().remove();
-            //     i_field = i_field-1;
-            // });
-
-            // $('body').on('click',".btn-remove", function(){
-            //     $(this).parent().parent().remove();
-            // });
-
-            // $('body').on('mousedown',".datetimepicker_day", function(){
-            //     $(this).datetimepicker({
-            //         timepicker:false,
-            //         format:'d/m/Y',
-            //         mask:true
-            //     });
-            // });
-
-            // $('body').on('mousedown',".datetimepicker_hour_begin", function(){
-            //     $(this).datetimepicker({
-            //         datepicker:false,
-            //         format:'H:i',
-            //         mask:true,
-            //         onShow:function( ct ){
-            //             this.setOptions({
-            //                 maxTime:$(this).val()?$(this).val():false
-            //             })
-            //         }
-            //     });
-            // });
-
-            // $('body').on('mousedown',".datetimepicker_hour_end", function(){
-            //     $(this).datetimepicker({
-            //         datepicker:false,
-            //         format:'H:i',
-            //         mask:true,
-            //         onShow:function( ct ){
-            //             this.setOptions({
-            //                 minTime:$(this).val()?$(this).val():false
-            //             })
-            //         }
-            //     });
-            // });
-        // });
     
     </script>
       

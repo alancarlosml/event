@@ -60,6 +60,7 @@
                           <div class="form-group">
                             <label for="password">Senha</label>
                             <input type="password" class="form-control" id="password" name="password" placeholder="Senha">
+                            <div id="passwordHelp" class="form-text text-muted">Caso não queira alterar a senha, deixe esse campo em branco.</div>
                           </div>
                         </div>
                         <!-- /.card-body -->

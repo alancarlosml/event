@@ -16,6 +16,7 @@ use App\Models\Participante;
 use App\Models\ParticipanteLote;
 use App\Models\Place;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Owner;
 use App\Models\State;
 
@@ -453,14 +454,22 @@ class EventController extends Controller
                 ->groupBy('lotes.id')
                 ->get();
 
-        $participantes = Participante::orderBy('participantes.name')
-                    ->join('orders', 'orders.participante_id', '=', 'participantes.id')
-                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
-                    ->join('events', 'events.id', '=', 'lotes.event_id')
-                    ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
-                    ->where('events.id', $id)
-                    ->select('lotes.name as lote_name', 'orders.id', 'order_items.number as inscricao', 'orders.status as situacao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+        // $participantes = Participante::orderBy('orders.created_at', 'asc')
+        //             ->join('orders', 'orders.participante_id', '=', 'participantes.id')
+        //             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+        //             ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+        //             ->join('events', 'events.id', '=', 'lotes.event_id')
+        //             ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+        //             ->where('events.id', $id)
+        //             ->select('lotes.name as lote_name', 'orders.id', 'orders.status as situacao', 'order_items.id as order_item_id', 'order_items.number as inscricao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+        //             ->get();
+
+        $all_orders = Order::orderBy('orders.created_at', 'asc')
+                    ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+                    ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+                    ->where('event_dates.event_id', $id)
+                    // ->select('lotes.name as lote_name', 'orders.id', 'orders.status as situacao', 'order_items.id as order_item_id', 'order_items.number as inscricao', 'participantes.name as participante_name', 'participantes.email as participante_email', 'coupons.code')
+                    ->select('orders.id as order_id', 'orders.status as situacao', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
                     ->get();
         
         $situacao_participantes = Participante::orderBy('participantes.name')
@@ -475,7 +484,16 @@ class EventController extends Controller
                     ->selectRaw("case when lotes.type = 0 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value else '' end as valor_desconto")
                     ->get();
 
-                    // dd($situacao_participantes);
+        $situacao_participantes_lotes = OrderItem::orderBy('order_items.created_at', 'desc')
+                    ->join('orders', 'orders.id', '=', 'order_items.order_id')
+                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+                    ->join('events', 'events.id', '=', 'lotes.event_id')
+                    // ->join('option_answers', 'option_answers.order_item_id', '=', 'order_items.id')
+                    ->where('events.id', $id)
+                    ->select('order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
+                    ->get();
+
+        // dd($situacao_participantes_lotes);
         
         $payment_methods = Order::orderBy('orders.gatway_payment_method')
                     ->join('order_items', 'orders.id', '=', 'order_items.order_id')
@@ -501,22 +519,23 @@ class EventController extends Controller
 
         // dd($payment_methods);
 
-        $participantes_json = response()->json($participantes);
+        $participantes_json = response()->json($all_orders);
         $payment_methods_json = response()->json($payment_methods);
 
         // dd($payment_methods_json);
 
-        return view('event.reports', compact('event', 'lotes', 'resumo', 'participantes', 'participantes_json', 'config', 'situacao_participantes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
+        return view('event.reports', compact('event', 'lotes', 'resumo', 'all_orders', 'participantes_json', 'config', 'situacao_participantes', 'situacao_participantes_lotes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
     }
 
     public function participantes_edit($id){
                 
-        $participanteLote = DB::table('participantes_lotes')
-                            ->join('participantes', 'participantes_lotes.participante_id', '=', 'participantes.id')
-                            ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+        $participanteLote = Order::orderBy('orders.created_at', 'asc')
+                            ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+                            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
                             ->join('events', 'events.id', '=', 'lotes.event_id')
-                            ->where('participantes_lotes.id', $id)
-                            ->select('events.id as event_id', 'participantes_lotes.id as participantes_lotes_id', 'participantes_lotes.number', 'participantes_lotes.status', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
+                            ->where('order_items.id', $id)
+                            ->select('events.id as event_id', 'orders.id as order_id', 'orders.status', 'order_items.id as order_item_id', 'order_items.number', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
                             ->first();
         
         $lotes = Lote::orderBy('order')
@@ -532,27 +551,45 @@ class EventController extends Controller
 
     public function participantes_update(Request $request, $id)
     {
-
-        $participanteLote_id = DB::table('participantes_lotes')
-                            ->join('participantes', 'participantes_lotes.participante_id', '=', 'participantes.id')
-                            ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
+        $orderItemObj = Order::orderBy('orders.created_at', 'asc')
+                            ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+                            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
                             ->join('events', 'events.id', '=', 'lotes.event_id')
-                            ->where('participantes_lotes.id', $id)
-                            ->select('events.id as event_id', 'participantes_lotes.id as participantes_lotes_id', 'participantes_lotes.number', 'participantes_lotes.status', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
+                            ->where('order_items.id', $id)
+                            ->select('events.id as event_id', 'orders.id as order_id', 'order_items.number', 'orders.status', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
                             ->first();
 
-        $participanteLote = ParticipanteLote::findOrFail($id);
+        // dd($participanteLote_id);
+
+        $order = Order::findOrFail($orderItemObj->order_id);
+        $orderItem = OrderItem::findOrFail($id);
 
         $input = $request->all();
 
-        $participanteLote['status'] = $input['status'];
-        $participanteLote['lote_id'] = $input['lote_id'];
+        $order['status'] = $input['status'];
+        $orderItem['lote_id'] = $input['lote_id'];
 
-        // dd($participanteLote);
+        // dd($orderItem);
 
-        $participanteLote->save();
+        $order->save();
+        $orderItem->save();
     
-        return redirect()->route('event.reports', $participanteLote_id->event_id)->withFragment('#participantes_table');
+        return redirect()->route('event.reports', $orderItemObj->event_id)->withFragment('#participantes_table');
+    }
+
+    public function order_details(Request $request, $id)
+    {
+        $order = Order::orderBy('orders.created_at', 'asc')
+                    ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+                    ->join('events', 'events.id', '=', 'lotes.event_id')
+                    ->where('orders.id', $id)
+                    ->select('events.id as event_id', 'orders.id as order_id', 'orders.hash as order_hash', 'orders.status as situacao', 'orders.gatway_hash as gatway_hash', 'orders.gatway_reference as gatway_reference', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
+                    ->first();
+    
+        return view('event.order_detail', compact('order'));
     }
 
 }
