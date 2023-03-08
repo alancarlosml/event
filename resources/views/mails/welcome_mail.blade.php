@@ -76,13 +76,13 @@
                               <tbody>
                                 <tr>
                                   <td style="line-height: 24px; font-size: 16px; width: 100%; border-radius: 24px; margin: 0; padding: 40px;" align="left" bgcolor="#F1f1f5">
-                                    <strong class="text-center" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 20px; margin: 0;" align="center">Seja bem-vindo à Loja de Eventos!</strong>
+                                    <strong class="text-center" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 20px; margin: 0;" align="center">Seja bem-vindo à Ticket DZ6!</strong>
                                     <table class="btn btn-red-500 rounded-full px-6 w-full w-lg-48" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 9999px; border-collapse: separate !important; width: 192px;" width="192">
                                     <tbody>
 									  <tr><td>&nbsp;</td></tr>
                                       <tr>
                                         <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 100px; margin: 0;" align="center" bgcolor="#dc3545" width="100">
-                                          <a href="http://www.lojadeeventos.com.br/" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 12px; border: 1px solid #dc3545;">Acessar a Loja de Eventos</a>
+                                          <a href="http://www.lojadeeventos.com.br/" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 12px; border: 1px solid #dc3545;">Acessar a Ticket DZ6</a>
                                         </td>
                                       </tr>
                                     </tbody>
@@ -107,7 +107,7 @@
 										<tr><td>&nbsp;</td></tr>
 										<tr>
                                           <td style="line-height: 24px; font-size: 14px; height: 1px; width: 100%; margin: 0;" align="left">
-										   <span style="color: #aaa">Caso você tenha alguma dúvida, entre em <a href="mailto:contato@lojadeeventos.com.br" style="color: #0d6efd;">contato</a>.</span>
+										   <span style="color: #aaa">Caso você tenha alguma dúvida, entre em <a href="mailto:contato@ticketdz6.com.br" style="color: #0d6efd;">contato</a>.</span>
                                           </td>
                                         </tr>
 										<tr>
@@ -117,7 +117,7 @@
                                         </tr>
 										<tr>
                                           <td style="line-height: 24px; font-size: 14px; height: 1px; width: 100%; margin: 0;" align="left">
-										   <span style="color: #aaa">Loja de Eventos, {{ date('Y') }}. Todos os direitos reservado.</span>
+										   <span style="color: #aaa">Ticket DZ6, {{ date('Y') }}. Todos os direitos reservado.</span>
                                           </td>
                                         </tr>
                                       </tbody>

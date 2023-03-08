@@ -141,7 +141,7 @@
                                         </tr>
                                       </tbody>
                                     </table>
-                                    <p style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left">Caso você tenha alguma dúvida, entre em contato: <a href="mailto:contato@lojadeeventos.com.br" style="color: #0d6efd;"><span class="__cf_email__">contato@lojadeeventos.com.br</span></a>.</p>
+                                    <p style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left">Caso você tenha alguma dúvida, entre em contato: <a href="mailto:contato@ticketdz6.com.br" style="color: #0d6efd;"><span class="__cf_email__">contato@ticketdz6.com.br</span></a>.</p>
                                   </td>
                                 </tr>
                               </tbody>

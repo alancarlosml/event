@@ -124,7 +124,7 @@
 										<tr><td>&nbsp;</td></tr>
 										<tr>
                                           <td style="line-height: 24px; font-size: 14px; height: 1px; width: 100%; margin: 0;" align="left">
-										   <span style="color: #aaa">Caso você tenha alguma dúvida, entre em <a href="mailto:contato@lojadeeventos.com.br" style="color: #0d6efd;">contato</a>.</span>
+										   <span style="color: #aaa">Caso você tenha alguma dúvida, entre em <a href="mailto:contato@ticketdz6.com.br" style="color: #0d6efd;">contato</a>.</span>
                                           </td>
                                         </tr>
 										<tr>
@@ -134,7 +134,7 @@
                                         </tr>
 										<tr>
                                           <td style="line-height: 24px; font-size: 14px; height: 1px; width: 100%; margin: 0;" align="left">
-										   <span style="color: #aaa">Loja de Eventos, {{ date('Y') }}. Todos os direitos reservado.</span>
+										   <span style="color: #aaa">Ticket DZ6, {{ date('Y') }}. Todos os direitos reservado.</span>
                                           </td>
                                         </tr>
                                       </tbody>

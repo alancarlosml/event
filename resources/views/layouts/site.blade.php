@@ -7,7 +7,7 @@
         <meta content="" name="keywords">
         <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-        <title>Loja de Eventos</title>
+        <title>Ticket DZ6</title>
 
         <!-- Favicons -->
         <link rel="icon" href="{{ asset('assets/img/favicon/favicon.png') }}">
@@ -195,7 +195,7 @@
       
           <div class="container">
             <div class="copyright">
-              &copy; Copyright <strong><span>Loja de Eventos</span></strong>. Todos os direitos reservados
+              &copy; Copyright <strong><span>Ticket DZ6</span></strong>. Todos os direitos reservados
             </div>
             <div class="credits">
               <!-- All the links in the footer should remain intact. -->

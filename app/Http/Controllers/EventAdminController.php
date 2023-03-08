@@ -1059,7 +1059,7 @@ class EventAdminController extends Controller
         }else{
             //ENVIAR EMAIL SOLICITANDO A CRIAÇÃO DA CONTA
             $msgType = "error";
-            $msgContent = "Não foi possível adicionar usuário. Usuário não possui um cadastro na Loja de Eventos.";
+            $msgContent = "Não foi possível adicionar usuário. Usuário não possui um cadastro na Ticket DZ6.";
         }
 
         return redirect()->route('event_home.guests', $event->hash)->with($msgType, $msgContent);   

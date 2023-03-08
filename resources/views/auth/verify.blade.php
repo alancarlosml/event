@@ -25,7 +25,7 @@
                                 <ul>
                                     <li>verifique a pasta de spam</li>
                                     <li>verifique se você digitou seu e-mail corretamente</li>
-                                    <li>se você não conseguir resolver o problema, entre em contato com contato@lojadeeventos.com.br</li>
+                                    <li>se você não conseguir resolver o problema, entre em contato com contato@ticketdz6.com.br</li>
                                 </ul>    
                             </div>
                         </div>

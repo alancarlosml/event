@@ -70,99 +70,138 @@
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
         <script>
 
-            $(document).ready(function() { 
+                // $('#checkout_submit').validate({
+                //     errorClass: "error fail-alert d-block"
+                // });
 
-                $('#checkout_submit').validate({
-                    errorClass: "error fail-alert d-block"
-                });
-
-                $('#finalizar_comprar').show();
-                $('#carregando_comprar').addClass('d-none');
+                // $('#finalizar_comprar').show();
+                // $('#carregando_comprar').addClass('d-none');
                 
-                // $('.date_mask').mask('00/00/0000', {placeholder: "__/__/____"});
-                // $('.cep').mask('00000-000');
-                $('.phone_with_ddd_mask').mask('(00) 00000-0000');
-                $('.cpf_mask').mask('000.000.000-00', {reverse: false});
-                $('.cnpj_mask').mask('00.000.000/0000-00', {reverse: false});
-                $('.cep_mask').mask('00000-000');
-                $('.expiration_mask').mask('00/0000');
-                $('.cc_cvc_mask').mask('000');
-                $('.cc_number_mask').mask('YYYY YYYY YYYY YYYY', {'translation': {
-                        Y: {pattern: /[0-9]/}
-                    }
-                });
-                $('.cc_cvc_mask').mask('YYY', {'translation': {
-                        Y: {pattern: /[0-9]/}
-                    }
-                });
+                // // $('.date_mask').mask('00/00/0000', {placeholder: "__/__/____"});
+                // // $('.cep').mask('00000-000');
+                // $('.phone_with_ddd_mask').mask('(00) 00000-0000');
+                // $('.cpf_mask').mask('000.000.000-00', {reverse: false});
+                // $('.cnpj_mask').mask('00.000.000/0000-00', {reverse: false});
+                // $('.cep_mask').mask('00000-000');
+                // $('.expiration_mask').mask('00/0000');
+                // $('.cc_cvc_mask').mask('000');
+                // $('.cc_number_mask').mask('YYYY YYYY YYYY YYYY', {'translation': {
+                //         Y: {pattern: /[0-9]/}
+                //     }
+                // });
+                // $('.cc_cvc_mask').mask('YYY', {'translation': {
+                //         Y: {pattern: /[0-9]/}
+                //     }
+                // });
 
-                const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}', {
-                    locale: 'pt-BR'
-                });
+            // $(document).ready(function() { 
+
+            //     const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}', {
+            //         locale: 'pt-BR'
+            //     });
+
+            //     const bricksBuilder = mp.bricks();
+            //     const renderPaymentBrick = async (bricksBuilder) => {
+            //         const settings = {
+            //             initialization: {
+            //                 amount: 100, // valor total a ser pago
+            //                 locale: 'pt-BR'
+            //             },
+            //             customization: {
+            //                 //maxInstallments: 10,
+            //                 paymentMethods: {
+            //                     creditCard: 'all',
+            //                     ticket: ['bolbradesco'],
+            //                     bankTransfer: ['pix'],
+            //                 },
+            //                 visual: {
+            //                     hideFormTitle: true,
+            //                     style: {
+            //                         theme: 'bootstrap', // | 'dark' | 'bootstrap' | 'flat'
+            //                     }
+            //                 },
+            //             },
+            //             callbacks: {
+            //                 onFormUnmounted: () =>{
+            //                 },
+            //                 onReady: () => {
+            //                 },
+            //                 onSubmit: ({ selectedPaymentMethod, formData }) => {
+                            
+            //                     return new Promise((resolve, reject) => {
+            //                         fetch("{{route('conference.thanks', $event->slug)}}", {
+            //                             method: "POST",
+            //                             headers: {
+            //                                 "Content-Type": "application/json",
+            //                             },
+            //                             // "_token": "csrf_token()",
+            //                             body: JSON.stringify(formData) 
+            //                         })
+            //                         .then((response) => {
+            //                             console.log(response);
+            //                             resolve();
+            //                         })
+            //                         .catch((error) => {
+            //                             console.log(error);
+            //                             reject();
+            //                         })
+            //                     });
+            //                 },
+            //                 onError: (error) => {
+            //                     console.error(error);
+            //                 },
+            //             },
+            //         };
+            //         window.paymentBrickController = await bricksBuilder.create(
+            //             'payment',
+            //             'paymentBrick_container',
+            //             settings);
+            //     };
+            //     renderPaymentBrick(bricksBuilder);
+            // });
+
+            $(document).ready(function() {
+	
+                const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}');
 
                 const bricksBuilder = mp.bricks();
+
                 const renderPaymentBrick = async (bricksBuilder) => {
                     const settings = {
-                        initialization: {
-                            amount: 100, // valor total a ser pago
-                            locale: 'pt-BR'
+                    initialization: {
+                        amount: 100, // valor total a ser pago
+                    },
+                    customization: {
+                        paymentMethods: {
+                        creditCard: 'all',
+                        debitCard: 'all',
                         },
-                        customization: {
-                            //maxInstallments: 10,
-                            paymentMethods: {
-                                creditCard: 'all',
-                                ticket: ['bolbradesco'],
-                                bankTransfer: ['pix'],
-                            },
-                            visual: {
-                                hideFormTitle: true,
-                                style: {
-                                    theme: 'bootstrap', // | 'dark' | 'bootstrap' | 'flat'
-                                }
-                            },
-                        },
-                        callbacks: {
-                            onFormUnmounted: () =>{
-                                console.log('sds');
-                            },
+                    },
+                    callbacks: {
                             onReady: () => {
-                                /*
-                                Callback chamado quando o Brick estiver pronto.
-                                Aqui você pode ocultar loadings do seu site, por exemplo.
-                                */
-                            },
-                            onSubmit: ({ selectedPaymentMethod, formData }) => {
-                            // callback chamado ao clicar no botão de submissão dos dados
-                            
-                                return new Promise((resolve, reject) => {
-                                    fetch("{{route('conference.thanks', $event->slug)}}", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                        },
-                                        "_token": "csrf_token()",
-                                        body: JSON.stringify(formData) 
-                                    })
-                                    .then((response) => {
-                                        console.log(response);
-                                        resolve();
-                                    })
-                                    .catch((error) => {
-                                        console.log(error);
-                                        reject();
-                                    })
-                                });
+                            console.log('brick ready');
                             },
                             onError: (error) => {
-                                // callback chamado para todos os casos de erro do Brick
-                                console.error(error);
+                                alert(JSON.stringify(error))
                             },
+                            onSubmit: (cardFormData) => {
+                                fetch("{{route('conference.thanks', $event->slug)}}", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify(cardFormData),
+                                })
+                                .then(response => {
+                                    return response.json();
+                                })
+                                .catch(error => {
+                                    alert("Unexpected error\n"+JSON.stringify(error));
+                                });
+                            },   
                         },
                     };
-                    window.paymentBrickController = await bricksBuilder.create(
-                        'payment',
-                        'paymentBrick_container',
-                        settings);
+                    window.paymentBrickController = await bricksBuilder.create('payment', 'paymentBrick_container', settings);
                 };
                 renderPaymentBrick(bricksBuilder);
             });

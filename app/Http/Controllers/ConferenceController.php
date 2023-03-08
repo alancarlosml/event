@@ -386,28 +386,46 @@ class ConferenceController extends Controller
     public function thanks(Request $request)
     {
 
-        $input = $request->all();
+        // echo $request->getContent()->transaction_amount;
+        // dd($request->getContent()->transaction_amount);
+        // return $request;
+
+        $input = json_decode($request->getContent());
 
         MercadoPago\SDK::setAccessToken(env('MERCADO_PAGO_ACCESS_TOKEN', ''));
         
         try {
             $payment = new MercadoPago\Payment();
-            $payment->transaction_amount = (float)$_POST['transactionAmount'];
-            $payment->token = $_POST['token'];
-            $payment->description = $_POST['description'];
-            $payment->installments = (int)$_POST['installments'];
-            $payment->payment_method_id = $_POST['paymentMethodId'];
-            $payment->issuer_id = (int)$_POST['issuer'];
+            $payment->transaction_amount = (float)$input->formData->transaction_amount;
+            $payment->token = $input->formData->token;
+            // $payment->description = $input['description'];
+            $payment->installments = (int)$input->formData->installments;
+            $payment->payment_method_id = $input->formData->payment_method_id;
+            $payment->issuer_id = (int)$input->formData->issuer_id;
+            // $payment->notification_url = 'http://requestbin.fullcontact.com/1ogudgk1';
             
             $payer = new MercadoPago\Payer();
-            $payer->email = $_POST['email'];
+            $payer->email = $input->formData->payer->email;
             $payer->identification = array(
-                "type" => $_POST['identificationType'],
-                "number" => $_POST['identificationNumber']
+                "type" => $input->formData->payer->identification->type,
+                "number" => $input->formData->payer->identification->number
             );
             $payment->payer = $payer;
             
             $payment->save();
+
+            // if ($payment->save()){
+            //     // Sucesso
+            //     $responseArray = $payment->toArray();
+            //     echo json_encode($responseArray);
+            //     return json_encode($responseArray);
+            
+            // }else {
+            //     //Falha
+            //     $errorArray = (array) $payment->error;
+            //     echo json_encode($errorArray);
+            //     return json_encode($errorArray);
+            // }
 
             if($payment->id === null) {
                 $error_message = 'Unknown error cause';
@@ -428,7 +446,9 @@ class ConferenceController extends Controller
 
             // echo json_encode($response);
 
-            return $response;
+            // dd(json_encode($response));
+
+            return json_encode($response);
 
         } catch(Exception $exception) {
             
@@ -437,351 +457,5 @@ class ConferenceController extends Controller
             return $response;
         }
 
-        // $token = 'OQ2YC58HU5DSJMJUSDKNQAYR028QNCWT';
-        // $key = '9UUFJOFJPQRA3OZU36KL96CU5X9UXMBYRZYV446O';
-
-        // $moip = new Moip(new BasicAuth($token, $key), Moip::ENDPOINT_SANDBOX);
-
-        // $event = $request->session()->get('event');
-        // $coupon = $request->session()->get('coupon');
-        // $subtotal = $request->session()->get('subtotal');
-        // $coupon_subtotal = $request->session()->get('coupon_subtotal');
-        // $total = $request->session()->get('total');
-        // $dict_lotes = $request->session()->get('dict_lotes');
-        // $array_lotes_obj = $request->session()->get('array_lotes_obj');
-        // $event_date_result = $request->session()->get('event_date_result');
-
-        // $event_details = $event->name;
-
-        // $name_info = "";
-        // $email_info = "";
-        // $cpf_info = "";
-        // $date_born_info = "";
-        // $phone_info = "";
-        // $ddd = ""; 
-        // $number_phone = "";
-        // $address_info = "";
-        // $number_info = "";
-        // $district_info = "";
-        // $state_info = "";
-        // $city_info = "";
-        // $zip_info = "";
-
-        // if(isset($input['payment_form_check'])){
-
-        //     if($input['payment_form_check'] == 1){
-
-        //         $name_info = $input['cc_name_info'];
-        //         $email_info = $input['cc_email_info'];
-        //         $cpf_info = $input['cc_cpf_info'];
-        //         $date_born_info = $input['cc_date_info'];
-        //         $phone_info = $input['cc_phone_info'];
-        //         $address_info = $input['cc_address'];
-        //         $address2_info = $input['cc_address2'];
-        //         $number_info = $input['cc_number'];
-        //         $district_info = $input['cc_district'];
-        //         $state_info = $input['cc_state'];
-        //         $city_info = $input['cc_city'];
-        //         $zip_info = $input['cc_zip'];
-
-        //     }elseif($input['payment_form_check'] == 2){
-
-        //         $name_info = $input['boleto_name_info'];
-        //         $email_info = $input['boleto_email_info'];
-        //         $cpf_info = $input['boleto_cpf_info'];
-        //         $date_born_info = $input['boleto_date_info'];
-        //         $phone_info = $input['boleto_phone_info'];
-        //         $address_info = $input['boleto_address'];
-        //         $address2_info = $input['boleto_address2'];
-        //         $number_info = $input['boleto_number'];
-        //         $district_info = $input['boleto_district'];
-        //         $state_info = $input['boleto_state'];
-        //         $city_info = $input['boleto_city'];
-        //         $zip_info = $input['boleto_zip'];
-        //     }
-
-        //     if($cpf_info){
-        //         $cpf_info = str_replace('.', '', $cpf_info);
-        //         $cpf_info = str_replace('-', '', $cpf_info);
-        //     } else {
-        //         return back()->withErrors(['error' => 'Por favor, preencha o campo CPF']);
-        //     }
-
-        //     if($phone_info){
-        //         $phone_info = explode(' ', $phone_info);
-        //         $ddd = str_replace('(', '', $phone_info[0]);
-        //         $ddd = str_replace(')', '', $ddd);
-
-        //         $number_phone = str_replace('-', '', $phone_info[1]);
-        //     } else {
-        //         return back()->withErrors(['error' => 'Por favor, preencha o campo Telefone']);
-        //     }
-
-        // } else{
-        //     return back()->withErrors(['error' => 'Por favor, selecione o tipo do pagamento']);
-        // }
-
-        // try {
-
-        //     $customer = $moip->customers()->setOwnId(uniqid())
-        //         ->setFullname($name_info)
-        //         ->setEmail($email_info)
-        //         ->setBirthDate($date_born_info)
-        //         ->setTaxDocument($cpf_info)
-        //         ->setPhone($ddd, $number_phone)
-        //         ->addAddress('BILLING',
-        //                 $address_info, $number_info,
-        //                 $district_info, $city_info, $state_info,
-        //                 $zip_info, $address2_info)
-        //         ->create();
-
-                
-        //     $order = $moip->orders()->setOwnId(uniqid());
-            
-        //     foreach($array_lotes_obj as $array_obj){
-
-        //         $lote = Lote::where('id', $array_obj['id'])->first();
-
-        //         if($lote->tax_servico == 0){
-        //             $order->addItem($lote->name, 1, $lote->description, intval(($lote->value + $lote->value*0.1)*100));
-        //         }else{
-        //             $order->addItem($lote->name, 1, $lote->description, intval($lote->value*100));
-        //         }
-        //     }
-
-        //     $order->setShippingAmount(0)->setAddition(0)->setDiscount(intval($coupon_subtotal*100))
-        //         ->setCustomer($customer)
-        //         ->create();
-
-        //     if($input['payment_form_check'] == 1){
-
-        //         $mensagens = [
-        //             'cc_name_info.required' => 'O Nome é obrigatório!',
-        //             'cc_email_info.required' => 'O Email é obrigatório!',
-        //             'cc_cpf_info.required' => 'O CPF é obrigatório!',
-        //             'cc_date_info.required' => 'A Data de Nascimento é obrigatória!',
-        //             'cc_phone_info.required' => 'O Telefone é obrigatório!',
-        //             'cc_address.required' => 'O Endereço de cobrança é obrigatório!',
-        //             'cc_number.required' => 'O Número do Endereço é obrigatório!',
-        //             'cc_district.required' => 'O Bairro é obrigatório!',
-        //             'cc_state.required' => 'O Estado é obrigatório!',
-        //             'cc_city.required' => 'A Cidade é obrigatória!',
-        //             'cc_zip.required' => 'O CEP é obrigatório!',
-        //             'cc_name.required' => 'O Nome Impresso no Cartão é obrigatório!',
-        //             'payment_form_check.required' => 'O Tipo do Pagamento é obrigatório!'
-        //         ];
-
-        //         $request->validate([
-        //             'cc_name_info' => 'required',
-        //             'cc_email_info' => 'required',
-        //             'cc_cpf_info' => 'required',
-        //             'cc_date_info' => 'required',
-        //             'cc_phone_info' => 'required',
-        //             'cc_address' => 'required',
-        //             'cc_number' => 'required',
-        //             'cc_district' => 'required',
-        //             'cc_state' => 'required',
-        //             'cc_city' => 'required',
-        //             'cc_zip' => 'required',
-        //             'cc_name' => 'required',
-        //             'payment_form_check' => 'required'
-        //         ], $mensagens);
-
-        //         $payment_form = 'credit';
-        //         $hash_cc = $input['encrypted_value'];    
-                
-        //         $holder = $moip->holders()->setFullname($name_info)
-        //                 ->setBirthDate($date_born_info)
-        //                 ->setTaxDocument($cpf_info, 'CPF')
-        //                 ->setPhone($ddd, $number_phone, 55)
-        //                 ->setAddress('BILLING',
-        //                     $address_info, $number_info,
-        //                     $district_info, $city_info, $state_info,
-        //                     $zip_info, $address2_info);   
-
-        //         $payment = $order->payments()
-        //             ->setCreditCardHash($hash_cc, $holder)
-        //             ->setInstallmentCount(1)
-        //             ->setStatementDescriptor('Pagamento ingresso: ' . $event_details)
-        //             ->execute();
-    
-        //     }elseif($input['payment_form_check'] == 2) {
-
-        //         $mensagens = [
-        //             'boleto_name_info.required' => 'O Nome é obrigatório!',
-        //             'boleto_email_info.required' => 'O Email é obrigatório!',
-        //             'boleto_cpf_info.required' => 'O CPF é obrigatório!',
-        //             'boleto_date_info.required' => 'A Data de Nascimento é obrigatória!',
-        //             'boleto_phone_info.required' => 'O Telefone é obrigatório!',
-        //             'boleto_address.required' => 'O Endereço de cobrança é obrigatório!',
-        //             'boleto_number.required' => 'O Número do Endereço é obrigatório!',
-        //             'boleto_district.required' => 'O Bairro é obrigatório!',
-        //             'boleto_state.required' => 'O Estado é obrigatório!',
-        //             'boleto_city.required' => 'A Cidade é obrigatória!',
-        //             'boleto_zip.required' => 'O CEP é obrigatório!',
-        //         ];
-
-        //         $request->validate([
-        //             'boleto_name_info' => 'required',
-        //             'boleto_email_info' => 'required',
-        //             'boleto_cpf_info' => 'required',
-        //             'boleto_date_info' => 'required',
-        //             'boleto_phone_info' => 'required',
-        //             'boleto_address' => 'required',
-        //             'boleto_number' => 'required',
-        //             'boleto_district' => 'required',
-        //             'boleto_state' => 'required',
-        //             'boleto_city' => 'required',
-        //             'boleto_zip' => 'required',
-        //         ], $mensagens);
-
-        //         $payment_form = 'boleto';
-        //         $logo_uri = 'https://cdn.moip.com.br/wp-content/uploads/2016/05/02163352/logo-moip.png';
-        //         $expiration_date = (new \DateTime())->add(new \DateInterval('P3D'));
-        //         $instruction_lines = ['INSTRUÇÃO 1', 'INSTRUÇÃO 2', 'INSTRUÇÃO 3'];
-
-        //         dd($order);
-
-        //         // Creating payment to order
-        //         $payment = $order->payments()
-        //             ->setBoleto($expiration_date, $logo_uri, $instruction_lines)
-        //             ->execute();
-        //     }
-
-        //     $coupon_id = null;
-        //     if($coupon){
-        //         $coupon_id = $coupon->id;
-        //     }
-
-        //     $order_id = DB::table('orders')->insertGetId([
-        //         'hash' => md5((time() . $payment->getId()) . md5('papainoel')),
-        //         'quantity' => 1,
-        //         'date_used' => null,
-        //         'gatway_hash' => md5($payment->getId()),
-        //         'gatway_reference' => $payment->getId(),
-        //         'gatway_status' => $payment->getStatus(),
-        //         'gatway_payment_method' => $payment_form,
-        //         'event_date_id' => $event_date_result->id,
-        //         'participante_id' => Auth::user()->id,
-        //         'coupon_id' => $coupon_id,
-        //         'created_at' => now()
-        //     ]);
-
-        //     if($input['payment_form_check'] == 2){
-
-        //         $boleto_detail_id = DB::table('boleto_details')->insertGetId([
-        //             'value' => $payment->getAmount()->total,
-        //             'href' => $payment->getHrefBoleto(),
-        //             'line_code' => $payment->getLineCodeBoleto(),
-        //             'href_print' => $payment->getHrefPrintBoleto(),
-        //             'order_id' => $order_id,
-        //             'created_at' => now()
-        //         ]);
-        //     }
-
-        //     foreach($dict_lotes as $i => $dict){
-
-        //         $lote = Lote::where('hash', $dict['lote_hash'])->first();
-
-        //         $order_item_id = DB::table('order_items')->insertGetId([
-        //             'hash' => md5((time() + $i) . md5('papainoel')),
-        //             'number' => crc32((time() + $i) . md5('papainoel')),
-        //             'quantity' => 1,
-        //             'value' => $lote->value,
-        //             'order_id' => $order_id,
-        //             'lote_id' => $lote->id,
-        //             'created_at' => now()
-        //         ]);
-
-        //         foreach(array_keys($input) as $field){
-
-        //             if(str_contains($field, 'newfield_')){
-        //                 $id = explode("_", $field);
-        //                 $id = $id[2];
-
-        //                 $question = Question::where('id', $id)->first();
-
-        //                 if($input['newfield_'. $k+1 . '_'. $id] != ""){
-
-        //                     $option_answer_id = DB::table('option_answers')->insertGetId([
-        //                         'answer' => $input['newfield_'. $k+1 . '_'. $id],
-        //                         'question_id' => $question->id,
-        //                         'order_item_id' => $order_item_id,
-        //                         'created_at' => now()
-        //                     ]);
-        //                 }
-        //             }
-        //         }
-
-        //     }
-
-
-
-
-
-        //     // if($coupon){
-        //     //     $inscricao_coupom_id = DB::table('orders_coupons')->insertGetId([
-        //     //         'order_id' => $order_id,
-        //     //         'coupon_id' => $coupon->id
-        //     //     ]);
-        //     // }
-
-        //     // $array_participantes = [];
-        //     // foreach($dict_lotes as $i => $dict){
-
-        //     //     $lote = Lote::where('hash', $dict['lote_hash'])->first();
-
-        //     //     $participantes_lote_id = DB::table('participantes_lotes')->insertGetId([
-        //     //         'hash' => md5((time() + $i) . md5('papainoel')),
-        //     //         'number' => crc32((time() + $i) . md5('papainoel')),
-        //     //         'created_at' => now(),
-        //     //         'status' => 1,
-        //     //         'participante_id' => 1,
-        //     //         // 'participante_id' => Auth::user()->id,
-        //     //         'lote_id' => $lote->id
-        //     //     ]);
-
-        //     //     array_push($array_participantes, $participantes_lote_id);
-
-        //     //     $order_item_id = DB::table('order_items')->insertGetId([
-        //     //         'quantity' => 1,
-        //     //         'value' => $lote->value,
-        //     //         'order_id' => $order_id,
-        //     //         'participante_lote_id' => $participantes_lote_id,
-        //     //         'created_at' => now()
-        //     //     ]);
-        //     // }
-
-        //     // foreach($array_participantes as $k => $participante_id){
-
-        //     //     foreach(array_keys($input) as $field){
-
-        //     //         if(str_contains($field, 'newfield_')){
-        //     //             $id = explode("_", $field);
-        //     //             $id = $id[2];
-
-        //     //             $question = Question::where('id', $id)->first();
-
-        //     //             if($input['newfield_'. $k+1 . '_'. $id] != ""){
-
-        //     //                 $option_answer_id = DB::table('option_answers')->insertGetId([
-        //     //                     'answer' => $input['newfield_'. $k+1 . '_'. $id],
-        //     //                     'question_id' => $question->id,
-        //     //                     'participante_lote_id' => $participante_id,
-        //     //                     'order_id' => $order_id,
-        //     //                     'created_at' => now()
-        //     //                 ]);
-        //     //             }
-        //     //         }
-        //     //     }
-        //     // }
-
-        // } catch (\Moip\Exceptions\UnautorizedException $e) {
-        //     return back()->withErrors(['error' => 'Compra não autorizada.']);
-        // } catch (\Moip\Exceptions\ValidationException $e) {
-        //     return back()->withErrors(['error' => 'Compra não autorizada.']);
-        // } catch (\Moip\Exceptions\UnexpectedException $e) {
-        //     return back()->withErrors(['error' => 'Compra não autorizada.']);
-        // }
     }
 }

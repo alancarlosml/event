@@ -22,7 +22,7 @@
                             <div>
                         
                                 <div class="mb-4 text-lg text-gray-600">
-                                    {{ __('Obrigado por se cadastrar na Loja de Eventos! Antes de começar, você poderia verificar seu endereço de e-mail clicando no link que acabamos de enviar para você? Se você não recebeu o e-mail, teremos o prazer de lhe enviar outro.') }}
+                                    {{ __('Obrigado por se cadastrar na Ticket DZ6! Antes de começar, você poderia verificar seu endereço de e-mail clicando no link que acabamos de enviar para você? Se você não recebeu o e-mail, teremos o prazer de lhe enviar outro.') }}
                                 </div>
                         
                                 @if (session('status') == 'verification-link-sent')
