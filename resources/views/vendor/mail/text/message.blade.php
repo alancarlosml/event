@@ -8,8 +8,8 @@
             <tr>
                 <td class="logo" style="text-align: left;">
                     <h1>
-                        <a href="http://www.lojadeeventos.com.br" target="_blank">
-                            <img class="w-16" src="https://lojadeeventos.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
+                        <a href="http://www.ticketdz6.com.br" target="_blank">
+                            <img class="w-16" src="https://www.ticketdz6.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
                         </a>
                     </h1>
                 </td>
@@ -22,8 +22,8 @@
             <tr>
                 <td class="logo" style="text-align: left;">
                     <h1>
-                        <a href="http://www.lojadeeventos.com.br" target="_blank">
-                        <img class="w-16" src="https://lojadeeventos.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
+                        <a href="http://www.ticketdz6.com.br" target="_blank">
+                        <img class="w-16" src="https://www.ticketdz6.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
                         </a>
                     </h1>
                 </td>

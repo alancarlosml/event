@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -334,6 +335,8 @@ class ConferenceController extends Controller
             'created_at' => now()
         ]);
 
+        $request->session()->put('order_id', $order_id);
+
         foreach($dict_lotes as $i => $dict){
 
             $lote = Lote::where('hash', $dict['lote_hash'])->first();
@@ -379,82 +382,190 @@ class ConferenceController extends Controller
     public function paymentView(Request $request)
     {
         $event = $request->session()->get('event');
+        $total = $request->session()->get('total');
 
-        return view('conference.payment', compact('event'));
+        return view('conference.payment', compact('event', 'total'));
     }
 
     public function thanks(Request $request)
     {
 
-        // echo $request->getContent()->transaction_amount;
-        // dd($request->getContent()->transaction_amount);
+        // echo $request->getContent();
+        // dd($request->getContent());
         // return $request;
-
+        
         $input = json_decode($request->getContent());
+        // var_dump($input->formData->installments);
+        // dd($input->formData->installments);
+        // return $input;
 
         MercadoPago\SDK::setAccessToken(env('MERCADO_PAGO_ACCESS_TOKEN', ''));
+
+        $order_id = $request->session()->get('order_id');
+        $event = $request->session()->get('event');
+        $total = $request->session()->get('total');
+
+        $order = Order::findOrFail($order_id);
+
+        $first_name = Str::of(Auth::user()->name)->explode(' ')[0];
+        $tmp_explode = Str::of(Auth::user()->name)->explode(' ');
+        $last_name = end($tmp_explode);
         
         try {
-            $payment = new MercadoPago\Payment();
-            $payment->transaction_amount = (float)$input->formData->transaction_amount;
-            $payment->token = $input->formData->token;
-            // $payment->description = $input['description'];
-            $payment->installments = (int)$input->formData->installments;
-            $payment->payment_method_id = $input->formData->payment_method_id;
-            $payment->issuer_id = (int)$input->formData->issuer_id;
-            // $payment->notification_url = 'http://requestbin.fullcontact.com/1ogudgk1';
-            
-            $payer = new MercadoPago\Payer();
-            $payer->email = $input->formData->payer->email;
-            $payer->identification = array(
-                "type" => $input->formData->payer->identification->type,
-                "number" => $input->formData->payer->identification->number
-            );
-            $payment->payer = $payer;
-            
-            $payment->save();
 
-            // if ($payment->save()){
-            //     // Sucesso
-            //     $responseArray = $payment->toArray();
-            //     echo json_encode($responseArray);
-            //     return json_encode($responseArray);
-            
-            // }else {
-            //     //Falha
-            //     $errorArray = (array) $payment->error;
-            //     echo json_encode($errorArray);
-            //     return json_encode($errorArray);
-            // }
+            if($input->paymentType == 'credit_card') {
 
-            if($payment->id === null) {
-                $error_message = 'Unknown error cause';
-        
-                if($payment->error !== null) {
-                    $sdk_error_message = $payment->error->message;
-                    $error_message = $sdk_error_message !== null ? $sdk_error_message : $error_message;
+                $payment = new MercadoPago\Payment();
+                $payment->transaction_amount = (float)$total;
+                $payment->token = $input->formData->token;
+                $payment->description = "Ingresso Ticket DZ6: " . $event->name;
+                $payment->installments = (int)$input->formData->installments;
+                $payment->payment_method_id = $input->formData->payment_method_id;
+                $payment->issuer_id = (int)$input->formData->issuer_id;
+                // $payment->notification_url = 'http://requestbin.fullcontact.com/1ogudgk1';
+                
+                $payer = new MercadoPago\Payer();
+                $payer->email = $input->formData->payer->email;
+                $payer->first_name = $first_name;
+                $payer->last_name = $last_name;
+                $payer->identification = array(
+                    "type" => $input->formData->payer->identification->type,
+                    "number" => $input->formData->payer->identification->type
+                );
+
+                $payment->payer = $payer;
+            
+            } elseif($input->paymentType == 'bank_transfer'){
+
+                $payment = new MercadoPago\Payment();
+                $payment->transaction_amount = (float)$total;
+                $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
+                $payment->payment_method_id = $input->formData->payment_method_id;
+                $payment->payer = array(
+                    "email" => $input->payer->formData->email,
+                    "first_name" => $first_name,
+                    "last_name" => $last_name,
+                    "identification" => array(
+                        "type" => "CPF",
+                        "number" => Auth::user()->cpf
+                    ),
+                    // "address"=>  array(
+                    //     "zip_code" => "06233200",
+                    //     "street_name" => "Av. das Nações Unidas",
+                    //     "street_number" => "3003",
+                    //     "neighborhood" => "Bonfim",
+                    //     "city" => "Osasco",
+                    //     "federal_unit" => "SP"
+                    // )
+                );
+
+            } elseif($input->paymentType == 'ticket') {
+
+                $payment = new MercadoPago\Payment();
+                $payment->transaction_amount = (float)$total;
+                $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
+                $payment->payment_method_id = $input->formData->payment_method_id;
+                $payment->payer = array(
+                    "email" => $input->payer->formData->email,
+                    "first_name" => $first_name,
+                    "last_name" => $last_name,
+                    "identification" => array(
+                        "type" => "CPF",
+                        "number" => Auth::user()->cpf
+                    ),
+                    // "address"=>  array(
+                    //     "zip_code" => "06233200",
+                    //     "street_name" => "Av. das Nações Unidas",
+                    //     "street_number" => "3003",
+                    //     "neighborhood" => "Bonfim",
+                    //     "city" => "Osasco",
+                    //     "federal_unit" => "SP"
+                    // )
+                );
+            }
+            
+            if ($payment->save()){
+                // Sucesso
+
+                $responseArray = $payment->toArray();
+                $result = json_encode($responseArray);
+
+                $output = json_decode($result);
+
+                // var_dump($output->id);
+                // dd($output->id);
+
+                DB::table('orders')
+                    ->where('id', $order_id)
+                    ->update([
+                            'status' => 1, 
+                            'gatway_hash' => $output->id, 
+                            'gatway_status' => $output->status, 
+                            'gatway_payment_method' => $output->payment_type_id, 
+                            'gatway_date_status' => $output->date_approved
+                        ]);
+
+                if($input->paymentType == 'credit_card') {
+
+                    // SALVAR INFORMACOES DA TABELA CREDIT_CARD_DETAILS
+                    // MANDAR EMAIL COM COMPRA REALIZADA COM SUCESSO
+                    
+                } elseif($input->paymentType == 'bank_transfer') {
+
+                    // SALVAR INFORMACOES DA TABELA PIX_DETAILS
+                    // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DA CHAVE PIX
+                    
+                } elseif($input->paymentType == 'ticket') {
+                    
+                    // SALVAR INFORMACOES DA TABELA BOLETO_DETAILS
+                    // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DO BOLETO
+
                 }
-        
-                throw new Exception($error_message);
-            }   
-            
-            $response = array(
-                'status' => $payment->status,
-                'status_detail' => $payment->status_detail,
-                'id' => $payment->id
-            );
 
-            // echo json_encode($response);
+                return $output;
+              
+              }else {
+                //Falha
+                $errorArray = (array) $payment->error;
+                $result =  json_encode($errorArray);
 
-            // dd(json_encode($response));
+                $output = json_decode($result);
 
-            return json_encode($response);
+                // var_dump($output);
+                // dd($output);
+
+                date_default_timezone_set("America/Fortaleza");
+                $curr_date = date("Y-m-d H:i:s");
+
+                if($input->paymentType == 'credit_card') {
+
+                    DB::table('orders')
+                    ->where('id', $order_id)
+                    ->update([
+                            'status' => 3, 
+                            'gatway_status' => $output->status, 
+                            'gatway_payment_method' => 'credit_card', 
+                            'gatway_date_status' => $curr_date,
+                            'gatway_description' => $output->message
+                        ]);
+
+                    // MANDAR EMAIL COM COMPRA NÃO REALIZADA
+                    
+                } elseif($input->paymentType == 'bank_transfer') {
+
+                    // MANDAR EMAIL COM COMPRA NÃO REALIZADA
+                    
+                } elseif($input->paymentType == 'ticket') {
+
+                    // MANDAR EMAIL COM COMPRA NÃO REALIZADA
+                }
+                
+                return $result;
+              }
 
         } catch(Exception $exception) {
-            
-            $response = array('error_message' => $exception->getMessage());
-    
-            return $response;
+
+            return $exception;
         }
 
     }

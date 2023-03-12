@@ -58,7 +58,7 @@
                         <div class="form-group">
                             <label for="slug">URL do evento</label>
                             <p class="text-muted" style="font-size: 18px">
-                                http://www.lojadeeventos.com.br/<b>{{$event->slug}}</b>
+                                http://www.ticketdz6.com.br/<b>{{$event->slug}}</b>
                             </p>
                         </div>
                         <div class="form-group">

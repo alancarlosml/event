@@ -52,7 +52,7 @@
                                 <label for="slug">URL do evento*</label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                      <span class="input-group-text" id="basic-addon3">https://www.lojadeeventos.com.br/</span>
+                                      <span class="input-group-text" id="basic-addon3">https://www.ticketdz6.com.br/</span>
                                     </div>
                                     <input type="text" class="form-control col-lg-12 col-sm-12" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" value="{{ $event->slug ?? '' }}" required>
                                   </div>

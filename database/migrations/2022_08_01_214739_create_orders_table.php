@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('gatway_reference');  
             $table->string('gatway_status');  
             $table->string('gatway_payment_method');  
+            $table->string('gatway_description');  
+            $table->timestamp('gatway_date_status');  
             $table->integer('event_date_id')->index()->unsigned();
             $table->foreign('event_date_id')
                 ->references('id')

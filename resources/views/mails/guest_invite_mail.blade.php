@@ -40,7 +40,7 @@
                               </tbody>
                             </table>
                             <div style="text-align: center;">
-                              <img class="w-16" src="https://lojadeeventos.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
+                              <img class="w-16" src="https://www.ticketdz6.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
                             </div>
                             <table class="s-6 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
                               <tbody>
@@ -76,7 +76,7 @@
                                 <tbody>
                                   <tr>
                                     <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 192px; margin: 0;" align="center" bgcolor="#dc3545" width="192">
-                                      <a href="https://www.lojadeeventos.com.br/painel/meus-eventos" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Meus eventos</a>
+                                      <a href="https://www.ticketdz6.com.br/painel/meus-eventos" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Meus eventos</a>
                                     </td>
                                   </tr>
                                 </tbody>

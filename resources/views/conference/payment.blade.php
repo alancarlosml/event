@@ -18,7 +18,9 @@
                     <div class="row justify-content-center">
                         <div class="col-8">
                             <div class="mb-4 mt-5">
-                                <div id="paymentBrick_container"></div>
+                                <!-- <div id="paymentBrick_container"></div> -->
+                                <div id="cardPaymentBrick_container"></div>
+                                <div id="statusScreenBrick_container"></div>
                             </div>
                         </div>
                     </div>
@@ -162,48 +164,163 @@
 
             $(document).ready(function() {
 	
-                const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}');
+                // const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}');
+
+                // const bricksBuilder = mp.bricks();
+
+                // const renderPaymentBrick = async (bricksBuilder) => {
+                //     const settings = {
+                //     initialization: {
+                //         amount: 100, // valor total a ser pago
+                //     },
+                //     customization: {
+                //         paymentMethods: {
+                //         creditCard: 'all',
+                //         debitCard: 'all',
+                //         },
+                //     },
+                //     callbacks: {
+                //             onReady: () => {
+                //                 console.log('brick ready');
+                //             },
+                //             onError: (error) => {
+                //                 alert(JSON.stringify(error))
+                //             },
+                //             onSubmit: (cardFormData) => {
+                //                 return new Promise((resolve, reject) => {
+                //                     fetch("{{route('conference.thanks', $event->slug)}}", {
+                //                         method: "POST",
+                //                         headers: {
+                //                             "Content-Type": "application/json",
+                //                         },
+                //                         body: JSON.stringify(cardFormData),
+                //                     })
+                //                     .then(response => {
+                //                         console.log(response.json());
+                //                         return response.json();
+                //                         resolve();
+                //                     })
+                //                     .then(result => {
+                //                         if(!result.hasOwnProperty("error_message")) {
+                //                             alert('Segundo then');
+                //                         } else {
+                //                             alert(JSON.stringify({
+                //                                 status: result.status,
+                //                                 message: result.error_message
+                //                             }));
+                //                         }
+                //                     })
+                //                     .catch(error => {
+                //                         console.log("Unexpected error\n"+JSON.stringify(error));
+                //                         reject();
+                //                     });
+                //                 });
+                //             },   
+                //         },
+                //     };
+                //     window.paymentBrickController = await bricksBuilder.create('payment', 'paymentBrick_container', settings);
+                // };
+                // renderPaymentBrick(bricksBuilder);
+
+
+                const mp = new MercadoPago('{{env('MERCADO_PAGO_PUBLIC_KEY', '')}}', {
+                    locale: 'pt-BR'
+                });
 
                 const bricksBuilder = mp.bricks();
 
-                const renderPaymentBrick = async (bricksBuilder) => {
-                    const settings = {
+                // function hideForm(el) {
+                //   let display = document.getElementById(el).style.display;
+                //               if (display == "none")
+                //                 document.getElementById(el).style.display = 'block';
+                //               else
+                //                 document.getElementById(el).style.display = 'none';
+                // }
+
+                const renderCardPaymentBrick = async (bricksBuilder) => {
+                const settings = {
                     initialization: {
-                        amount: 100, // valor total a ser pago
+                        amount: {{$total}}, // valor total a ser pago
+                        locale: 'pt-BR'
                     },
                     customization: {
+                        //maxInstallments: 10,
                         paymentMethods: {
-                        creditCard: 'all',
-                        debitCard: 'all',
+                            creditCard: 'all',
+                            ticket: ['bolbradesco'],
+                            bankTransfer: ['pix'],
+                        },
+                        visual: {
+                            hideFormTitle: false,
+                            style: {
+                                theme: 'bootstrap', // | 'dark' | 'bootstrap' | 'flat'
+                            }
                         },
                     },
                     callbacks: {
-                            onReady: () => {
-                            console.log('brick ready');
-                            },
-                            onError: (error) => {
-                                alert(JSON.stringify(error))
-                            },
-                            onSubmit: (cardFormData) => {
+                        onReady: () => {
+                            /*
+                            Callback chamado quando o Brick estiver pronto.
+                            Aqui você pode ocultar loadings do seu site, por exemplo.
+                            */
+                        },
+                        onSubmit: (cardFormData) => {
+                            // callback chamado o usuário clicar no botão de submissão dos dados
+
+                            // ejemplo de envío de los datos recolectados por el Brick a su servidor
+                            return new Promise((resolve, reject) => {
                                 fetch("{{route('conference.thanks', $event->slug)}}", {
                                     method: "POST",
                                     headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify(cardFormData),
-                                })
-                                .then(response => {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify(cardFormData)
+                                }).then(response => {
+                                    document.getElementById('cardPaymentBrick_container').style.display = 'none';
                                     return response.json();
                                 })
-                                .catch(error => {
-                                    alert("Unexpected error\n"+JSON.stringify(error));
-                                });
-                            },   
+                                .then((result) => {
+                                const renderStausScreenBrick = async (bricksBuilder) => {
+                                    const settings = {
+                                        initialization: {
+                                            paymentId: result.id, // id de pagamento gerado pelo Mercado Pago
+                                        },
+                                        callbacks: {
+                                            onReady: () => {
+                                            // callback chamado quando o Brick estiver pronto
+                                            },
+                                            onError: (error) => {
+                                            // callback chamado para todos os casos de erro do Brick
+                                            },
+                                        },
+                                    };
+                                    window.statusBrickController = await bricksBuilder.create(
+                                    'statusScreen',
+                                    'statusScreenBrick_container',
+                                    settings
+                                    );
+                                };
+                                renderStausScreenBrick(bricksBuilder);
+                                    // receber o resultado do pagamento
+                                    resolve();
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                    reject();
+                                })
+                            });
                         },
-                    };
-                    window.paymentBrickController = await bricksBuilder.create('payment', 'paymentBrick_container', settings);
+                        onError: (error) => {
+                            // callback chamado para todos os casos de erro do Brick
+                            console.error(error);
+                        },
+                    },
                 };
-                renderPaymentBrick(bricksBuilder);
+                const cardPaymentBrickController = await bricksBuilder.create('payment', 'cardPaymentBrick_container', settings);
+                
+                };
+                renderCardPaymentBrick(bricksBuilder);
+
             });
 
 

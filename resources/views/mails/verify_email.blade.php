@@ -40,7 +40,7 @@
                               </tbody>
                             </table>
                             <div style="text-align: center;">
-                              <img class="w-16" src="https://lojadeeventos.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
+                              <img class="w-16" src="https://www.ticketdz6.com.br/assets/img/logo_principal.png" style="height: auto; line-height: 100%; outline: none; text-decoration: none; width: 256px; border-style: none; border-width: 0;" width="256">
                             </div>
                             <div class="space-y-4">
                               <h3 class="text-4xl fw-800" style="padding-top: 0; padding-bottom: 0; font-weight: 800 !important; vertical-align: baseline; font-size: 28px;margin: 0;" align="left">Olá!</h3>
