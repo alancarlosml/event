@@ -1290,7 +1290,7 @@ class EventAdminController extends Controller
             ->join('events', 'events.id', '=', 'lotes.event_id')
             // ->join('option_answers', 'option_answers.order_item_id', '=', 'order_items.id')
             ->where('events.hash', $hash)
-            ->select('order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
+            ->select('order_items.id', 'order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
             ->get();
         
         // $situacao_participantes = Participante::orderBy('participantes.name')

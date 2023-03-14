@@ -239,15 +239,15 @@
             }
 
             .ftco-section .btn.btn-primary {
-                background: #ea1d25 !important;
-                border: 1px solid #f75e63 !important;
+                background: #185ca4 !important;
+                border: 1px solid #4f9bd5 !important;
                 color: #fff !important; 
             }
 
             .ftco-section .btn.btn-primary:hover {
-                border: 1px solid #ea1d25;
-                background: #f75e63 !important;
-                /* color: #f75e63;  */
+                border: 1px solid #185ca4;
+                background: #4f9bd5 !important;
+                /* color: #4f9bd5;  */
             }
 
             .ftco-section .btn.btn-primary.btn-outline-primary {
