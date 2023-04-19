@@ -22,6 +22,11 @@
                                 <div id="cardPaymentBrick_container"></div>
                                 <div id="statusScreenBrick_container"></div>
                             </div>
+                            <div id="result_operation flex d-none">
+                                <p class="text-center">
+                                    Verifique a situação dos seus ingressos em <a href="{{route('event_home.my_registrations')}}" class="alert-link text-decoration-none">Minhas inscrições</a>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -299,6 +304,7 @@
                                     'statusScreenBrick_container',
                                     settings
                                     );
+                                    document.getElementById('result_operation').remove('d-none');
                                 };
                                 renderStausScreenBrick(bricksBuilder);
                                     // receber o resultado do pagamento

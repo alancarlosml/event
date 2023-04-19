@@ -395,8 +395,8 @@ class ConferenceController extends Controller
         // return $request;
         
         $input = json_decode($request->getContent());
-        // var_dump($input->formData->installments);
-        // dd($input->formData->installments);
+        // var_dump($input);
+        // dd($input);
         // return $input;
 
         MercadoPago\SDK::setAccessToken(env('MERCADO_PAGO_ACCESS_TOKEN', ''));
@@ -442,7 +442,7 @@ class ConferenceController extends Controller
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
                 $payment->payer = array(
-                    "email" => $input->payer->formData->email,
+                    "email" => $input->formData->payer->email,
                     "first_name" => $first_name,
                     "last_name" => $last_name,
                     "identification" => array(
@@ -459,28 +459,31 @@ class ConferenceController extends Controller
                     // )
                 );
 
-            } elseif($input->paymentType == 'ticket') {
+                // var_dump($payment);
+                // dd($payment);
+
+            } elseif($input->paymentType == 'ticket') { // Boleto
 
                 $payment = new MercadoPago\Payment();
-                $payment->transaction_amount = (float)$total;
+                $payment->transaction_amount = (float) $total;
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
                 $payment->payer = array(
-                    "email" => $input->payer->formData->email,
-                    "first_name" => $first_name,
-                    "last_name" => $last_name,
+                    "email" => $input->formData->payer->email,
+                    "first_name" => $input->formData->payer->first_name,
+                    "last_name" => $input->formData->payer->last_name,
                     "identification" => array(
-                        "type" => "CPF",
-                        "number" => Auth::user()->cpf
+                        "type" => $input->formData->payer->identification->type,
+                        "number" => $input->formData->payer->identification->number
                     ),
-                    // "address"=>  array(
-                    //     "zip_code" => "06233200",
-                    //     "street_name" => "Av. das Nações Unidas",
-                    //     "street_number" => "3003",
-                    //     "neighborhood" => "Bonfim",
-                    //     "city" => "Osasco",
-                    //     "federal_unit" => "SP"
-                    // )
+                    "address"=>  array(
+                        "zip_code" => $input->formData->payer->address->zip_code,
+                        "street_name" => $input->formData->payer->address->street_name,
+                        "street_number" => $input->formData->payer->address->street_number,
+                        "neighborhood" => $input->formData->payer->address->neighborhood,
+                        "city" => $input->formData->payer->address->city,
+                        "federal_unit" => $input->formData->payer->address->federal_unit,
+                    )
                 );
             }
             
@@ -492,8 +495,8 @@ class ConferenceController extends Controller
 
                 $output = json_decode($result);
 
-                // var_dump($output->id);
-                // dd($output->id);
+                // var_dump($output);
+                // dd($output);
 
                 DB::table('orders')
                     ->where('id', $order_id)
@@ -502,22 +505,55 @@ class ConferenceController extends Controller
                             'gatway_hash' => $output->id, 
                             'gatway_status' => $output->status, 
                             'gatway_payment_method' => $output->payment_type_id, 
-                            'gatway_date_status' => $output->date_approved
+                            'gatway_date_status' => $output->date_created
                         ]);
 
                 if($input->paymentType == 'credit_card') {
 
+                    $total_amount_tax = 0;
+
+                    $total_amount_tax = $total_amount_tax + ((float)$output->transaction_details->total_paid_amount - (float)$output->transaction_details->net_received_amount);
+
                     // SALVAR INFORMACOES DA TABELA CREDIT_CARD_DETAILS
+                    $credit_detail_id = DB::table('credit_details')->insertGetId([
+                        'token' => $output->token,
+                        'installments' => $output->installments,
+                        'value' => $output->transaction_details->total_paid_amount,
+                        'installment_amount' => $output->transaction_details->installment_amount,
+                        'total_paid_amount' => $output->transaction_details->total_paid_amount,
+                        'net_received_amount' => $output->transaction_details->net_received_amount,
+                        'total_amount_tax' => $total_amount_tax,
+                        'payment_method_id' => $output->payment_method_id,
+                        'order_id' => $order_id,
+                        'created_at' => now()
+                    ]);
                     // MANDAR EMAIL COM COMPRA REALIZADA COM SUCESSO
                     
                 } elseif($input->paymentType == 'bank_transfer') {
 
                     // SALVAR INFORMACOES DA TABELA PIX_DETAILS
+                    $pix_detail_id = DB::table('pix_details')->insertGetId([
+                        'value' => $output->transaction_details->total_paid_amount,
+                        'qr_code' => $output->point_of_interaction->transaction_data->qr_code,
+                        'qr_code_base64' => $output->point_of_interaction->transaction_data->qr_code_base64,
+                        'ticket_url' => $output->point_of_interaction->transaction_data->ticket_url,
+                        'expiration_date' => $output->date_of_expiration,
+                        'order_id' => $order_id,
+                        'created_at' => now()
+                    ]);
                     // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DA CHAVE PIX
                     
                 } elseif($input->paymentType == 'ticket') {
                     
                     // SALVAR INFORMACOES DA TABELA BOLETO_DETAILS
+                    $boleto_detail_id = DB::table('boleto_details')->insertGetId([
+                        'value' => $output->transaction_details->total_paid_amount,
+                        'href' => $output->transaction_details->external_resource_url,
+                        'line_code' => $output->barcode->content,
+                        'expiration_date' => $outut->date_of_expiration,
+                        'order_id' => $order_id,
+                        'created_at' => now()
+                    ]);
                     // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DO BOLETO
 
                 }

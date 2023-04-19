@@ -15,47 +15,53 @@
                         <div class="login-wrap p-4 p-md-5">
                             <div class="d-flex">
                                 <div class="w-100">
-                                    <h3 class="mb-4">Resete a sua senha</h3>
+                                    <h3 class="mb-4">Redefinir a sua senha</h3>
                                 </div>
                             </div>
 
-                            <x-auth-validation-errors class="mb-4" :errors="$errors" />
+                            <div>
 
-                            <form method="POST" action="{{ route('password.update') }}" id="form-submit">
-                                @csrf
+                                <x-auth-validation-errors class="mb-4" :errors="$errors" />
 
-                                <!-- Password Reset Token -->
-                                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+                                <div class="mt-4 d-flex items-center justify-between">
 
-                                <!-- Email Address -->
-                                <div>
-                                    <x-label for="email" :value="__('Email')" />
+                                    <form method="POST" action="{{ route('password.update') }}" id="form-submit" class="col-6">
+                                        @csrf
 
-                                    <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus />
+                                        <!-- Password Reset Token -->
+                                        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+                                        <!-- Email Address -->
+                                        <div>
+                                            <x-label for="email" :value="__('Email')" />
+
+                                            <x-input id="email" class="form-control" type="email" name="email" :value="old('email', $request->email)" required autofocus />
+                                        </div>
+
+                                        <!-- Password -->
+                                        <div class="mt-4">
+                                            <x-label for="password" :value="__('Senha')" />
+
+                                            <x-input id="password" class="form-control" type="password" name="password" required />
+                                        </div>
+
+                                        <!-- Confirm Password -->
+                                        <div class="mt-4">
+                                            <x-label for="password_confirmation" :value="__('Confirmar senha')" />
+
+                                            <x-input id="password_confirmation" class="form-control"
+                                                                type="password"
+                                                                name="password_confirmation" required />
+                                        </div>
+
+                                        <div class="flex items-center justify-end mt-4">
+                                            <x-button class="btn btn-primary" id="btn-submit">
+                                                {{ __('Redefinir senha') }}
+                                            </x-button>
+                                        </div>
+                                    </form>
                                 </div>
-
-                                <!-- Password -->
-                                <div class="mt-4">
-                                    <x-label for="password" :value="__('Password')" />
-
-                                    <x-input id="password" class="block mt-1 w-full" type="password" name="password" required />
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="mt-4">
-                                    <x-label for="password_confirmation" :value="__('Confirm Password')" />
-
-                                    <x-input id="password_confirmation" class="block mt-1 w-full"
-                                                        type="password"
-                                                        name="password_confirmation" required />
-                                </div>
-
-                                <div class="flex items-center justify-end mt-4">
-                                    <x-button id="btn-submit">
-                                        {{ __('Reset Password') }}
-                                    </x-button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>

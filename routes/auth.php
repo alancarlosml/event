@@ -26,7 +26,7 @@ Route::middleware('guest')->group(function () {
     
     Route::get('painel/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     
-    Route::post('painel/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::post('painel/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware(['guest'])->name('password.email');
     
     Route::get('painel/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     
