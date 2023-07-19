@@ -171,6 +171,7 @@
                                                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                             </div>
                                         </div>
+                                        <input type="hidden" name="date_id[]" value="">
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label for="number">Hora início</label>
@@ -208,15 +209,14 @@
                                 <div class="form-group col-md-10">
                                     <label for="place_name">Local*</label>
                                     <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{ $event->place->name ?? '' }}" required>
-                                    <small id="place_nameHelp" class="form-text text-muted">Busque pelo local do evento, caso não o encontre, clique no botão a seguir para cadastrar um novo local.</small>
+                                    <small id="place_nameHelp" class="form-text text-muted">Comece a digitar para buscar o local do evento, caso não o encontre, preencha os campos deste formulário.</small>
                                 </div>
                                 <div class="form-group col-md-2">
-                                    <label for="place_name">Não encontrou o local?</label><br>
-                                    <a class="btn btn-success btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_place">
-                                        <i class="fa-solid fa-plus"></i>
-                                        Adicionar
+                                    <label for="place_name">&nbsp;</label><br>
+                                    <a class="btn btn-warning btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_place">
+                                        Limpar campos
                                     </a>
-                                </div> 
+                                </div>  
                             </div>
                             <div id="event_address">
                                 <div class="form-row">

@@ -128,7 +128,7 @@
                     var uf = this.value;
                     $("#city").html('');
                     $.ajax({
-                        url:"{{url('places/get-cities-by-state')}}",
+                        url:"{{url('admin/places/get-cities-by-state')}}",
                         type: "POST",
                         data: {
                             uf: uf,

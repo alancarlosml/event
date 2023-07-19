@@ -72,7 +72,7 @@
                                   </tr>
                                 </tbody>
                               </table>
-							  @id($acao == 'salvo')
+							  @if($acao == 'salvo')
 							  <p style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left"><b>Atenção! Seu evento foi criado mas ainda não está publicado. Caso deseje publicar seu evento, acesse <a href="https://www.ticketdz6.com.br/painel/meus-eventos">seus eventos</a> e faça a publicação.</b></p>
 							  @endif
 
@@ -112,7 +112,7 @@
                                     <table class="p-2 w-full" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin-top: 20px" width="100%">
                                       <tbody>
                                         <tr>
-                                          <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="left" width="100%"><b>Local: </b> {{ $event->place->name}}, {{ $event->place->get_city()->name}}-{{ $event->place->get_city()->uf}}</span></td>
+                                          <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="left" width="100%"><b>Local: </b> @if($event->place){{ $event->place->name}}, {{ $event->place->get_city()->name}}-{{ $event->place->get_city()->uf}} @else Não definido @endif</span></td>
                                         </tr>
                                         <tr>
                                           <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="left" width="100%"><b>Data: </b>@if($event->min_event_dates() != $event->max_event_dates()) De {{\Carbon\Carbon::parse($event->min_event_dates())->format('d/m')}} a {{\Carbon\Carbon::parse($event->max_event_dates())->format('d/m')}}@else{{\Carbon\Carbon::parse($event->min_event_dates())->format('d/m')}}@endif, {{\Carbon\Carbon::parse($event->min_event_time())->format('H:i')}}h</td>

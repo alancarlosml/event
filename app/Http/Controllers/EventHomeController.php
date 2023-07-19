@@ -118,6 +118,8 @@ class EventHomeController extends Controller
         // dd($request->session()->get('event'));
         
         // try {
+
+        dd(empty($request->session()->get('event')));
         if(empty($request->session()->get('event'))){
             
             $validatedDataEvent = $request->validate([
@@ -138,17 +140,25 @@ class EventHomeController extends Controller
             // $validatedDataEvent['owner_id'] = $owner->id;
             
             $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('papainoel'));
+
+            dd('aaqui');
             
             $event = new Event();
             $event->fill($validatedDataEvent);
             $event->save();
             $event_id = $event->id;
-            $event->participantes()->attach([
+            DB::table('participantes_events')->insert([
                 'event_id' => $event_id, 
                 'participante_id' => $validatedDataEvent['admin_id'], 
                 'role' => 'admin', 
-                'created_at' => date('Y-m-d H:i:s')]
-            );
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+            // $event->participantes()->attach([
+            //     'event_id' => $event_id, 
+            //     'participante_id' => $validatedDataEvent['admin_id'], 
+            //     'role' => 'admin', 
+            //     'created_at' => date('Y-m-d H:i:s')]
+            // );
             $request->session()->put('event', $event);
             $request->session()->put('event_id', $event_id);
         }else{
@@ -629,9 +639,9 @@ class EventHomeController extends Controller
     public function autocomplete_place(Request $request)
     {
         $data = Place::join('cities', 'cities.id', '=', 'places.city_id')
-                    ->join('states', 'states.uf', '=', 'cities.uf')
+                    ->join('states', 'states.id', '=', 'cities.uf')
                     ->where('places.name', 'LIKE', '%'. $request->get('search'). '%')
-                    ->select("places.name as value", "places.id", "places.address", "places.number", "places.complement", "places.district", "places.zip", "places.city_id", "states.uf")
+                    ->select("places.name as value", "places.id", "places.address", "places.number", "places.complement", "places.district", "places.zip", "places.city_id", "states.id as uf")
                     ->get();
     
         return response()->json($data);

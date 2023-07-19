@@ -326,7 +326,7 @@ class EventController extends Controller
     public function autocomplete_place(Request $request)
     {
         $data = Place::join('cities', 'cities.id', '=', 'places.city_id')
-                    ->join('states', 'states.uf', '=', 'cities.uf')
+                    ->join('states', 'states.id', '=', 'cities.uf')
                     ->where('places.name', 'LIKE', '%'. $request->get('search'). '%')
                     ->select("places.name as value", "places.id", "places.address", "places.number", "places.complement", "places.district", "places.zip", "places.city_id", "states.uf")
                     ->get();

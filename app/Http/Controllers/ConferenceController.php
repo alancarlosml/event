@@ -550,7 +550,7 @@ class ConferenceController extends Controller
                         'value' => $output->transaction_details->total_paid_amount,
                         'href' => $output->transaction_details->external_resource_url,
                         'line_code' => $output->barcode->content,
-                        'expiration_date' => $outut->date_of_expiration,
+                        'expiration_date' => $output->date_of_expiration,
                         'order_id' => $order_id,
                         'created_at' => now()
                     ]);
