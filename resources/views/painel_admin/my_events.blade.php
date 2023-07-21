@@ -107,6 +107,10 @@
                                                             <i class="fa-solid fa-envelope"></i>
                                                             Contatos
                                                         </a>
+                                                        <a class="dropdown-item" href="{{route('event_home.event_clone', $event->hash)}}">
+                                                            <i class="fa-solid fa-copy"></i>
+                                                            Duplicar
+                                                        </a>
                                                         <a class="dropdown-item" href="{{route('event_home.my_events_edit', $event->hash)}}">
                                                             <i class="fas fa-pencil-alt"></i>
                                                             Editar

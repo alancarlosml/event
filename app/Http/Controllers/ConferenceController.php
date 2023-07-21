@@ -52,6 +52,8 @@ class ConferenceController extends Controller
         $request->session()->forget('dict_lotes');
         $request->session()->forget('event_date_result');
 
+
+        
         if($event)
         {
             $total_dates = count($event->event_dates);
@@ -63,7 +65,7 @@ class ConferenceController extends Controller
             // $total = $request->session()->get('total');
 
             // return view('site.event', compact('event', 'coupon', 'subtotal', 'coupon_subtotal', 'total'));
-            return view('site.event', compact('event', 'total_dates', 'date_min'));
+            return view('site.event', compact('event', 'slug', 'total_dates', 'date_min'));
         
         }else{
 

@@ -490,7 +490,7 @@ class EventController extends Controller
                     ->join('events', 'events.id', '=', 'lotes.event_id')
                     // ->join('option_answers', 'option_answers.order_item_id', '=', 'order_items.id')
                     ->where('events.id', $id)
-                    ->select('order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
+                    ->select('order_items.id as id', 'order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
                     ->get();
 
         // dd($situacao_participantes_lotes);
@@ -515,6 +515,8 @@ class EventController extends Controller
                     ->select('coupons.id', 'coupons.code','coupons.limit_buy', 'coupons.discount_type', 'coupons.discount_value',
                     DB::raw("COUNT(CASE WHEN orders.status = 1 THEN 1 END) AS confirmado"),
                     DB::raw("COUNT(CASE WHEN orders.status = 2 THEN 1 END) AS pendente"))
+                    ->groupBy('coupons.id', 'coupons.code','coupons.limit_buy', 'coupons.discount_type', 'coupons.discount_value')
+                    ->havingRaw('confirmado > 0 OR pendente > 0')
                     ->get();
 
         // dd($payment_methods);

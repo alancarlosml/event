@@ -97,6 +97,36 @@ class EventAdminController extends Controller
         return view('painel_admin.my_events', compact('events'));
     }
 
+    public function eventClone(Request $request, $hash){
+
+        $event = Event::where('hash', $hash)->first();
+
+        $newEvent = $event->replicate()->fill([
+            'name' => $event->name . ' - CÓPIA (' . date("Y-m-d H:i:s")  . ')',
+            'slug' => Str::slug($event->name . ' - CÓPIA (' . date("Y-m-d H:i:s")  . ')', '-'),
+            'hash' => md5($event->name . $event->description . date("Y-m-d H:i:s") . md5('evento_duplicado')),
+            'status' => 0
+        ]);
+
+        $newEvent->save();
+
+        DB::table('participantes_events')->insert([
+            'hash' => md5(Auth::user()->name . date("Y-m-d H:i:s") . md5('evento_duplicado')),
+            'role' => 'admin',
+            'status' => 1,
+            'created_at' => date("Y-m-d H:i:s"),
+            'participante_id' => Auth::user()->id,
+            'event_id' => $newEvent->id,
+        ]);
+
+        $request->session()->put('event', $newEvent);
+
+        //ENVIAR EMAIL - EVENTO CRIADO
+        Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
+
+        return redirect()->route('event_home.my_events_edit', $newEvent->hash);
+    }
+
     public function myEventsShow($hash){
                 
         $event = Event::where('hash', $hash)->first();
@@ -934,27 +964,28 @@ class EventAdminController extends Controller
         $input = $request->all();
 
         $config = Configuration::findOrFail(1);
-
+        
         $taxa_juros = $config->tax;
 
         if($input['type'] == 0){
             $validatedData = $this->validate($request, [
+                'event_id' => 'nullable',
                 'type' => 'required|integer',
                 'tax_parcelamento' => 'required|integer',
                 'tax_service' => 'required|integer',
                 'value' => 'required',
-                'tax' => 'nullable',
-                'final_value' => 'nullable',
-                'form_pagamento' => 'required',
                 'name' => 'required',
                 'quantity' => 'required',
                 'description' => 'required',
                 'limit_min' => 'required|min:1',
-                'limit_max' => 'required|gt:limit_min',
+                'limit_max' => 'required|gte:limit_min',
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
+
+                // 'tax' => 'nullable',
+                // 'final_value' => 'nullable',
+                'form_pagamento' => 'nullable',
                 'visibility' => 'required',
-                'event_id' => 'nullable'
             ]);
         } else {
             $validatedData = $this->validate($request, [
@@ -964,12 +995,14 @@ class EventAdminController extends Controller
                 'quantity' => 'required',
                 'visibility' => 'required',
                 'limit_min' => 'required|min:1',
-                'limit_max' => 'required|min:1',
+                'limit_max' => 'required|gte:limit_min',
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
                 'event_id' => 'nullable'
             ]);
         }
+
+        // dd($validatedData);
 
         $event_id = $request->session()->get('event_id');
         $number_lotes = Lote::where("event_id", $event_id)->count();
@@ -1677,7 +1710,7 @@ class EventAdminController extends Controller
             ->join('events', 'events.id', '=', 'lotes.event_id')
             // ->join('option_answers', 'option_answers.order_item_id', '=', 'order_items.id')
             ->where('events.hash', $hash)
-            ->select('order_items.id', 'order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
+            ->select('order_items.id as id', 'order_items.number', 'order_items.status as status_item', 'lotes.name as lote_name')
             ->get();
         
         // $situacao_participantes = Participante::orderBy('participantes.name')
@@ -1714,6 +1747,8 @@ class EventAdminController extends Controller
                     ->select('coupons.id', 'coupons.code','coupons.limit_buy', 'coupons.discount_type', 'coupons.discount_value',
                     DB::raw("COUNT(CASE WHEN orders.status = 1 THEN 1 END) AS confirmado"),
                     DB::raw("COUNT(CASE WHEN orders.status = 2 THEN 1 END) AS pendente"))
+                    ->groupBy('coupons.id', 'coupons.code','coupons.limit_buy', 'coupons.discount_type', 'coupons.discount_value')
+                    ->havingRaw('confirmado > 0 OR pendente > 0')
                     ->get();
 
         // dd($payment_methods);

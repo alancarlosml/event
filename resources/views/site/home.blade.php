@@ -1,16 +1,16 @@
 <x-site-layout>
     <section id="hero" class="hero owl-carousel">
         <div class="hero_img">
-            <img src="{{ asset('site/home1.jpg')}}" alt=""> 
+            <img src="{{ asset('site/home1.jpg') }}" alt="">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home2.jpg')}}" alt="">
+            <img src="{{ asset('site/home2.jpg') }}" alt="">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home3.jpg')}}" alt="">
+            <img src="{{ asset('site/home3.jpg') }}" alt="">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home4.jpg')}}" alt="">
+            <img src="{{ asset('site/home4.jpg') }}" alt="">
         </div>
     </section><!-- End Hero -->
 
@@ -18,30 +18,36 @@
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
                 <h1 data-aos="fade-up">Agora ficou muito mais fácil organizar seus próprios eventos!</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400">Crie seu própio evento e comece a lucrar com ele agora mesmo.</h2>
+                <h2 data-aos="fade-up" data-aos-delay="400">Crie seu própio evento e comece a lucrar com ele agora
+                    mesmo.</h2>
                 <div>
                     <div class="text-center text-lg-start">
-                    <a href="@if(!Auth::user()) {{route('register')}} @else {{route('event_home.create_event_link')}} @endif" class="btn-get-started d-inline-flex align-items-center justify-content-center align-self-center">
-                        <span>Começar agora!</span>
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
+                        <a href="@if (!Auth::user()) {{ route('register') }} @else {{ route('event_home.create_event_link') }} @endif"
+                           class="btn-get-started d-inline-flex align-items-center justify-content-center align-self-center">
+                            <span>Começar agora!</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 hero-img">
-                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/XOTq6z3QdX8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/XOTq6z3QdX8"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
             </div>
         </div>
     </div>
-    
+
     <main id="main">
         <!-- ======= Values Section ======= -->
         <section id="values" class="values">
 
             <div class="container" data-aos="fade-up">
                 <header class="section-header">
-                        <p>Comece a vender em 5 minutos!</p>
-                        <h2 class="mt-3">Uma plataforma de eventos para te ajudar a não perder tempo e focar no que importa</h2>
+                    <p>Comece a vender em 5 minutos!</p>
+                    <h2 class="mt-3">Uma plataforma de eventos para te ajudar a não perder tempo e focar no que
+                        importa</h2>
                 </header>
                 <div class="row justify-content-center" id="start_event">
                     <div class="col-lg-2" data-aos="fade-up" data-aos-delay="200">
@@ -50,14 +56,14 @@
                             <h5>Faça seu cadastro</h5>
                         </div>
                     </div>
-        
+
                     <div class="col-lg-2 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="400">
                         <div class="box">
                             <i class="fa-solid fa-calendar-check"></i>
                             <h5>Crie seu evento</h5>
                         </div>
                     </div>
-        
+
                     <div class="col-lg-2 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="600">
                         <div class="box">
                             <i class="fa-solid fa-users-gear"></i>
@@ -68,10 +74,10 @@
                     <div class="col-lg-2" data-aos="fade-up" data-aos-delay="200">
                         <div class="box">
                             <i class="fa-solid fa-bullhorn"></i>
-                        <h5>Publique seu evento</h5>
+                            <h5>Publique seu evento</h5>
                         </div>
                     </div>
-            
+
                     <div class="col-lg-2 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="400">
                         <div class="box">
                             <i class="fa-solid fa-dollar-sign"></i>
@@ -84,7 +90,7 @@
 
         <!-- ======= Features Section ======= -->
         <section id="features" class="features">
-    
+
             {{-- <div class="container" data-aos="fade-up">
         
                 <header class="section-header">
@@ -219,56 +225,64 @@
                 </div>
         
                 </div><!-- End Feature Tabs --> --}}
-        
-                <!-- Feature Icons -->
-                <div class="row feature-icons" data-aos="fade-up">
-                    <header class="section-header">
-                        <p>Características</p>
-                    </header>
 
-                    <div class="row">
-                        <div class="col-xl-4 text-center" data-aos="fade-right" data-aos-delay="100">
-                            <img src="assets/img/features-3.png" class="img-fluid p-4" alt="">
-                        </div>
-                        <div class="col-xl-8 d-flex content">
-                            <div class="row align-self-center gy-4">
-                
-                                <div class="col-md-6 icon-box" data-aos="fade-up">
-                                    <i class="ri-line-chart-line"></i>
-                                    <div>
-                                        <h4>Site do evento</h4>
-                                        <p>Crie um site completo para seu evento em poucos minutos e de forma fácil. Basta preencher as informações, escolher o layout e publicar. Pronto! Site no ar e inscrições disponíveis para venda.</p>
-                                    </div>
+            <!-- Feature Icons -->
+            <div class="row feature-icons" data-aos="fade-up">
+                <header class="section-header">
+                    <p>Características</p>
+                </header>
+
+                <div class="row">
+                    <div class="col-xl-4 text-center" data-aos="fade-right" data-aos-delay="100">
+                        <img src="assets/img/features-3.png" class="img-fluid p-4" alt="">
+                    </div>
+                    <div class="col-xl-8 d-flex content">
+                        <div class="row align-self-center gy-4">
+
+                            <div class="col-md-6 icon-box" data-aos="fade-up">
+                                <i class="ri-line-chart-line"></i>
+                                <div>
+                                    <h4>Site do evento</h4>
+                                    <p>Crie um site completo para seu evento em poucos minutos e de forma fácil. Basta
+                                        preencher as informações, escolher o layout e publicar. Pronto! Site no ar e
+                                        inscrições disponíveis para venda.</p>
                                 </div>
-                
-                                <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="100">
-                                    <i class="ri-stack-line"></i>
-                                    <div>
-                                        <h4>Inscrições</h4>
-                                        <p>Venda inscrições online através de cartão de crédito (em até 12x), boleto e até mesmo empenho. Você ainda pode receber pagamentos internacionais. E o melhor: receba o dinheiro em 2 dias*!</p>
-                                    </div>
+                            </div>
+
+                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="100">
+                                <i class="ri-stack-line"></i>
+                                <div>
+                                    <h4>Inscrições</h4>
+                                    <p>Venda inscrições online através de cartão de crédito (em até 12x), boleto e até
+                                        mesmo empenho. Você ainda pode receber pagamentos internacionais. E o melhor:
+                                        receba o dinheiro em 2 dias*!</p>
                                 </div>
-                
-                                <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="200">
-                                    <i class="ri-brush-4-line"></i>
-                                    <div>
-                                        <h4>Credenciamento</h4>
-                                        <p>Todas as ferramentas de secretaria à sua disposição. Gere etiquetas para crachás, faça o check-in de participantes e controle a entrada e saída deles. Aproveite o app Doity Check-in e acelere o credenciamento!</p>
-                                    </div>
+                            </div>
+
+                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="200">
+                                <i class="ri-brush-4-line"></i>
+                                <div>
+                                    <h4>Credenciamento</h4>
+                                    <p>Todas as ferramentas de secretaria à sua disposição. Gere etiquetas para crachás,
+                                        faça o check-in de participantes e controle a entrada e saída deles. Aproveite o
+                                        app Doity Check-in e acelere o credenciamento!</p>
                                 </div>
-                
-                                <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="300">
-                                    <i class="ri-magic-line"></i>
-                                    <div>
-                                        <h4>Certificados</h4>
-                                        <p>Emita certificados online para participantes, palestrantes, autores, apresentadores, avaliadores e organizadores do evento. Personalize e envie por email com um simples clique!
-                                        </p>
-                                    </div>
+                            </div>
+
+                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="300">
+                                <i class="ri-magic-line"></i>
+                                <div>
+                                    <h4>Certificados</h4>
+                                    <p>Emita certificados online para participantes, palestrantes, autores,
+                                        apresentadores, avaliadores e organizadores do evento. Personalize e envie por
+                                        email com um simples clique!
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div><!-- End Feature Icons -->
+                </div>
+            </div><!-- End Feature Icons -->
             </div>
         </section><!-- End Features Section -->
 
@@ -282,7 +296,7 @@
                     @foreach ($categories as $category)
                         <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
                             <div class="service-box">
-                                <h3><a href="/{{$category->slug}}">{{$category->description}}</a></h3>
+                                <h3><a href="/{{ $category->slug }}">{{ $category->description }}</a></h3>
                             </div>
                         </div>
                     @endforeach
@@ -338,7 +352,7 @@
                 </div>
             </div>
         </section><!-- End Counts Section --> --}}
-    
+
         <!-- ======= Pricing Section ======= -->
         {{-- <section id="planos" class="pricing" style="background: #4154f1;">
             <div class="container" data-aos="fade-up">
@@ -374,100 +388,130 @@
                 </div>
             </div>
         </section><!-- End Pricing Section --> --}}
-    
+
         <!-- ======= F.A.Q Section ======= -->
         <section id="faq" class="faq">
-    
+
             <div class="container" data-aos="fade-up">
-    
+
                 <header class="section-header">
                     <p>Perguntas frequentes</p>
                 </header>
-        
+
                 <div class="row">
                     <div class="col-lg-6">
                         <!-- F.A.Q List 1-->
                         <div class="accordion accordion-flush" id="faqlist1">
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-1">
-                                    Non consectetur a erat nam at lectus urna duis?
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#faq-content-1">
+                                        Non consectetur a erat nam at lectus urna duis?
                                     </button>
                                 </h2>
-                                <div id="faq-content-1" class="accordion-collapse collapse" data-bs-parent="#faqlist1">
+                                <div id="faq-content-1" class="accordion-collapse collapse"
+                                     data-bs-parent="#faqlist1">
                                     <div class="accordion-body">
-                                    Feugiat pretium nibh ipsum consequat. Tempus iaculis urna id volutpat lacus laoreet non curabitur gravida. Venenatis lectus magna fringilla urna porttitor rhoncus dolor purus non.
+                                        Feugiat pretium nibh ipsum consequat. Tempus iaculis urna id volutpat lacus
+                                        laoreet non curabitur gravida. Venenatis lectus magna fringilla urna porttitor
+                                        rhoncus dolor purus non.
                                     </div>
                                 </div>
                             </div>
-            
+
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-2">
-                                    Feugiat scelerisque varius morbi enim nunc faucibus a pellentesque?
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#faq-content-2">
+                                        Feugiat scelerisque varius morbi enim nunc faucibus a pellentesque?
                                     </button>
                                 </h2>
-                                <div id="faq-content-2" class="accordion-collapse collapse" data-bs-parent="#faqlist1">
+                                <div id="faq-content-2" class="accordion-collapse collapse"
+                                     data-bs-parent="#faqlist1">
                                     <div class="accordion-body">
-                                    Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi. Id interdum velit laoreet id donec ultrices. Fringilla phasellus faucibus scelerisque eleifend donec pretium. Est pellentesque elit ullamcorper dignissim. Mauris ultrices eros in cursus turpis massa tincidunt dui.
+                                        Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi. Id
+                                        interdum velit laoreet id donec ultrices. Fringilla phasellus faucibus
+                                        scelerisque eleifend donec pretium. Est pellentesque elit ullamcorper dignissim.
+                                        Mauris ultrices eros in cursus turpis massa tincidunt dui.
                                     </div>
                                 </div>
                             </div>
-            
+
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-3">
-                                    Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi?
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#faq-content-3">
+                                        Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi?
                                     </button>
                                 </h2>
-                                <div id="faq-content-3" class="accordion-collapse collapse" data-bs-parent="#faqlist1">
+                                <div id="faq-content-3" class="accordion-collapse collapse"
+                                     data-bs-parent="#faqlist1">
                                     <div class="accordion-body">
-                                    Eleifend mi in nulla posuere sollicitudin aliquam ultrices sagittis orci. Faucibus pulvinar elementum integer enim. Sem nulla pharetra diam sit amet nisl suscipit. Rutrum tellus pellentesque eu tincidunt. Lectus urna duis convallis convallis tellus. Urna molestie at elementum eu facilisis sed odio morbi quis
+                                        Eleifend mi in nulla posuere sollicitudin aliquam ultrices sagittis orci.
+                                        Faucibus pulvinar elementum integer enim. Sem nulla pharetra diam sit amet nisl
+                                        suscipit. Rutrum tellus pellentesque eu tincidunt. Lectus urna duis convallis
+                                        convallis tellus. Urna molestie at elementum eu facilisis sed odio morbi quis
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-        
+
                     <div class="col-lg-6">
-                    <!-- F.A.Q List 2-->
+                        <!-- F.A.Q List 2-->
                         <div class="accordion accordion-flush" id="faqlist2">
-            
+
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-content-1">
-                                    Ac odio tempor orci dapibus. Aliquam eleifend mi in nulla?
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#faq2-content-1">
+                                        Ac odio tempor orci dapibus. Aliquam eleifend mi in nulla?
                                     </button>
                                 </h2>
-                                <div id="faq2-content-1" class="accordion-collapse collapse" data-bs-parent="#faqlist2">
+                                <div id="faq2-content-1" class="accordion-collapse collapse"
+                                     data-bs-parent="#faqlist2">
                                     <div class="accordion-body">
-                                    Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi. Id interdum velit laoreet id donec ultrices. Fringilla phasellus faucibus scelerisque eleifend donec pretium. Est pellentesque elit ullamcorper dignissim. Mauris ultrices eros in cursus turpis massa tincidunt dui.
+                                        Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi. Id
+                                        interdum velit laoreet id donec ultrices. Fringilla phasellus faucibus
+                                        scelerisque eleifend donec pretium. Est pellentesque elit ullamcorper dignissim.
+                                        Mauris ultrices eros in cursus turpis massa tincidunt dui.
                                     </div>
                                 </div>
                             </div>
-            
+
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-content-2">
-                                    Tempus quam pellentesque nec nam aliquam sem et tortor consequat?
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#faq2-content-2">
+                                        Tempus quam pellentesque nec nam aliquam sem et tortor consequat?
                                     </button>
                                 </h2>
-                                <div id="faq2-content-2" class="accordion-collapse collapse" data-bs-parent="#faqlist2">
+                                <div id="faq2-content-2" class="accordion-collapse collapse"
+                                     data-bs-parent="#faqlist2">
                                     <div class="accordion-body">
-                                    Molestie a iaculis at erat pellentesque adipiscing commodo. Dignissim suspendisse in est ante in. Nunc vel risus commodo viverra maecenas accumsan. Sit amet nisl suscipit adipiscing bibendum est. Purus gravida quis blandit turpis cursus in
+                                        Molestie a iaculis at erat pellentesque adipiscing commodo. Dignissim
+                                        suspendisse in est ante in. Nunc vel risus commodo viverra maecenas accumsan.
+                                        Sit amet nisl suscipit adipiscing bibendum est. Purus gravida quis blandit
+                                        turpis cursus in
                                     </div>
                                 </div>
                             </div>
-            
+
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2-content-3">
-                                    Varius vel pharetra vel turpis nunc eget lorem dolor?
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#faq2-content-3">
+                                        Varius vel pharetra vel turpis nunc eget lorem dolor?
                                     </button>
                                 </h2>
-                                <div id="faq2-content-3" class="accordion-collapse collapse" data-bs-parent="#faqlist2">
+                                <div id="faq2-content-3" class="accordion-collapse collapse"
+                                     data-bs-parent="#faqlist2">
                                     <div class="accordion-body">
-                                    Laoreet sit amet cursus sit amet dictum sit amet justo. Mauris vitae ultricies leo integer malesuada nunc vel. Tincidunt eget nullam non nisi est sit amet. Turpis nunc eget lorem dolor sed. Ut venenatis tellus in metus vulputate eu scelerisque. Pellentesque diam volutpat commodo sed egestas egestas fringilla phasellus faucibus. Nibh tellus molestie nunc non blandit massa enim nec.
+                                        Laoreet sit amet cursus sit amet dictum sit amet justo. Mauris vitae ultricies
+                                        leo integer malesuada nunc vel. Tincidunt eget nullam non nisi est sit amet.
+                                        Turpis nunc eget lorem dolor sed. Ut venenatis tellus in metus vulputate eu
+                                        scelerisque. Pellentesque diam volutpat commodo sed egestas egestas fringilla
+                                        phasellus faucibus. Nibh tellus molestie nunc non blandit massa enim nec.
                                     </div>
                                 </div>
                             </div>
@@ -476,127 +520,160 @@
                 </div>
             </div>
         </section><!-- End F.A.Q Section -->
-    
+
         <!-- ======= Clients Section ======= -->
         <section id="clients" class="clients">
             <div class="container" data-aos="fade-up">
-    
+
                 <header class="section-header">
                     <p>Nossos clientes</p>
                 </header>
-        
+
                 <div class="clients-slider swiper">
                     <div class="swiper-wrapper align-items-center">
-                        <div class="swiper-slide"><img src="assets/img/clients/client-1.png" class="img-fluid" alt=""></div>
-                        <div class="swiper-slide"><img src="assets/img/clients/client-2.png" class="img-fluid" alt=""></div>
-                        <div class="swiper-slide"><img src="assets/img/clients/client-3.png" class="img-fluid" alt=""></div>
-                        <div class="swiper-slide"><img src="assets/img/clients/client-4.png" class="img-fluid" alt=""></div>
-                        <div class="swiper-slide"><img src="assets/img/clients/client-5.png" class="img-fluid" alt=""></div>
-                        <div class="swiper-slide"><img src="assets/img/clients/client-6.png" class="img-fluid" alt=""></div>
-                        <div class="swiper-slide"><img src="assets/img/clients/client-7.png" class="img-fluid" alt=""></div>
-                        <div class="swiper-slide"><img src="assets/img/clients/client-8.png" class="img-fluid" alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-1.png" class="img-fluid"
+                                 alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-2.png" class="img-fluid"
+                                 alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-3.png" class="img-fluid"
+                                 alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-4.png" class="img-fluid"
+                                 alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-5.png" class="img-fluid"
+                                 alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-6.png" class="img-fluid"
+                                 alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-7.png" class="img-fluid"
+                                 alt=""></div>
+                        <div class="swiper-slide"><img src="assets/img/clients/client-8.png" class="img-fluid"
+                                 alt=""></div>
                     </div>
                     <div class="swiper-pagination"></div>
                 </div>
             </div>
-    
+
         </section><!-- End Clients Section -->
 
-            
+
         <!-- ======= Testimonials Section ======= -->
         <section id="testimonials" class="testimonials">
-    
+
             <div class="container" data-aos="fade-up">
-    
+
                 <div class="testimonials-slider swiper" data-aos="fade-up" data-aos-delay="200">
                     <div class="swiper-wrapper">
-        
+
                         <div class="swiper-slide">
                             <div class="testimonial-item">
-                            <div class="stars">
-                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                            </div>
-                            <p>
-                                Proin iaculis purus consequat sem cure digni ssim donec porttitora entum suscipit rhoncus. Accusantium quam, ultricies eget id, aliquam eget nibh et. Maecen aliquam, risus at semper.
-                            </p>
-                            <div class="profile mt-auto">
-                                <img src="assets/img/testimonials/testimonials-1.jpg" class="testimonial-img" alt="">
-                                <h3>Saul Goodman</h3>
-                                <h4>Ceo &amp; Founder</h4>
-                            </div>
+                                <div class="stars">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i>
+                                </div>
+                                <p>
+                                    Proin iaculis purus consequat sem cure digni ssim donec porttitora entum suscipit
+                                    rhoncus. Accusantium quam, ultricies eget id, aliquam eget nibh et. Maecen aliquam,
+                                    risus at semper.
+                                </p>
+                                <div class="profile mt-auto">
+                                    <img src="assets/img/testimonials/testimonials-1.jpg" class="testimonial-img"
+                                         alt="">
+                                    <h3>Saul Goodman</h3>
+                                    <h4>Ceo &amp; Founder</h4>
+                                </div>
                             </div>
                         </div><!-- End testimonial item -->
-            
+
                         <div class="swiper-slide">
                             <div class="testimonial-item">
-                            <div class="stars">
-                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                            </div>
-                            <p>
-                                Export tempor illum tamen malis malis eram quae irure esse labore quem cillum quid cillum eram malis quorum velit fore eram velit sunt aliqua noster fugiat irure amet legam anim culpa.
-                            </p>
-                            <div class="profile mt-auto">
-                                <img src="assets/img/testimonials/testimonials-2.jpg" class="testimonial-img" alt="">
-                                <h3>Sara Wilsson</h3>
-                                <h4>Designer</h4>
-                            </div>
+                                <div class="stars">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i>
+                                </div>
+                                <p>
+                                    Export tempor illum tamen malis malis eram quae irure esse labore quem cillum quid
+                                    cillum eram malis quorum velit fore eram velit sunt aliqua noster fugiat irure amet
+                                    legam anim culpa.
+                                </p>
+                                <div class="profile mt-auto">
+                                    <img src="assets/img/testimonials/testimonials-2.jpg" class="testimonial-img"
+                                         alt="">
+                                    <h3>Sara Wilsson</h3>
+                                    <h4>Designer</h4>
+                                </div>
                             </div>
                         </div><!-- End testimonial item -->
-            
+
                         <div class="swiper-slide">
                             <div class="testimonial-item">
-                            <div class="stars">
-                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                            </div>
-                            <p>
-                                Enim nisi quem export duis labore cillum quae magna enim sint quorum nulla quem veniam duis minim tempor labore quem eram duis noster aute amet eram fore quis sint minim.
-                            </p>
-                            <div class="profile mt-auto">
-                                <img src="assets/img/testimonials/testimonials-3.jpg" class="testimonial-img" alt="">
-                                <h3>Jena Karlis</h3>
-                                <h4>Store Owner</h4>
-                            </div>
+                                <div class="stars">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i>
+                                </div>
+                                <p>
+                                    Enim nisi quem export duis labore cillum quae magna enim sint quorum nulla quem
+                                    veniam duis minim tempor labore quem eram duis noster aute amet eram fore quis sint
+                                    minim.
+                                </p>
+                                <div class="profile mt-auto">
+                                    <img src="assets/img/testimonials/testimonials-3.jpg" class="testimonial-img"
+                                         alt="">
+                                    <h3>Jena Karlis</h3>
+                                    <h4>Store Owner</h4>
+                                </div>
                             </div>
                         </div><!-- End testimonial item -->
-            
+
                         <div class="swiper-slide">
                             <div class="testimonial-item">
-                            <div class="stars">
-                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                            </div>
-                            <p>
-                                Fugiat enim eram quae cillum dolore dolor amet nulla culpa multos export minim fugiat minim velit minim dolor enim duis veniam ipsum anim magna sunt elit fore quem dolore labore illum veniam.
-                            </p>
-                            <div class="profile mt-auto">
-                                <img src="assets/img/testimonials/testimonials-4.jpg" class="testimonial-img" alt="">
-                                <h3>Matt Brandon</h3>
-                                <h4>Freelancer</h4>
-                            </div>
+                                <div class="stars">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i>
+                                </div>
+                                <p>
+                                    Fugiat enim eram quae cillum dolore dolor amet nulla culpa multos export minim
+                                    fugiat minim velit minim dolor enim duis veniam ipsum anim magna sunt elit fore quem
+                                    dolore labore illum veniam.
+                                </p>
+                                <div class="profile mt-auto">
+                                    <img src="assets/img/testimonials/testimonials-4.jpg" class="testimonial-img"
+                                         alt="">
+                                    <h3>Matt Brandon</h3>
+                                    <h4>Freelancer</h4>
+                                </div>
                             </div>
                         </div><!-- End testimonial item -->
-            
+
                         <div class="swiper-slide">
                             <div class="testimonial-item">
-                            <div class="stars">
-                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                            </div>
-                            <p>
-                                Quis quorum aliqua sint quem legam fore sunt eram irure aliqua veniam tempor noster veniam enim culpa labore duis sunt culpa nulla illum cillum fugiat legam esse veniam culpa fore nisi cillum quid.
-                            </p>
-                            <div class="profile mt-auto">
-                                <img src="assets/img/testimonials/testimonials-5.jpg" class="testimonial-img" alt="">
-                                <h3>John Larson</h3>
-                                <h4>Entrepreneur</h4>
-                            </div>
+                                <div class="stars">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                       class="bi bi-star-fill"></i>
+                                </div>
+                                <p>
+                                    Quis quorum aliqua sint quem legam fore sunt eram irure aliqua veniam tempor noster
+                                    veniam enim culpa labore duis sunt culpa nulla illum cillum fugiat legam esse veniam
+                                    culpa fore nisi cillum quid.
+                                </p>
+                                <div class="profile mt-auto">
+                                    <img src="assets/img/testimonials/testimonials-5.jpg" class="testimonial-img"
+                                         alt="">
+                                    <h3>John Larson</h3>
+                                    <h4>Entrepreneur</h4>
+                                </div>
                             </div>
                         </div><!-- End testimonial item -->
-        
+
                     </div>
                     <div class="swiper-pagination"></div>
                 </div>
-    
+
             </div>
-    
+
         </section><!-- End Testimonials Section -->
 
         {{-- <!-- ======= Recent Blog Posts Section ======= -->
@@ -652,29 +729,30 @@
     @endpush
 
     @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
+              crossorigin="anonymous" referrerpolicy="no-referrer" />
     @endpush
-        
+
     @push('footer')
         <script src="{{ asset('assets/vendor/owlcarousel/owl.carousel.min.js') }}"></script>
         <script type="text/javascript">
-            $(document).ready(function(){
+            $(document).ready(function() {
                 $('.owl-carousel').owlCarousel({
-                    loop:true,
-                    autoplay:true,
-                    autoplayTimeout:3000,
+                    loop: true,
+                    autoplay: true,
+                    autoplayTimeout: 3000,
                     animateOut: 'fadeOut',
-                    margin:0,
-                    nav:false,
-                    responsive:{
-                        0:{
-                            items:1
+                    margin: 0,
+                    nav: false,
+                    responsive: {
+                        0: {
+                            items: 1
                         },
-                        600:{
-                            items:1
+                        600: {
+                            items: 1
                         },
-                        1000:{
-                            items:1
+                        1000: {
+                            items: 1
                         }
                     }
                 })

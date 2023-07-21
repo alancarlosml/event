@@ -34,6 +34,7 @@ Route::get('painel/meus-eventos', 'App\Http\Controllers\EventAdminController@myE
 Route::get('painel/meus-eventos/{hash}/detalhes', 'App\Http\Controllers\EventAdminController@myEventsShow')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_show');
 Route::get('painel/meus-eventos/{hash}/contatos', 'App\Http\Controllers\EventAdminController@contacts')->middleware(['auth:participante', 'verified'])->name('event_home.contacts');
 Route::get('painel/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@myEventsEdit')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_edit');
+Route::get('painel/meus-eventos/{hash}/duplicar', 'App\Http\Controllers\EventAdminController@eventClone')->middleware(['auth:participante', 'verified'])->name('event_home.event_clone');
 Route::get('painel/meus-eventos/{hash}/convidados', 'App\Http\Controllers\EventAdminController@guests')->middleware(['auth:participante', 'verified'])->name('event_home.guests');
 Route::get('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@addGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guest_add');
 Route::post('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@storeGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guest_store');
@@ -158,7 +159,7 @@ Route::post('admin/events/store_file/{id}','App\Http\Controllers\EventController
 Route::get('admin/events/delete_file/{id}','App\Http\Controllers\EventController@delete_file')->middleware(['auth:web'])->name('event.delete_file');
 Route::get('admin/eventos/participantes/editar/{id}', 'App\Http\Controllers\EventController@participantes_edit')->middleware(['auth:web'])->name('event.participantes.edit');
 Route::post('admin/eventos/participantes/update/{id}', 'App\Http\Controllers\EventController@participantes_update')->middleware(['auth:web'])->name('event.participantes.update');
-Route::get('admin/eventos/vendas/detalhes/{id}', 'App\Http\Controllers\EventController@order_details')->middleware(['auth:web'])->name('event.orders.details');
+Route::get('admin/eventos/vendas/detalhes/{hash}', 'App\Http\Controllers\EventController@order_details')->middleware(['auth:web'])->name('event.orders.details');
 
 Route::get('admin/events/{id}/coupons', 'App\Http\Controllers\CouponController@coupons')->middleware(['auth:web'])->name('event.coupons');
 Route::get('admin/events/{id}/create_coupon', 'App\Http\Controllers\CouponController@create_coupon')->middleware(['auth:web'])->name('event.create_coupon');

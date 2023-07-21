@@ -47,7 +47,6 @@
                                 <div class="form-group">
                                     <label for="type">Tipo do lote*</label>
                                     <select id="type" class="form-control col-md-3" id="type" name="type">
-                                      <option selected>Selecione</option>
                                       <option value="0">Pago</option>
                                       <option value="1">Grátis</option>
                                     </select>
@@ -56,7 +55,7 @@
                                     <div class="form-group col-md-3">
                                         <label for="tax_parcelamento">Juros do parcelamento* <a href="javascript:;" data-toggle="tooltip" data-placement="right" title="Tooltip on right"><i class="fa-solid fa-circle-question"></i></a></label>
                                         <select id="tax_parcelamento" class="form-control" id="tax_parcelamento" name="tax_parcelamento">
-                                            <option selected>Selecione</option>
+                                            <option selected value="">Selecione</option>
                                             <option value="0">Pago pelo participante</option>
                                             <option value="1">Pago pelo organizador</option>
                                         </select>
@@ -64,7 +63,7 @@
                                     <div class="form-group col-md-3">
                                         <label for="tax_service">Taxa de serviço ({{number_format($taxa_juros*100, 2, ',')}}%)*</label>
                                         <select id="tax_service" class="form-control" id="tax_service" name="tax_service">
-                                            <option selected>Selecione</option>
+                                            <option selected value="">Selecione</option>
                                             <option value="0">Pago pelo participante</option>
                                             <option value="1">Pago pelo organizador</option>
                                         </select>
@@ -82,6 +81,10 @@
                                           <div class="form-check form-check-inline">
                                             <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="form_pagamento[]" value="2">
                                             <label class="form-check-label" for="inlineCheckbox2">Boleto bancário <a href="javascript:;" data-toggle="tooltip" data-placement="right" title="Tooltip on right"><i class="fa-solid fa-circle-question"></i></a></label>
+                                          </div>
+                                          <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="form_pagamento[]" value="3">
+                                            <label class="form-check-label" for="inlineCheckbox3">PIX <a href="javascript:;" data-toggle="tooltip" data-placement="right" title="Tooltip on right"><i class="fa-solid fa-circle-question"></i></a></label>
                                           </div>
                                     </div>
                                 </div>
@@ -152,7 +155,7 @@
                                 <div class="form-group">
                                     <label for="visibility">Visibilidade*</label>
                                     <select id="visibility" class="form-control col-md-3" name="visibility">
-                                      <option selected>Selecione</option>
+                                      <option selected value="">Selecione</option>
                                       <option value="0">Público</option>
                                       <option value="1">Privado</option>
                                     </select>
@@ -167,7 +170,8 @@
                                 </div>
                             </div> --}}
 
-                            <div class="pl-5 pr-4 text-right">
+                            <div class="card-footer d-flex justify-content-between">
+                                <a href="{{ route('event_home.create.step.two') }}" class="btn btn-primary">Voltar</a>
                                 <button type="submit" class="btn btn-primary">Criar lote</button>
                             </div>
                         </form>
