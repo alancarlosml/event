@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -10,8 +12,9 @@ use App\Models\Category;
 
 class AreaController extends Controller
 {
-    public function index($category_id){
-        
+    public function index($category_id)
+    {
+
         $category = Category::find($category_id);
         $areas = Area::where('category_id', $category_id)->orderBy('name')->get();
 
@@ -22,7 +25,8 @@ class AreaController extends Controller
         return view('area.index', compact('category', 'areas'));
     }
 
-    public function create($category_id){
+    public function create($category_id)
+    {
 
         $category = Category::find($category_id);
 
@@ -32,7 +36,7 @@ class AreaController extends Controller
     public function store(Request $request, $category_id)
     {
         $this->validate($request, [
-            'name' => 'required'
+            'name' => 'required',
         ]);
 
         $input = $request->all();
@@ -46,10 +50,11 @@ class AreaController extends Controller
         return redirect()->route('area.index', $category_id);
     }
 
-    public function edit($category_id, $id){
-                
+    public function edit($category_id, $id)
+    {
+
         $category = Category::find($category_id);
-        
+
         $area = Area::find($id);
 
         return view('area.edit', compact('area', 'category'));
@@ -58,20 +63,20 @@ class AreaController extends Controller
     public function update(Request $request, $category_id, $id)
     {
         $category = Category::findOrFail($category_id);
-        
+
         $area = Area::findOrFail($id);
 
         $this->validate($request, [
-            'name' => 'required'
+            'name' => 'required',
         ]);
 
         $input = $request->all();
 
         $input['slug'] = Str::slug($input['name'], '-');
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
@@ -85,12 +90,13 @@ class AreaController extends Controller
         $area = Area::findOrFail($id);
 
         $area->delete();
-        
+
         return redirect()->route('area.index', $category_id);
     }
 
-    public function show($id){
-                
+    public function show($id)
+    {
+
         $category = Category::find($id);
 
         return view('category.show', compact('category'));

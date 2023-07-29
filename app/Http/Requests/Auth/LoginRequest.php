@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;
@@ -48,11 +50,11 @@ class LoginRequest extends FormRequest
 
         // dd(Auth::guard('participante')->attempt($this->only('email', 'password'), $this->boolean('remember')));
 
-        if (! Auth::guard('participante')->attempt(['email' => $this->input('email'), 'password' => $this->input('password'), 'status' => 1], $this->boolean('remember'))) {
+        if ( ! Auth::guard('participante')->attempt(['email' => $this->input('email'), 'password' => $this->input('password'), 'status' => 1], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed')
+                'email' => trans('auth.failed'),
             ]);
         }
 
@@ -68,7 +70,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited()
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if ( ! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 

@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class ConfigurationSeeder extends Seeder
 {
@@ -18,7 +18,7 @@ class ConfigurationSeeder extends Seeder
     {
         DB::table('configurations')->insert([
             'tax' => 0.07,
-            'created_at' => date("Y-m-d H:i:s")
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
     }
 }

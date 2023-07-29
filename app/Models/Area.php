@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,12 +15,11 @@ class Area extends Model
         'name',
         'slug',
         'category_id',
-        'status'
+        'status',
     ];
 
     public function category()
     {
-      return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class);
     }
-    
 }

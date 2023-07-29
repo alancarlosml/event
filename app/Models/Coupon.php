@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +18,7 @@ class Coupon extends Model
         'limit_buy',
         'limit_tickets',
         'status',
-        'event_id'
+        'event_id',
     ];
 
     public function lotes()
@@ -25,6 +27,7 @@ class Coupon extends Model
             Lote::class,
             'coupons_lotes',
             'coupon_id',
-            'lote_id');
+            'lote_id'
+        );
     }
 }

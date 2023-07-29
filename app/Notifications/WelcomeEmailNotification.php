@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -43,11 +44,12 @@ class WelcomeEmailNotification extends Notification
     public function toMail($notifiable)
     {
 
-        return (new MailMessage)
-        ->view(
-            'mails.welcome_mail', ['name' => $this->participante->name]
-        )
-        ->subject('Cadastro realizado com sucesso');
+        return (new MailMessage())
+            ->view(
+                'mails.welcome_mail',
+                ['name' => $this->participante->name]
+            )
+            ->subject('Cadastro realizado com sucesso');
     }
 
     /**
@@ -59,7 +61,7 @@ class WelcomeEmailNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            //
+
         ];
     }
 }

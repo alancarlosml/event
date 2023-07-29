@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\EventTime;
@@ -14,7 +16,7 @@ class EventTimeController extends Controller
      */
     public function index()
     {
-        //
+
     }
 
     /**
@@ -24,7 +26,7 @@ class EventTimeController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -35,7 +37,7 @@ class EventTimeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
     }
 
     /**
@@ -46,7 +48,7 @@ class EventTimeController extends Controller
      */
     public function show(EventTime $eventTime)
     {
-        //
+
     }
 
     /**
@@ -57,7 +59,7 @@ class EventTimeController extends Controller
      */
     public function edit(EventTime $eventTime)
     {
-        //
+
     }
 
     /**
@@ -69,7 +71,7 @@ class EventTimeController extends Controller
      */
     public function update(Request $request, EventTime $eventTime)
     {
-        //
+
     }
 
     /**
@@ -80,6 +82,6 @@ class EventTimeController extends Controller
      */
     public function destroy(EventTime $eventTime)
     {
-        //
+
     }
 }

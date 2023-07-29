@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-use App\Models\City;
 
 class Place extends Model
 {
@@ -21,12 +21,12 @@ class Place extends Model
         'zip',
         'complement',
         'city_id',
-        'status'
+        'status',
     ];
 
     public function cite()
     {
-      return $this->belongsTo(City::class);
+        return $this->belongsTo(City::class);
     }
 
     public function events()
@@ -37,7 +37,7 @@ class Place extends Model
     public function get_city()
     {
         return City::join('states', 'cities.uf', '=', 'states.id')
-                ->where('cities.id', $this->city_id)
-                ->selectRaw('cities.name, states.uf')->first();
+            ->where('cities.id', $this->city_id)
+            ->selectRaw('cities.name, states.uf')->first();
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Participante;
@@ -14,7 +16,7 @@ class ParticipanteObserver
      */
     public function created(Participante $participante)
     {
-        //
+
     }
 
     /**
@@ -25,7 +27,7 @@ class ParticipanteObserver
      */
     public function updated(Participante $participante)
     {
-        //
+
     }
 
     /**
@@ -36,7 +38,7 @@ class ParticipanteObserver
      */
     public function deleted(Participante $participante)
     {
-        //
+
     }
 
     /**
@@ -47,7 +49,7 @@ class ParticipanteObserver
      */
     public function restored(Participante $participante)
     {
-        //
+
     }
 
     /**
@@ -58,6 +60,6 @@ class ParticipanteObserver
      */
     public function forceDeleted(Participante $participante)
     {
-        //
+
     }
 }

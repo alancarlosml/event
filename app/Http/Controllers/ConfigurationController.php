@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -8,8 +10,9 @@ use App\Models\Configuration;
 
 class ConfigurationController extends Controller
 {
-    public function edit(){
-                
+    public function edit()
+    {
+
         $configuration = Configuration::find(1);
 
         return view('configuration.edit', compact('configuration'));
@@ -20,7 +23,7 @@ class ConfigurationController extends Controller
         $configuration = Configuration::findOrFail(1);
 
         $this->validate($request, [
-            'tax' => 'required'
+            'tax' => 'required',
         ]);
 
         $input = $request->all();

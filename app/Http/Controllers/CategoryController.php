@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Area;
@@ -10,8 +12,9 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
-    public function index(){
-        
+    public function index()
+    {
+
         $categories = Category::orderBy('description')->get();
 
         // dd($categories);
@@ -19,7 +22,8 @@ class CategoryController extends Controller
         return view('category.index', compact('categories'));
     }
 
-    public function create(){
+    public function create()
+    {
 
         return view('category.add');
     }
@@ -27,16 +31,16 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'description' => 'required'
+            'description' => 'required',
         ]);
 
         $input = $request->all();
 
         $input['slug'] = Str::slug($input['description'], '-');
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
@@ -45,8 +49,9 @@ class CategoryController extends Controller
         return redirect()->route('category.index');
     }
 
-    public function edit($id){
-                
+    public function edit($id)
+    {
+
         $category = Category::find($id);
 
         return view('category.edit', compact('category'));
@@ -57,16 +62,16 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $this->validate($request, [
-            'description' => 'required'
+            'description' => 'required',
         ]);
 
         $input = $request->all();
 
         $input['slug'] = Str::slug($input['description'], '-');
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
@@ -80,12 +85,13 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $category->delete();
-        
+
         return redirect()->route('category.index');
     }
 
-    public function show($id){
-                
+    public function show($id)
+    {
+
         $category = Category::find($id);
 
         return view('category.show', compact('category'));
@@ -93,10 +99,10 @@ class CategoryController extends Controller
 
     public function getAreas(Request $request)
     {
-        $data['areas'] = Area::where("category_id",$request->category_id)
-                    ->where("status", 1)
-                    ->get(["name","id"]);
-        
+        $data['areas'] = Area::where('category_id', $request->category_id)
+            ->where('status', 1)
+            ->get(['name', 'id']);
+
         return response()->json($data);
     }
 }

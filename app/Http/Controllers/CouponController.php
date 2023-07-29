@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -10,25 +12,26 @@ use App\Models\Lote;
 
 class CouponController extends Controller
 {
-    
-    public function coupons($id){
+    public function coupons($id)
+    {
 
         $event = Event::find($id);
-        
+
         $coupons = Coupon::where('event_id', $id)->orderBy('created_at')->get();
 
         return view('coupon.coupons', compact('event', 'coupons'));
     }
 
-    public function create_coupon($id){
+    public function create_coupon($id)
+    {
 
         $event = Event::find($id);
 
-        $coupon_code = strtoupper(substr($event->name, 0, 2) . substr(sha1($event->id . $event->created_at . md5($event->name)), 0, 6));        
+        $coupon_code = strtoupper(substr($event->name, 0, 2) . substr(sha1($event->id . $event->created_at . md5($event->name)), 0, 6));
 
         $lotes = Lote::orderBy('order')
-                ->where('event_id', $id)
-                ->get();
+            ->where('event_id', $id)
+            ->get();
 
         return view('coupon.create_coupon', compact('event', 'lotes', 'id', 'coupon_code'));
     }
@@ -42,7 +45,7 @@ class CouponController extends Controller
             'discount_type' => 'required',
             'discount_value' => 'required',
             'limit_buy' => 'required',
-            'limit_tickets' => 'required'
+            'limit_tickets' => 'required',
         ]);
 
         $input = $request->all();
@@ -53,8 +56,8 @@ class CouponController extends Controller
 
         $lotes = $input['lotes'];
 
-        foreach($lotes as $lote){
-            
+        foreach($lotes as $lote) {
+
             $coupon_obj->lotes()->attach($lote);
         }
 
@@ -63,24 +66,25 @@ class CouponController extends Controller
         $coupons = Coupon::where('event_id', $id)->orderBy('created_at')->get();
 
         $lotes = Lote::orderBy('order')
-                ->where('event_id', $id)
-                ->get();
+            ->where('event_id', $id)
+            ->get();
 
         return view('coupon.coupons', compact('event', 'coupons', 'lotes'));
     }
 
-    public function editCoupon($id){
+    public function editCoupon($id)
+    {
 
         $coupon = Coupon::find($id);
 
         $event = Event::find($coupon->event_id);
 
         $lotes = Lote::orderBy('order')
-                ->where('event_id', $coupon->event_id)
-                ->get();
-        
+            ->where('event_id', $coupon->event_id)
+            ->get();
+
         // dd($coupon->lotes);
-                
+
         return view('coupon.coupon_edit', compact('event', 'coupon', 'lotes', 'id'));
     }
 
@@ -95,7 +99,7 @@ class CouponController extends Controller
             'discount_type' => 'required',
             'discount_value' => 'required',
             'limit_buy' => 'required',
-            'limit_tickets' => 'required'
+            'limit_tickets' => 'required',
         ]);
 
         $input = $request->all();
@@ -105,12 +109,12 @@ class CouponController extends Controller
         $lotes = $input['lotes'];
 
         $coupon->lotes()->detach();
-        
-        foreach($lotes as $lote){
-            
+
+        foreach($lotes as $lote) {
+
             $coupon->lotes()->attach($lote);
         }
-        
+
         $coupon->fill($input)->save();
 
         $coupons = Coupon::where('event_id', $coupon->event_id)->orderBy('created_at')->get();
@@ -123,8 +127,7 @@ class CouponController extends Controller
         $coupon = Coupon::findOrFail($id);
 
         $coupon->delete();
-        
+
         return redirect()->route('coupon.coupons');
     }
-
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -28,7 +30,7 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request)
     {
-        if (! Auth::guard('participante')->validate([
+        if ( ! Auth::guard('participante')->validate([
             'email' => $request->user()->email,
             'password' => $request->password,
         ])) {

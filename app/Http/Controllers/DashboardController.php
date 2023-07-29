@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Event;
@@ -34,7 +35,7 @@ class DashboardController extends Controller
                             inner join participantes_events on participantes.id = participantes_events.participante_id
                             where participantes_events.role = 'admin' and participantes_events.status = 1
                             ) as x"), function ($join) {
-                $join->on("x.event_id", "=", "events.id");
+                $join->on('x.event_id', '=', 'events.id');
             })
             ->where('events.status', '1')
             ->select(
@@ -112,7 +113,6 @@ class DashboardController extends Controller
             )
             ->first();
 
-
         // $ingressos_vendidos = DB::table('lotes')
         //     ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')
         //     ->join('orders', 'orders.id', '=', 'order_items.order_id')
@@ -120,23 +120,23 @@ class DashboardController extends Controller
         //     ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
         //     ->selectRaw("count(case when orders.status = 1 then 1 end) as confirmado")
         //     ->selectRaw(
-        //         "sum(case 
-        //                         when 
+        //         "sum(case
+        //                         when
         //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
-        //                         when    
-        //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
-        //                         when    
+        //                         when
+        //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value
+        //                         when
         //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value
         //                         end
         //                     ) as total_confirmado"
         //     )
         //     ->selectRaw(
-        //         "sum(case 
-        //                         when 
+        //         "sum(case
+        //                         when
         //                             lotes.type = 0 and orders.status = 2 and coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
-        //                         when    
-        //                             lotes.type = 0 and orders.status = 2 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
-        //                         when    
+        //                         when
+        //                             lotes.type = 0 and orders.status = 2 and coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value
+        //                         when
         //                             lotes.type = 0 and orders.status = 2 and coupons.discount_type is null and coupons.code is null then order_items.value
         //                         end
         //                     ) as total_pendente"
@@ -152,11 +152,11 @@ class DashboardController extends Controller
         //     ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
         //     ->selectRaw(DB::raw('max(MONTH(event_dates.date)) teste'))
         //     ->selectRaw("count(case when orders.status = 1 then 1 end) as confirmado")
-        //     ->selectRaw("sum(case 
-        //                         when 
+        //     ->selectRaw("sum(case
+        //                         when
         //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then lotes.value - (coupons.discount_value * lotes.value)
-        //                         when    
-        //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value 
+        //                         when
+        //                             lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then lotes.value - coupons.discount_value
         //                         end
         //                     ) as total_confirmado"
         //                 )

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Exception;
@@ -10,7 +12,6 @@ use Illuminate\Support\Str;
 use App\Models\Category;
 use App\Models\Configuration;
 use App\Models\City;
-use App\Models\Coupon;
 use App\Models\Event;
 use App\Models\EventDate;
 use App\Models\Lote;
@@ -25,7 +26,8 @@ use App\Models\State;
 
 class EventHomeController extends Controller
 {
-    public function events(){
+    public function events()
+    {
 
         // $menu = 'home';
         // $title = 'Home';
@@ -33,7 +35,7 @@ class EventHomeController extends Controller
         // $description = 'Bilhete Mania - Venda de ingressos online';
         // $image = url('img/favicon/favicon-96x96.png');
 
-        $event = new Event;
+        $event = new Event();
         // $event = new Event;
         // // $faq = new Faq;
 
@@ -57,7 +59,8 @@ class EventHomeController extends Controller
         return view('site.events', compact('events', 'categories', 'states'));
     }
 
-    public function getMoreEvents(Request $request) {
+    public function getMoreEvents(Request $request)
+    {
         $event_val = $request->event_val;
         $category_val = $request->category_val;
         $area_val = $request->area_val;
@@ -67,15 +70,16 @@ class EventHomeController extends Controller
         if($request->ajax()) {
             $events = Event::getEvents($event_val, $category_val, $area_val, $state_val, $period_val);
             $events_list = view('site.events_data', compact('events'))->render();
+
             return response()->json(['succes' => true, 'events_list' => $events_list]);
         }
     }
 
     public function getCity(Request $request)
     {
-        $data['cities'] = City::where("uf",$request->uf)
-                    ->get(["name","id"]);
-        
+        $data['cities'] = City::where('uf', $request->uf)
+            ->get(['name', 'id']);
+
         return response()->json($data);
     }
 
@@ -116,12 +120,12 @@ class EventHomeController extends Controller
     public function postCreateStepOne(Request $request)
     {
         // dd($request->session()->get('event'));
-        
+
         // try {
 
         dd(empty($request->session()->get('event')));
-        if(empty($request->session()->get('event'))){
-            
+        if(empty($request->session()->get('event'))) {
+
             $validatedDataEvent = $request->validate([
                 'name' => 'required',
                 'hash' => 'string',
@@ -132,36 +136,36 @@ class EventHomeController extends Controller
                 'area_id' => 'required',
                 'max_tickets' => 'required',
                 'admin_id' => 'required',
-                'status' => 'string'
+                'status' => 'string',
             ]);
 
             // $owner = Owner::where('email', $validatedDataEvent['owner_email'])->first();
             // $owner = User::where('email', $validatedDataEvent['owner_email'])->first();
             // $validatedDataEvent['owner_id'] = $owner->id;
-            
+
             $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('papainoel'));
 
             dd('aaqui');
-            
+
             $event = new Event();
             $event->fill($validatedDataEvent);
             $event->save();
             $event_id = $event->id;
             DB::table('participantes_events')->insert([
-                'event_id' => $event_id, 
-                'participante_id' => $validatedDataEvent['admin_id'], 
-                'role' => 'admin', 
-                'created_at' => date('Y-m-d H:i:s')
+                'event_id' => $event_id,
+                'participante_id' => $validatedDataEvent['admin_id'],
+                'role' => 'admin',
+                'created_at' => date('Y-m-d H:i:s'),
             ]);
             // $event->participantes()->attach([
-            //     'event_id' => $event_id, 
-            //     'participante_id' => $validatedDataEvent['admin_id'], 
-            //     'role' => 'admin', 
+            //     'event_id' => $event_id,
+            //     'participante_id' => $validatedDataEvent['admin_id'],
+            //     'role' => 'admin',
             //     'created_at' => date('Y-m-d H:i:s')]
             // );
             $request->session()->put('event', $event);
             $request->session()->put('event_id', $event_id);
-        }else{
+        } else {
             // $event = $request->session()->get('event');
             $event_id = $request->session()->get('event_id');
             $event = Event::findOrFail($event_id);
@@ -174,13 +178,13 @@ class EventHomeController extends Controller
                 'area_id' => 'required',
                 'max_tickets' => 'required',
                 'admin_id' => 'required',
-                'status' => 'string'
+                'status' => 'string',
             ]);
 
             // $owner = Owner::where('email', $validatedDataEvent['owner_email'])->first();
             // $owner = User::where('email', $validatedDataEvent['owner_email'])->first();
             // $validatedDataEvent['owner_id'] = $owner->id;
-            
+
             $event->fill($validatedDataEvent);
             $request->session()->put('event', $event);
             $event->save();
@@ -204,46 +208,46 @@ class EventHomeController extends Controller
             'district' => 'required',
             'complement' => 'nullable',
             'zip' => 'required',
-            'city_id_hidden' => 'required'
+            'city_id_hidden' => 'required',
         ]);
 
         $validatedDataPlace['name'] = $validatedDataPlace['place_name'];
         $validatedDataPlace['city_id'] = $validatedDataPlace['city_id_hidden'];
         $validatedDataPlace['place_id'] = $validatedDataPlace['place_id_hidden'];
-        
+
         $event_id = $request->session()->get('event_id');
 
         if($validatedDataPlace['place_id'] != null) {
-            $event = Event::where('id', $event_id)->update(array('place_id' => $validatedDataPlace['place_id']));
+            $event = Event::where('id', $event_id)->update(['place_id' => $validatedDataPlace['place_id']]);
             $place = Place::findOrFail($validatedDataPlace['place_id']);
             $request->session()->put('place', $place);
             $request->session()->put('place_id', $validatedDataPlace['place_id']);
             $request->session()->put('uf', $place->get_city()->uf);
-        } else{
+        } else {
             $place = new Place();
             $place->fill($validatedDataPlace);
             $place->save();
             $place_id = $place->id;
-            Event::where('id', $event_id)->update(array('place_id' => $place_id));
+            Event::where('id', $event_id)->update(['place_id' => $place_id]);
             $request->session()->put('place', $place);
             $request->session()->put('place_id', $place_id);
         }
 
         // dd($validatedDataPlace);
-            
-            // if(empty($request->session()->get('place'))){
-            //     $place = new Place();
-            //     $place->fill($validatedDataPlace);
-            //     $place->save();
-            //     $place_id = $place->id;
-            //     $request->session()->put('place', $place);
-            //     $request->session()->put('place_id', $place_id);
-            // }else{
-            //     $place_id = $request->session()->get('place_id');
-            //     $place = Place::findOrFail($place_id);
-            //     $place->fill($validatedDataPlace);
-            //     $request->session()->put('place', $place);
-            // }
+
+        // if(empty($request->session()->get('place'))){
+        //     $place = new Place();
+        //     $place->fill($validatedDataPlace);
+        //     $place->save();
+        //     $place_id = $place->id;
+        //     $request->session()->put('place', $place);
+        //     $request->session()->put('place_id', $place_id);
+        // }else{
+        //     $place_id = $request->session()->get('place_id');
+        //     $place = Place::findOrFail($place_id);
+        //     $place->fill($validatedDataPlace);
+        //     $request->session()->put('place', $place);
+        // }
 
         // } catch (Exception $exception) {
         //     return back()->withError($exception->getMessage());
@@ -254,7 +258,7 @@ class EventHomeController extends Controller
         $validatedDataEventDate = $request->validate([
             'date' => 'required',
             'time_begin' => 'required',
-            'time_end' => 'required'
+            'time_end' => 'required',
         ]);
 
         $dates = $validatedDataEventDate['date'];
@@ -262,25 +266,25 @@ class EventHomeController extends Controller
         $times_end = $validatedDataEventDate['time_end'];
         $event_id = $request->session()->get('event_id');
 
-        $finalArray = array();
+        $finalArray = [];
         for ($i = 0; $i < count($dates); $i++) {
 
             $dates[$i] = str_replace('/', '-', $dates[$i]);
-            array_push($finalArray, array(
+            array_push($finalArray, [
                 'date' => date('Y-m-d', strtotime($dates[$i])),
                 'time_begin' => date('H:i', strtotime($times_begin[$i])),
                 'time_end' => date('H:i', strtotime($times_end[$i])),
                 'status' => 1,
                 'event_id' => $event_id,
-                'created_at' => date("Y-m-d H:i:s")
-            ));
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
         }
 
-        if(empty($request->session()->get('eventDate'))){
+        if(empty($request->session()->get('eventDate'))) {
             DB::table('event_dates')->where('event_id', $event_id)->delete();
             EventDate::insert($finalArray);
             $request->session()->put('eventDate', $finalArray);
-        }else{
+        } else {
             DB::table('event_dates')->where('event_id', $event_id)->delete();
             EventDate::insert($finalArray);
             $request->session()->put('eventDate', $finalArray);
@@ -301,7 +305,7 @@ class EventHomeController extends Controller
         // }
 
         // dd($finalArray);
-        // EventDate::insert($finalArray);   
+        // EventDate::insert($finalArray);
 
         return redirect()->route('event_home.create.step.two');
     }
@@ -309,7 +313,7 @@ class EventHomeController extends Controller
     public function createStepTwo(Request $request)
     {
         $lotes = $request->session()->get('lotes');
-  
+
         return view('painel_admin.list_lotes', compact('lotes'));
     }
 
@@ -326,7 +330,7 @@ class EventHomeController extends Controller
     {
         $input = $request->all();
 
-        if($input['type'] == 0){
+        if($input['type'] == 0) {
             $validatedData = $this->validate($request, [
                 'name' => 'required',
                 'description' => 'required',
@@ -342,7 +346,7 @@ class EventHomeController extends Controller
                 'form_pagamento' => 'required',
                 'value' => 'required',
                 'final_value' => 'nullable',
-                'event_id' => 'nullable'
+                'event_id' => 'nullable',
             ]);
         } else {
             $validatedData = $this->validate($request, [
@@ -355,12 +359,12 @@ class EventHomeController extends Controller
                 'limit_max' => 'required|gt:limit_min',
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
-                'event_id' => 'nullable'
+                'event_id' => 'nullable',
             ]);
         }
 
         $event_id = $request->session()->get('event_id');
-        $number_lotes = Lote::where("event_id", $event_id)->count();
+        $number_lotes = Lote::where('event_id', $event_id)->count();
 
         $validatedData['event_id'] = $event_id;
 
@@ -378,10 +382,10 @@ class EventHomeController extends Controller
         $lote->fill($validatedData);
         $lote->save();
         $lote_id = $lote->id;
-        
+
         $lotes = Lote::orderBy('order')
-                ->where('event_id', $event_id)
-                ->get();
+            ->where('event_id', $event_id)
+            ->get();
         // dd($lotes);
         $request->session()->put('lotes', $lotes);
         $request->session()->put('lote_id', $lote_id);
@@ -423,7 +427,7 @@ class EventHomeController extends Controller
     // }
 
     // public function edit($id){
-                
+
     //     // $event = Event::find($id);
     //     $event = DB::table('events')
     //         ->join('places', 'places.id', '=', 'events.place_id')
@@ -435,15 +439,15 @@ class EventHomeController extends Controller
     //         ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
     //         ->where('events.id', $id)
     //         ->select(
-    //             'events.*', 
+    //             'events.*',
     //             'categories.id as category_id',
-    //             'places.name as place_name', 
-    //             'places.address as place_address', 
-    //             'places.number as place_number', 
-    //             'places.district as place_district', 
-    //             'places.complement as place_complement', 
-    //             'places.zip as place_zip', 
-    //             'cities.id as city_id', 
+    //             'places.name as place_name',
+    //             'places.address as place_address',
+    //             'places.number as place_number',
+    //             'places.district as place_district',
+    //             'places.complement as place_complement',
+    //             'places.zip as place_zip',
+    //             'cities.id as city_id',
     //             'states.uf as city_uf',
     //             'owners.email as owner_email'
     //             )
@@ -455,8 +459,8 @@ class EventHomeController extends Controller
     //         ->join('events', 'events.id', '=', 'event_dates.event_id')
     //         ->where('events.id', $id)
     //         ->selectRaw(
-    //             'event_dates.id, 
-    //             DATE_FORMAT(event_dates.date, "%d/%m/%Y") as date, 
+    //             'event_dates.id,
+    //             DATE_FORMAT(event_dates.date, "%d/%m/%Y") as date,
     //             DATE_FORMAT(event_dates.time_begin, "%H:%i") as time_begin,
     //             DATE_FORMAT(event_dates.time_end, "%H:%i") as time_end'
     //             )
@@ -544,8 +548,8 @@ class EventHomeController extends Controller
     //             'created_at' => date("Y-m-d H:i:s")
     //         ));
     //     }
-    //     EventDate::insert($finalArray);       
-                
+    //     EventDate::insert($finalArray);
+
     //     $owner = Owner::where('email', $input['owner_email'])->first();
 
     //     if(isset($input['status'])){
@@ -557,9 +561,9 @@ class EventHomeController extends Controller
     //     $input['owner_id'] = $owner->id;
 
     //     $event->fill($input)->save();
-    
+
     //     $place = Place::where('name', $request->place_name)->first();
-    
+
     //     if($place) {
 
     //         $place->address = $request->address;
@@ -607,12 +611,12 @@ class EventHomeController extends Controller
     //     $event = Event::findOrFail($id);
 
     //     $event->delete();
-        
+
     //     return redirect()->route('event.index');
     // }
 
     // public function show($id){
-                
+
     //     $event = Event::find($id);
 
     //     return view('event.show', compact('event'));
@@ -639,11 +643,11 @@ class EventHomeController extends Controller
     public function autocomplete_place(Request $request)
     {
         $data = Place::join('cities', 'cities.id', '=', 'places.city_id')
-                    ->join('states', 'states.id', '=', 'cities.uf')
-                    ->where('places.name', 'LIKE', '%'. $request->get('search'). '%')
-                    ->select("places.name as value", "places.id", "places.address", "places.number", "places.complement", "places.district", "places.zip", "places.city_id", "states.id as uf")
-                    ->get();
-    
+            ->join('states', 'states.id', '=', 'cities.uf')
+            ->where('places.name', 'LIKE', '%'. $request->get('search'). '%')
+            ->select('places.name as value', 'places.id', 'places.address', 'places.number', 'places.complement', 'places.district', 'places.zip', 'places.city_id', 'states.id as uf')
+            ->get();
+
         return response()->json($data);
     }
 
@@ -678,7 +682,7 @@ class EventHomeController extends Controller
     // }
 
     // public function participantes_edit($id){
-                
+
     //     $participanteLote = DB::table('participantes_lotes')
     //                         ->join('participantes', 'participantes_lotes.participante_id', '=', 'participantes.id')
     //                         ->join('lotes', 'participantes_lotes.lote_id', '=', 'lotes.id')
@@ -686,7 +690,7 @@ class EventHomeController extends Controller
     //                         ->where('participantes_lotes.id', $id)
     //                         ->select('events.id as event_id', 'participantes_lotes.id as participantes_lotes_id', 'participantes_lotes.number', 'participantes_lotes.status', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
     //                         ->first();
-        
+
     //     $lotes = Lote::orderBy('order')
     //                         ->where('event_id', $participanteLote->event_id)
     //                         ->get();
@@ -719,7 +723,7 @@ class EventHomeController extends Controller
     //     // dd($participanteLote);
 
     //     $participanteLote->save();
-    
+
     //     return redirect()->route('event.reports', $participanteLote_id->event_id)->withFragment('#participantes_table');
     // }
 

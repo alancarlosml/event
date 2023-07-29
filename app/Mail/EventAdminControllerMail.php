@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Models\Event;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -12,7 +13,8 @@ use Illuminate\Queue\SerializesModels;
 
 class EventAdminControllerMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * The order instance.
@@ -22,7 +24,7 @@ class EventAdminControllerMail extends Mailable
     protected $event;
     public $subject;
     public $acao;
- 
+
     /**
      * Create a new message instance.
      *

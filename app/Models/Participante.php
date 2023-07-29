@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -7,12 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Model;
 use App\Notifications\ResetPasswordNotification;
 
 class Participante extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
 
     protected $guard = 'participante';
 
@@ -28,7 +31,7 @@ class Participante extends Authenticatable implements MustVerifyEmail
         'phone',
         'password',
         'status',
-        'read_terms'
+        'read_terms',
     ];
 
     /**
@@ -65,9 +68,10 @@ class Participante extends Authenticatable implements MustVerifyEmail
             Event::class,
             'participantes_events',
             'participante_id',
-            'event_id');
+            'event_id'
+        );
     }
-    
+
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token));

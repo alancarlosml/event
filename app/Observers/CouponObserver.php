@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Coupon;
@@ -26,7 +28,7 @@ class CouponObserver
      */
     public function updated(Coupon $coupon)
     {
-        //
+
     }
 
     /**
@@ -37,7 +39,7 @@ class CouponObserver
      */
     public function deleted(Coupon $coupon)
     {
-        //
+
     }
 
     /**
@@ -48,7 +50,7 @@ class CouponObserver
      */
     public function restored(Coupon $coupon)
     {
-        //
+
     }
 
     /**
@@ -59,6 +61,6 @@ class CouponObserver
      */
     public function forceDeleted(Coupon $coupon)
     {
-        //
+
     }
 }

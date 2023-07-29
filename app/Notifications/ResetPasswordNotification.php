@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -52,9 +53,10 @@ class ResetPasswordNotification extends ResetPassword
             'email' => $notifiable->getEmailForPasswordReset(),
         ], false));
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->view(
-                'mails.reset_password', ['name'=>$notifiable->name,'url' => $url]
+                'mails.reset_password',
+                ['name' => $notifiable->name, 'url' => $url]
             )
             ->subject('Redefinição de senha');
     }
@@ -68,7 +70,7 @@ class ResetPasswordNotification extends ResetPassword
     public function toArray($notifiable)
     {
         return [
-            //
+
         ];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,12 +21,12 @@ class ParticipanteLote extends Model
     protected $fillable = [
         'hash',
         'number',
-        'status'
+        'status',
     ];
 
     public function participante()
     {
-      return $this->belongsTo(Participante::class);
+        return $this->belongsTo(Participante::class);
     }
 
     public function lote()

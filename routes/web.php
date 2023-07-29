@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,13 +22,13 @@ Route::post('/contato', 'App\Http\Controllers\HomeController@send')->name('conta
 Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
 Route::get('/eventos/get-more-events', 'App\Http\Controllers\EventHomeController@getMoreEvents')->name('event_home.get-more-events');
 
-Route::post('painel/get-areas-by-category','App\Http\Controllers\HomeController@getAreas')->name('event_home.get_areas_by_category');
+Route::post('painel/get-areas-by-category', 'App\Http\Controllers\HomeController@getAreas')->name('event_home.get_areas_by_category');
 Route::get('painel/autocomplete_place', 'App\Http\Controllers\EventHomeController@autocomplete_place')->name('event_home.autocomplete_place');
 Route::get('painel/check_slug', 'App\Http\Controllers\EventHomeController@check_slug')->name('event_home.check_slug');
 Route::get('painel/create_slug', 'App\Http\Controllers\EventHomeController@create_slug')->name('event_home.create_slug');
-Route::post('painel/store_file/{id}','App\Http\Controllers\EventHomeController@file_store')->middleware(['auth:participante', 'verified'])->name('event_home.store_file');
-Route::get('painel/delete_file/{id}','App\Http\Controllers\EventHomeController@delete_file')->middleware(['auth:participante', 'verified'])->name('event_home.delete_file');
-Route::post('painel/places/get-cities-by-state','App\Http\Controllers\EventHomeController@getCity')->middleware(['auth:participante', 'verified'])->name('event_home.get_city');
+Route::post('painel/store_file/{id}', 'App\Http\Controllers\EventHomeController@file_store')->middleware(['auth:participante', 'verified'])->name('event_home.store_file');
+Route::get('painel/delete_file/{id}', 'App\Http\Controllers\EventHomeController@delete_file')->middleware(['auth:participante', 'verified'])->name('event_home.delete_file');
+Route::post('painel/places/get-cities-by-state', 'App\Http\Controllers\EventHomeController@getCity')->middleware(['auth:participante', 'verified'])->name('event_home.get_city');
 
 // PAINEL - CRIAR EVENTO
 Route::get('painel/minhas-inscricoes', 'App\Http\Controllers\EventAdminController@myRegistrations')->middleware(['auth:participante', 'verified'])->name('event_home.my_registrations');
@@ -70,8 +72,8 @@ Route::delete('painel/eventos/cupom/{hash}/excluir', 'App\Http\Controllers\Event
 
 Route::get('painel/eventos/publicar', 'App\Http\Controllers\EventAdminController@createStepFour')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.four');
 Route::post('painel/eventos/publicar/{hash}', 'App\Http\Controllers\EventAdminController@postCreateStepFour')->middleware(['auth:participante', 'verified'])->name('event_home.publish');
-Route::get('painel/eventos/{id}/delete_file','App\Http\Controllers\EventAdminController@deleteFileEvent')->middleware(['auth:participante', 'verified'])->name('event_home.delete_file_event');
-Route::get('painel/eventos/organizador/{id}/delete_file_icon','App\Http\Controllers\EventAdminController@deleteFileIcon')->middleware(['auth:participante', 'verified'])->name('event_home.delete_file_icon');
+Route::get('painel/eventos/{id}/delete_file', 'App\Http\Controllers\EventAdminController@deleteFileEvent')->middleware(['auth:participante', 'verified'])->name('event_home.delete_file_event');
+Route::get('painel/eventos/organizador/{id}/delete_file_icon', 'App\Http\Controllers\EventAdminController@deleteFileIcon')->middleware(['auth:participante', 'verified'])->name('event_home.delete_file_icon');
 
 Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->name('conference.index');
 Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->name('contact_event');
@@ -88,8 +90,6 @@ Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEvent
 // Route::post('painel/lotes/{id}/update', 'App\Http\Controllers\LoteController@update')->middleware(['auth:participante', 'verified'])->name('lote.update');
 // Route::delete('painel/lotes/{id}/destroy', 'App\Http\Controllers\LoteController@destroy')->middleware(['auth:participante', 'verified'])->name('lote.destroy');
 // Route::post('painel/lotes/{id}/save_lotes', 'App\Http\Controllers\LoteController@save_lotes')->middleware(['auth:participante', 'verified'])->name('lote.save_lotes');
-
-
 
 // Route::get('admin/register', [RegisteredUserController::class, 'create'])->name('register');
 
@@ -121,7 +121,7 @@ Route::post('admin/categories/store', 'App\Http\Controllers\CategoryController@s
 Route::get('admin/categories/edit/{id}', 'App\Http\Controllers\CategoryController@edit')->middleware(['auth:web'])->name('category.edit');
 Route::post('admin/categories/update/{id}', 'App\Http\Controllers\CategoryController@update')->middleware(['auth:web'])->name('category.update');
 Route::delete('admin/categories/destroy/{id}', 'App\Http\Controllers\CategoryController@destroy')->middleware(['auth:web'])->name('category.destroy');
-Route::post('admin/categories/get-areas-by-category','App\Http\Controllers\CategoryController@getAreas')->middleware(['auth:web']);
+Route::post('admin/categories/get-areas-by-category', 'App\Http\Controllers\CategoryController@getAreas')->middleware(['auth:web']);
 
 Route::get('admin/categories/{category_id}/areas', 'App\Http\Controllers\AreaController@index')->middleware(['auth:web'])->name('area.index');
 Route::get('admin/categories/{category_id}/areas/show/{id}', 'App\Http\Controllers\AreaController@show')->middleware(['auth:web'])->name('area.show');
@@ -138,7 +138,7 @@ Route::post('admin/places/store', 'App\Http\Controllers\PlaceController@store')-
 Route::get('admin/places/edit/{id}', 'App\Http\Controllers\PlaceController@edit')->middleware(['auth:web'])->name('place.edit');
 Route::post('admin/places/update/{id}', 'App\Http\Controllers\PlaceController@update')->middleware(['auth:web'])->name('place.update');
 Route::delete('admin/places/destroy/{id}', 'App\Http\Controllers\PlaceController@destroy')->middleware(['auth:web'])->name('place.destroy');
-Route::post('admin/places/get-cities-by-state','App\Http\Controllers\PlaceController@getCity')->middleware(['auth:web']);
+Route::post('admin/places/get-cities-by-state', 'App\Http\Controllers\PlaceController@getCity')->middleware(['auth:web']);
 
 Route::get('admin/contacts/list', 'App\Http\Controllers\ContactController@index')->middleware(['auth:web'])->name('contact.index');
 Route::get('admin/contacts/show/{id}', 'App\Http\Controllers\ContactController@show')->middleware(['auth:web'])->name('contact.show');
@@ -155,8 +155,8 @@ Route::delete('admin/events/destroy/{id}', 'App\Http\Controllers\EventController
 Route::get('admin/events/autocomplete_place', 'App\Http\Controllers\EventController@autocomplete_place')->name('event.autocomplete_place');
 Route::get('admin/events/check_slug', 'App\Http\Controllers\EventController@check_slug')->name('event.check_slug');
 Route::get('admin/events/create_slug', 'App\Http\Controllers\EventController@create_slug')->name('event.create_slug');
-Route::post('admin/events/store_file/{id}','App\Http\Controllers\EventController@file_store')->middleware(['auth:web'])->name('event.store_file');
-Route::get('admin/events/delete_file/{id}','App\Http\Controllers\EventController@delete_file')->middleware(['auth:web'])->name('event.delete_file');
+Route::post('admin/events/store_file/{id}', 'App\Http\Controllers\EventController@file_store')->middleware(['auth:web'])->name('event.store_file');
+Route::get('admin/events/delete_file/{id}', 'App\Http\Controllers\EventController@delete_file')->middleware(['auth:web'])->name('event.delete_file');
 Route::get('admin/eventos/participantes/editar/{id}', 'App\Http\Controllers\EventController@participantes_edit')->middleware(['auth:web'])->name('event.participantes.edit');
 Route::post('admin/eventos/participantes/update/{id}', 'App\Http\Controllers\EventController@participantes_update')->middleware(['auth:web'])->name('event.participantes.update');
 Route::get('admin/eventos/vendas/detalhes/{hash}', 'App\Http\Controllers\EventController@order_details')->middleware(['auth:web'])->name('event.orders.details');
@@ -184,8 +184,8 @@ Route::post('admin/owners/store', 'App\Http\Controllers\OwnerController@store')-
 Route::get('admin/owners/edit/{id}', 'App\Http\Controllers\OwnerController@edit')->middleware(['auth:web'])->name('owner.edit');
 Route::post('admin/owners/update/{id}', 'App\Http\Controllers\OwnerController@update')->middleware(['auth:web'])->name('owner.update');
 Route::delete('admin/owners/destroy/{id}', 'App\Http\Controllers\OwnerController@destroy')->middleware(['auth:web'])->name('owner.destroy');
-Route::post('admin/owners/store_file/{id}','App\Http\Controllers\OwnerController@file_store')->middleware(['auth:web'])->name('owner.store_file');
-Route::get('admin/owners/delete_file/{id}','App\Http\Controllers\OwnerController@delete_file')->middleware(['auth:web'])->name('owner.delete_file');
+Route::post('admin/owners/store_file/{id}', 'App\Http\Controllers\OwnerController@file_store')->middleware(['auth:web'])->name('owner.store_file');
+Route::get('admin/owners/delete_file/{id}', 'App\Http\Controllers\OwnerController@delete_file')->middleware(['auth:web'])->name('owner.delete_file');
 
 Route::get('admin/participantes/list', 'App\Http\Controllers\ParticipanteController@index')->middleware(['auth:web'])->name('participante.index');
 Route::get('admin/participantes/show/{id}', 'App\Http\Controllers\ParticipanteController@show')->middleware(['auth:web'])->name('participante.show');

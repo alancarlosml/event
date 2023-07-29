@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      *
@@ -14,10 +15,10 @@ return new class extends Migration
     public function up()
     {
         Schema::disableForeignKeyConstraints();
-        
+
         Schema::create('events', function (Blueprint $table) {
-            $table->increments('id');     
-            $table->string('hash')->unique();    
+            $table->increments('id');
+            $table->string('hash')->unique();
             $table->string('name')->unique();
             $table->string('subtitle');
             $table->string('slug')->unique();
@@ -43,9 +44,9 @@ return new class extends Migration
                 ->onDelete('cascade');
             $table->integer('area_id')->index()->nullable()->unsigned();
             $table->foreign('area_id')
-                  ->references('id')
-                  ->on('areas')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('areas')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

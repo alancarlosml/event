@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Owner;
@@ -14,7 +16,7 @@ class OwnerObserver
      */
     public function created(Owner $owner)
     {
-        
+
     }
 
     /**
@@ -25,7 +27,7 @@ class OwnerObserver
      */
     public function updated(Owner $owner)
     {
-        //
+
     }
 
     /**
@@ -36,7 +38,7 @@ class OwnerObserver
      */
     public function deleted(Owner $owner)
     {
-        //
+
     }
 
     /**
@@ -47,7 +49,7 @@ class OwnerObserver
      */
     public function restored(Owner $owner)
     {
-        //
+
     }
 
     /**
@@ -58,6 +60,6 @@ class OwnerObserver
      */
     public function forceDeleted(Owner $owner)
     {
-        //
+
     }
 }

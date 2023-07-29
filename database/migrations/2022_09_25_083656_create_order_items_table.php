@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      *
@@ -17,10 +18,10 @@ return new class extends Migration
 
         Schema::create('order_items', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('number')->unique(); 
+            $table->string('number')->unique();
             $table->integer('quantity');
             $table->double('value');
-            $table->timestamp('date_use'); 
+            $table->timestamp('date_use');
             $table->integer('status');  // 1 - confirmado / 2 - pendente / 3 - cancelado / 4 - estornado
             $table->integer('order_id')->index()->unsigned();
             $table->foreign('order_id')

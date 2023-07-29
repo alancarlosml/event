@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\User;
@@ -14,7 +16,7 @@ class UserObserver
      */
     public function created(User $user)
     {
-        //
+
     }
 
     /**
@@ -25,7 +27,7 @@ class UserObserver
      */
     public function updated(User $user)
     {
-        //
+
     }
 
     /**
@@ -36,7 +38,7 @@ class UserObserver
      */
     public function deleted(User $user)
     {
-        //
+
     }
 
     /**
@@ -47,7 +49,7 @@ class UserObserver
      */
     public function restored(User $user)
     {
-        //
+
     }
 
     /**
@@ -58,6 +60,6 @@ class UserObserver
      */
     public function forceDeleted(User $user)
     {
-        //
+
     }
 }

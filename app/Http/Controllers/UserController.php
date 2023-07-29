@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -9,14 +11,16 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function index(){
-        
+    public function index()
+    {
+
         $users = User::orderBy('name')->get();
 
         return view('user.index', compact('users'));
     }
 
-    public function create(){
+    public function create()
+    {
 
         return view('user.add');
     }
@@ -26,7 +30,7 @@ class UserController extends Controller
         $this->validate($request, [
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8'
+            'password' => 'required|min:8',
         ]);
 
         $input = $request->all();
@@ -38,8 +42,9 @@ class UserController extends Controller
         return redirect()->route('user.index');
     }
 
-    public function edit($id){
-                
+    public function edit($id)
+    {
+
         $user = User::find($id);
 
         return view('user.edit', compact('user'));
@@ -57,15 +62,15 @@ class UserController extends Controller
 
         $input = $request->all();
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
-        if( empty( $input['password'] ) ){
+        if(empty($input['password'])) {
             unset($input['password']);
-        }else{
+        } else {
             Hash::make($input['password']);
         }
 
@@ -79,7 +84,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $user->delete();
-        
+
         return redirect()->route('user.index');
     }
 }

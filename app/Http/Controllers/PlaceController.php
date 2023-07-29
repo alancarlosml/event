@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -11,8 +13,9 @@ use App\Models\City;
 
 class PlaceController extends Controller
 {
-    public function index(){
-        
+    public function index()
+    {
+
         // $places = Place::orderBy('name')->get();
 
         $places = DB::table('places')
@@ -27,7 +30,8 @@ class PlaceController extends Controller
         return view('place.index', compact('places'));
     }
 
-    public function create(){
+    public function create()
+    {
 
         $states = State::orderBy('name')->get();
 
@@ -44,7 +48,7 @@ class PlaceController extends Controller
             'zip' => 'required',
             'state' => 'required',
             'city_id' => 'required',
-            'status' => 'required'
+            'status' => 'required',
         ]);
 
         $input = $request->all();
@@ -54,8 +58,9 @@ class PlaceController extends Controller
         return redirect()->route('place.index');
     }
 
-    public function edit($id){
-                
+    public function edit($id)
+    {
+
         // $place = Place::find($id);
 
         $place = DB::table('places')
@@ -83,14 +88,14 @@ class PlaceController extends Controller
             'zip' => 'required',
             'state' => 'required',
             'city_id' => 'required',
-            'status' => 'required'
+            'status' => 'required',
         ]);
 
         $input = $request->all();
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
@@ -104,28 +109,29 @@ class PlaceController extends Controller
         $place = Place::findOrFail($id);
 
         $place->delete();
-        
+
         return redirect()->route('place.index');
     }
 
-    public function show($id){
-                
+    public function show($id)
+    {
+
         $place = Place::find($id);
 
         $city_uf = DB::table('cities')
-                    ->join('states', 'states.uf', '=', 'cities.uf')
-                    ->where('cities.id', $place->city_id)
-                    ->select('cities.name', 'states.uf')
-                    ->first();
+            ->join('states', 'states.uf', '=', 'cities.uf')
+            ->where('cities.id', $place->city_id)
+            ->select('cities.name', 'states.uf')
+            ->first();
 
         return view('place.show', compact('place', 'city_uf'));
     }
 
     public function getCity(Request $request)
     {
-        $data['cities'] = City::where("uf",$request->uf)
-                    ->get(["name","id"]);
-        
+        $data['cities'] = City::where('uf', $request->uf)
+            ->get(['name', 'id']);
+
         return response()->json($data);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -16,10 +18,11 @@ class LoteController extends Controller
      */
     public function index()
     {
-        //
+
     }
 
-    public function create($id){
+    public function create($id)
+    {
 
         $config = Configuration::findOrFail(1);
 
@@ -32,7 +35,7 @@ class LoteController extends Controller
     {
         $input = $request->all();
 
-        if($input['type'] == 0){
+        if($input['type'] == 0) {
             $this->validate($request, [
                 'name' => 'required',
                 'description' => 'required',
@@ -45,7 +48,7 @@ class LoteController extends Controller
                 'datetime_end' => 'required',
                 'tax_parcelamento' => 'required|integer',
                 'tax_service' => 'required|integer',
-                'form_pagamento' => 'required|integer'
+                'form_pagamento' => 'required|integer',
             ]);
         } else {
 
@@ -58,11 +61,11 @@ class LoteController extends Controller
                 'limit_min' => 'required|min:1',
                 'limit_max' => 'required|gt:limit_min',
                 'datetime_begin' => 'required',
-                'datetime_end' => 'required'
+                'datetime_end' => 'required',
             ]);
         }
 
-        $number_lotes = Lote::where("event_id", $id)->count();
+        $number_lotes = Lote::where('event_id', $id)->count();
 
         $input['order'] = $number_lotes + 1;
         $input['datetime_begin'] = date('Y-m-d H:m', strtotime(str_replace('/', '-', $input['datetime_begin'])));
@@ -78,8 +81,9 @@ class LoteController extends Controller
         return redirect()->route('event.lotes', $id);
     }
 
-    public function edit($id){
-                
+    public function edit($id)
+    {
+
         $lote = Lote::find($id);
 
         $config = Configuration::findOrFail(1);
@@ -97,8 +101,8 @@ class LoteController extends Controller
         $lote = Lote::findOrFail($id);
 
         $input = $request->all();
-        
-        if($input['type'] == 0){
+
+        if($input['type'] == 0) {
             $this->validate($request, [
                 'name' => 'required',
                 'description' => 'required',
@@ -111,7 +115,7 @@ class LoteController extends Controller
                 'datetime_end' => 'required',
                 'tax_parcelamento' => 'required|integer',
                 'tax_service' => 'required|integer',
-                'form_pagamento' => 'required|integer'
+                'form_pagamento' => 'required|integer',
             ]);
         } else {
 
@@ -124,7 +128,7 @@ class LoteController extends Controller
                 'limit_min' => 'required|min:1',
                 'limit_max' => 'required|gt:limit_min',
                 'datetime_begin' => 'required',
-                'datetime_end' => 'required'
+                'datetime_end' => 'required',
             ]);
         }
 
@@ -136,9 +140,9 @@ class LoteController extends Controller
             $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * 0.07;
         }
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
@@ -152,7 +156,7 @@ class LoteController extends Controller
         $lote = Lote::findOrFail($id);
 
         $lote->delete();
-        
+
         return redirect()->route('event.lotes', $lote->event_id);
     }
 
@@ -160,8 +164,8 @@ class LoteController extends Controller
     {
         $input = $request->all();
 
-        foreach($input['order_lote'] as $order){
-            
+        foreach($input['order_lote'] as $order) {
+
             $id_order = explode('_', $order);
             $idorder = $id_order[0];
             $order = $id_order[1];

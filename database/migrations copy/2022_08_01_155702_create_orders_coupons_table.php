@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      *
@@ -16,7 +17,7 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
 
         Schema::create('orders_coupons', function (Blueprint $table) {
-            $table->increments('id');      
+            $table->increments('id');
             $table->integer('order_id')->index()->unsigned();
             $table->foreign('order_id')
                 ->references('id')

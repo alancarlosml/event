@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,6 @@ class ParticipanteEvent extends Model
     protected $table = 'participantes_events';
 
     protected $fillable = [
-        'status'
+        'status',
     ];
 }

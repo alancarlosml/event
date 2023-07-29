@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -8,14 +10,16 @@ use App\Models\Owner;
 
 class OwnerController extends Controller
 {
-    public function index(){
-        
+    public function index()
+    {
+
         $owners = Owner::orderBy('name')->get();
 
         return view('owner.index', compact('owners'));
     }
 
-    public function create(){
+    public function create()
+    {
 
         return view('owner.add');
     }
@@ -25,14 +29,14 @@ class OwnerController extends Controller
         $this->validate($request, [
             'name' => 'required',
             'icon' => 'mimes:jpg,jpeg,bmp,png|max:2048',
-            'status' => 'nullable'
+            'status' => 'nullable',
         ]);
 
         $input = $request->all();
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
@@ -53,8 +57,9 @@ class OwnerController extends Controller
         return redirect()->route('owner.index');
     }
 
-    public function edit($id){
-                
+    public function edit($id)
+    {
+
         $owner = Owner::find($id);
 
         return view('owner.edit', compact('owner'));
@@ -64,24 +69,24 @@ class OwnerController extends Controller
     {
         $owner = Owner::findOrFail($id);
 
-        if($owner->icon){
+        if($owner->icon) {
             $this->validate($request, [
                 'name' => 'required',
-                'status'
+                'status',
             ]);
         } else {
             $this->validate($request, [
                 'name' => 'required',
                 'icon' => 'mimes:jpg,jpeg,bmp,png|max:2048',
-                'status'
+                'status',
             ]);
         }
 
         $input = $request->all();
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
@@ -105,12 +110,13 @@ class OwnerController extends Controller
         $owner = Owner::findOrFail($id);
 
         $owner->delete();
-        
+
         return redirect()->route('owner.index');
     }
 
-    public function show($id){
-                
+    public function show($id)
+    {
+
         $owner = Owner::find($id);
 
         return view('owner.show', compact('owner'));

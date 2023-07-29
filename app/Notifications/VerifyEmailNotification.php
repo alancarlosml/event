@@ -1,15 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
 
 class VerifyEmailNotification extends VerifyEmail
@@ -23,7 +23,7 @@ class VerifyEmailNotification extends VerifyEmail
      */
     public function __construct()
     {
-        //
+
     }
 
     /**
@@ -58,9 +58,10 @@ class VerifyEmailNotification extends VerifyEmail
             ]
         );
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->view(
-                'mails.verify_email', ['url' => $url]
+                'mails.verify_email',
+                ['url' => $url]
             )
             ->subject('Verificar endereço de email');
     }
@@ -74,7 +75,7 @@ class VerifyEmailNotification extends VerifyEmail
     public function toArray($notifiable)
     {
         return [
-            //
+
         ];
     }
 }

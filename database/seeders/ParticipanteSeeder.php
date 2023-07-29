@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class ParticipanteSeeder extends Seeder
 {
@@ -23,7 +24,7 @@ class ParticipanteSeeder extends Seeder
             'cpf' => '02587763520',
             'phone' => '8955554544',
             'status' => 1,
-            'created_at' => date("Y-m-d H:i:s")
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         DB::table('participantes')->insert([
@@ -33,7 +34,7 @@ class ParticipanteSeeder extends Seeder
             'cpf' => '02587763520',
             'phone' => '8955554544',
             'status' => 1,
-            'created_at' => date("Y-m-d H:i:s")
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         DB::table('participantes')->insert([
@@ -43,7 +44,7 @@ class ParticipanteSeeder extends Seeder
             'cpf' => '02587763520',
             'phone' => '8955554544',
             'status' => 1,
-            'created_at' => date("Y-m-d H:i:s")
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         DB::table('participantes')->insert([
@@ -53,7 +54,7 @@ class ParticipanteSeeder extends Seeder
             'cpf' => '02587763520',
             'phone' => '8955554544',
             'status' => 0,
-            'created_at' => date("Y-m-d H:i:s")
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         DB::table('participantes')->insert([
@@ -63,7 +64,7 @@ class ParticipanteSeeder extends Seeder
             'cpf' => '02587763520',
             'phone' => '8955554544',
             'status' => 0,
-            'created_at' => date("Y-m-d H:i:s")
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
     }
 }

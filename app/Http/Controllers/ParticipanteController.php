@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -9,28 +11,30 @@ use App\Models\Participante;
 
 class ParticipanteController extends Controller
 {
-    public function index(){
-        
+    public function index()
+    {
+
         $participantes = Participante::orderBy('name')->get();
 
         $participantesAdmins = Participante::orderBy('name')
-                                ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
-                                ->where('participantes_events.role', 'admin')
-                                ->select('participantes.id', 'participantes.name')
-                                ->groupBy('participantes.id')
-                                ->get();
+            ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
+            ->where('participantes_events.role', 'admin')
+            ->select('participantes.id', 'participantes.name')
+            ->groupBy('participantes.id')
+            ->get();
 
         $participantesConvidados = Participante::orderBy('name')
-                                ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
-                                ->where('participantes_events.role', 'guest')
-                                ->select('participantes.id', 'participantes.name')
-                                ->groupBy('participantes.id')
-                                ->get();
+            ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
+            ->where('participantes_events.role', 'guest')
+            ->select('participantes.id', 'participantes.name')
+            ->groupBy('participantes.id')
+            ->get();
 
         return view('participante.index', compact('participantes', 'participantesAdmins', 'participantesConvidados'));
     }
 
-    public function create(){
+    public function create()
+    {
 
         return view('participante.add');
     }
@@ -42,7 +46,7 @@ class ParticipanteController extends Controller
             'email' => 'required|email|unique:participantes,email',
             'password' => 'required|min:8',
             'cpf' => 'required',
-            'phone' => 'required'
+            'phone' => 'required',
         ]);
 
         $input = $request->all();
@@ -52,8 +56,9 @@ class ParticipanteController extends Controller
         return redirect()->route('participante.index');
     }
 
-    public function edit($id){
-                
+    public function edit($id)
+    {
+
         $participante = Participante::find($id);
 
         return view('participante.edit', compact('participante'));
@@ -68,20 +73,20 @@ class ParticipanteController extends Controller
             'email' => 'required|email|unique:participantes,email,' . $participante->id,
             'password' => 'nullable|min:8',
             'cpf' => 'required',
-            'phone' => 'required'
+            'phone' => 'required',
         ]);
 
         $input = $request->all();
 
-        if(isset($input['status'])){
+        if(isset($input['status'])) {
             $input['status'] = 1;
-        }else{
+        } else {
             $input['status'] = 0;
         }
 
-        if( empty( $input['password'] ) ){
+        if(empty($input['password'])) {
             unset($input['password']);
-        }else{
+        } else {
             Hash::make($input['password']);
         }
 
@@ -95,12 +100,13 @@ class ParticipanteController extends Controller
         $participante = Participante::findOrFail($id);
 
         $participante->delete();
-        
+
         return redirect()->route('participante.index');
     }
 
-    public function show($id){
-                
+    public function show($id)
+    {
+
         $participante = Participante::find($id);
 
         return view('participante.show', compact('participante'));

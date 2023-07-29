@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Participante;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,13 +55,13 @@ class RegisteredUserController extends Controller
             'phone' => $request->phone,
             'read_terms' => $request->read_terms,
             'password' => Hash::make($request->password),
-            'status' => 1 // cadastrado mas não confirmado ainda
+            'status' => 1, // cadastrado mas não confirmado ainda
         ]);
 
         $email_participante = $request->email;
 
         $participante->notify(new WelcomeEmailNotification($participante));
-        
+
         event(new Registered($participante));
 
         // Auth::login($user);
@@ -73,7 +74,8 @@ class RegisteredUserController extends Controller
         // return redirect()->intended($previousUrl);
     }
 
-    public function verify(Request $request){
+    public function verify(Request $request)
+    {
 
         return view('auth.verify');
     }

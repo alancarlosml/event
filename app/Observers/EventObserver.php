@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Event;
@@ -26,7 +28,7 @@ class EventObserver
      */
     public function updated(Event $event)
     {
-        //
+
     }
 
     /**
@@ -37,7 +39,7 @@ class EventObserver
      */
     public function deleted(Event $event)
     {
-        //
+
     }
 
     /**
@@ -48,7 +50,7 @@ class EventObserver
      */
     public function restored(Event $event)
     {
-        //
+
     }
 
     /**
@@ -59,6 +61,6 @@ class EventObserver
      */
     public function forceDeleted(Event $event)
     {
-        //
+
     }
 }

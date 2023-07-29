@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,12 +29,12 @@ class Lote extends Model
         'datetime_begin',
         'datetime_end',
         'order',
-        'event_id'
+        'event_id',
     ];
 
     public function event()
     {
-      return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class);
     }
 
     public function coupons()
@@ -41,7 +43,8 @@ class Lote extends Model
             Coupon::class,
             'coupons_lotes',
             'lote_id',
-            'coupon_id');
+            'coupon_id'
+        );
     }
 
     // public function participantes()
