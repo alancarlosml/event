@@ -23,201 +23,184 @@
                         </div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Erros encontrados:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     @endif
                 </div>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-12">
-                            <!-- Default box -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0 mt-1"><b>Detalhes do comprador</b></h5>
-                                </div>
-                                <div class="card-body table-responsive p-0">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="card-body col-6">
-                                                <div class="form-group">
-                                                    <label for="id">CPF</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->participante)){{$order->participante->cpf}} @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="name">Nome</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->participante)){{$order->participante->name}} @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="subtitle">Email</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->participante)){{$order->participante->email}} @else - @endif
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div class="card-body col-6">
-                                                <div class="form-group">
-                                                    <label for="subtitle">Telefone</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->participante)){{$order->participante->phone}} @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="subtitle">Data criação</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->participante)){{ \Carbon\Carbon::parse($order->participante->created_at)->format('d/m/Y H:i') }} @else - @endif
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- /.card-body -->
-                                </div>
-                            </div>
-                            <!-- /.card -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0 mt-1"><b>Detalhes da venda</b></h5>
-                                </div>
-                                <div class="card-body table-responsive p-0">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="card-body col-6">
-                                                <div class="form-group">
-                                                    <label for="id">Hash da venda</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->order_hash)){{$order->order_hash}} @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="name">Hash Mercado Pago</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->gatway_hash)){{$order->gatway_hash}} @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="subtitle">Referência Mercado Pago</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->gatway_reference)){{$order->gatway_reference}} @else - @endif
-                                                    </p>
-                                                </div>
-                                                
-                                            </div>
-                                            <div class="card-body col-6">
-                                                <div class="form-group">
-                                                    <label for="subtitle">Status da compra</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->situacao)) @if($order->situacao == 1) Confirmado @elseif($order->situacao == 2) Pendente @elseif($order->situacao == 3) Cancelado @endif @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="slug">Forma pagamento</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->gatway_payment_method)) @if($order->gatway_payment_method == 'credit') Crédito @elseif($order->gatway_payment_method == 'boleto') Boleto @elseif($order->gatway_payment_method == 'pix') Pix @else  Não informado @endif @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="slug">Data da compra</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order->created_at)){{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }} @else - @endif
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- /.card-body -->
-                                </div>
-                            </div>
-                            @if(isset($order->order_items))
-                            @foreach($order->order_items as $k => $order_item)
-                            <!-- /.card -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0 mt-1"><b>Participante #{{$k+1}}</b></h5>
-                                </div>
-                                <div class="card-body table-responsive p-0">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="card-body col-6">
-                                                <div class="form-group">
-                                                    <label for="id">Hash participante</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        {{$order_item->hash}}
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="id">Nº inscrição</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        {{$order_item->number}}
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="subtitle">Lote</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if(isset($order_item->lote)){{$order_item->lote->name}} @else - @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="name">Valor do ingresso</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @money($order_item->value)
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="name">Taxa de serviço</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @money($order_item->value)
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="name">Valor recebido</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @money($order_item->value)
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="subtitle">Data uso</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if($order_item->date_use){{ \Carbon\Carbon::parse($order_item->date_use)->format('d/m/Y H:i') }} @else Não utilizado @endif
-                                                    </p>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="subtitle">Status da compra do participante</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        @if($order_item->status == 1) Confirmado @elseif($order_item->status == 2) Pendente @elseif($order_item->status == 3) Cancelado  @elseif($order_item->status == 4) Estorno @else - @endif
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            @if(isset($order_item->answers))
-                                            <div class="card-body col-6">
-                                                @foreach($order_item->answers as $answer)
-                                                <div class="form-group">
-                                                    <label for="subtitle">{{$answer->question->question}}</label>
-                                                    <p class="text-muted" style="font-size: 18px">
-                                                        {{$answer->answer}}
-                                                    </p>
-                                                </div>
-                                                @endforeach
-                                            </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <!-- /.card-body -->
-                                </div>
-                            </div>
-                            <!-- /.card -->
-                            @endforeach
+                <div class="card-body table-responsive p-0">
+                    <h4 class="d-flex justify-content-end">
+                        <a href="#" class="button-print" onclick="window.print();"><img src="{{ asset('assets/img/print-pdf.jpg') }}" alt="Imprimir" width="36px"></a>
+                    </h4>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="id">ID</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->id}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Nome</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->name}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="subtitle">Subtitulo</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->subtitle}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="slug">URL do evento</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{env('APP_URL') . '/' . $event->slug}} 
+                                <a href="{{env('APP_URL') . '/' . $event->slug}}" target="_blank">
+                                    <i class="fa-solid fa-up-right-from-square"></i>
+                                </a>
+                                
+                                {{-- Addionar um link com um icone para o evento --}}
+
+
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Descrição</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {!!$event->description!!}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="banner">Banner</label> <br/>
+                            @if (!isset($event->banner))
+                                <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
+                            @else
+                                Sem banner cadastrado
                             @endif
                         </div>
+                        <div class="form-group">
+                            <label for="max_tickets">N° máximo de ingressos</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->max_tickets}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_tickets">Local do evento</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->place->name}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_tickets">Responsável</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{$event->get_participante_admin()->name}} - {{$event->get_participante_admin()->email}}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="created_at">Data de criação</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                {{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Ativo</label>
+                            <p class="text-muted" style="font-size: 18px">
+                                @if($event->status == 1) 
+                                    Sim 
+                                @else 
+                                    Não 
+                                @endif
+                            </p>
+                        </div>
+                        <hr>
+                        <label for="lotes">Lotes</label>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-head-fixed text-nowrap">
+                                <thead>
+                                    <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Valor</th>
+                                    <th>Taxa</th>
+                                    <th>Preço final</th>
+                                    <th>Quantidade</th>
+                                    <th>Visibilidade</th>
+                                    {{-- <th>Cupons</th> --}}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($event->lotes as $lote)
+                                        <tr>
+                                            <td>{{$lote->id}}</td>
+                                            <td>
+                                                <b>{{$lote->name}}</b><br/>
+                                                {{$lote->description}}
+                                            </td>
+                                            <td>@money($lote->value)</td>
+                                            <td>@money($lote->tax)</td>
+                                            <td>@money($lote->final_value)</td>
+                                            <td>{{$lote->quantity}}</td>
+                                            <td>@if($lote->visibility == 0) Público @else Privado @endif</td>
+                                            {{-- <td>
+                                                <ul class="list-group list-group-flush">
+                                                    @foreach($lote->coupons as $coupon)
+                                                    <li>{{$coupon->code}}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </td> --}}
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        {{-- <hr> --}}
+                        {{-- <label for="cupons">Cupons</label>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-head-fixed text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Código</th>
+                                        <th>Tipo desconto</th>
+                                        <th>Valor desconto</th>
+                                        <th>Limite de compras</th>
+                                        <th>Limite de inscrições</th>
+                                        <th>Lotes</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($event->coupons as $coupon)
+                                        <tr>
+                                            <td>{{$coupon->id}}</td>
+                                            <td>{{$coupon->code}}</td>
+                                            <td>@if($coupon->discount_type == 0) Porcentagem @elseif($coupon->discount_type == 1) Fixo @endif</td>
+                                            <td>@if($coupon->discount_type == 0) {{$coupon->discount_value*100}}% @elseif($coupon->discount_type == 1) @money($coupon->discount_value) @endif</td>
+                                            <td>{{$coupon->limit_buy}}</td>
+                                            <td>{{$coupon->limit_tickets}}</td>
+                                            <td>
+                                                <ul class="list-group list-group-flush">
+                                                    @foreach($coupon->lotes as $lote)
+                                                    <li>{{$lote->name}}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
+                                            <td>@if($coupon->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div> --}}
                     </div>
+                    <!-- /.card-body -->
                 </div>
             </div>
         </section>
@@ -232,6 +215,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
         <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
+        <link rel="stylesheet" href="{{ asset('assets/css/print.css') }}" media="print" type="text/css"/>
           
       @endpush
 

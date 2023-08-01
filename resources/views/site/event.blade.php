@@ -78,9 +78,9 @@
             <div class="row">
                 <div class="col-12">
                     <div class="section-title-header text-center pb-4">
-                        <h2 class="section-title wow fadeInUp animated" data-wow-delay="0.2s"
-                            style="visibility: visible;-webkit-animation-delay: 0.2s; -moz-animation-delay: 0.2s; animation-delay: 0.2s;">
-                            Inscrições</h2>
+                        <h2 class="section-title wow fadeInUp animated" data-wow-delay="0.2s" style="visibility: visible;-webkit-animation-delay: 0.2s; -moz-animation-delay: 0.2s; animation-delay: 0.2s;">
+                            Inscrições
+                        </h2>
                     </div>
                 </div>
             </div>
@@ -90,9 +90,7 @@
                         <ul class="nav nav-tabs">
                             @foreach ($event->event_dates as $event_date)
                                 <li class="nav-item">
-                                    <a class="nav-link event_date_nav @if ($total_dates == 1) active @endif"
-                                       href="javascript:;"
-                                       data-tab="{{ $event_date->id }}">{{ \Carbon\Carbon::parse($event_date->date)->format('d/m') }}</a>
+                                    <a class="nav-link event_date_nav @if ($total_dates == 1) active @endif" href="javascript:;" data-tab="{{ $event_date->id }}">{{ \Carbon\Carbon::parse($event_date->date)->format('d/m') }}</a>
                                 </li>
                             @endforeach
                         </ul>

@@ -59,6 +59,13 @@ class HomeController extends Controller
             'subject' => 'required',
             'text' => 'required',
             'g-recaptcha-response' => 'required|recaptchav3:register,0.5',
+        ], [
+            'name.required' => 'O campo nome é obrigatório.',
+            'email.required' => 'O campo email é obrigatório.',
+            'phone.required' => 'O campo telefone é obrigatório.',
+            'subject.required' => 'O campo assunto é obrigatório.',
+            'text.required' => 'O campo mensagem é obrigatório.',
+            'g-recaptcha-response.required' => 'O campo captcha é obrigatório.',
         ]);
 
         $input = $request->all();

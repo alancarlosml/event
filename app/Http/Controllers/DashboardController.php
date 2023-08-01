@@ -57,6 +57,7 @@ class DashboardController extends Controller
             ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
             ->where('orders.status', 1)
             ->select('orders.id as order_id', 'orders.status as situacao', 'events.name as event_name', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
+            ->orderBy('orders.created_at', 'desc')
             ->get();
 
         $ingressos_pendentes = DB::table('orders')
@@ -67,6 +68,7 @@ class DashboardController extends Controller
             ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
             ->where('orders.status', 2)
             ->select('orders.id as order_id', 'orders.status as situacao', 'events.name as event_name', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
+            ->orderBy('orders.created_at', 'desc')
             ->get();
 
         $ingressos_cancelados = DB::table('orders')
@@ -77,6 +79,7 @@ class DashboardController extends Controller
             ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
             ->where('orders.status', 3)
             ->select('orders.id as order_id', 'orders.status as situacao', 'events.name as event_name', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
+            ->orderBy('orders.created_at', 'desc')
             ->get();
 
         $total_confirmado = DB::table('lotes')

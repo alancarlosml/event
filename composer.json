@@ -15,6 +15,7 @@
         "mercadopago/dx-php": "2.5.3",
         "moip/moip-sdk-php": "^3.1",
         "rmccue/requests": "1.7.0",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^5.5"
     },
     "require-dev": {

@@ -99,10 +99,11 @@ class CategoryController extends Controller
 
     public function getAreas(Request $request)
     {
+    
         $data['areas'] = Area::where('category_id', $request->category_id)
             ->where('status', 1)
             ->get(['name', 'id']);
 
-        return response()->json($data);
+return response()->json($data);
     }
 }

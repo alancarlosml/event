@@ -23,12 +23,16 @@
                         </div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Erros encontrados:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -208,8 +212,8 @@
                                                         </td>
                                                         <td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
                                                         </td>
-                                                        <td> <a class="btn btn-info btn-sm mr-1"
-                                                               href="{{ route('event_home.order.details', $order->order_hash) }}">
+                                                        <td> 
+                                                            <a class="btn btn-info btn-sm mr-1" href="{{ route('event_home.order.details', $order->order_hash) }}">
                                                                 <i class="fa-solid fa-plus"></i> Info
                                                             </a>
                                                         </td>
@@ -498,6 +502,7 @@
                 });
 
                 $('#participantes_table').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -594,6 +599,7 @@
                 });
 
                 $('#participantes_inscritos_lote').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -690,6 +696,7 @@
                 });
 
                 $('#participantes_listagem_lote').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -786,6 +793,7 @@
                 });
 
                 $('#participantes_inscritos_cupom').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",

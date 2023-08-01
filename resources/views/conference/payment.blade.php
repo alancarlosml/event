@@ -25,8 +25,8 @@
                             <div id="result_operation flex d-none">
                                 <p class="text-center">
                                     Verifique a situação dos seus ingressos em <a
-                                        href="{{ route('event_home.my_registrations') }}"
-                                        class="alert-link text-decoration-none">Minhas inscrições</a>
+                                       href="{{ route('event_home.my_registrations') }}"
+                                       class="alert-link text-decoration-none">Minhas inscrições</a>
                                 </p>
                             </div>
                         </div>
@@ -35,17 +35,17 @@
 
                 <!-- Modal -->
                 <div class="modal fade mt-5" id="cupomModal" tabindex="-1" role="dialog"
-                    aria-labelledby="cupomModalLabel" aria-hidden="true">
+                     aria-labelledby="cupomModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <strong class="modal-title" id="cupomModalLabel"><img id="modal_icon"
-                                        src="/assets_conference/imgs/success.png" style="max-height: 48px"> <span
-                                        id="modal_txt">Cupom adicionado com sucesso!</span></strong>
+                                         src="/assets_conference/imgs/success.png" style="max-height: 48px"> <span
+                                          id="modal_txt">Cupom adicionado com sucesso!</span></strong>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" id="modal_close" class="btn btn-secondary"
-                                    data-dismiss="modal">Ok</button>
+                                        data-dismiss="modal">Ok</button>
                             </div>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
 
     @push('bootstrap_version')
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
+              crossorigin="anonymous" referrerpolicy="no-referrer" />
     @endpush
 
     @push('theme')
@@ -83,7 +83,7 @@
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js">
         </script>
         <script type="text/javascript"
-            src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
+                src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
         <script>
             // $('#checkout_submit').validate({
             //     errorClass: "error fail-alert d-block"
@@ -300,7 +300,7 @@
                                                 const settings = {
                                                     initialization: {
                                                         paymentId: result
-                                                        .id, // id de pagamento gerado pelo Mercado Pago
+                                                            .id, // id de pagamento gerado pelo Mercado Pago
                                                     },
                                                     callbacks: {
                                                         onReady: () => {

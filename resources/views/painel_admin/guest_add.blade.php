@@ -23,12 +23,16 @@
                         </div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Erros encontrados:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -40,7 +44,7 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="email">Email do convidado*</label>
-                                    <input type="email" class="form-control col-5" id="email" name="email" placeholder="Email" required>
+                                    <input type="email" class="form-control col-5" id="email" name="email" placeholder="Email" required value="old('email')">
                                     <small id="emailHelp" class="form-text text-muted">Antes de realizar a adição, certifique-se de que o usuário já possui cadastro no site.</small>
                                 </div>
                                 <div class="form-group">

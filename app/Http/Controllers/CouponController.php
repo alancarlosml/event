@@ -85,7 +85,7 @@ class CouponController extends Controller
 
         // dd($coupon->lotes);
 
-        return view('coupon.coupon_edit', compact('event', 'coupon', 'lotes', 'id'));
+        return view('coupon.edit_coupon', compact('event', 'coupon', 'lotes', 'id'));
     }
 
     public function update_coupon(Request $request, $id)

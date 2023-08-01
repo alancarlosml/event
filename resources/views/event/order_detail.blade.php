@@ -8,13 +8,6 @@
                     <div class="col-sm-6">
                         <h1>Vendas</h1>
                     </div>
-                    {{-- <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Layout</a></li>
-                            <li class="breadcrumb-item active">Fixed Layout</li>
-                        </ol>
-                    </div> --}}
                 </div>
             </div><!-- /.container-fluid -->
         </section>
@@ -31,7 +24,7 @@
                                 <h3 class="card-title">Detalhes do comprador</h3>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse"
-                                        title="Collapse">
+                                            title="Collapse">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </div>
@@ -104,7 +97,7 @@
                                 <h3 class="card-title">Detalhes da venda</h3>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse"
-                                        title="Collapse">
+                                            title="Collapse">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </div>
@@ -204,7 +197,7 @@
                                         <h3 class="card-title">Participante #{{ $k + 1 }}</h3>
                                         <div class="card-tools">
                                             <button type="button" class="btn btn-tool" data-card-widget="collapse"
-                                                title="Collapse">
+                                                    title="Collapse">
                                                 <i class="fas fa-minus"></i>
                                             </button>
                                         </div>
@@ -285,7 +278,7 @@
                                                         @foreach ($order_item->answers as $answer)
                                                             <div class="form-group">
                                                                 <label
-                                                                    for="subtitle">{{ $answer->question->question }}</label>
+                                                                       for="subtitle">{{ $answer->question->question }}</label>
                                                                 <p class="text-muted" style="font-size: 18px">
                                                                     {{ $answer->answer }}
                                                                 </p>

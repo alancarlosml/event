@@ -181,6 +181,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        // SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -210,7 +211,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Moip' => Moip\Moip::class,
-        'BasicAuth' => Moip\Auth\BasicAuth::class
+        'BasicAuth' => Moip\Auth\BasicAuth::class,
+        // 'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
     ])->toArray(),
 
 ];

@@ -33,12 +33,14 @@ use App\Models\Question;
 use App\Models\User;
 use App\Models\State;
 
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 class EventAdminController extends Controller
 {
     public function myRegistrations()
     {
 
-        $events = Order::orderBy('events.created_at', 'desc')
+        $orders = Order::orderBy('events.created_at', 'desc')
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
             // ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
@@ -47,17 +49,19 @@ class EventAdminController extends Controller
             ->join('events', 'event_dates.event_id', '=', 'events.id')
             ->join('places', 'places.id', '=', 'events.place_id')
             ->select(
-                'events.*',
-                // 'lotes.name as lote_name',
+                'events.name as event_name',
+                'events.status as event_status',
+                'events.created_at as event_date',
                 'event_dates.date as data_chosen',
-                'places.name as place_name'
+                'places.name as place_name',
+                'orders.hash as order_hash',
+                'orders.gatway_status'
             )
             ->where('participantes.id', Auth::user()->id)
             ->groupBy('events.id')
-            // ->where('participantes_events.status', 1)
             ->get();
 
-        return view('painel_admin.my_registrations', compact('events'));
+        return view('painel_admin.my_registrations', compact('orders'));
     }
 
     public function myEvents()
@@ -95,7 +99,7 @@ class EventAdminController extends Controller
             ->where('participantes_events.status', 1)
             // ->where('participantes_events.role', 'admin')
             // ->select('events.*', 'places.name as place_name', 'users.name as owner_name', DB::raw('MIN(event_dates.date) as date_event_min'), DB::raw('MAX(event_dates.date) as date_event_max'))
-            ->orderBy('events.name')
+            ->orderBy('created_at', 'desc')
             ->groupBy('events.id')
             ->get();
 
@@ -241,8 +245,7 @@ class EventAdminController extends Controller
 
         } catch (Exception $e) {
             // Alguma coisa deu errado. Reverter as operações de banco de dados.
-            dd($e);
-            DB::rollback();
+    DB::rollback();
 
             // Reenviar o erro para manipulação adicional (por exemplo, log, exibição para o usuário).
             throw $e;
@@ -268,6 +271,14 @@ class EventAdminController extends Controller
                 'place_id_hidden' => 'nullable',
                 'admin_id' => 'required',
                 'status' => 'string',
+            ], [
+                'name.required' => 'O nome do evento é obrigatório.',
+                'slug.required' => 'A URL do evento é obrigatório.',
+                'slug.unique' => 'A URL do evento já está em uso.',
+                'description.required' => 'A descrição do evento é obrigatória.',
+                'area_id.required' => 'A área do evento é obrigatória.',
+                'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
+                'admin_email.required' => 'O email do administrador é obrigatório.',
             ]);
 
             // dd($validatedDataEvent);
@@ -319,6 +330,15 @@ class EventAdminController extends Controller
                 'status' => 'string',
                 'new_field' => 'required',
                 'new_field_id' => 'nullable',
+            ],[
+                'name.required' => 'O nome do evento é obrigatório.',
+                'slug.required' => 'A URL do evento é obrigatório.',
+                'slug.unique' => 'A URL do evento já está em uso.',
+                'description.required' => 'A descrição do evento é obrigatória.',
+                'area_id.required' => 'A área do evento é obrigatória.',
+                'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
+                'admin_email.required' => 'O email do administrador é obrigatório.',
+                'new_field.required' => 'As perguntas são obrigatórias.',
             ]);
 
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
@@ -353,6 +373,13 @@ class EventAdminController extends Controller
             'complement' => 'nullable',
             'zip' => 'required',
             'city_id_hidden' => 'required',
+        ],[
+            'place_name.required' => 'O nome do lugar é obrigatório.',
+            'address.required' => 'O endereço do lugar é obrigatório.',
+            'number.required' => 'O número do lugar é obrigatório.',
+            'district.required' => 'O bairro do lugar é obrigatório.',
+            'zip.required' => 'O CEP do lugar é obrigatório.',
+            'city_id_hidden.required' => 'A cidade do lugar é obrigatória.',
         ]);
 
         // dd($validatedDataPlace);
@@ -390,10 +417,14 @@ class EventAdminController extends Controller
     private function saveEventDates(Request $request, Event $event)
     {
         $validatedDataEventDate = $request->validate([
-            'date' => 'required',
-            'time_begin' => 'required',
-            'time_end' => 'required',
+            'date.*' => 'required',
+            'time_begin.*' => 'required',
+            'time_end.*' => 'required',
             'date_id' => 'nullable',
+        ],[
+            'date.*.required' => 'A data do evento é obrigatória.',
+            'time_begin.*.required' => 'A hora de início do evento é obrigatória.',
+            'time_end.*.required' => 'A hora de término do evento é obrigatória.',
         ]);
 
         $date_ids = $validatedDataEventDate['date_id'];
@@ -410,16 +441,12 @@ class EventAdminController extends Controller
             ->only('id')
             ->toArray();
 
-        // dd($date_ids);
-        // dd($date_ids_db);
-
         foreach($date_ids_db as $date_id_db) {
 
             if( ! in_array($date_id_db['id'], $date_ids)) {
                 DB::table('event_dates')->where('id', $date_id_db['id'])->delete();
             }
         }
-        //fim
 
         $date_events_array = [];
         for ($i = 0; $i < count($dates); $i++) {
@@ -471,6 +498,8 @@ class EventAdminController extends Controller
         $validatedDataQuestion = $request->validate([
             'new_field' => 'required',
             'new_field_id' => 'nullable',
+        ],[
+            'new_field.required' => 'As perguntas são obrigatórias.',
         ]);
 
         $fields = $validatedDataQuestion['new_field'];
@@ -587,355 +616,6 @@ class EventAdminController extends Controller
         }
     }
 
-    // public function postCreateStepOne(Request $request)
-    // {
-    //     /*********************************************/
-    //     /*************** SAVE EVENTS *****************/
-    //     /*********************************************/
-
-    //     if(empty($request->session()->get('event'))){
-
-    //         $validatedDataEvent = $request->validate([
-    //             'name' => 'required',
-    //             'hash' => 'string',
-    //             'slug' => 'required|unique:events',
-    //             'subtitle' => 'string',
-    //             'description' => 'required',
-    //             // 'category' => 'required',
-    //             'area_id' => 'required',
-    //             'max_tickets' => 'required',
-    //             'admin_email' => 'required',
-    //             'place_id_hidden' => 'required',
-    //             'admin_id' => 'required',
-    //             'status' => 'string'
-    //         ]);
-
-    //         // dd($validatedDataEvent);
-
-    //         $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('papainoel'));
-    //         $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
-    //         $validatedDataEvent['status'] = 0;
-    //         $validatedDataEvent['place_id'] = $validatedDataEvent['place_id_hidden'];
-
-    //         // dd($validatedDataEvent);
-
-    //         $event = new Event();
-    //         $event->fill($validatedDataEvent);
-    //         $event->save();
-    //         // dd($event);
-    //         $event_id = $event->id;
-    //         $request->session()->put('event', $event);
-    //         $request->session()->put('event_id', $event_id);
-
-    //         DB::table('participantes_events')->insert([
-    //             'event_id' => $event_id,
-    //             'participante_id' => $validatedDataEvent['admin_id'],
-    //             'hash' => md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('cachorronoel')),
-    //             'role' => 'admin',
-    //             'status' => 1,
-    //             'created_at' => date('Y-m-d H:i:s')
-    //         ]);
-    //         //ENVIAR EMAIL - EVENTO CRIADO
-
-    //          Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
-
-    //     }else{
-
-    //         $event_id = $request->session()->get('event_id');
-    //         $event = Event::findOrFail($event_id);
-
-    //         $validatedDataEvent = $request->validate([
-    //             'name' => 'required',
-    //             'slug' => 'required|unique:events,slug,'.$event_id,
-    //             'description' => 'required',
-    //             'subtitle' => 'string',
-    //             'category' => 'required',
-    //             'area_id' => 'required',
-    //             'max_tickets' => 'required',
-    //             'admin_email' => 'required',
-    //             'place_id_hidden' => 'required',
-    //             'status' => 'string',
-    //             'new_field' => 'required',
-    //             'new_field_id' => 'nullable'
-    //         ]);
-
-    //         $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
-    //         $validatedDataEvent['place_id'] = $validatedDataEvent['place_id_hidden'];
-
-    //         // if(isset($validatedDataEvent['status'])){
-    //         //     $validatedDataEvent['status'] = 1;
-    //         // }else{
-    //         //     $validatedDataEvent['status'] = 0;
-    //         // }
-
-    //         $event->fill($validatedDataEvent);
-    //         $request->session()->put('event', $event);
-    //         $event->save();
-
-    //         Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
-    //     }
-
-    //     /*********************************************/
-    //     /*************** END SAVE EVENTS *************/
-    //     /*********************************************/
-
-    //     /*********************************************/
-    //     /*************** SAVE PLACES *****************/
-    //     /*********************************************/
-
-    //     $validatedDataPlace = $request->validate([
-    //         'place_id_hidden' => 'nullable',
-    //         'place_name' => 'required',
-    //         'address' => 'required',
-    //         'number' => 'required',
-    //         'district' => 'required',
-    //         'complement' => 'nullable',
-    //         'zip' => 'required',
-    //         'city_id_hidden' => 'required'
-    //     ]);
-
-    //     // dd($validatedDataPlace);
-
-    //     $validatedDataPlace['name'] = $validatedDataPlace['place_name'];
-    //     $validatedDataPlace['city_id'] = $validatedDataPlace['city_id_hidden'];
-    //     $validatedDataPlace['place_id'] = $validatedDataPlace['place_id_hidden'];
-    //     $validatedDataPlace['status'] = 1;
-
-    //     $event_id = $request->session()->get('event_id');
-
-    //     if($validatedDataPlace['place_id'] != null) {
-    //         $event = Event::where('id', $event_id)->update(array('place_id' => $validatedDataPlace['place_id']));
-    //         $place = Place::findOrFail($validatedDataPlace['place_id']);
-    //         $request->session()->put('place', $place);
-    //         $request->session()->put('place_id', $validatedDataPlace['place_id']);
-    //         $request->session()->put('uf', $place->get_city()->uf);
-    //     } else{
-    //         $place = new Place();
-    //         $place->fill($validatedDataPlace);
-    //         $place->save();
-    //         $place_id = $place->id;
-    //         Event::where('id', $event_id)->update(array('place_id' => $place_id));
-    //         $request->session()->put('place', $place);
-    //         $request->session()->put('place_id', $place_id);
-    //     }
-
-    //     /*********************************************/
-    //     /*************** END SAVE PLACES *************/
-    //     /*********************************************/
-
-    //     /*********************************************/
-    //     /*************** SAVE DATES ******************/
-    //     /*********************************************/
-
-    //     $validatedDataEventDate = $request->validate([
-    //         'date' => 'required',
-    //         'time_begin' => 'required',
-    //         'time_end' => 'required',
-    //         'date_id' => 'nullable'
-    //     ]);
-
-    //     $date_ids = $validatedDataEventDate['date_id'];
-    //     $dates = $validatedDataEventDate['date'];
-    //     $times_begin = $validatedDataEventDate['time_begin'];
-    //     $times_end = $validatedDataEventDate['time_end'];
-    //     $event_id = $request->session()->get('event_id');
-
-    //     // Verifica se está faltando um id para excluir no banco
-    //     $date_ids_db = EventDate::where('event_id', $event_id)
-    //                 ->where('status', '1')
-    //                 ->get()
-    //                 ->map
-    //                 ->only('id')
-    //                 ->toArray();
-
-    //     // dd($date_ids);
-    //     // dd($date_ids_db);
-
-    //     foreach($date_ids_db as $date_id_db){
-
-    //         if(!in_array($date_id_db['id'], $date_ids)){
-    //             DB::table('event_dates')->where('id', $date_id_db['id'])->delete();
-    //         }
-    //     }
-    //     //fim
-
-    //     $date_events_array = array();
-    //     for ($i = 0; $i < count($dates); $i++){
-    //         $date = str_replace("/", "-", $dates[$i]);
-    //         if(!isset($date_ids[$i])){
-    //             array_push($date_events_array, array(
-    //                 'date_id' => null,
-    //                 'date' => date('Y-m-d', strtotime($date)),
-    //                 'time_begin' => date('H:i', strtotime($times_begin[$i])),
-    //                 'time_end' => date('H:i', strtotime($times_end[$i])),
-    //             ));
-    //         }else{
-    //             array_push($date_events_array, array(
-    //                 'date_id' => $date_ids[$i],
-    //                 'date' => date('Y-m-d', strtotime($date)),
-    //                 'time_begin' => date('H:i', strtotime($times_begin[$i])),
-    //                 'time_end' => date('H:i', strtotime($times_end[$i])),
-    //             ));
-    //         }
-    //     }
-
-    //     foreach($date_events_array as $arr_date){
-
-    //         if($arr_date['date_id'] == null){
-    //             EventDate::create([
-    //                 'date' => date('Y-m-d', strtotime(str_replace('/', '-', $arr_date['date']))),
-    //                 'time_begin' => date('H:i', strtotime($arr_date['time_begin'])),
-    //                 'time_end' => date('H:i', strtotime($arr_date['time_end'])),
-    //                 'status' => 1,
-    //                 'event_id' => $event_id,
-    //                 'created_at' => date("Y-m-d H:i:s")
-    //             ]);
-    //         }else{
-    //             // $dates[$i] = str_replace('/', '-', $dates[$i]);
-    //             $arr_dates = array(
-    //                 'date' => date('Y-m-d', strtotime(str_replace('/', '-', $arr_date['date']))),
-    //                 'time_begin' => date('H:i', strtotime($arr_date['time_begin'])),
-    //                 'time_end' => date('H:i', strtotime($arr_date['time_end']))
-    //             );
-
-    //             // array_push($finalArray, $arr_dates);
-    //             EventDate::where('id', $arr_date['date_id'])->update($arr_dates);
-    //         }
-    //     }
-
-    //     /*********************************************/
-    //     /*************** END SAVE DATES **************/
-    //     /*********************************************/
-
-    //     /*********************************************/
-    //     /*************** SAVE QUESTIONS **************/
-    //     /*********************************************/
-
-    //     // DB::table('questions')->where('event_id', $event_id)->delete();
-
-    //     $fields = $validatedDataEvent['new_field'];
-    //     $field_ids = $validatedDataEvent['new_field_id'];
-
-    //     // Verifica se está faltando um id para excluir no banco
-    //     $questions_ids_db = Question::where('event_id', $event_id)
-    //                 ->where('status', '1')
-    //                 ->get()
-    //                 ->map
-    //                 ->only('id')
-    //                 ->toArray();
-
-    //     foreach($questions_ids_db as $questions_ids_db){
-
-    //         if(!in_array($questions_ids_db['id'], $field_ids)){
-    //             DB::table('questions')->where('id', $questions_ids_db['id'])->delete();
-    //         }
-    //     }
-    //     //fim
-
-    //     $questions_array = array();
-    //     for ($i = 0; $i < count($fields); $i++){
-    //         if(!isset($field_ids[$i])){
-    //             array_push($questions_array, array(
-    //                 'question_id' => null,
-    //                 'question' => $fields[$i]
-    //             ));
-    //         }else{
-    //             array_push($questions_array, array(
-    //                 'question_id' => $field_ids[$i],
-    //                 'question' => $fields[$i]
-    //             ));
-    //         }
-    //     }
-
-    //     // dd($questions_array);
-
-    //     foreach($questions_array as $id => $field){
-
-    //         if($field['question_id'] == null){
-
-    //             preg_match_all("/\(([^\]]*)\)/", $field['question'], $matches);
-    //             $result_field = $matches[1];
-    //             $result_field = str_replace("Tipo: ", "", $result_field);
-
-    //             $more_fields = explode(';', $field['question']);
-
-    //             $required = 0;
-    //             if(strpos($field['question'], 'Obrigatório')){
-    //                 $required = 1;
-    //             }
-
-    //             $unique = 0;
-    //             if(strpos($field['question'], 'Único')){
-    //                 $unique = 1;
-    //             }
-
-    //             $option = Option::where('option', $result_field[0])->first();
-    //             $question = Question::create([
-    //             // DB::table('questions')->insert([
-    //                 'question' => $more_fields[0],
-    //                 'order' => $id + 1,
-    //                 'required' => $required,
-    //                 'unique' => $unique,
-    //                 'status' => 1,
-    //                 'option_id' => $option->id,
-    //                 'event_id' => $event_id
-    //             ]);
-
-    //             $id_question = $question->id;
-
-    //             $result_regex = preg_match_all("/\[([^\]]*)\]/", $field['question'], $matches);
-
-    //             if($result_regex){
-    //                 $result_field = $matches[1];
-    //                 $result_field = str_replace("Opções: ", "", $result_field);
-
-    //                 $array_explode_question = explode(',', $result_field[0]);
-
-    //                 foreach($array_explode_question as $item_array_explode_question){
-    //                     DB::table('option_values')->insert([
-    //                         'value' => trim($item_array_explode_question),
-    //                         'question_id' => $id_question
-    //                     ]);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     $questions = Question::orderBy('order')->where('event_id', $event_id)->get();
-
-    //     $request->session()->put('questions', $questions);
-
-    //     /*********************************************/
-    //     /************* END SAVE QUESTIONS ************/
-    //     /*********************************************/
-
-    //     /*********************************************/
-    //     /*************** SAVE USER ADMIN *************/
-    //     /*********************************************/
-
-    //     $participante_evento = ParticipanteEvent::where('role', 'admin')
-    //                             ->where('participante_id', Auth::user()->id)
-    //                             ->where('event_id', $event_id)
-    //                             ->get();
-
-    //     if($participante_evento->count() == 0){
-    //         DB::table('participantes_events')->insert([
-    //             'hash' => md5(Auth::user()->name . date("Y-m-d H:i:s") . md5('papainoel')),
-    //             'role' => 'admin',
-    //             'status' => 1,
-    //             'created_at' => date("Y-m-d H:i:s"),
-    //             'participante_id' => Auth::user()->id,
-    //             'event_id' => $event_id,
-    //         ]);
-    //     }
-
-    //     /*********************************************/
-    //     /************* END SAVE USER ADMIN ***********/
-    //     /*********************************************/
-
-    //     return redirect()->route('event_home.create.step.two');
-    // }
-
     public function createStepTwo(Request $request)
     {
         $event_id = $request->session()->get('event_id');
@@ -987,11 +667,22 @@ class EventAdminController extends Controller
                 'limit_max' => 'required|gte:limit_min',
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
-
-                // 'tax' => 'nullable',
-                // 'final_value' => 'nullable',
                 'form_pagamento' => 'nullable',
                 'visibility' => 'required',
+            ],[
+               'type.required' => 'Tipo de lote é obrigatório',
+               'tax_parcelamento.required' => 'Taxa de parcelamento é obrigatória',
+               'tax_service.required' => 'Taxa de serviço é obrigatória',
+               'value.required' => 'Valor do lote é obrigatório',
+               'name.required' => 'Nome do lote é obrigatório',
+               'quantity.required' => 'Quantidade é obrigatória',
+               'description.required' => 'Descrição do lote é obrigatória',
+               'limit_min.required' => 'Limite mínimo de 1 é obrigatório',
+               'limit_max.required' => 'Limite máximo maior ou igual ao limíte mínimo é obrigatório',
+               'datetime_begin.required' => 'Data de inicio é obrigatória',
+               'datetime_end.required' => 'Data de fim é obrigatória',
+               'form_pagamento.required' => 'Forma de pagamento é obrigatória',
+               'visibility.required' => 'Visibilidade do lote é obrigatória',
             ]);
         } else {
             $validatedData = $this->validate($request, [
@@ -1005,6 +696,20 @@ class EventAdminController extends Controller
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
                 'event_id' => 'nullable',
+            ],[
+                'type.required' => 'Tipo de lote é obrigatório',
+                'tax_parcelamento.required' => 'Taxa de parcelamento é obrigatória',
+                'tax_service.required' => 'Taxa de serviço é obrigatória',
+                'value.required' => 'Valor do lote é obrigatório',
+                'name.required' => 'Nome do lote é obrigatório',
+                'quantity.required' => 'Quantidade é obrigatória',
+                'description.required' => 'Descrição do lote é obrigatória',
+                'limit_min.required' => 'Limite mínimo de 1 é obrigatório',
+                'limit_max.required' => 'Limite máximo maior ou igual ao limíte mínimo é obrigatório',
+                'datetime_begin.required' => 'Data de inicio é obrigatória',
+                'datetime_end.required' => 'Data de fim é obrigatória',
+                'form_pagamento.required' => 'Forma de pagamento é obrigatória',
+                'visibility.required' => 'Visibilidade do lote é obrigatória',
             ]);
         }
 
@@ -1080,12 +785,26 @@ class EventAdminController extends Controller
                 'quantity' => 'required',
                 'description' => 'required',
                 'limit_min' => 'required|min:1',
-                'limit_max' => 'required|min:1',
+                'limit_max' => 'required|gte:limit_min',
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
                 'visibility' => 'required',
                 'event_id' => 'nullable',
-            ]);
+            ],[
+                'type.required' => 'Tipo de lote é obrigatório',
+                'tax_parcelamento.required' => 'Taxa de parcelamento é obrigatória',
+                'tax_service.required' => 'Taxa de serviço é obrigatória',
+                'value.required' => 'Valor do lote é obrigatório',
+                'name.required' => 'Nome do lote é obrigatório',
+                'quantity.required' => 'Quantidade é obrigatória',
+                'description.required' => 'Descrição do lote é obrigatória',
+                'limit_min.required' => 'Limite mínimo de 1 é obrigatório',
+                'limit_max.required' => 'Limite máximo maior ou igual ao limíte mínimo é obrigatório',
+                'datetime_begin.required' => 'Data de inicio é obrigatória',
+                'datetime_end.required' => 'Data de fim é obrigatória',
+                'form_pagamento.required' => 'Forma de pagamento é obrigatória',
+                'visibility.required' => 'Visibilidade do lote é obrigatória',
+             ]);
         } else {
 
             $this->validate($request, [
@@ -1094,11 +813,21 @@ class EventAdminController extends Controller
                 'quantity' => 'required',
                 'description' => 'required',
                 'limit_min' => 'required|min:1',
-                'limit_max' => 'required|min:1',
+                'limit_max' => 'required|gte:limit_min',
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
                 'visibility' => 'required',
                 'event_id' => 'nullable',
+            ],[
+                'type.required' => 'Tipo de lote é obrigatório',
+                'name.required' => 'Nome do lote é obrigatório',
+                'quantity.required' => 'Quantidade é obrigatória',
+                'description.required' => 'Descrição do lote é obrigatória',
+                'limit_min.required' => 'Limite mínimo de 1 é obrigatório',
+                'limit_max.required' => 'Limite máximo maior ou igual ao limíte mínimo é obrigatório',
+                'datetime_begin.required' => 'Data de inicio é obrigatória',
+                'datetime_end.required' => 'Data de fim é obrigatória',
+                'visibility.required' => 'Visibilidade do lote é obrigatória',
             ]);
         }
 
@@ -1201,6 +930,13 @@ class EventAdminController extends Controller
             'discount_value' => 'required',
             'limit_buy' => 'required',
             'limit_tickets' => 'required',
+        ],[
+            'code.required' => 'Código do cupom é obrigatório',
+            'code.unique' => 'Código do cupom já existe',
+            'discount_type.required' => 'Tipo de desconto é obrigatório',
+            'discount_value.required' => 'Valor do desconto é obrigatório',
+            'limit_buy.required' => 'Limite de compra é obrigatório',
+            'limit_tickets.required' => 'Limite de ingressos é obrigatório',
         ]);
 
         $input = $request->all();
@@ -1261,6 +997,13 @@ class EventAdminController extends Controller
             'limit_buy' => 'required',
             'limit_tickets' => 'required',
             'status' => 'nullable',
+        ],[
+            'code.required' => 'Código do cupom é obrigatório',
+            'code.unique' => 'Código do cupom já existe',
+            'discount_type.required' => 'Tipo de desconto é obrigatório',
+            'discount_value.required' => 'Valor do desconto é obrigatório',
+            'limit_buy.required' => 'Limite de compra é obrigatório',
+            'limit_tickets.required' => 'Limite de ingressos é obrigatório',
         ]);
 
         $input = $request->all();
@@ -1332,6 +1075,10 @@ class EventAdminController extends Controller
                 'theme' => 'required',
                 'banner_option' => 'required',
                 'status' => 'nullable',
+            ],[
+                'theme.required' => 'O tema do evento é obrigatório',
+                'banner_option.required' => 'O banner do evento é obrigatório',
+                'status.required' => 'Status é obrigatório',
             ]);
         } else {
             if($input['banner_option'] == 2) {
@@ -1340,12 +1087,20 @@ class EventAdminController extends Controller
                     'theme' => 'required',
                     'banner_option' => 'required',
                     'status' => 'nullable',
+                ],[
+                    'banner.required' => 'Os formatos aceitos para as imagens dos banner são: jpg, jpeg, bmp, png',
+                    'theme.required' => 'O tema do evento é obrigatória',   
+                    'banner_option.required' => 'O banner do evento é obrigatório',
+                    'status.required' => 'Status é obrigatório',
                 ]);
             } else {
                 $validatedEvent = $request->validate([
                     'theme' => 'required',
                     'banner_option' => 'required',
                     'status' => 'nullable',
+                ],[
+                    'theme.required' => 'O tema do evento é obrigatório',
+                    'banner_option.required' => 'O banner do evento é obrigatório',
                 ]);
 
                 $validatedEvent['banner'] = '';
@@ -1378,13 +1133,20 @@ class EventAdminController extends Controller
                 'owner_name' => 'required',
                 'description' => 'required',
                 'status' => 'nullable',
+            ],[
+                'owner_name.required' => 'O nome do proprietário é obrigatório',
+                'description.required' => 'A descrição do proprietário é obrigatória',
             ]);
         } else {
             $validatedOwner = $request->validate([
-                'icon' => 'mimes:jpg,jpeg,bmp,png|max:2048',
+                'icon' => 'required|mimes:jpg,jpeg,bmp,png|max:2048',
                 'owner_name' => 'required',
                 'description' => 'required',
                 'status' => 'nullable',
+            ],[
+                'owner_name.required' => 'O nome do proprietário é obrigatório',
+                'description.required' => 'A descrição do proprietário é obrigatória',
+                'icon.required' => 'Os formatos aceitos para as imagens são: jpg, jpeg, bmp, png',
             ]);
         }
 
@@ -1792,8 +1554,49 @@ class EventAdminController extends Controller
             ->join('events', 'events.id', '=', 'lotes.event_id')
             ->where('orders.hash', $hash)
             ->select('events.id as event_id', 'orders.id as order_id', 'orders.hash as order_hash', 'orders.status as situacao', 'orders.gatway_hash as gatway_hash', 'orders.gatway_reference as gatway_reference', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.id as participante_id', 'participantes.name as participante_name', 'participantes.email as participante_email', 'lotes.id as lote_id', 'lotes.name as lote_name')
+            ->groupBy('order_items.id')
             ->first();
 
         return view('painel_admin.order_detail', compact('order'));
     }
+
+    public function print_voucher(Request $request, $hash)
+    {
+
+        $items = OrderItem::orderBy('order_items.created_at', 'desc')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->join('participantes', 'participantes.id', '=', 'orders.participante_id')
+            ->join('events', 'event_dates.event_id', '=', 'events.id')
+            ->join('places', 'places.id', '=', 'events.place_id')
+            ->selectRaw(
+                'events.name as event_name,
+                events.status as event_status,
+                events.created_at as event_date,
+                event_dates.date as data_chosen,
+                places.name as place_name,
+                orders.hash as order_hash,
+                orders.gatway_status,
+                orders.gatway_hash,
+                orders.gatway_reference,
+                order_items.number,
+                order_items.created_at,
+                order_items.hash as order_items_hash,
+                md5(concat(orders.hash, order_items.hash, order_items.number, order_items.created_at, md5("papainoel"))) as purchase_hash'
+            )
+            ->where('orders.hash', $hash)
+            ->where('orders.gatway_status', '1')
+            ->get();
+
+        foreach($items as $item){
+
+            OrderItem::where('status', '1')
+                ->where('hash', $item->order_items_hash)
+                ->update(['purchase_hash' => $item->purchase_hash]);
+        }
+        
+        return view('painel_admin.print_voucher', compact('items'));
+
+    }
+
 }

@@ -8,13 +8,6 @@
                     <div class="col-sm-6">
                         <h1>Cupons</h1>
                     </div>
-                    {{-- <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Layout</a></li>
-                            <li class="breadcrumb-item active">Fixed Layout</li>
-                        </ol>
-                    </div> --}}
                 </div>
             </div><!-- /.container-fluid -->
         </section>
@@ -38,12 +31,16 @@
                                 </div>
                             </div>
                             @if ($errors->any())
-                                <div class="alert alert-danger">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <strong>Erros encontrados:</strong>
                                     <ul>
                                         @foreach ($errors->all() as $error)
                                             <li>{{ $error }}</li>
                                         @endforeach
                                     </ul>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
                             @endif
                             <div class="card-body table-responsive p-0">
@@ -89,8 +86,8 @@
                                                 name="limit_tickets" placeholder="0" min="0">
                                         </div>
                                         <div class="form-group">
-                                            <label for="lotes">Marque os lotes que terão este cupom de
-                                                desconto</label>
+                                            <label for="lotes">Marque os lotes que terão este cupom de desconto</label>
+                                            @if(count($lotes) > 0)
                                             <ul class="list-group">
                                                 @foreach ($lotes as $lote)
                                                     <li class="list-group-item">
@@ -104,6 +101,9 @@
                                                     </li>
                                                 @endforeach
                                             </ul>
+                                            @else
+                                                <br/>Lotes não cadastrados!
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="form-check pb-3">
@@ -115,7 +115,8 @@
                                     </div>
                                     <!-- /.card-body -->
                                     <div class="card-footer">
-                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                        <a href="{{ route('event.coupons', $id)}}" class="btn btn-success float-left">Voltar</a>
+                                        <button type="submit" class="btn btn-primary float-right">Salvar</button>
                                     </div>
                                 </form>
                             </div>

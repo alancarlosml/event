@@ -22,12 +22,16 @@
                         </div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Erros encontrados:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -199,6 +203,7 @@
             $('[data-toggle="popover"]').popover();
 
             $('#list_events').DataTable({
+                order: [[0, 'desc']],
                 language: {
                     "decimal":        "",
                     "emptyTable":     "Sem dados disponíveis na tabela",

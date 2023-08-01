@@ -22,12 +22,16 @@
                         </div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Erros encontrados:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -35,7 +39,6 @@
                     <table class="table table-head-fixed text-wrap hover" id="list_events">
                         <thead>
                             <tr>
-                            <th>ID</th>
                             <th>Detalhes</th>
                             <th>Local</th>
                             <th>Data Compra</th>
@@ -44,22 +47,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($events as $event)
+                            @foreach($orders as $order)
                                 <tr>
-                                    <td>{{$event->id}}</td>
                                     <td>
-                                        <b>Nome:</b> {{$event->name}} <br/>
-                                        <b>Data evento:</b> {{ \Carbon\Carbon::parse($event->data_chosen)->format('j/m/Y') }}
-                                        {{-- <b>Data evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif --}}
+                                        <b>Nome:</b> {{$order->event_name}} <br/>
+                                        <b>Data evento:</b> {{ \Carbon\Carbon::parse($order->data_chosen)->format('j/m/Y') }}
                                     </td>
-                                    <td>{{$event->place_name}}</td>
-                                    {{-- <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif</td> --}}
-                                    <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y') }}</td>
+                                    <td>{{$order->place_name}}</td>
+                                    <td>{{ \Carbon\Carbon::parse($order->event_date)->format('j/m/Y') }}</td>
                                     <td>
-                                        @if($event->status == 1) 
-                                            <span class="badge badge-success">Ativo</span> 
-                                        @else
-                                            <span class="badge badge-warning">Não ativo</span> 
+                                        @if(isset($order->gatway_status)) 
+                                            @if($order->gatway_status == 1) <span class="badge badge-success"> Confirmado </span>
+                                            @elseif($order->gatway_status == 2) <span class="badge badge-info"> Pendente </span>
+                                            @elseif($order->gatway_status == 3) <span class="badge badge-danger">Cancelado </span>
+                                            @endif 
+                                            @else <span class="badge badge-warning"> Não processado </span>
                                         @endif
                                     </td>
                                     <td>
@@ -69,11 +71,13 @@
                                                     <i class="fa-solid fa-gear"></i> Configurações
                                                 </button>
                                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
-                                                    <a class="dropdown-item" href="{{route('event_home.my_events_show', $event->hash)}}" target="_blank">
+                                                    @if($order->gatway_status == 1)
+                                                    <a class="dropdown-item" href="{{route('event_home.order.print_voucher', $order->order_hash)}}" target="_blank">
                                                         <i class="fas fa-print"></i>
                                                         Imprimir voucher
                                                     </a>
-                                                    <a class="dropdown-item" href="{{route('event_home.my_events_show', $event->hash)}}">
+                                                    @endif
+                                                    <a class="dropdown-item" href="{{route('event_home.order.details', $order->order_hash)}}">
                                                         <i class="fas fa-eye"></i>
                                                         Detalhes
                                                     </a>

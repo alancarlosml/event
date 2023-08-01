@@ -27,6 +27,7 @@ return new class () extends Migration {
             $table->integer('banner_option');
             $table->string('max_tickets');
             $table->string('theme');
+            $table->string('contact');
             $table->integer('status');
             // $table->foreignId('owner_id')->nullable()
             //     ->constrained('owners')

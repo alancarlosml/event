@@ -23,12 +23,16 @@
                         </div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Erros encontrados:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -45,8 +49,8 @@
                         <div class="card-body">
                             <h4>Sobre o evento</h4>
                             <div class="form-group">
-                                <label for="name">Nome*</label>
-                                <input type="text" class="form-control col-12" id="name" name="name" placeholder="Nome" value="{{ $event->name ?? '' }}" required="required" title="press">
+                                <label for="name">Nome do evento*</label>
+                                <input type="text" class="form-control col-12" id="name" name="name" placeholder="Nome do evento" value="{{$event->name ?? old('name') }}" required>
                             </div>
                             <div class="form-group">
                                 <label for="slug">URL do evento*</label>
@@ -54,17 +58,17 @@
                                     <div class="input-group-prepend">
                                       <span class="input-group-text" id="basic-addon3">https://www.ticketdz6.com.br/</span>
                                     </div>
-                                    <input type="text" class="form-control col-lg-12 col-sm-12" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" value="{{ $event->slug ?? '' }}" required>
+                                    <input type="text" class="form-control col-lg-12 col-sm-12" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" value="{{ $event->slug ?? old('slug') }}" required>
                                   </div>
                                 <small id="slugHelp" class="form-text text-danger d-none">Essa URL já está em uso, por favor, selecione outra.</small>
                             </div>
                             <div class="form-group">
                                 <label for="subtitle">Subtítulo</label>
-                                <input type="text" class="form-control col-lg-12 col-sm-12" id="subtitle" name="subtitle" placeholder="Subtítulo" value="{{ $event->subtitle ?? '' }}" required>
+                                <input type="text" class="form-control col-lg-12 col-sm-12" id="subtitle" name="subtitle" placeholder="Subtítulo" value="{{ $event->subtitle ?? old('subtitle') }}">
                             </div>
                             <div class="form-group">
                                 <label for="description">Descrição*</label>
-                                <textarea class="form-control" id="description" name="description" required> {{ $event->description ?? '' }}</textarea>
+                                <textarea class="form-control" id="description" name="description" required> {{ $event->description ?? old('description') }}</textarea>
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-lg-3 col-sm-12">
@@ -87,8 +91,8 @@
                                 <input type="hidden" name="area_id_hidden" id="area_id_hidden" value="{{ $event->area_id ?? '' }}">
                             </div>
                             <div class="form-group">
-                                <label for="admin_email">Email para contato*</label>
-                                <input type="email" class="form-control col-lg-6 col-sm-12" id="admin_email" name="admin_email" placeholder="Contato" value="{{Auth::user()->email}}">
+                                <label for="contact">Email para contato*</label>
+                                <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
                             </div>
                             {{-- <div class="form-group">
                                 <label for="banner">Banner do evento*</label><br/>
@@ -104,7 +108,7 @@
                             </div> --}}
                             <div class="form-group">
                                 <label for="max_tickets">Total máximo de vagas*</label>
-                                <input type="number" class="form-control col-lg-2 col-sm-12" id="max_tickets" name="max_tickets" value="{{ $event->max_tickets ?? '' }}" min="0">
+                                <input type="number" class="form-control col-lg-2 col-sm-12" id="max_tickets" name="max_tickets" value="{{ $event->max_tickets ?? old('max_tickets') }}" min="0">
                             </div>
                             <input type="hidden" name="admin_id" id="admin_id_hidden" value="{{Auth::user()->id}}">
                         </div>
@@ -209,7 +213,7 @@
                             <div class="form-row">
                                 <div class="form-group col-md-10">
                                     <label for="place_name">Local*</label>
-                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{ $place->name ?? '' }}" required>
+                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{ $place->place_name ?? old('place_name') }}" required>
                                     <small id="place_nameHelp" class="form-text text-muted">Comece a digitar para buscar o local do evento, caso não o encontre, preencha os campos deste formulário.</small>
                                 </div>
                                 <div class="form-group col-md-2">
@@ -223,20 +227,20 @@
                                 <div class="form-row">
                                     <div class="form-group col-md-10">
                                         <label for="address">Rua*</label>
-                                        <input type="text" class="form-control" id="address" name="address" placeholder="Rua" @if($place) readonly @endif value="{{ $place->address ?? '' }}" required>
+                                        <input type="text" class="form-control" id="address" name="address" placeholder="Rua" @if($place) readonly @endif value="{{ $place->address ?? old('address') }}" required>
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label for="number">Número*</label>
-                                        <input type="text" class="form-control" id="number" name="number" placeholder="Número" @if($place) readonly @endif value="{{ $place->number ?? '' }}" required>
+                                        <input type="text" class="form-control" id="number" name="number" placeholder="Número" @if($place) readonly @endif value="{{ $place->number ?? old('number') }}" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="district">Bairro*</label>
-                                    <input type="text" class="form-control" id="district" name="district" placeholder="Bairro" @if($place) readonly @endif value="{{ $place->district ?? '' }}" required>
+                                    <input type="text" class="form-control" id="district" name="district" placeholder="Bairro" @if($place) readonly @endif value="{{ $place->district ?? old('district') }}" required>
                                 </div>
                                <div class="form-group">
                                     <label for="complement">Complemento</label>
-                                    <input type="text" class="form-control" id="complement" name="complement" placeholder="Complemento" @if($place) readonly @endif value="{{ $place->complement ?? '' }}">
+                                    <input type="text" class="form-control" id="complement" name="complement" placeholder="Complemento" @if($place) readonly @endif value="{{ $place->complement ?? old('complement') }}">
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group col-md-5">
@@ -258,7 +262,7 @@
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label for="zip">CEP*</label>
-                                        <input type="text" class="form-control" id="zip" name="zip" placeholder="CEP" @if($place) readonly @endif value="{{ $place->zip ?? '' }}" required>
+                                        <input type="text" class="form-control" id="zip" name="zip" placeholder="CEP" @if($place) readonly @endif value="{{$place->zip ?? old('zip') }}" required>
                                     </div>
                                     <input type="hidden" name="place_id_hidden" id="place_id_hidden" value="{{ $place->id ?? '' }}">
                                 </div>  
@@ -294,7 +298,7 @@
                                         <div class="row">
                                             <div class="form-group col-md-12 col-sm-12" id="div_new_options" style="display: none">
                                                 <label for="">Preencha as opções separadas por vírgula</label>
-                                                <input type="text" class="form-control" name="new_options" id="new_options">
+                                                <input type="text" class="form-control" name="new_options" id="new_options" placeholder="XXX, YYY, ZZZ">
                                             </div>
                                             <div class="form-group col-md-12 col-sm-12" id="div_new_number" style="display: none">
                                                 <div class="row">
@@ -559,10 +563,16 @@
 
                 var id_option_select = $(this).val();
 
-                if(id_option_select == 2 || id_option_select == 3 || id_option_select == 4){
+                if(id_option_select == 2 || id_option_select == 3 || id_option_select == 4 || id_option_select == 14){
                     $('#div_new_options').show();
+                    if(id_option_select == 14){
+                        $('#new_options').val('AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO');
+                    }
                 } else {
                     $('#div_new_options').hide();
+                    if(id_option_select == 14){
+                        $('#new_options').val('');
+                    }
                 }
 
                 if(id_option_select == 9 || id_option_select == 10){

@@ -23,12 +23,16 @@
                         </div>
                     @endif
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Erros encontrados:</strong>
                             <ul>
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -40,11 +44,11 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="name">Nome do convidado*</label>
-                                    <input type="text" class="form-control col-5" id="name" name="name" placeholder="Nome" value="{{$guest->name}}" readonly>
+                                    <input type="text" class="form-control col-5" id="name" name="name" placeholder="Nome" value="{{$guest->name ?? old('name')}}" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="email">Email do convidado*</label>
-                                    <input type="text" class="form-control col-5" id="email" name="email" placeholder="Email" value="{{$guest->email}}" readonly>
+                                    <input type="text" class="form-control col-5" id="email" name="email" placeholder="Email" value="{{$guest->email ?? old('email')}}" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="status">Status</label>

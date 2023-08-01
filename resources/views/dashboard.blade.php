@@ -187,7 +187,7 @@
 															<td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
 															</td>
 															<td> <a class="btn btn-info btn-sm mr-1"
-																	href="{{ route('event.orders.details', $order->order_hash) }}">
+																	href="{{ route('event.orders.details', $order->order_id) }}">
 																	<i class="fa-solid fa-plus"></i> Info
 																</a>
 															</td>
@@ -239,7 +239,7 @@
 															<td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
 															</td>
 															<td> <a class="btn btn-info btn-sm mr-1"
-																	href="{{ route('event.orders.details', $order->order_hash) }}">
+																	href="{{ route('event.orders.details', $order->order_id) }}">
 																	<i class="fa-solid fa-plus"></i> Info
 																</a>
 															</td>
@@ -291,7 +291,7 @@
 															<td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
 															</td>
 															<td> <a class="btn btn-info btn-sm mr-1"
-																	href="{{ route('event.orders.details', $order->order_hash) }}">
+																	href="{{ route('event.orders.details', $order->order_id) }}">
 																	<i class="fa-solid fa-plus"></i> Info
 																</a>
 															</td>
@@ -333,6 +333,7 @@
             $(document).ready(function() {
 
                 $('#total_eventos').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -429,6 +430,7 @@
                 });
 
                 $('#vendas_confirmadas').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -525,6 +527,7 @@
                 });
 
                 $('#vendas_pendentes').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -621,6 +624,7 @@
                 });
 
                 $('#vendas_canceladas').DataTable({
+                    order: [[0, 'desc']],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",

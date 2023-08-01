@@ -14,11 +14,12 @@ use App\Models\Coupon;
 use App\Models\Event;
 use App\Models\EventDate;
 use App\Models\Lote;
+use App\Models\Option;
 use App\Models\Participante;
 use App\Models\Place;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Owner;
+use App\Models\Question;
 use App\Models\State;
 
 class EventController extends Controller
@@ -56,7 +57,7 @@ class EventController extends Controller
             )
             // ->where('participantes_events.role', 'admin')
             // ->select('events.*', 'places.name as place_name', 'users.name as owner_name', DB::raw('MIN(event_dates.date) as date_event_min'), DB::raw('MAX(event_dates.date) as date_event_max'))
-            ->orderBy('events.name')
+            ->orderBy('events.created_at', 'desc')
             ->groupBy('events.id')
             ->get();
 
@@ -93,6 +94,7 @@ class EventController extends Controller
             'category' => 'required',
             'area_id' => 'required',
             'total' => 'required',
+            'contact' => 'required',
             'place_name' => 'required',
             'address' => 'required',
             'number' => 'required',
@@ -112,39 +114,57 @@ class EventController extends Controller
 
     public function edit($id)
     {
-
         // $event = Event::find($id);
-        $event = DB::table('events')
-            ->join('places', 'places.id', '=', 'events.place_id')
-            ->join('cities', 'cities.id', '=', 'places.city_id')
-            ->join('states', 'states.id', '=', 'cities.uf')
-            ->join('participantes_events', 'participantes_events.event_id', '=', 'events.id')
-            ->join('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
-            ->join('areas', 'areas.id', '=', 'events.area_id')
-            ->join('categories', 'categories.id', '=', 'areas.category_id')
-            ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
-            ->where('events.id', $id)
-            ->where('participantes_events.role', 'admin')
-            ->select(
-                'events.*',
-                'categories.id as category_id',
-                'places.name as place_name',
-                'places.address as place_address',
-                'places.number as place_number',
-                'places.district as place_district',
-                'places.complement as place_complement',
-                'places.zip as place_zip',
-                'cities.id as city_id',
-                'states.uf as city_uf',
-                'participantes.email as participante_email'
-            )
-            ->first();
+        // $event = DB::table('events')
+        //     ->leftJoin('places', 'places.id', '=', 'events.place_id')
+        //     ->leftJoin('cities', 'cities.id', '=', 'places.city_id')
+        //     ->leftJoin('states', 'states.id', '=', 'cities.uf')
+        //     ->leftJoin('participantes_events', 'participantes_events.event_id', '=', 'events.id')
+        //     ->leftJoin('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
+        //     ->leftJoin('areas', 'areas.id', '=', 'events.area_id')
+        //     ->leftJoin('categories', 'categories.id', '=', 'areas.category_id')
+        //     ->leftJoin('event_dates', 'event_dates.event_id', '=', 'events.id')
+        //     ->where('events.id', $id)
+        //     ->where('participantes_events.role', 'admin')
+        //     ->select(
+        //         'events.*',
+        //         'categories.id as category_id',
+        //         'places.name as place_name',
+        //         'places.address as place_address',
+        //         'places.number as place_number',
+        //         'places.district as place_district',
+        //         'places.complement as place_complement',
+        //         'places.zip as place_zip',
+        //         'cities.id as city_id',
+        //         'states.uf as city_uf',
+        //         'participantes.email as participante_email'
+        //     )
+        //     ->first();
 
-        // dd($event);
+        // $dates = DB::table('event_dates')
+        //     ->join('events', 'events.id', '=', 'event_dates.event_id')
+        //     ->where('events.id', $id)
+        //     ->selectRaw(
+        //         'event_dates.id, 
+        //         DATE_FORMAT(event_dates.date, "%d/%m/%Y") as date, 
+        //         DATE_FORMAT(event_dates.time_begin, "%H:%i") as time_begin,
+        //         DATE_FORMAT(event_dates.time_end, "%H:%i") as time_end'
+        //     )
+        //     ->orderBy('event_dates.date')
+        //     ->get();
+
+        // $categories = Category::orderBy('description')->get();
+        // $states = State::orderBy('name')->get();
+
+        $event = Event::where('id', $id)->first();
+        $categories = Category::orderBy('description')->get();
+        $states = State::orderBy('name')->get();
+        $options = Option::orderBy('id')->get();
+        $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
 
         $dates = DB::table('event_dates')
             ->join('events', 'events.id', '=', 'event_dates.event_id')
-            ->where('events.id', $id)
+            ->where('events.hash', $event->hash)
             ->selectRaw(
                 'event_dates.id, 
                 DATE_FORMAT(event_dates.date, "%d/%m/%Y") as date, 
@@ -153,11 +173,6 @@ class EventController extends Controller
             )
             ->orderBy('event_dates.date')
             ->get();
-
-        // dd($dates);
-
-        $categories = Category::orderBy('description')->get();
-        $states = State::orderBy('name')->get();
 
         return view('event.edit', compact('event', 'dates', 'categories', 'states'));
     }
@@ -174,10 +189,11 @@ class EventController extends Controller
                 'category' => 'required',
                 'area_id' => 'required',
                 'max_tickets' => 'required',
+                'contact' => 'required',
                 'place_name' => 'required',
-                'date' => 'required',
-                'time_begin' => 'required',
-                'time_end' => 'required',
+                'date.*' => 'required',
+                'time_begin.*' => 'required',
+                'time_end.*' => 'required',
                 'address' => 'required',
                 'number' => 'required',
                 'district' => 'required',
@@ -194,10 +210,11 @@ class EventController extends Controller
                 'category' => 'required',
                 'area_id' => 'required',
                 'max_tickets' => 'required',
+                'contact' => 'required',
                 'place_name' => 'required',
-                'date' => 'required',
-                'time_begin' => 'required',
-                'time_end' => 'required',
+                'date.*' => 'required',
+                'time_begin.*' => 'required',
+                'time_end.*' => 'required',
                 'address' => 'required',
                 'number' => 'required',
                 'district' => 'required',
@@ -208,8 +225,6 @@ class EventController extends Controller
         }
 
         $input = $request->all();
-
-        // dd($input);
 
         $dates = $input['date'];
         $times_begin = $input['time_begin'];
@@ -333,7 +348,7 @@ class EventController extends Controller
         $data = Place::join('cities', 'cities.id', '=', 'places.city_id')
             ->join('states', 'states.id', '=', 'cities.uf')
             ->where('places.name', 'LIKE', '%'. $request->get('search'). '%')
-            ->select('places.name as value', 'places.id', 'places.address', 'places.number', 'places.complement', 'places.district', 'places.zip', 'places.city_id', 'states.uf')
+            ->select('places.name as value', 'places.id', 'places.address', 'places.number', 'places.complement', 'places.district', 'places.zip', 'places.city_id', 'states.id as uf')
             ->get();
 
         return response()->json($data);

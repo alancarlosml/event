@@ -21,7 +21,8 @@ return new class () extends Migration {
             $table->string('number')->unique();
             $table->integer('quantity');
             $table->double('value');
-            $table->timestamp('date_use');
+            $table->timestamp('date_use')->nullable();
+            $table->string('purchase_hash')->nullable();
             $table->integer('status');  // 1 - confirmado / 2 - pendente / 3 - cancelado / 4 - estornado
             $table->integer('order_id')->index()->unsigned();
             $table->foreign('order_id')

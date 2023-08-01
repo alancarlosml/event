@@ -8,13 +8,6 @@
                     <div class="col-sm-6">
                         <h1>Inscrição</h1>
                     </div>
-                    {{-- <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Layout</a></li>
-                            <li class="breadcrumb-item active">Fixed Layout</li>
-                        </ol>
-                    </div> --}}
                 </div>
             </div><!-- /.container-fluid -->
         </section>
@@ -32,7 +25,7 @@
 
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse"
-                                        title="Collapse">
+                                            title="Collapse">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </div>
@@ -44,30 +37,34 @@
                                     </div>
                                 @endif
                                 @if ($errors->any())
-                                    <div class="alert alert-danger">
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <strong>Erros encontrados:</strong>
                                         <ul>
                                             @foreach ($errors->all() as $error)
                                                 <li>{{ $error }}</li>
                                             @endforeach
                                         </ul>
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
                                     </div>
                                 @endif
                             </div>
                             <div class="card-body table-responsive p-0">
                                 <form method="POST"
-                                    action="{{ route('event.participantes.update', $participanteLote->order_item_id) }}">
+                                      action="{{ route('event.participantes.update', $participanteLote->order_item_id) }}">
                                     @csrf
                                     <div class="card-body">
                                         <div class="form-group">
                                             <label for="number">Número</label>
                                             <input type="text" disabled class="form-control" id="number"
-                                                placeholder="Número" value="{{ $participanteLote->number }}">
+                                                   placeholder="Número" value="{{ $participanteLote->number }}">
                                         </div>
                                         <div class="form-group">
                                             <label for="participante">Participante</label>
                                             <input type="text" disabled class="form-control" id="participante"
-                                                placeholder="Participante"
-                                                value="{{ $participanteLote->participante_name }}">
+                                                   placeholder="Participante"
+                                                   value="{{ $participanteLote->participante_name }}">
                                         </div>
                                         <div class="form-group">
                                             <label for="lote_id">Lote</label>
@@ -75,7 +72,7 @@
                                                 <option>Selecione</option>
                                                 @foreach ($lotes as $lote)
                                                     <option value="{{ $lote->id }}"
-                                                        @if ($participanteLote->lote_id == $lote->id) selected @endif>
+                                                            @if ($participanteLote->lote_id == $lote->id) selected @endif>
                                                         {{ $lote->name }}</option>
                                                 @endforeach
                                             </select>
@@ -85,12 +82,14 @@
                                             <select class="form-control" id="status" name="status">
                                                 <option>Selecione</option>
                                                 <option value="1"
-                                                    @if ($participanteLote->status == 1) selected @endif>Confirmado
+                                                        @if ($participanteLote->status == 1) selected @endif>Confirmado
                                                 </option>
                                                 <option value="2"
-                                                    @if ($participanteLote->status == 2) selected @endif>Pendente</option>
+                                                        @if ($participanteLote->status == 2) selected @endif>Pendente
+                                                </option>
                                                 <option value="3"
-                                                    @if ($participanteLote->status == 3) selected @endif>Cancelado</option>
+                                                        @if ($participanteLote->status == 3) selected @endif>Cancelado
+                                                </option>
                                             </select>
                                         </div>
                                     </div>
@@ -112,28 +111,28 @@
     <!-- /.content-wrapper -->
     @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
-            integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
+              integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
+              crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
         <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css"
-            integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg=="
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
+              href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css"
+              integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg=="
+              crossorigin="anonymous" referrerpolicy="no-referrer" />
     @endpush
 
     @push('footer')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
-            integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
         <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"
-            integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"
+                integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js"
-            integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         <script>
             $(function() {

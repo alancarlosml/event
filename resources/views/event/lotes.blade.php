@@ -8,13 +8,6 @@
                     <div class="col-sm-6">
                         <h1>Eventos</h1>
                     </div>
-                    {{-- <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Layout</a></li>
-                            <li class="breadcrumb-item active">Fixed Layout</li>
-                        </ol>
-                    </div> --}}
                 </div>
             </div><!-- /.container-fluid -->
         </section>
@@ -38,19 +31,22 @@
                                 </div>
                             </div>
                             @if ($errors->any())
-                                <div class="alert alert-danger">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <strong>Erros encontrados:</strong>
                                     <ul>
                                         @foreach ($errors->all() as $error)
                                             <li>{{ $error }}</li>
                                         @endforeach
                                     </ul>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
                             @endif
                             <div class="card-body table-responsive p-0">
                                 <div class="card-body">
                                     <div class="form-group text-right">
-                                        <a href="{{ route('lote.create', $event->id) }}"
-                                            class="btn btn-success">Cadastrar novo lote</a>
+                                        <a href="{{ route('lote.create', $event->id) }}" class="btn btn-success">Cadastrar novo lote</a>
                                     </div>
                                     <table class="table table-head-fixed text-nowrap">
                                         <thead>
@@ -96,20 +92,13 @@
                                                                 </i>
                                                                 Editar
                                                             </a>
-                                                            <form action="{{ route('lote.destroy', $lote->id) }}"
-                                                                method="POST">
+                                                            <form action="{{ route('lote.destroy', $lote->id) }}" method="POST">
                                                                 <input type="hidden" name="_method" value="DELETE">
-                                                                <input type="hidden" name="_token"
-                                                                    value="{{ csrf_token() }}">
-                                                                <a class="btn btn-danger btn-sm mr-1"
-                                                                    href="javascript:;"
-                                                                    onclick="removeData({{ $lote->id }})">
-                                                                    <i class="fas fa-trash">
-                                                                    </i>
-                                                                    Remover
+                                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                                <a class="btn btn-danger btn-sm mr-1" href="javascript:;" onclick="removeData({{ $lote->id }})">
+                                                                    <i class="fas fa-trash"></i> Remover
                                                                 </a>
-                                                                <button class="d-none"
-                                                                    id="btn-remove-hidden-{{ $lote->id }}">Remover</button>
+                                                                <button class="d-none" id="btn-remove-hidden-{{ $lote->id }}">Remover</button>
                                                             </form>
                                                         </div>
                                                     </td>
@@ -144,17 +133,18 @@
                                             @endforeach
                                         </tbody>
                                     </table>
-                                    <form method="POST" action="{{ route('lote.save_lotes', $id) }}">
-                                        @csrf
-                                        @foreach ($lotes as $lote)
-                                            <input type="hidden" name="order_lote[]" id="lote_{{ $lote->id }}"
-                                                value="{{ $lote->id }}_{{ $lote->order }}">
-                                        @endforeach
-                                        <div class="card-footer">
-                                            <button type="submit" class="btn btn-primary">Salvar</button>
-                                        </div>
-                                    </form>
                                 </div>
+                                <form method="POST" action="{{ route('lote.save_lotes', $id) }}">
+                                    @csrf
+                                    @foreach ($lotes as $lote)
+                                        <input type="hidden" name="order_lote[]" id="lote_{{ $lote->id }}"
+                                            value="{{ $lote->id }}_{{ $lote->order }}">
+                                    @endforeach
+                                    <div class="card-footer">
+                                        <a href="{{ route('event.index')}}" class="btn btn-success float-left">Voltar</a>
+                                        <button type="submit" class="btn btn-primary float-right">Salvar</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                         <!-- /.card -->

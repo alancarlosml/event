@@ -22,16 +22,14 @@ class Event extends Model
         'subtitle',
         'slug',
         'description',
-        // 'category',
         'banner',
         'banner_option',
-        // 'admin_id',
         'owner_id',
         'area_id',
         'place_id',
-        // 'place_id_hidden',
         'max_tickets',
         'theme',
+        'contact',
         'status',
     ];
 
@@ -108,12 +106,60 @@ class Event extends Model
     public static function getEvents($event_val, $category_val, $area_val, $state_val, $period_val)
     {
 
+        // $events = Event::join('areas', 'areas.id', '=', 'events.area_id')
+        //     ->join('categories', 'categories.id', '=', 'areas.category_id')
+        //     ->join('places', 'places.id', '=', 'events.place_id')
+        //     ->join('cities', 'cities.id', '=', 'places.city_id')
+        //     ->join('states', 'states.id', '=', 'cities.uf')
+        //     ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
+        //     ->select(
+        //         'events.name as event_name',
+        //         'events.slug as event_slug',
+        //         'events.banner as event_banner',
+        //         'categories.description as category_description',
+        //         'areas.name as area_name',
+        //         'places.name as place_name',
+        //         'cities.name as city_name',
+        //         'states.uf as state_uf',
+        //         // DB::raw('min(event_dates.date) as min_date'),
+        //         // DB::raw('min(event_dates.time_begin) as min_time')
+        //     )
+        //     ->where('events.status', 1);
+
+        // return $events->paginate(10);
+
+
+        // $events = Event::join('areas', 'areas.id', '=', 'events.area_id')
+        //     ->join('categories', 'categories.id', '=', 'areas.category_id')
+        //     ->join('places', 'places.id', '=', 'events.place_id')
+        //     ->join('cities', 'cities.id', '=', 'places.city_id')
+        //     ->join('states', 'states.id', '=', 'cities.uf')
+        //     // ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
+        //     ->select(
+        //         'events.name as event_name',
+        //         'events.slug as event_slug',
+        //         'events.banner as event_banner',
+        //         'categories.description as category_description',
+        //         'areas.name as area_name',
+        //         'places.name as place_name',
+        //         'cities.name as city_name',
+        //         'states.uf as state_uf',
+        //         // DB::raw('min(event_dates.date) as min_date'),
+        //         // DB::raw('min(event_dates.time_begin) as min_time')
+        //     )
+        //     ->where('events.status', 1);
+
+        // dd($events->get());
+
         $events = Event::join('areas', 'areas.id', '=', 'events.area_id')
             ->join('categories', 'categories.id', '=', 'areas.category_id')
             ->join('places', 'places.id', '=', 'events.place_id')
             ->join('cities', 'cities.id', '=', 'places.city_id')
             ->join('states', 'states.id', '=', 'cities.uf')
-            ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
+            ->leftJoin('event_dates', function ($join) {
+                $join->on('event_dates.event_id', '=', 'events.id');
+                $join->where('event_dates.date', '=', DB::raw("(SELECT MIN(date) FROM event_dates WHERE event_dates.event_id = events.id)"));
+            })
             ->select(
                 'events.name as event_name',
                 'events.slug as event_slug',
@@ -123,14 +169,13 @@ class Event extends Model
                 'places.name as place_name',
                 'cities.name as city_name',
                 'states.uf as state_uf',
-                DB::raw('min(event_dates.date) as min_date'),
-                DB::raw('min(event_dates.time_begin) as min_time')
+                DB::raw("(SELECT MIN(date) FROM event_dates WHERE event_dates.event_id = events.id) as min_date"),
+                DB::raw("(SELECT MIN(time_begin) FROM event_dates WHERE event_dates.event_id = events.id) as min_time")
             )
-            ->where('events.status', 1);
+            ->where('events.status', 1)
+            ->groupBy('events.id');
 
-        // dd($events->get());
-
-        if($event_val && ! empty($event_val)) {
+        if($event_val && !empty($event_val)) {
 
             $events->where('events.name', 'like', "%{$event_val}%");
         }

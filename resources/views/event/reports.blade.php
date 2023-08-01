@@ -8,13 +8,6 @@
                     <div class="col-sm-6">
                         <h1>Eventos</h1>
                     </div>
-                    {{-- <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Layout</a></li>
-                            <li class="breadcrumb-item active">Fixed Layout</li>
-                        </ol>
-                    </div> --}}
                 </div>
             </div><!-- /.container-fluid -->
         </section>
@@ -29,18 +22,22 @@
                                 <h3 class="card-title">Relatórios financeiros - {{ $event->name }}</h3>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse"
-                                        title="Collapse">
+                                            title="Collapse">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </div>
                             </div>
                             @if ($errors->any())
-                                <div class="alert alert-danger">
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <strong>Erros encontrados:</strong>
                                     <ul>
                                         @foreach ($errors->all() as $error)
                                             <li>{{ $error }}</li>
                                         @endforeach
                                     </ul>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
                             @endif
                             <div class="card-body">
@@ -48,33 +45,44 @@
                                     <div class="col-12 col-md-12 col-lg-12">
                                         <h4 class="d-flex justify-content-between">
                                             Resumo financeiro
-                                            <a href="#" class="button-print" onclick="window.print();"><img src="{{ asset('assets/img/print-pdf.jpg') }}" alt="Imprimir" width="36px"></a>
+                                            <a href="#" class="button-print" onclick="window.print();"><img
+                                                     src="{{ asset('assets/img/print-pdf.jpg') }}" alt="Imprimir"
+                                                     width="36px"></a>
                                         </h4>
                                         <div class="row">
                                             <div class="col-12 col-sm-4">
                                                 <div class="info-box bg-light">
                                                     <div class="info-box-content">
-                                                        <span class="info-box-text text-center text-muted">Total confirmado</span>
-                                                        <span class="info-box-number text-center text-success mb-0 h5">@money($resumo->total_confirmado)</span>
-                                                        <small class="text-center mb-0">{{ $resumo->confirmado }} participantes</small>
+                                                        <span class="info-box-text text-center text-muted">Total
+                                                            confirmado</span>
+                                                        <span
+                                                              class="info-box-number text-center text-success mb-0 h5">@money($resumo->total_confirmado)</span>
+                                                        <small class="text-center mb-0">{{ $resumo->confirmado }}
+                                                            participantes</small>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-4">
                                                 <div class="info-box bg-light">
                                                     <div class="info-box-content">
-                                                        <span class="info-box-text text-center text-muted">Total pendente</span>
-                                                        <span class="info-box-number text-center text-danger mb-0 h5">@money($resumo->total_pendente)</span>
-                                                        <small class="text-center mb-0">{{ $resumo->pendente }} participantes</small>
+                                                        <span class="info-box-text text-center text-muted">Total
+                                                            pendente</span>
+                                                        <span
+                                                              class="info-box-number text-center text-danger mb-0 h5">@money($resumo->total_pendente)</span>
+                                                        <small class="text-center mb-0">{{ $resumo->pendente }}
+                                                            participantes</small>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-4">
                                                 <div class="info-box bg-light">
                                                     <div class="info-box-content">
-                                                        <span class="info-box-text text-center text-muted">Total geral</span>
-                                                        <span class="info-box-number text-center text-primary mb-0 h5">@money($resumo->total_confirmado + $resumo->total_pendente)</span>
-                                                        <small class="text-center mb-0">{{ $resumo->geral }} participantes</small>
+                                                        <span class="info-box-text text-center text-muted">Total
+                                                            geral</span>
+                                                        <span
+                                                              class="info-box-number text-center text-primary mb-0 h5">@money($resumo->total_confirmado + $resumo->total_pendente)</span>
+                                                        <small class="text-center mb-0">{{ $resumo->geral }}
+                                                            participantes</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -104,16 +112,19 @@
                                             <div class="col-6">
                                                 <h4 class="text-center">Vendas por meio de pagamento</h4>
                                                 <div class="table-responsive">
-                                                    <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                                    <canvas id="pieChart"
+                                                            style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                                                 </div>
                                             </div>
                                         </div>
                                         <hr />
                                         <div class="row">
                                             <div class="col-12">
-                                                <h4 class="mb-3">Listagem de vendas realizadas ({{ count($all_orders) }})</h4>
+                                                <h4 class="mb-3">Listagem de vendas realizadas
+                                                    ({{ count($all_orders) }})</h4>
                                                 <div class="card-body table-responsive p-0">
-                                                    <table class="table table-head-fixed text-nowrap display" id="participantes_table">
+                                                    <table class="table table-head-fixed text-nowrap display"
+                                                           id="participantes_table">
                                                         <thead>
                                                             <tr>
                                                                 <th>#</th>
@@ -131,7 +142,8 @@
                                                                     <td> {{ $order->order_id }} </td>
                                                                     <td> {{ $order->order_hash }} </td>
                                                                     <td> {{ $order->participante_name }}
-                                                                        ({{ $order->participante_cpf }}) <br />
+                                                                        ({{ $order->participante_cpf }})
+                                                                        <br />
                                                                         {{ $order->participante_email }}
                                                                     </td>
                                                                     <td>
@@ -147,20 +159,23 @@
                                                                     </td>
                                                                     <td>
                                                                         @if ($order->situacao == 1)
-                                                                            <span class="badge badge-success">Confirmado</span>
+                                                                            <span
+                                                                                  class="badge badge-success">Confirmado</span>
                                                                         @elseif($order->situacao == 2)
-                                                                            <span class="badge badge-warning">Pendente</span>
+                                                                            <span
+                                                                                  class="badge badge-warning">Pendente</span>
                                                                         @elseif($order->situacao == 2)
-                                                                            <span class="badge badge-danger">Cancelado</span>
+                                                                            <span
+                                                                                  class="badge badge-danger">Cancelado</span>
                                                                         @else
                                                                             -
                                                                         @endif
                                                                     </td>
                                                                     <td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
                                                                     </td>
-                                                                    <td> 
+                                                                    <td>
                                                                         <a class="btn btn-info btn-sm mr-1"
-                                                                            href="{{ route('event.orders.details', $order->order_id) }}">
+                                                                           href="{{ route('event.orders.details', $order->order_id) }}">
                                                                             <i class="fa-solid fa-plus"></i> Info
                                                                         </a>
                                                                     </td>
@@ -176,7 +191,8 @@
                                             <div class="col-12">
                                                 <h4>Resumo de inscritos por lote ({{ count($lotes) }})</h4>
                                                 <div class="card-body table-responsive p-0">
-                                                    <table class="table table-head-fixed text-nowrap display" id="participantes_inscritos_lote">
+                                                    <table class="table table-head-fixed text-nowrap display"
+                                                           id="participantes_inscritos_lote">
                                                         <thead>
                                                             <tr>
                                                                 <th>ID</th>
@@ -208,9 +224,11 @@
                                         <hr class="mt-5" />
                                         <div class="row">
                                             <div class="col-12">
-                                                <h4 class="mb-3">Listagem de inscritos por lote ({{ count($situacao_participantes_lotes) }})</h4>
+                                                <h4 class="mb-3">Listagem de inscritos por lote
+                                                    ({{ count($situacao_participantes_lotes) }})</h4>
                                                 <div class="card-body table-responsive p-0">
-                                                    <table class="table table-head-fixed text-nowrap display" id="participantes_listagem_lote">
+                                                    <table class="table table-head-fixed text-nowrap display"
+                                                           id="participantes_listagem_lote">
                                                         <thead>
                                                             <tr>
                                                                 <th>Nº inscrição</th>
@@ -230,13 +248,17 @@
                                                                     <td>{{ $participante->lote_name }}</td>
                                                                     <td>
                                                                         @if ($participante->status_item == 1)
-                                                                            <span class="badge badge-success">Confirmado</span>
+                                                                            <span
+                                                                                  class="badge badge-success">Confirmado</span>
                                                                         @elseif($participante->status_item == 2)
-                                                                            <span class="badge badge-warning">Pendente</span>
+                                                                            <span
+                                                                                  class="badge badge-warning">Pendente</span>
                                                                         @elseif($participante->status_item == 3)
-                                                                            <span class="badge badge-info">Cancelado</span>
+                                                                            <span
+                                                                                  class="badge badge-info">Cancelado</span>
                                                                         @elseif($participante->status_item == 4)
-                                                                            <span class="badge badge-warning">Estornado</span>
+                                                                            <span
+                                                                                  class="badge badge-warning">Estornado</span>
                                                                         @else
                                                                             -
                                                                         @endif
@@ -245,12 +267,14 @@
                                                                         @if ($participante->status_item == 2)
                                                                             <div class="d-flex">
                                                                                 <a class="btn btn-warning btn-sm mr-1"
-                                                                                    href="{{ route('event.participantes.edit', $participante->id) }}">
-                                                                                    <i class="fas fa-plus"></i> Nova cobrança
+                                                                                   href="{{ route('event.participantes.edit', $participante->id) }}">
+                                                                                    <i class="fas fa-plus"></i> Nova
+                                                                                    cobrança
                                                                                 </a>
                                                                                 <a class="btn btn-warning btn-sm mr-1"
-                                                                                    href="{{ route('event.participantes.edit', $participante->id) }}">
-                                                                                    <i class="fas fa-pencil"></i> Editar
+                                                                                   href="{{ route('event.participantes.edit', $participante->id) }}">
+                                                                                    <i class="fas fa-pencil"></i>
+                                                                                    Editar
                                                                                 </a>
                                                                             </div>
                                                                         @endif
@@ -317,9 +341,11 @@
                                         <hr class="mt-5"/> --}}
                                         <div class="row">
                                             <div class="col-12">
-                                                <h4 class="mb-3">Resumo de inscritos por cupom de desconto ({{ count($situacao_coupons) }})</h4>
+                                                <h4 class="mb-3">Resumo de inscritos por cupom de desconto
+                                                    ({{ count($situacao_coupons) }})</h4>
                                                 <div class="card-body table-responsive p-0">
-                                                    <table class="table table-head-fixed text-nowrap display" id="participantes_inscritos_cupom">
+                                                    <table class="table table-head-fixed text-nowrap display"
+                                                           id="participantes_inscritos_cupom">
                                                         <thead>
                                                             <tr>
                                                                 <th>ID</th>
@@ -401,9 +427,9 @@
     <!-- /.content-wrapper -->
     @push('head')
         <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
+              crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css"
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
+              crossorigin="anonymous" referrerpolicy="no-referrer" />
     @endpush
     @push('footer')
         <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
@@ -414,10 +440,10 @@
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.2/chart.min.js"
-            integrity="sha512-zjlf0U0eJmSo1Le4/zcZI51ks5SjuQXkU0yOdsOBubjSmio9iCUp8XPLkEAADZNBdR9crRy3cniZ65LF2w8sRA=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                integrity="sha512-zjlf0U0eJmSo1Le4/zcZI51ks5SjuQXkU0yOdsOBubjSmio9iCUp8XPLkEAADZNBdR9crRy3cniZ65LF2w8sRA=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://unpkg.com/chart.js-plugin-labels-dv/dist/chartjs-plugin-labels.min.js" crossorigin="anonymous"
-            referrerpolicy="no-referrer"></script>
+                referrerpolicy="no-referrer"></script>
         {{-- <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script> --}}
         <script>
             function removeData(id) {
@@ -437,6 +463,9 @@
                 });
 
                 $('#participantes_table').DataTable({
+                    order: [
+                        [0, 'desc']
+                    ],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -533,6 +562,9 @@
                 });
 
                 $('#participantes_inscritos_lote').DataTable({
+                    order: [
+                        [0, 'desc']
+                    ],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -627,8 +659,11 @@
                         }
                     ]
                 });
-                
+
                 $('#participantes_listagem_lote').DataTable({
+                    order: [
+                        [0, 'desc']
+                    ],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",
@@ -725,6 +760,9 @@
                 });
 
                 $('#participantes_inscritos_cupom').DataTable({
+                    order: [
+                        [0, 'desc']
+                    ],
                     language: {
                         "decimal": "",
                         "emptyTable": "Sem dados disponíveis na tabela",

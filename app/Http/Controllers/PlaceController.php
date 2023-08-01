@@ -129,8 +129,7 @@ class PlaceController extends Controller
 
     public function getCity(Request $request)
     {
-        $data['cities'] = City::where('uf', $request->uf)
-            ->get(['name', 'id']);
+        $data['cities'] = City::where('uf', $request->uf)->get(['name', 'id']);
 
         return response()->json($data);
     }

@@ -71,6 +71,13 @@ class ConferenceController extends Controller
             'subject' => 'required',
             'text' => 'required',
             'g-recaptcha-response' => 'required|recaptchav3:register,0.5',
+        ], [
+            'name.required' => 'O campo nome é obrigatório.',
+            'email.required' => 'O campo email é obrigatório.',
+            'phone.required' => 'O campo telefone é obrigatório.',
+            'subject.required' => 'O campo assunto é obrigatório.',
+            'text.required' => 'O campo mensagem é obrigatório.',
+            'g-recaptcha-response.required' => 'O campo captcha é obrigatório.',
         ]);
 
         $input = $request->all();
@@ -174,10 +181,6 @@ class ConferenceController extends Controller
         $data = $request->all();
 
         $dicts = $data['dict'];
-
-        // $subtotal = 0;
-        // $coupon_subtotal = 0;
-        // $total = 0;
 
         $subtotal = 0;
         $coupon_subtotal = 0;
@@ -558,9 +561,6 @@ class ConferenceController extends Controller
                 $result = json_encode($errorArray);
 
                 $output = json_decode($result);
-
-                // var_dump($output);
-                // dd($output);
 
                 date_default_timezone_set('America/Fortaleza');
                 $curr_date = date('Y-m-d H:i:s');
