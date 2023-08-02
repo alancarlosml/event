@@ -65,9 +65,11 @@
                                             <option value="0" @if($coupon->discount_type == 0) selected @endif>%</option>
                                             <option value="1" @if($coupon->discount_type == 1) selected @endif>Fixo</option>
                                         </select>
-                                        <input type="text" class="form-control col-2 ml-2" id="discount_value" name="discount_value" placeholder="0" value="{{$coupon->discount_value ?? old('discount_value')}}">
+                                        <input type="text" class="form-control col-2 ml-2" id="discount_value" name="discount_value" placeholder="0" value="{{$coupon->discount_value * 100 ?? old('discount_value')}}">
                                     </div>
-                                    <small id="taxHelp" class="form-text text-muted">Em caso de porcentagem (%), use o valor 0.07 para 7%, por exemplo.</small>
+                                    <small id="taxHelp" class="form-text text-muted">
+                                        Em caso de porcentagem (%), use por exemplo o valor 7 para 7%.
+                                    </small>
                                 </div>
                                 <div class="form-group">
                                     <label for="limit_buy">Limite de compras*</label>

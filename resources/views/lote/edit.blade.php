@@ -213,7 +213,7 @@
                                         </div>
                                     </div>
                                     <div class="card-footer">
-                                        <a href="{{ route('event.lotes', $id)}}" class="btn btn-success float-left">Voltar</a>
+                                        <a href="{{ route('event.lotes', $lote->id)}}" class="btn btn-success float-left">Voltar</a>
                                         <button type="submit" class="btn btn-primary float-right">Salvar</button>
                                     </div>
                                 </form>

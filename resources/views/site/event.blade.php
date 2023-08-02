@@ -95,8 +95,7 @@
                             @endforeach
                         </ul>
                     @endif
-                    <input type="hidden" name="event_date_result" id="event_date_result"
-                           value="@if ($total_dates == 1) {{ $date_min->id }} @endif">
+                    <input type="hidden" name="event_date_result" id="event_date_result" value="@if ($total_dates == 1) {{ $date_min->id }} @endif">
                     <div class="table-responsive">
                         <table class="table">
                             <tbody>
@@ -113,7 +112,7 @@
                                         @endif
                                     </th>
                                 </thead>
-                                @foreach ($event->lotes as $lote)
+                                @foreach ($event->lotesAtivosHoje() as $lote)
                                     <tr class="border-bottom" lote_hash="{{ $lote->hash }}">
                                         <td>
                                             <div class="d-flex align-items-center">

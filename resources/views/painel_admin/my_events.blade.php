@@ -54,15 +54,15 @@
                                     <td>{{$event->id}}</td>
                                     <td>
                                         <b>Nome:</b> {{$event->name}} <br/>
-                                        <b>Data do evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif
+                                        <b>Data do evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }} @endif
                                     </td>
                                     <td>
                                         {{$event->admin_name}} <br>
                                         <small>{{$event->admin_email}}</small>
                                     </td>
                                     <td>{{$event->place_name}}</td>
-                                    {{-- <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }} @endif</td> --}}
-                                    <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y') }}</td>
+                                    {{-- <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }} @endif</td> --}}
+                                    <td>{{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y') }}</td>
                                     <td>
                                         @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "")
                                             {{-- <span class="badge badge-danger">Incompleto</span> --}}

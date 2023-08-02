@@ -72,8 +72,9 @@
                                                 <input type="text" class="form-control col-2 ml-2"
                                                     id="discount_value" name="discount_value" placeholder="0">
                                             </div>
-                                            <small id="taxHelp" class="form-text text-muted">Em caso de porcentagem
-                                                (%), use o valor 0.07 para 7%, por exemplo.</small>
+                                            <small id="taxHelp" class="form-text text-muted">
+                                                Em caso de porcentagem (%), use por exemplo o valor 7 para 7%.
+                                            </small>
                                         </div>
                                         <div class="form-group">
                                             <label for="limit_buy">Limite de compras*</label>

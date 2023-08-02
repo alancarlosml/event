@@ -213,7 +213,7 @@
                             <div class="form-row">
                                 <div class="form-group col-md-10">
                                     <label for="place_name">Local*</label>
-                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{ $place->place_name ?? old('place_name') }}" required>
+                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{ $place->name ?? old('place_name') }}" required>
                                     <small id="place_nameHelp" class="form-text text-muted">Comece a digitar para buscar o local do evento, caso não o encontre, preencha os campos deste formulário.</small>
                                 </div>
                                 <div class="form-group col-md-2">

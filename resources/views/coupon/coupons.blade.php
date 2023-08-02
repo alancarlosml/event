@@ -76,7 +76,7 @@
                                                     </td>
                                                     <td>
                                                         @if ($coupon->discount_type == 0)
-                                                            {{ $coupon->discount_value * 100 }}%
+                                                            {{ $coupon->discount_value }}%
                                                         @elseif($coupon->discount_type == 1)
                                                             @money($coupon->discount_value)
                                                         @endif

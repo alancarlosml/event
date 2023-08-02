@@ -20,8 +20,8 @@
                             <span><b>Lote(s) selecionado(s):</b> </span>
                             <ul class="list-style">
                                 @foreach ($array_lotes as $array_lote)
-                                    <li class="ml-4" style="list-style-type: circle">{{ $array_lote['quantity'] }}x
-                                        {{ $array_lote['name'] }}</li>
+                                    <li class="ml-4" style="list-style-type: circle">{{ $array_lote['quantity'] }}
+                                        x {{ $array_lote['name'] }}</li>
                                 @endforeach
                             </ul>
                         </div>
@@ -109,8 +109,7 @@
                                 <h2 class="section-title wow fadeInUp animated">Dados da inscrição</h2>
                             </div>
                             @foreach ($array_lotes_obj as $k => $lote_obj)
-                                <strong class="d-block mb-3"><u>Informações do participante #{{ $k + 1 }}
-                                        ({{ $lote_obj['name'] }})</u></strong>
+                                <strong class="d-block mb-3"><u>Informações do participante #{{ $k + 1 }} ({{ $lote_obj['name'] }})</u></strong>
                                 @foreach ($questions as $id => $question)
                                     @switch($question->option_id)
                                         @case(1)

@@ -23,7 +23,7 @@
                                 <div class="card-body text-center">
                                     <h4 class="card-title">#{{$item->number}}</h4>
                                     <h5 class="card-title">{{$item->event_name}}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">{{ \Carbon\Carbon::parse($item->data_chosen)->format('j/m/Y') }}</h6>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ \Carbon\Carbon::parse($item->data_chosen)->format('d/m/Y') }}</h6>
                                     <p class="card-text">{{$item->place_name}}</p>
                                     <div class="my-3">
                                         {!! QrCode::size(300)->generate($item->purchase_hash); !!}

@@ -61,6 +61,10 @@ class CouponController extends Controller
             $coupon_obj->lotes()->attach($lote);
         }
 
+        if($input['discount_type'] == '0') {
+            $input['discount_value'] = (double)$input['discount_value'] / 100;
+        }
+
         $coupon_obj->fill($input)->save();
 
         $coupons = Coupon::where('event_id', $id)->orderBy('created_at')->get();
@@ -95,9 +99,9 @@ class CouponController extends Controller
         $event = Event::find($coupon->event_id);
 
         $this->validate($request, [
-            'code' => 'required',
+            'code' => 'required|unique:coupons,code,'.$coupon->id.',id',
             'discount_type' => 'required',
-            'discount_value' => 'required',
+            'discount_value' => 'required|numeric',
             'limit_buy' => 'required',
             'limit_tickets' => 'required',
         ]);
@@ -113,6 +117,10 @@ class CouponController extends Controller
         foreach($lotes as $lote) {
 
             $coupon->lotes()->attach($lote);
+        }
+
+        if($input['discount_type'] == 0) {
+            $input['discount_value'] = (double)$input['discount_value'] / 100;
         }
 
         $coupon->fill($input)->save();

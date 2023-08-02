@@ -63,12 +63,12 @@
                                                 <td>{{ $event->place_name }}</td>
                                                 <td>
                                                     @if ($event->date_event_min == $event->date_event_max)
-                                                        {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }}
+                                                        {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }}
                                                     @else
                                                         De
-                                                        {{ \Carbon\Carbon::parse($event->date_event_min)->format('j/m/Y') }}
+                                                        {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }}
                                                         <br /> a
-                                                        {{ \Carbon\Carbon::parse($event->date_event_max)->format('j/m/Y') }}
+                                                        {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }}
                                                     @endif
                                                 </td>
                                                 <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}

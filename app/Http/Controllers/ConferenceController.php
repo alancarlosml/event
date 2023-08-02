@@ -16,7 +16,9 @@ use App\Models\EventDate;
 use App\Models\Lote;
 use App\Models\Question;
 use App\Models\Message;
+use App\Models\OptionAnswer;
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 
 use MercadoPago;
@@ -25,12 +27,6 @@ class ConferenceController extends Controller
 {
     public function event(Request $request, $slug)
     {
-
-        // $menu = 'home';
-        // $title = 'Home';
-        // $url = url('/');
-        // $description = 'Bilhete Mania - Venda de ingressos online';
-        // $image = url('img/favicon/favicon-96x96.png');
 
         $event = Event::where('slug', $slug)->first();
 
@@ -44,13 +40,7 @@ class ConferenceController extends Controller
         if($event) {
             $total_dates = count($event->event_dates);
             $date_min = EventDate::select('id')->where('date', $event->min_event_dates())->first();
-            // if($event->event_dates());
-            // $coupon = $request->session()->get('coupon');
-            // $subtotal = $request->session()->get('subtotal');
-            // $coupon_subtotal = $request->session()->get('coupon_subtotal');
-            // $total = $request->session()->get('total');
-
-            // return view('site.event', compact('event', 'coupon', 'subtotal', 'coupon_subtotal', 'total'));
+ 
             return view('site.event', compact('event', 'slug', 'total_dates', 'date_min'));
 
         } else {
@@ -299,6 +289,64 @@ class ConferenceController extends Controller
         return response()->json(['success' => 'Cupom removido com sucesso.', 'subtotal' => $subtotal]);
     }
 
+    // public function payment(Request $request)
+    // {
+    //     $coupon = $request->session()->get('coupon');
+
+    //     $order = Order::create([
+    //         'hash' => md5(time() . uniqid() . md5('papainoel')),
+    //         'status' => 2,
+    //         'event_date_id' => $request->session()->get('event_date')->id,
+    //         'participante_id' => Auth::user()->id,
+    //         'coupon_id' => $coupon ? $coupon->id : null,
+    //     ]);
+
+    //     $request->session()->put('order_id', $order->id);
+
+    //     $this->createOrderItems($order, $request->all());
+
+    //     return redirect()->route('conference.payment', $request->session()->get('event')->slug);
+    // }
+
+    // private function createOrderItems(Order $order, array $input)
+    // {
+    //     $dict_lotes = session('dict_lotes');
+
+    //     foreach($dict_lotes as $i => $dict) {
+    //         $lote = Lote::where('hash', $dict['lote_hash'])->first();
+
+    //         $orderItem = $order->items()->create([
+    //             'hash' => md5((time() . uniqid() . $i) . md5('papainoel')),
+    //             'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('papainoel')), 36),
+    //             'quantity' => 1,
+    //             'value' => $lote->value,
+    //             'status' => 2,
+    //             'lote_id' => $lote->id,
+    //         ]);
+
+    //         $this->createOptionAnswers($orderItem, $input);
+    //     }
+    // }
+
+    // private function createOptionAnswers(OrderItem $orderItem, array $input)
+    // {
+    //     foreach(array_keys($input) as $field) {
+    //         if(!str_contains($field, 'newfield_')) continue;
+
+    //         list(, $k, $id) = explode('_', $field);
+    //         $question = Question::find($id);
+    //         $answer = $input['newfield_' . $k . '_' . $id];
+
+    //         if ($answer) {
+    //             OptionAnswer::create([
+    //                 'answer' => $answer,
+    //                 'question_id' => $question->id,
+    //                 'order_item_id' => $orderItem->id,
+    //             ]);
+    //         }
+    //     }
+    // }
+
     public function payment(Request $request)
     {
         $input = $request->all();
@@ -370,7 +418,6 @@ class ConferenceController extends Controller
             }
         }
 
-        // return view('conference.payment', compact('event', 'order_id', 'total'));
         return redirect()->route('conference.payment', $event->slug);
     }
 

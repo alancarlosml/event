@@ -49,9 +49,8 @@
                                     <div class="card-body">
                                         <div class="form-group">
                                             <label for="tax">Taxa de juros*</label>
-                                            <input type="text" class="form-control" id="tax" name="tax"
-                                                placeholder="Ex: 0.07" value="{{ $configuration->tax }}">
-                                            <small id="taxHelp" class="form-text text-muted">Ex: 0.07 para 7%.</small>
+                                            <input type="text" class="form-control" id="tax" name="tax" placeholder="Ex: 7" value="{{ $configuration->tax * 100 }}">
+                                            <small id="taxHelp" class="form-text text-muted">Ex: 7 para 7%.</small>
                                         </div>
                                     </div>
                                     <!-- /.card-body -->

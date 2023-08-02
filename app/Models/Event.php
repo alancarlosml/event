@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 // use Cviebrock\EloquentSluggable\Sluggable;
 
@@ -86,6 +87,18 @@ class Event extends Model
     public function lotes()
     {
         return $this->hasMany(Lote::class)->orderBy('order');
+    }
+    
+    public function lotesAtivosHoje()
+    {
+
+        return $this->hasMany(Lote::class)
+                    ->orderBy('order')
+                    ->where(function ($query) {
+                        $query->where('datetime_begin', '<=', DB::raw('NOW()'))
+                              ->where('datetime_end', '>=', DB::raw('NOW()'));
+                    })
+                    ->get();
     }
 
     public function coupons()

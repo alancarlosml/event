@@ -23,10 +23,15 @@ class ConfigurationController extends Controller
         $configuration = Configuration::findOrFail(1);
 
         $this->validate($request, [
-            'tax' => 'required',
+            'tax' => 'required|numeric',
+        ], [
+            'tax.required' => 'Campo obrigatório',
+            'tax.numeric' => 'O campo taxa de juros deve ser um número.',
         ]);
 
         $input = $request->all();
+
+        $input['tax'] = (double)$input['tax'] / 100;
 
         $configuration->fill($input)->save();
 

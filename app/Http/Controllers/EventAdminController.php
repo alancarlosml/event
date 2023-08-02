@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 use App\Mail\EventAdminControllerMail;
 use App\Mail\GuestControllerMail;
@@ -40,8 +41,8 @@ class EventAdminController extends Controller
     public function myRegistrations()
     {
 
-        $orders = Order::orderBy('events.created_at', 'desc')
-            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+        $orders = Order::orderBy('orders.created_at', 'desc')
+            ->leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
             ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
             // ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
             ->join('participantes', 'participantes.id', '=', 'orders.participante_id')
@@ -51,14 +52,15 @@ class EventAdminController extends Controller
             ->select(
                 'events.name as event_name',
                 'events.status as event_status',
-                'events.created_at as event_date',
+                'orders.created_at as event_date',
                 'event_dates.date as data_chosen',
                 'places.name as place_name',
+                'orders.id as order_id',
                 'orders.hash as order_hash',
                 'orders.gatway_status'
             )
-            ->where('participantes.id', Auth::user()->id)
-            ->groupBy('events.id')
+            ->where('orders.participante_id', Auth::user()->id)
+            ->groupBy('orders.id')
             ->get();
 
         return view('painel_admin.my_registrations', compact('orders'));
@@ -267,7 +269,7 @@ class EventAdminController extends Controller
                 // 'category' => 'required',
                 'area_id' => 'required',
                 'max_tickets' => 'required',
-                'admin_email' => 'required',
+                'contact' => 'required',
                 'place_id_hidden' => 'nullable',
                 'admin_id' => 'required',
                 'status' => 'string',
@@ -278,7 +280,7 @@ class EventAdminController extends Controller
                 'description.required' => 'A descrição do evento é obrigatória.',
                 'area_id.required' => 'A área do evento é obrigatória.',
                 'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
-                'admin_email.required' => 'O email do administrador é obrigatório.',
+                'contact.required' => 'O email do administrador é obrigatório.',
             ]);
 
             // dd($validatedDataEvent);
@@ -325,7 +327,7 @@ class EventAdminController extends Controller
                 'category' => 'required',
                 'area_id' => 'required',
                 'max_tickets' => 'required',
-                'admin_email' => 'required',
+                'contact' => 'required',
                 'place_id_hidden' => 'nullable',
                 'status' => 'string',
                 'new_field' => 'required',
@@ -337,7 +339,7 @@ class EventAdminController extends Controller
                 'description.required' => 'A descrição do evento é obrigatória.',
                 'area_id.required' => 'A área do evento é obrigatória.',
                 'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
-                'admin_email.required' => 'O email do administrador é obrigatório.',
+                'contact.required' => 'O email do administrador é obrigatório.',
                 'new_field.required' => 'As perguntas são obrigatórias.',
             ]);
 
@@ -961,6 +963,10 @@ class EventAdminController extends Controller
             $coupon_obj->lotes()->attach($lote);
         }
 
+        if($input['discount_type'] == 0) {
+            $input['discount_value'] = (double)$input['discount_value'] / 100;
+        }
+
         $coupon_obj->fill($input)->save();
 
         return redirect()->route('event_home.create.step.three')->with('success', 'Cupom salvo com sucesso!');
@@ -1023,6 +1029,10 @@ class EventAdminController extends Controller
         foreach($lotes as $lote) {
 
             $coupon->lotes()->attach($lote);
+        }
+
+        if($input['discount_type'] == 0) {
+            $input['discount_value'] = (double)$input['discount_value'] / 100;
         }
 
         $coupon->fill($input)->save();

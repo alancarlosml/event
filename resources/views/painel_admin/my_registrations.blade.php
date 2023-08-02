@@ -39,6 +39,7 @@
                     <table class="table table-head-fixed text-wrap hover" id="list_events">
                         <thead>
                             <tr>
+                            <th>ID</th>
                             <th>Detalhes</th>
                             <th>Local</th>
                             <th>Data Compra</th>
@@ -49,12 +50,14 @@
                         <tbody>
                             @foreach($orders as $order)
                                 <tr>
+                                    <td>{{$order->order_id}}</td>
                                     <td>
+                                        <b>Hash:</b> {{$order->order_hash}} <br/>
                                         <b>Nome:</b> {{$order->event_name}} <br/>
-                                        <b>Data evento:</b> {{ \Carbon\Carbon::parse($order->data_chosen)->format('j/m/Y') }}
+                                        <b>Data evento:</b> {{ \Carbon\Carbon::parse($order->data_chosen)->format('d/m/Y') }}
                                     </td>
                                     <td>{{$order->place_name}}</td>
-                                    <td>{{ \Carbon\Carbon::parse($order->event_date)->format('j/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($order->event_date)->format('d/m/Y') }}</td>
                                     <td>
                                         @if(isset($order->gatway_status)) 
                                             @if($order->gatway_status == 1) <span class="badge badge-success"> Confirmado </span>
@@ -124,6 +127,9 @@
         $(document).ready(function() {
 
             $('#list_events').DataTable({
+                order: [
+                    [0, 'desc']
+                ],
                 language: {
                     "decimal":        "",
                     "emptyTable":     "Sem dados disponíveis na tabela",
