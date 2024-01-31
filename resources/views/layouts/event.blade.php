@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>@stack('event_name') - Ticket DZ6</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/bootstrap.min.css') }}">
-    {{-- <link rel="stylesheet" type="text/css" href="assets_conference/css/line-icons.css"> --}}
     <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/slicknav.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/nivo-lightbox.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets_conference/css/color-switcher.css') }}">
@@ -163,7 +162,7 @@
                 <div class="col-lg-3 col-md-12 text-left">
                     <div class="footer-logo">
                         <a href="/" class="logo d-flex align-items-center">
-                            <img src="{{ asset('assets/img/logo_principal_sf.png') }}" alt="">
+                            <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
                         </a>
                     </div>
                     <p>Sua nova plataforma de criação e gerenciamento de eventos. </p>

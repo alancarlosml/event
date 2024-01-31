@@ -422,7 +422,7 @@ class EventAdminController extends Controller
             'date.*' => 'required',
             'time_begin.*' => 'required',
             'time_end.*' => 'required',
-            'date_id' => 'nullable',
+            'date_id.*' => 'nullable',
         ],[
             'date.*.required' => 'A data do evento é obrigatória.',
             'time_begin.*.required' => 'A hora de início do evento é obrigatória.',
@@ -927,14 +927,13 @@ class EventAdminController extends Controller
         $event = Event::where('hash', $hash)->first();
 
         $this->validate($request, [
-            'code' => 'required|unique:coupons',
+            'code' => 'required',
             'discount_type' => 'required',
             'discount_value' => 'required',
             'limit_buy' => 'required',
             'limit_tickets' => 'required',
         ],[
             'code.required' => 'Código do cupom é obrigatório',
-            'code.unique' => 'Código do cupom já existe',
             'discount_type.required' => 'Tipo de desconto é obrigatório',
             'discount_value.required' => 'Valor do desconto é obrigatório',
             'limit_buy.required' => 'Limite de compra é obrigatório',
@@ -1005,7 +1004,6 @@ class EventAdminController extends Controller
             'status' => 'nullable',
         ],[
             'code.required' => 'Código do cupom é obrigatório',
-            'code.unique' => 'Código do cupom já existe',
             'discount_type.required' => 'Tipo de desconto é obrigatório',
             'discount_value.required' => 'Valor do desconto é obrigatório',
             'limit_buy.required' => 'Limite de compra é obrigatório',
@@ -1190,6 +1188,15 @@ class EventAdminController extends Controller
         }
 
         return redirect()->route('event_home.my_events')->with('success', 'Evento salvo com sucesso!');
+    }
+
+    public function destroy($hash)
+    {
+        $event = Event::where('hash', $hash)->first();
+
+        $event->delete();
+
+        return redirect()->route('event_home.my_events');
     }
 
     public function guests($hash)

@@ -244,6 +244,44 @@
                 }
             });
 
+            const localePt_Br = {
+                days: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+                daysShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+                daysMin: ['Do', 'Se', 'Te', 'Qu', 'Qu', 'Se', 'Sa'],
+                months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                monthsShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                today: 'Hoje',
+                clear: 'Cancelar',
+                onlyTimepicker: true,
+                dateFormat: 'dd/MM/yyyy',
+                timeFormat: 'HH:mm',
+                firstDay: 1
+            }
+
+            dpMin = new AirDatepicker('#input_datetimepicker_day_begin', {
+                timepicker: true,
+                minDate: new Date(),
+                locale: localePt_Br,
+                onSelect({date}) {
+                    dpMax.update({
+                        minDate: date
+                    })
+                }
+                //onlyTimepicker: true
+            })
+
+            dpMax = new AirDatepicker('#input_datetimepicker_day_end', {
+                timepicker: true,
+                minDate: new Date(),
+                locale: localePt_Br,
+                onSelect({date}) {
+                    dpMin.update({
+                        maxDate: date
+                    })
+                }
+                //onlyTimepicker: true
+            })
+
             // $('#reservationtime_input').daterangepicker({
             //     timePicker: true,
             //     timePickerIncrement: 30,
@@ -271,31 +309,28 @@
             //     $('#reservationtime_begin').datetimepicker('maxDate', e.date);
             // });
 
-            $('body').on('mousedown',"#input_datetimepicker_day_begin", function(){
-                $(this).datetimepicker({
-                    timepicker:true,
-                    format:'d/m/Y H:i',
-                    mask:true,
-                    onShow:function( ct ){
-                        this.setOptions({
-                            maxDate:$('#input_datetimepicker_day_end').val()?$('#input_datetimepicker_day_end').val():false
-                        })
-                    },
-                });
-            });
+            // $('body').on('mousedown',"#input_datetimepicker_day_begin", function(){
+            //     $(this).datetimepicker({
+            //         timepicker:true,
+            //         format:'d/m/Y H:i',
+            //         mask:true,
+            //         minDate:new Date(),
+            //         /*onShow:function( ct ){
+            //             this.setOptions({
+            //                 minDate:$('#input_datetimepicker_day_begin').val()?$('#input_datetimepicker_day_begin').val():false
+            //             })
+            //         },*/
+            //     });
+            // });
 
-            $('body').on('mousedown',"#input_datetimepicker_day_end", function(){
-                $(this).datetimepicker({
-                    timepicker:true,
-                    format:'d/m/Y H:i',
-                    mask:true,
-                    onShow:function( ct ){
-                        this.setOptions({
-                            minDate:$('#input_datetimepicker_day_begin').val()?$('#input_datetimepicker_day_begin').val():false
-                        })
-                    },
-                });
-            });
+            // $('body').on('mousedown',"#input_datetimepicker_day_end", function(){
+            //     $(this).datetimepicker({
+            //         timepicker:true,
+            //         format:'d/m/Y H:i',
+            //         mask:true,
+            //         minDate:new Date(),
+            //     });
+            // });
         });
     
     </script>

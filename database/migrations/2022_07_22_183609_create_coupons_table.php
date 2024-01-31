@@ -19,7 +19,7 @@ return new class () extends Migration {
         Schema::create('coupons', function (Blueprint $table) {
             $table->increments('id');
             $table->string('hash')->unique();
-            $table->string('code')->unique();
+            $table->string('code');
             $table->integer('discount_type');
             $table->double('discount_value');
             $table->integer('limit_buy');

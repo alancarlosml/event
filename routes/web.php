@@ -36,6 +36,7 @@ Route::get('painel/meus-eventos', 'App\Http\Controllers\EventAdminController@myE
 Route::get('painel/meus-eventos/{hash}/detalhes', 'App\Http\Controllers\EventAdminController@myEventsShow')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_show');
 Route::get('painel/meus-eventos/{hash}/contatos', 'App\Http\Controllers\EventAdminController@contacts')->middleware(['auth:participante', 'verified'])->name('event_home.contacts');
 Route::get('painel/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@myEventsEdit')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_edit');
+Route::delete('painel/meus-eventos/{hash}/excluir', 'App\Http\Controllers\EventAdminController@destroy')->middleware(['auth:participante', 'verified'])->name('event_home.destroy');
 Route::get('painel/meus-eventos/{hash}/duplicar', 'App\Http\Controllers\EventAdminController@eventClone')->middleware(['auth:participante', 'verified'])->name('event_home.event_clone');
 Route::get('painel/meus-eventos/{hash}/convidados', 'App\Http\Controllers\EventAdminController@guests')->middleware(['auth:participante', 'verified'])->name('event_home.guests');
 Route::get('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@addGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guest_add');
@@ -86,6 +87,8 @@ Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTota
 Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');
 Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');
 Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEventDate')->name('conference.setEventDate');
+Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLotesPorData')->name('conference.getLotesPorData');
+
 // Route::post('painel/lotes/{id}/store', 'App\Http\Controllers\LoteController@store')->middleware(['auth:participante', 'verified'])->name('lote.store');
 // Route::get('painel/lotes/{id}/edit', 'App\Http\Controllers\LoteController@edit')->middleware(['auth:participante', 'verified'])->name('lote.edit');
 // Route::post('painel/lotes/{id}/update', 'App\Http\Controllers\LoteController@update')->middleware(['auth:participante', 'verified'])->name('lote.update');
@@ -195,5 +198,8 @@ Route::post('admin/participantes/store', 'App\Http\Controllers\ParticipanteContr
 Route::get('admin/participantes/edit/{id}', 'App\Http\Controllers\ParticipanteController@edit')->middleware(['auth:web'])->name('participante.edit');
 Route::post('admin/participantes/update/{id}', 'App\Http\Controllers\ParticipanteController@update')->middleware(['auth:web'])->name('participante.update');
 Route::delete('admin/participantes/destroy/{id}', 'App\Http\Controllers\ParticipanteController@destroy')->middleware(['auth:web'])->name('participante.destroy');
+
+Route::get('admin/events/{id}/questions', 'App\Http\Controllers\EventController@questions')->middleware(['auth:web'])->name('event.questions');
+Route::post('admin/events/{id}/questions/create', 'App\Http\Controllers\EventController@create_questions')->middleware(['auth:web'])->name('event.questions.create');
 
 require __DIR__.'/auth.php';

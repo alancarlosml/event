@@ -66,10 +66,6 @@
                                 <a href="{{env('APP_URL') . '/' . $event->slug}}" target="_blank">
                                     <i class="fa-solid fa-up-right-from-square"></i>
                                 </a>
-                                
-                                {{-- Addionar um link com um icone para o evento --}}
-
-
                             </p>
                         </div>
                         <div class="form-group">

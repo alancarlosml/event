@@ -215,6 +215,7 @@ class EventController extends Controller
                 'date.*' => 'required',
                 'time_begin.*' => 'required',
                 'time_end.*' => 'required',
+                'date_id.*' => 'nullable',
                 'address' => 'required',
                 'number' => 'required',
                 'district' => 'required',
@@ -226,31 +227,68 @@ class EventController extends Controller
 
         $input = $request->all();
 
+        $date_ids = $input['date_id'];
         $dates = $input['date'];
         $times_begin = $input['time_begin'];
         $times_end = $input['time_end'];
 
-        $event_date = new EventDate();
+        $date_ids_db = EventDate::where('event_id', $id)
+            ->where('status', '1')
+            ->get()
+            ->map
+            ->only('id')
+            ->toArray();
 
-        // $coupon->lotes()->detach();
+        foreach($date_ids_db as $date_id_db) {
 
-        DB::table('event_dates')->where('event_id', $id)->delete();
-
-        $finalArray = [];
-        for ($i = 0; $i < count($dates); $i++) {
-
-            $dates[$i] = str_replace('/', '-', $dates[$i]);
-            // dd(date('Y-m-d', strtotime($dates[$i])));
-            array_push($finalArray, [
-                'date' => date('Y-m-d', strtotime($dates[$i])),
-                'time_begin' => date('H:i', strtotime($times_begin[$i])),
-                'time_end' => date('H:i', strtotime($times_end[$i])),
-                'status' => 1,
-                'event_id' => $id,
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
+            if( ! in_array($date_id_db['id'], $date_ids)) {
+                DB::table('event_dates')->where('id', $date_id_db['id'])->delete();
+            }
         }
-        EventDate::insert($finalArray);
+
+        $date_events_array = [];
+        for ($i = 0; $i < count($dates); $i++) {
+            $date = str_replace('/', '-', $dates[$i]);
+            if( ! isset($date_ids[$i])) {
+                array_push($date_events_array, [
+                    'date_id' => null,
+                    'date' => date('Y-m-d', strtotime($date)),
+                    'time_begin' => date('H:i', strtotime($times_begin[$i])),
+                    'time_end' => date('H:i', strtotime($times_end[$i])),
+                ]);
+            } else {
+                array_push($date_events_array, [
+                    'date_id' => $date_ids[$i],
+                    'date' => date('Y-m-d', strtotime($date)),
+                    'time_begin' => date('H:i', strtotime($times_begin[$i])),
+                    'time_end' => date('H:i', strtotime($times_end[$i])),
+                ]);
+            }
+        }
+
+        foreach($date_events_array as $arr_date) {
+
+            if($arr_date['date_id'] == null) {
+                EventDate::create([
+                    'date' => date('Y-m-d', strtotime(str_replace('/', '-', $arr_date['date']))),
+                    'time_begin' => date('H:i', strtotime($arr_date['time_begin'])),
+                    'time_end' => date('H:i', strtotime($arr_date['time_end'])),
+                    'status' => 1,
+                    'event_id' => $id,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            } else {
+                // $dates[$i] = str_replace('/', '-', $dates[$i]);
+                $arr_dates = [
+                    'date' => date('Y-m-d', strtotime(str_replace('/', '-', $arr_date['date']))),
+                    'time_begin' => date('H:i', strtotime($arr_date['time_begin'])),
+                    'time_end' => date('H:i', strtotime($arr_date['time_end'])),
+                ];
+
+                // array_push($finalArray, $arr_dates);
+                EventDate::where('id', $arr_date['date_id'])->update($arr_dates);
+            }
+        }
 
         // $participante = Participante::where('email', $input['participante_email'])->first();
 
@@ -364,6 +402,123 @@ class EventController extends Controller
             ->get();
 
         return view('event.lotes', compact('event', 'lotes', 'id'));
+    }
+
+    public function questions($id){
+
+        $event = Event::find($id);
+
+        $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
+        $options = Option::orderBy('id')->get();
+
+        return view('event.questions', compact('event', 'questions', 'options', 'id'));
+    }
+
+    public function create_questions(Request $request, $id){
+
+        $event = Event::find($id);
+
+        $validatedDataQuestion = $request->validate([
+            'new_field' => 'required',
+            'new_field_id' => 'nullable',
+        ],[
+            'new_field.required' => 'As perguntas são obrigatórias.',
+        ]);
+
+        $fields = $validatedDataQuestion['new_field'];
+        $field_ids = $validatedDataQuestion['new_field_id'];
+        $event_id = $event->id;
+
+        // Verifica se está faltando um id para excluir no banco
+        $questions_ids_db = Question::where('event_id', $event_id)
+            ->where('status', '1')
+            ->get()
+            ->map
+            ->only('id')
+            ->toArray();
+
+        foreach($questions_ids_db as $questions_ids_db) {
+
+            if( ! in_array($questions_ids_db['id'], $field_ids)) {
+                DB::table('questions')->where('id', $questions_ids_db['id'])->delete();
+            }
+        }
+        //fim
+
+        $questions_array = [];
+        for ($i = 0; $i < count($fields); $i++) {
+            if( ! isset($field_ids[$i])) {
+                array_push($questions_array, [
+                    'question_id' => null,
+                    'question' => $fields[$i],
+                ]);
+            } else {
+                array_push($questions_array, [
+                    'question_id' => $field_ids[$i],
+                    'question' => $fields[$i],
+                ]);
+            }
+        }
+
+        // dd($questions_array);
+
+        foreach($questions_array as $id => $field) {
+
+            if($field['question_id'] == null) {
+
+                preg_match_all("/\(([^\]]*)\)/", $field['question'], $matches);
+                $result_field = $matches[1];
+                $result_field = str_replace('Tipo: ', '', $result_field);
+
+                $more_fields = explode(';', $field['question']);
+
+                $required = 0;
+                if(strpos($field['question'], 'Obrigatório')) {
+                    $required = 1;
+                }
+
+                $unique = 0;
+                if(strpos($field['question'], 'Único')) {
+                    $unique = 1;
+                }
+
+                $option = Option::where('option', $result_field[0])->first();
+                $question = Question::create([
+                    // DB::table('questions')->insert([
+                    'question' => $more_fields[0],
+                    'order' => $id + 1,
+                    'required' => $required,
+                    'unique' => $unique,
+                    'status' => 1,
+                    'option_id' => $option->id,
+                    'event_id' => $event_id,
+                ]);
+
+                $id_question = $question->id;
+
+                $result_regex = preg_match_all("/\[([^\]]*)\]/", $field['question'], $matches);
+
+                if($result_regex) {
+                    $result_field = $matches[1];
+                    $result_field = str_replace('Opções: ', '', $result_field);
+
+                    $array_explode_question = explode(',', $result_field[0]);
+
+                    foreach($array_explode_question as $item_array_explode_question) {
+                        DB::table('option_values')->insert([
+                            'value' => trim($item_array_explode_question),
+                            'question_id' => $id_question,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return back()->with('success', 'Questionário salvo com sucesso');
+
+        #$questions = Question::orderBy('order')->where('event_id', $event_id)->get();
+
+        #$request->session()->put('questions', $questions);
     }
 
     public function delete_file(Request $request, $id)

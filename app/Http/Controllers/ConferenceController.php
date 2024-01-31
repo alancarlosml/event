@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderMail;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,7 @@ use App\Models\OptionAnswer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Mail;
 use MercadoPago;
 
 class ConferenceController extends Controller
@@ -245,10 +246,23 @@ class ConferenceController extends Controller
         $eventHash = $data['eventHash'];
         $couponCode = $data['couponCode'];
 
-        // $evento = Ticket::where('hash_id', $hashIdTicket)->first()->sector()->first()->date()->first()->event()->first();
         $evento = Event::where('hash', $eventHash)->first();
 
-        $coupon = Coupon::where('code', $couponCode)->where('status', '1')->where('event_id', $evento->id)->first();
+        // $coupon = Coupon::where('code', $couponCode)->where('status', '1')->where('event_id', $evento->id)->first();
+
+        // VERIFICA O LIMIT_BUY PARA O CUPOM QUE ESTÁ SENDO ADICIONADO
+        $coupon = Coupon::select('coupons.*')
+                    ->selectSub(function ($query) {
+                        $query->selectRaw('count(*)')
+                            ->from('orders_coupons')
+                            ->whereColumn('coupons.id', 'orders_coupons.coupon_id');
+                    }, 'usage_count')
+                    ->where('code', $couponCode)
+                    ->where('status', '1')
+                    ->where('event_id', $evento->id)
+                    ->havingRaw('usage_count < limit_buy OR limit_buy IS NULL')
+                    ->first();
+
         $coupon_session = $request->session()->get('coupon');
 
         if($coupon_session) {
@@ -275,7 +289,7 @@ class ConferenceController extends Controller
 
             } else {
 
-                return response()->json(['error' => 'Cupom inválido.']);
+                return response()->json(['error' => 'Cupom inválido ou Indisponível.']);
             }
         }
     }
@@ -570,6 +584,7 @@ class ConferenceController extends Controller
                         'created_at' => now(),
                     ]);
                     // MANDAR EMAIL COM COMPRA REALIZADA COM SUCESSO
+                    Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
 
                 } elseif($input->paymentType == 'bank_transfer') {
 
@@ -643,5 +658,30 @@ class ConferenceController extends Controller
             return $exception;
         }
 
+    }
+
+    public function oauth(Request $request){
+     
+        $code = $request->code;
+        $state = $request->state;
+
+        dd($code . ' - ' . $state);
+        /*$app_id = 2470923232027455;
+        $access_token = "TEST-cc325724-c3e8-4430-9189-d49c50c00458";
+        $redirec_url = "https://www.ticketdz6.com.br/api/oauth";
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => "https://auth.mercadopago.com.br/authorization?client_id=" . $app_id . "&response_type=" . $code . "&platform_id=mp&redirect_uri=" . $redirec_url,
+            CURLOPT_RETURNTRANSFER => true,
+
+            CURLOPT_POSTFIELDS => http_build_query(array(
+                
+                "grant_type" => "authorization_code",
+                "code" => $code,
+                "redirect_uri" => $redirec_url
+
+            ))
+        ))*/
     }
 }

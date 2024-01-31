@@ -54,7 +54,7 @@
                                     <td>{{$event->id}}</td>
                                     <td>
                                         <b>Nome:</b> {{$event->name}} <br/>
-                                        <b>Data do evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }} @endif
+                                        <b>Data do evento:</b> @if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} a {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }} @endif
                                     </td>
                                     <td>
                                         {{$event->admin_name}} <br>
@@ -66,7 +66,7 @@
                                     <td>
                                         @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "")
                                             {{-- <span class="badge badge-danger">Incompleto</span> --}}
-                                            <a href="#" class="badge badge-danger" data-toggle="popover" data-trigger="hover" title="O que falta?" data-content="@if ($event->place_name == "") - Cadastrar local do evento @endif @if ($event->event_date == "") - Cadastrar data do evento @endif @if ($event->lote_name == "") - Cadastrar lotes @endif">Incompleto</a>
+                                            <a href="#" class="badge badge-danger" data-toggle="popover" data-trigger="hover" title="O que falta?" data-content="@if ($event->place_name == "") - Cadastrar local do evento <br> @endif @if ($event->event_date == "") - Cadastrar data do evento <br> @endif @if ($event->lote_name == "") - Cadastrar lotes @endif">Incompleto</a>
                                         @else
                                             @if($event->status == 1) 
                                                 <span class="badge badge-success">Ativo</span> 
@@ -91,9 +91,15 @@
                                             </a> --}}
                                             <div class="btn-group" role="group">
                                                 <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm mr-1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i class="fa-solid fa-gear"></i> Configurações
+                                                    <i class="fa-solid fa-gear"></i> Ações
                                                 </button>
                                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
+                                                    @if($event->place_name != "" && $event->participante_name != "" && $event->event_date != "" && $event->lote_name != "")
+                                                    <a class="dropdown-item" href="/{{ $event->slug }}" target="_blank">
+                                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                        Link evento
+                                                    </a>
+                                                    @endif
                                                     <a class="dropdown-item" href="{{route('event_home.reports', $event->hash)}}">
                                                         <i class="fa-solid fa-chart-pie"></i>
                                                         Relatórios
@@ -119,21 +125,21 @@
                                                             <i class="fas fa-pencil-alt"></i>
                                                             Editar
                                                         </a>
-                                                        <form action="{{ route('event.destroy', $event->id) }}" method="POST">
+                                                        <form action="{{ route('event_home.destroy', $event->hash) }}" method="POST">
                                                             <input type="hidden" name="_method" value="DELETE">
                                                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                            <a href="javascript:;" class="dropdown-item" onclick="removeData({{$event->id}})">
+                                                            <a href="javascript:;" class="dropdown-item" onclick="removeData('{{$event->hash}}')">
                                                                 <i class="fas fa-trash"></i>
                                                                 Remover
                                                             </a>
-                                                            <button class="d-none" id="btn-remove-hidden-{{$event->id}}">Remover</button>
+                                                            <button class="d-none" id="btn-remove-hidden-{{$event->hash}}">Remover</button>
                                                         </form>
                                                     @endif
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$event->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
+                                    <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$event->hash}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -143,10 +149,10 @@
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    Deseja realmente remover essa evento?
+                                                    Deseja realmente remover esse evento?
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$event->id}}" onclick="removeSucc({{$event->id}})">Sim</button>
+                                                    <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$event->hash}}" onclick="removeSucc('{{$event->hash}}')">Sim</button>
                                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
                                                 </div>
                                             </div>
@@ -200,7 +206,9 @@
 
         $(document).ready(function() {
 
-            $('[data-toggle="popover"]').popover();
+            $('[data-toggle="popover"]').popover({
+                html:true
+            });
 
             $('#list_events').DataTable({
                 order: [[0, 'desc']],

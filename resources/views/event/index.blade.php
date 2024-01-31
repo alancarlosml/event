@@ -42,10 +42,10 @@
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Nome</th>
+                                            <th>Evento</th>
                                             <th>Responsável</th>
                                             <th>Local</th>
-                                            <th>Data do Evento</th>
+                                            {{-- <th>Data do Evento</th> --}}
                                             <th>Data Criação</th>
                                             <th>Status</th>
                                             <th>Ações</th>
@@ -55,13 +55,24 @@
                                         @foreach ($events as $event)
                                             <tr @if ($event->place_name == '' || $event->participante_name == '' || $event->event_date == '' || $event->lote_name == '') style="background:#faceca" @endif>
                                                 <td>{{ $event->id }}</td>
-                                                <td>{{ $event->name }}</td>
+                                                <td>
+                                                    <b>Nome: </b> {{ $event->name }} <br>
+                                                    <b>Data evento: </b> 
+                                                    @if ($event->date_event_min == $event->date_event_max)
+                                                        {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }}
+                                                    @else
+                                                        De
+                                                        {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }}
+                                                        a
+                                                        {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }}
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     {{ $event->admin_name }} <br>
                                                     <small>{{ $event->admin_email }}</small>
                                                 </td>
                                                 <td>{{ $event->place_name }}</td>
-                                                <td>
+                                                {{-- <td>
                                                     @if ($event->date_event_min == $event->date_event_max)
                                                         {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }}
                                                     @else
@@ -70,7 +81,7 @@
                                                         <br /> a
                                                         {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }}
                                                     @endif
-                                                </td>
+                                                </td> --}}
                                                 <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}
                                                 </td>
                                                 <td>
@@ -95,6 +106,11 @@
                                                             href="{{ route('event.lotes', $event->id) }}">
                                                             <i class="fa-solid fa-tags"></i>
                                                             Lotes
+                                                        </a>
+                                                        <a class="btn btn-info btn-sm mr-1"
+                                                            href="{{ route('event.questions', $event->id) }}">
+                                                            <i class="fa-solid fa-question"></i>
+                                                            Questionário
                                                         </a>
                                                         <a class="btn btn-warning btn-sm mr-1"
                                                             href="{{ route('event.coupons', $event->id) }}">
@@ -151,7 +167,7 @@
                                                                 </button>
                                                             </div>
                                                             <div class="modal-body">
-                                                                Deseja realmente remover essa evento?
+                                                                Deseja realmente remover esse evento?
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-danger"

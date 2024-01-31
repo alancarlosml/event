@@ -22,3 +22,4 @@ use Illuminate\Support\Facades\Route;
 
 // Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
 Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->name('conference.thanks');
+Route::post('oauth', 'App\Http\Controllers\ConferenceController@oauth')->name('conference.oauth');

@@ -32,7 +32,7 @@
                         </div>
                     </div>
                 </div>
-
+                {{-- {{dd($event->max_event_dates())}} --}}
                 <!-- Modal -->
                 <div class="modal fade mt-5" id="cupomModal" tabindex="-1" role="dialog"
                      aria-labelledby="cupomModalLabel" aria-hidden="true">
@@ -85,156 +85,8 @@
         <script type="text/javascript"
                 src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
         <script>
-            // $('#checkout_submit').validate({
-            //     errorClass: "error fail-alert d-block"
-            // });
-
-            // $('#finalizar_comprar').show();
-            // $('#carregando_comprar').addClass('d-none');
-
-            // // $('.date_mask').mask('00/00/0000', {placeholder: "__/__/____"});
-            // // $('.cep').mask('00000-000');
-            // $('.phone_with_ddd_mask').mask('(00) 00000-0000');
-            // $('.cpf_mask').mask('000.000.000-00', {reverse: false});
-            // $('.cnpj_mask').mask('00.000.000/0000-00', {reverse: false});
-            // $('.cep_mask').mask('00000-000');
-            // $('.expiration_mask').mask('00/0000');
-            // $('.cc_cvc_mask').mask('000');
-            // $('.cc_number_mask').mask('YYYY YYYY YYYY YYYY', {'translation': {
-            //         Y: {pattern: /[0-9]/}
-            //     }
-            // });
-            // $('.cc_cvc_mask').mask('YYY', {'translation': {
-            //         Y: {pattern: /[0-9]/}
-            //     }
-            // });
-
-            // $(document).ready(function() { 
-
-            //     const mp = new MercadoPago('{{ env('MERCADO_PAGO_PUBLIC_KEY', '') }}', {
-            //         locale: 'pt-BR'
-            //     });
-
-            //     const bricksBuilder = mp.bricks();
-            //     const renderPaymentBrick = async (bricksBuilder) => {
-            //         const settings = {
-            //             initialization: {
-            //                 amount: 100, // valor total a ser pago
-            //                 locale: 'pt-BR'
-            //             },
-            //             customization: {
-            //                 //maxInstallments: 10,
-            //                 paymentMethods: {
-            //                     creditCard: 'all',
-            //                     ticket: ['bolbradesco'],
-            //                     bankTransfer: ['pix'],
-            //                 },
-            //                 visual: {
-            //                     hideFormTitle: true,
-            //                     style: {
-            //                         theme: 'bootstrap', // | 'dark' | 'bootstrap' | 'flat'
-            //                     }
-            //                 },
-            //             },
-            //             callbacks: {
-            //                 onFormUnmounted: () =>{
-            //                 },
-            //                 onReady: () => {
-            //                 },
-            //                 onSubmit: ({ selectedPaymentMethod, formData }) => {
-
-            //                     return new Promise((resolve, reject) => {
-            //                         fetch("{{ route('conference.thanks', $event->slug) }}", {
-            //                             method: "POST",
-            //                             headers: {
-            //                                 "Content-Type": "application/json",
-            //                             },
-            //                             // "_token": "csrf_token()",
-            //                             body: JSON.stringify(formData) 
-            //                         })
-            //                         .then((response) => {
-            //                             console.log(response);
-            //                             resolve();
-            //                         })
-            //                         .catch((error) => {
-            //                             console.log(error);
-            //                             reject();
-            //                         })
-            //                     });
-            //                 },
-            //                 onError: (error) => {
-            //                     console.error(error);
-            //                 },
-            //             },
-            //         };
-            //         window.paymentBrickController = await bricksBuilder.create(
-            //             'payment',
-            //             'paymentBrick_container',
-            //             settings);
-            //     };
-            //     renderPaymentBrick(bricksBuilder);
-            // });
 
             $(document).ready(function() {
-
-                // const mp = new MercadoPago('{{ env('MERCADO_PAGO_PUBLIC_KEY', '') }}');
-
-                // const bricksBuilder = mp.bricks();
-
-                // const renderPaymentBrick = async (bricksBuilder) => {
-                //     const settings = {
-                //     initialization: {
-                //         amount: 100, // valor total a ser pago
-                //     },
-                //     customization: {
-                //         paymentMethods: {
-                //         creditCard: 'all',
-                //         debitCard: 'all',
-                //         },
-                //     },
-                //     callbacks: {
-                //             onReady: () => {
-                //                 console.log('brick ready');
-                //             },
-                //             onError: (error) => {
-                //                 alert(JSON.stringify(error))
-                //             },
-                //             onSubmit: (cardFormData) => {
-                //                 return new Promise((resolve, reject) => {
-                //                     fetch("{{ route('conference.thanks', $event->slug) }}", {
-                //                         method: "POST",
-                //                         headers: {
-                //                             "Content-Type": "application/json",
-                //                         },
-                //                         body: JSON.stringify(cardFormData),
-                //                     })
-                //                     .then(response => {
-                //                         console.log(response.json());
-                //                         return response.json();
-                //                         resolve();
-                //                     })
-                //                     .then(result => {
-                //                         if(!result.hasOwnProperty("error_message")) {
-                //                             alert('Segundo then');
-                //                         } else {
-                //                             alert(JSON.stringify({
-                //                                 status: result.status,
-                //                                 message: result.error_message
-                //                             }));
-                //                         }
-                //                     })
-                //                     .catch(error => {
-                //                         console.log("Unexpected error\n"+JSON.stringify(error));
-                //                         reject();
-                //                     });
-                //                 });
-                //             },   
-                //         },
-                //     };
-                //     window.paymentBrickController = await bricksBuilder.create('payment', 'paymentBrick_container', settings);
-                // };
-                // renderPaymentBrick(bricksBuilder);
-
 
                 const mp = new MercadoPago('{{ env('MERCADO_PAGO_PUBLIC_KEY', '') }}', {
                     locale: 'pt-BR'
@@ -242,31 +94,35 @@
 
                 const bricksBuilder = mp.bricks();
 
-                // function hideForm(el) {
-                //   let display = document.getElementById(el).style.display;
-                //               if (display == "none")
-                //                 document.getElementById(el).style.display = 'block';
-                //               else
-                //                 document.getElementById(el).style.display = 'none';
-                // }
+                let maxDate = "{{$event->max_event_dates()}} 00:00:00";
+
+                let maxDateObj = new Date(maxDate);
+
+                let now = new Date();
+
+                now.setDate(now.getDate() + 3);
+
+                let paymentMethods = {
+                    creditCard: 'all',
+                    bankTransfer: ['pix']
+                };
+
+                if(now < maxDateObj) {
+                    paymentMethods.ticket = ['bolbradesco'];
+                }
 
                 const renderCardPaymentBrick = async (bricksBuilder) => {
                     const settings = {
                         initialization: {
-                            amount: {{ $total }}, // valor total a ser pago
+                            amount: {{ $total }}, 
                             locale: 'pt-BR'
                         },
                         customization: {
-                            //maxInstallments: 10,
-                            paymentMethods: {
-                                creditCard: 'all',
-                                ticket: ['bolbradesco'],
-                                bankTransfer: ['pix'],
-                            },
+                            paymentMethods: paymentMethods,
                             visual: {
                                 hideFormTitle: false,
                                 style: {
-                                    theme: 'bootstrap', // | 'dark' | 'bootstrap' | 'flat'
+                                    theme: 'bootstrap', 
                                 }
                             },
                         },

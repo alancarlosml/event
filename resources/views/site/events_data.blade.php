@@ -1,4 +1,5 @@
 <div class="row">
+    @if (count($events) > 0)
     @foreach ($events as $event)
         <div class="col-md-4">
             <div class="single-blog-item">
@@ -19,4 +20,11 @@
             </div>
         </div>
     @endforeach
+    @else
+        <div class="col-md-12">
+            <div class="alert alert-warning">
+                <strong>Ops!</strong> Nenhum evento encontrado.
+            </div> 
+        </div>
+    @endif
 </div>

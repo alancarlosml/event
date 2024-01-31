@@ -90,10 +90,6 @@
                                 {{-- {{dd($event)}} --}}
                                 <input type="hidden" name="area_id_hidden" id="area_id_hidden" value="{{ $event->area_id ?? '' }}">
                             </div>
-                            <div class="form-group">
-                                <label for="contact">Email para contato*</label>
-                                <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
-                            </div>
                             {{-- <div class="form-group">
                                 <label for="banner">Banner do evento*</label><br/>
                                 @if(!isset($event->banner))
@@ -113,6 +109,7 @@
                             <input type="hidden" name="admin_id" id="admin_id_hidden" value="{{Auth::user()->id}}">
                         </div>
                         <hr>
+
                         <div class="card-body" id="card-date">
                             <h4>Data e hora do evento</h4>
                             @if(isset($eventDate))
@@ -405,6 +402,18 @@
                                 @endif
                             </div>
                         </div>
+
+                        <hr>
+
+                        <div class="card-body">
+                            <h4>Vincular conta Mercado Pago</h4>
+                            <div class="form-group">
+                                <label for="contact">Email*</label>
+                                <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
+                                <small id="contactHelp" class="form-text text-muted">Importante: informe o email de uma conta Mercado Pago.</small>
+                            </div>
+                        </div>
+                        
                         <!-- /.card-body -->
                         <div class="card-footer text-right">
                             <button type="submit" class="btn btn-primary">Próximo</button>
@@ -883,7 +892,9 @@
                 $(this).datetimepicker({
                     timepicker:false,
                     format:'d/m/Y',
-                    mask:true
+                    mask:true,
+                    minDate:new Date(),
+                    lang:'pt-BR',
                 });
             });
 
@@ -901,7 +912,6 @@
             });
 
             $('body').on('mousedown',".datetimepicker_hour_end", function(){
-                console.log('sd');
                 $(this).datetimepicker({
                     datepicker:false,
                     format:'H:i',

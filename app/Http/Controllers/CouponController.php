@@ -41,7 +41,7 @@ class CouponController extends Controller
         $event = Event::find($id);
 
         $this->validate($request, [
-            'code' => 'required|unique:coupons',
+            'code' => 'required',
             'discount_type' => 'required',
             'discount_value' => 'required',
             'limit_buy' => 'required',
@@ -99,7 +99,7 @@ class CouponController extends Controller
         $event = Event::find($coupon->event_id);
 
         $this->validate($request, [
-            'code' => 'required|unique:coupons,code,'.$coupon->id.',id',
+            'code' => 'required',
             'discount_type' => 'required',
             'discount_value' => 'required|numeric',
             'limit_buy' => 'required',

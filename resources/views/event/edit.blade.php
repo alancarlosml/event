@@ -145,6 +145,7 @@
 																	class="fa fa-calendar"></i></div>
 															</div>
 														</div>
+														<input type="hidden" name="date_id[]" value="">
 													</div>
 													<div class="form-group col-md-2">
 														<label for="number">Hora início</label>

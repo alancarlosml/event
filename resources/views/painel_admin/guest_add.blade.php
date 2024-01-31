@@ -44,7 +44,7 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="email">Email do convidado*</label>
-                                    <input type="email" class="form-control col-5" id="email" name="email" placeholder="Email" required value="old('email')">
+                                    <input type="email" class="form-control col-5" id="email" name="email" placeholder="Email" value="{{old('email')}}" required>
                                     <small id="emailHelp" class="form-text text-muted">Antes de realizar a adição, certifique-se de que o usuário já possui cadastro no site.</small>
                                 </div>
                                 <div class="form-group">

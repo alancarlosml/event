@@ -186,7 +186,8 @@ class Event extends Model
                 DB::raw("(SELECT MIN(time_begin) FROM event_dates WHERE event_dates.event_id = events.id) as min_time")
             )
             ->where('events.status', 1)
-            ->groupBy('events.id');
+            ->groupBy('events.id')
+            ->having(DB::raw("(SELECT MIN(date) FROM event_dates WHERE event_dates.event_id = events.id)"), '>', now());
 
         if($event_val && !empty($event_val)) {
 

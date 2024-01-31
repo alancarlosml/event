@@ -142,10 +142,10 @@
                                                    id="input_datetimepicker_day_begin"
                                                    data-target="#datetimepicker_day_begin" name="datetime_begin"
                                                    autocomplete="off" />
-                                            <div class="input-group-append" data-target="#datetimepicker_day_begin"
+                                            {{-- <div class="input-group-append" data-target="#datetimepicker_day_begin"
                                                  data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
+                                            </div> --}}
                                         </div>
                                     </div>
                                     <div class="form-group col-md-3">
@@ -156,10 +156,10 @@
                                                    id="input_datetimepicker_day_end"
                                                    data-target="#datetimepicker_day_end" name="datetime_end"
                                                    autocomplete="off" />
-                                            <div class="input-group-append" data-target="#datetimepicker_day_end"
+                                            {{-- <div class="input-group-append" data-target="#datetimepicker_day_end"
                                                  data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
+                                            </div> --}}
                                         </div>
                                     </div>
                                     {{-- <div class="form-group col-md-3">
@@ -220,7 +220,8 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
               integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
               crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
+        {{-- <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet"> --}}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.css">
     @endpush
 
     @push('footer')
@@ -228,13 +229,13 @@
                 integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
                 crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-        <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
+        {{-- <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script> --}}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js"
                 integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ=="
                 crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js">
-        </script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.js"></script>
 
         <script>
             $(document).ready(function() {
@@ -256,6 +257,44 @@
                     }
                 });
 
+                const localePt_Br = {
+                    days: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+                    daysShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+                    daysMin: ['Do', 'Se', 'Te', 'Qu', 'Qu', 'Se', 'Sa'],
+                    months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                    monthsShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    today: 'Hoje',
+                    clear: 'Cancelar',
+                    onlyTimepicker: true,
+                    dateFormat: 'dd/MM/yyyy',
+                    timeFormat: 'HH:mm',
+                    firstDay: 1
+                }
+
+                dpMin = new AirDatepicker('#input_datetimepicker_day_begin', {
+                    timepicker: true,
+                    minDate: new Date(),
+                    locale: localePt_Br,
+                    onSelect({date}) {
+                        dpMax.update({
+                            minDate: date
+                        })
+                    }
+                    //onlyTimepicker: true
+                })
+
+                dpMax = new AirDatepicker('#input_datetimepicker_day_end', {
+                    timepicker: true,
+                    minDate: new Date(),
+                    locale: localePt_Br,
+                    onSelect({date}) {
+                        dpMin.update({
+                            maxDate: date
+                        })
+                    }
+                    //onlyTimepicker: true
+                })
+
                 // $('#reservationtime_input').daterangepicker({
                 //     timePicker: true,
                 //     timePickerIncrement: 30,
@@ -264,33 +303,29 @@
                 //     }
                 // });
 
-                $('body').on('mousedown', "#input_datetimepicker_day_begin", function() {
-                    $(this).datetimepicker({
-                        timepicker: true,
-                        format: 'd/m/Y H:i',
-                        mask: true,
-                        onShow: function(ct) {
-                            this.setOptions({
-                                maxDate: $('#input_datetimepicker_day_end').val() ? $(
-                                    '#input_datetimepicker_day_end').val() : false
-                            })
-                        },
-                    });
-                });
+                // $('body').on('mousedown', "#input_datetimepicker_day_begin", function() {
+                //     $(this).datetimepicker({
+                //         timepicker: true,
+                //         format: 'd/m/Y H:i',
+                //         mask: true,
+                //         minDate: new Date(),
+                //         /*onShow: function(ct) {
+                //             this.setOptions({
+                //                 maxDate: $('#input_datetimepicker_day_end').val() ? $(
+                //                     '#input_datetimepicker_day_end').val() : false
+                //             })
+                //         },*/
+                //     });
+                // });
 
-                $('body').on('mousedown', "#input_datetimepicker_day_end", function() {
-                    $(this).datetimepicker({
-                        timepicker: true,
-                        format: 'd/m/Y H:i',
-                        mask: true,
-                        onShow: function(ct) {
-                            this.setOptions({
-                                minDate: $('#input_datetimepicker_day_begin').val() ? $(
-                                    '#input_datetimepicker_day_begin').val() : false
-                            })
-                        },
-                    });
-                });
+                // $('body').on('mousedown', "#input_datetimepicker_day_end", function() {
+                //     $(this).datetimepicker({
+                //         timepicker: true,
+                //         format: 'd/m/Y H:i',
+                //         mask: true,
+                //         minDate:new Date(),
+                //     });
+                // });
 
                 // $('#reservationtime_begin').datetimepicker({ 
                 //     icons: { time: 'far fa-clock' },
