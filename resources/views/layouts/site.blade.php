@@ -8,7 +8,7 @@
     <meta content="" name="keywords">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <title>Ticket DZ6</title>
+    <title>Ticket DZ6 - Home</title>
 
     <!-- Favicons -->
     <link rel="icon" href="{{ asset('assets/img/favicon/favicon.png') }}">
