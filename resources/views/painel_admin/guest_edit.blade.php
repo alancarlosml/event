@@ -39,25 +39,44 @@
                 <div class="card-body table-responsive p-0">
                     <div class="card-body">
                         <h4>Editar usuário convidado</h4>
-                        <form method="POST" action="">
+                        <form method="POST" action="{{ route('event_home.guest_update', $guest->id) }}">
                             @csrf
                             <div class="card-body">
                                 <div class="form-group">
-                                    <label for="name">Nome do convidado*</label>
-                                    <input type="text" class="form-control col-5" id="name" name="name" placeholder="Nome" value="{{$guest->name ?? old('name')}}" readonly>
+                                    <label for="name">Nome*</label>
+                                    <input type="text" class="form-control col-5" id="name" name="name"
+                                           placeholder="Nome" value="{{ $guest->name ?? old('name') }}" readonly>
                                 </div>
                                 <div class="form-group">
-                                    <label for="email">Email do convidado*</label>
-                                    <input type="text" class="form-control col-5" id="email" name="email" placeholder="Email" value="{{$guest->email ?? old('email')}}" readonly>
+                                    <label for="email">Email*</label>
+                                    <input type="text" class="form-control col-5" id="email" name="email"
+                                           placeholder="Email" value="{{ $guest->email ?? old('email') }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Papel*</label>
+                                    <select class="form-control col-5" id="role" name="role">
+                                        <option value="admin" @if ($guest->role == 'admin') selected @endif>Admin
+                                        </option>
+                                        <option value="convidado" @if ($guest->role == 'convidado') selected @endif>
+                                            Convidado</option>
+                                        <option value="monitor" @if ($guest->role == 'monitor') selected @endif>
+                                            Monitor</option>
+                                        <option value="vendedor" @if ($guest->role == 'vendedor') selected @endif>
+                                            Vededor</option>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="status">Status</label>
                                     <div class="custom-switch">
-                                        <input type="checkbox" @if($guest->status == 1) checked="checked" @endif class="custom-control-input" name="status" id="status" value="1">
+                                        <input type="checkbox"
+                                               @if ($guest->status == 1) checked="checked" @endif
+                                               class="custom-control-input" name="status" id="status"
+                                               value="1">
                                         <label class="custom-control-label" for="status">Ativo</label>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="card-footer d-flex justify-content-between">
+                                    <a href="{{ route('event_home.guests', $guest->event_hash) }}" class="btn btn-primary">Anterior</a>
                                     <button type="submit" class="btn btn-primary">Salvar</button>
                                 </div>
                             </div>

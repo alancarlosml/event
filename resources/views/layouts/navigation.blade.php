@@ -53,10 +53,26 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('event.index') }}" class="nav-link">
+                    <a href="#" class="nav-link">
                         <i class="fa-solid fa-radio ml-2"></i>
-                        <p class="ml-2"> Eventos </p>
+                        <p class="ml-1">Eventos
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('event.create') }}" class="nav-link">
+                                <i class="fa-solid fa-minus"></i>
+                                <p>Adicionar</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('event.index') }}" class="nav-link">
+                                <i class="fa-solid fa-minus"></i>
+                                <p>Listar</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link">

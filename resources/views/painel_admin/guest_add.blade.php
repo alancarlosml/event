@@ -48,6 +48,25 @@
                                     <small id="emailHelp" class="form-text text-muted">Antes de realizar a adição, certifique-se de que o usuário já possui cadastro no site.</small>
                                 </div>
                                 <div class="form-group">
+                                    <label for="email">Papel*</label>
+                                    <select class="form-control col-5" id="role" name="role">
+                                        <option value="">Selecione</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="convidado">Convidado</option>
+                                        <option value="monitor">Monitor</option>
+                                        <option value="vendedor">Vendedor</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="status">Status</label>
+                                    <div class="custom-switch">
+                                        <input type="checkbox" class="custom-control-input" name="status"
+                                               id="status" value="1">
+                                        <label class="custom-control-label" for="status">Ativo</label>
+                                    </div>
+                                </div>
+                                <div class="card-footer d-flex justify-content-between">
+                                    <a href="{{ route('event_home.guests', $event->hash) }}" class="btn btn-primary">Anterior</a>
                                     <button type="submit" class="btn btn-primary">Salvar</button>
                                 </div>
                             </div>

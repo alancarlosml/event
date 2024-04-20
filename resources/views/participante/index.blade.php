@@ -74,6 +74,12 @@
                                                             </i>
                                                             Detalhes
                                                         </a>
+                                                        <a class="btn btn-warning btn-sm mr-1"
+                                                           href="{{ route('participante.list_events', $participante->id) }}">
+                                                            <i class="fas fa-calendar">
+                                                            </i>
+                                                            Eventos
+                                                        </a>
                                                         {{-- <a href="{{route('participante.show', $student->id)}}" class="btn btn-info m-1">Details</a> --}}
                                                         {{-- <a href="{{route('participante.edit', $participante->id)}}" class="btn btn-primary m-1">Editar</a> --}}
                                                         <a class="btn btn-info btn-sm mr-1"
@@ -135,7 +141,7 @@
                         </div>
                         <!-- /.card -->
 
-                        <div class="card">
+                        {{-- <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">Listar todos usuários admins</h3>
 
@@ -163,7 +169,7 @@
                                                 <td>
                                                     <div class="d-flex">
                                                         <a class="btn btn-primary btn-sm mr-1"
-                                                           href="{{ route('participante.show', $participante->id) }}">
+                                                           href="{{ route('participante.list_events', $participante->id) }}">
                                                             <i class="fas fa-eye">
                                                             </i>
                                                             Eventos
@@ -207,7 +213,7 @@
                                                 <td>
                                                     <div class="d-flex">
                                                         <a class="btn btn-primary btn-sm mr-1"
-                                                           href="{{ route('participante.show', $participante->id) }}">
+                                                           href="{{ route('participante.list_events', $participante->id) }}">
                                                             <i class="fas fa-eye">
                                                             </i>
                                                             Eventos
@@ -220,7 +226,7 @@
                                 </table>
                             </div>
                             <!-- /.card-body -->
-                        </div>
+                        </div> --}}
                         <!-- /.card -->
                     </div>
                 </div>

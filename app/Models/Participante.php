@@ -72,6 +72,13 @@ class Participante extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    public function inscricoes()
+    {
+        return $this->hasMany(
+            Order::class
+        );
+    }
+
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token));

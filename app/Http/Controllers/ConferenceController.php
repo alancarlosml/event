@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use GuzzleHttp\Client;
 
 use App\Models\City;
 use App\Models\Coupon;
@@ -386,6 +387,7 @@ class ConferenceController extends Controller
             'gatway_reference' => null,
             'gatway_status' => null,
             'gatway_payment_method' => null,
+            'event_id' => $event->id,
             'event_date_id' => $event_date->id,
             'participante_id' => Auth::user()->id,
             'coupon_id' => $coupon_id,
@@ -662,26 +664,39 @@ class ConferenceController extends Controller
 
     public function oauth(Request $request){
      
-        $code = $request->code;
-        $state = $request->state;
+        $code = $request->input('code');
+        $state = $request->input('state');
 
-        dd($code . ' - ' . $state);
-        /*$app_id = 2470923232027455;
-        $access_token = "TEST-cc325724-c3e8-4430-9189-d49c50c00458";
-        $redirec_url = "https://www.ticketdz6.com.br/api/oauth";
-        
-        $ch = curl_init();
-        curl_setopt_array($ch, array(
-            CURLOPT_URL => "https://auth.mercadopago.com.br/authorization?client_id=" . $app_id . "&response_type=" . $code . "&platform_id=mp&redirect_uri=" . $redirec_url,
-            CURLOPT_RETURNTRANSFER => true,
+        // Configuração da solicitação cURL
+        $apiEndpoint = 'https://api.mercadopago.com/oauth/token';
+        $requestData = [
+            'client_id' => env('MERCADO_PAGO_CLIENT_ID', ''),
+            'client_secret' => env('MERCADO_PAGO_CLIENT_SECRET', ''),
+            'code' => $code,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => env('MERCADO_PAGO_REDIRECT_URI', ''),
+        ];
 
-            CURLOPT_POSTFIELDS => http_build_query(array(
-                
-                "grant_type" => "authorization_code",
-                "code" => $code,
-                "redirect_uri" => $redirec_url
+        // Inicia o cliente Guzzle
+        $client = new Client();
 
-            ))
-        ))*/
+        try {
+            // Envia a solicitação POST para a API do MercadoPago
+            $response = $client->post($apiEndpoint, [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $requestData,
+            ]);
+
+            // Obtém o corpo da resposta
+            $responseData = json_decode($response->getBody(), true);
+
+            // Faça algo com os dados da resposta, se necessário
+            return response()->json($responseData);
+        } catch (\Exception $e) {
+            // Manipule erros, se necessário
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

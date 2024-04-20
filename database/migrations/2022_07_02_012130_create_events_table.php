@@ -25,6 +25,7 @@ return new class () extends Migration {
             $table->text('description');
             $table->string('banner');
             $table->integer('banner_option');
+            $table->double('config_tax');
             $table->string('max_tickets');
             $table->string('theme');
             $table->string('contact');

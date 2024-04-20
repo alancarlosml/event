@@ -22,4 +22,8 @@ use Illuminate\Support\Facades\Route;
 
 // Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
 Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->name('conference.thanks');
-Route::post('oauth', 'App\Http\Controllers\ConferenceController@oauth')->name('conference.oauth');
+Route::get('oauth', 'App\Http\Controllers\ConferenceController@oauth')->name('conference.oauth');
+
+Route::post('painel/meus-eventos/mensagens/marcar-como-lida', 'App\Http\Controllers\EventAdminController@marcarComoLida')->middleware(['auth:participante', 'verified'])->name('event_home.marcar_como_lida');
+Route::post('painel/meus-eventos/mensagens/marcar-como-nao-lida', 'App\Http\Controllers\EventAdminController@marcarComoNaoLida')->middleware(['auth:participante', 'verified'])->name('event_home.marcar_como_nao_lida');
+Route::post('painel/meus-eventos/mensagens/deletar', 'App\Http\Controllers\EventAdminController@deletarMensagens')->middleware(['auth:participante', 'verified'])->name('event_home.deletar_mensagens');

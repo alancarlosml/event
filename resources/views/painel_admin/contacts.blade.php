@@ -36,36 +36,54 @@
                         </div>
                     @endif
                 </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        Ações
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="dropdown-item"><a href="#" id="checkAllRead">Marcar como lida</a></li>
+                        <li class="dropdown-item"><a href="#" id="checkAllUnread">Marcar como não lida</a></li>
+                        <li class="dropdown-divider"></li>
+                        <li class="dropdown-item"><a href="#" class="text-danger" id="deleteAll">Deletar</a></li>
+                    </ul>
+                </div>
+                <hr>
                 <div class="card-body table-responsive p-0">
                     <table class="table table-head-fixed text-wrap hover contact_event" id="list_events">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th><input type="checkbox" id="checkAll"/></th>
                                 <th>Nome</th>
                                 <th>Email</th>
                                 <th>Telefone</th>
                                 <th>Assunto</th>
                                 <th>Data Criação</th>
-                                <th>Ações</th>
+                                {{-- <th>Ações</th> --}}
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($messages as $message)
-                                <tr @if ($message->read == 0) style="background:#eeefff; font-weight:bold" @endif
-                                    onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">
-                                    <td>{{ $message->id }}</td>
-                                    <td>{{ $message->name }}</td>
-                                    <td>{{ $message->email }}</td>
-                                    <td>{{ $message->phone }}</td>
-                                    <td>{{ $message->subject }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($message->created_at)->format('j/m/Y H:i') }}</td>
-                                    <td>
-                                        <div class="d-flex">
-                                            <a class="btn btn-primary btn-sm mr-1"
+                                <tr data-message-id="{{ $message->id }}" @if ($message->read == 0) style="background:#eeefff; font-weight:bold" @endif>
+                                    <td class="action"><input type="checkbox" /></td>
+                                    <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ $message->name }}</td>
+                                    <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ $message->email }}</td>
+                                    <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ $message->phone }}</td>
+                                    <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ $message->subject }}</td>
+                                    <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ \Carbon\Carbon::parse($message->created_at)->format('j/m/Y H:i') }}</td>
+                                    {{-- <td>
+                                        <div class="d-flex"> --}}
+                                            {{--<a class="btn btn-primary btn-sm mr-1"
                                                href="{{ route('event_home.show_message', $message->id) }}">
                                                 <i class="fa-solid fa-envelope"></i>
                                                 Abrir
+                                            </a>--}}
+                                            {{-- @if ($message->read == 1)
+                                            <a class="btn btn-warning btn-sm mr-1"
+                                               href="{{ route('event_home.show_message', $message->id) }}">
+                                                <i class="fa-solid fa-envelope"></i>
+                                                Marcar como não lida
                                             </a>
+                                            @endif
                                             <form action="{{ route('event_home.destroy_message', $message->id) }}"
                                                   method="POST">
                                                 <input type="hidden" name="_method" value="DELETE">
@@ -75,14 +93,14 @@
                                                     <i class="fas fa-trash">
                                                     </i>
                                                     Remover
-                                                </a>
+                                                </a> --}}
                                                 {{-- <a class="btn btn-danger m-1 btn-remove" href="javascript:;" onclick="removeData({{$category->id}})">Remover</a> --}}
-                                                <button class="d-none"
+                                                {{-- <button class="d-none"
                                                         id="btn-remove-hidden-{{ $message->id }}">Remover</button>
                                             </form>
                                         </div>
-                                    </td>
-                                    <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{ $message->id }}"
+                                    </td> --}}
+                                    {{-- <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{ $message->id }}"
                                          tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel"
                                          aria-hidden="true">
                                         <div class="modal-dialog" role="document">
@@ -104,6 +122,25 @@
                                                             onclick="removeSucc({{ $message->id }})">Sim</button>
                                                     <button type="button" class="btn btn-secondary"
                                                             data-dismiss="modal">Não</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> --}}
+                                    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar exclusão</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Tem certeza de que deseja excluir todas as mensagens selecionadas?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Excluir</button>
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -250,6 +287,110 @@
                         }
                     ]
                 });
+
+                var $checkAllCheckbox = $('#checkAll');
+                var $checkboxes = $('#list_events tbody input[type="checkbox"]');
+
+                $checkAllCheckbox.on('change', function() {
+                    $checkboxes.prop('checked', $checkAllCheckbox.prop('checked'));
+                });
+
+                // Quando clicar em "Marcar como lida"
+                $('#checkAllRead').click(function(e) {
+                    e.preventDefault();
+
+                    var ids = [];
+                    $('#list_events tbody input[type="checkbox"]:checked').each(function() {
+                        ids.push($(this).closest('tr').data('message-id'));
+                    });
+
+                    // Envia uma requisição AJAX para marcar todas as mensagens como lidas
+                    $.ajax({
+                        url: "{{ route('event_home.marcar_como_lida') }}",
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'marcarLida',
+                            ids: ids
+                        },
+                        success: function(response) {
+                            // Atualiza a página ou qualquer outra ação necessária após a marcação como lida
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                });
+
+                // Quando clicar em "Marcar como não lida"
+                $('#checkAllUnread').click(function(e) {
+                    e.preventDefault();
+
+                    var ids = [];
+                    $('#list_events tbody input[type="checkbox"]:checked').each(function() {
+                        ids.push($(this).closest('tr').data('message-id'));
+                    });
+
+                    console.log(ids);
+
+                    // Envia uma requisição AJAX para marcar todas as mensagens como lidas
+                    $.ajax({
+                        url: "{{ route('event_home.marcar_como_nao_lida') }}",
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'marcarNaoLida',
+                            ids: ids
+                        },
+                        success: function(response) {
+                            // Atualiza a página ou qualquer outra ação necessária após a marcação como lida
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                });
+
+                $('#deleteAll').click(function(e) {
+                    e.preventDefault();
+
+                    // Mostrar o modal de confirmação
+                    $('#confirmDeleteModal').modal('show');
+                });
+
+                // Lidar com o clique no botão de confirmação dentro do modal
+                $('#confirmDeleteButton').click(function() {
+                    var ids = [];
+                    $('#list_events tbody input[type="checkbox"]:checked').each(function() {
+                        ids.push($(this).closest('tr').data('message-id'));
+                    });
+
+                    // Envia uma requisição AJAX para marcar todas as mensagens como lidas
+                    $.ajax({
+                        url: "{{ route('event_home.deletar_mensagens') }}",
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'deletarMensagens',
+                            ids: ids
+                        },
+                        success: function(response) {
+                            // Atualiza a página ou qualquer outra ação necessária após a marcação como lida
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+
+                    $('#confirmDeleteModal').modal('hide');
+
+                    location.reload();
+                });
+
+
 
                 // $('#description').summernote({
                 //     placeholder: 'Descreva em detalhes o evento',

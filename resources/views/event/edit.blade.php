@@ -300,6 +300,17 @@
 											</div>  
 										</div>
 									</div>
+                                    <hr>
+									<div class="card-body">
+										<h4>Configurar taxa específica</h4>
+										<div class="form-row">
+											<div class="form-group col-md-10">
+												<label for="tax">Taxa de juros*</label>
+                                                <input type="text" class="form-control" id="tax" name="tax" placeholder="Ex: 7" value="{{ $event->tax * 100 }}">
+                                                <small id="taxHelp" class="form-text text-muted">Ex: 7 para 7%.</small>
+											</div>
+                                        </div>
+                                    </div>
                                     {{-- <div class="card-body">
                                         <h4>Endereço do evento</h4>
                                         <div class="form-row">

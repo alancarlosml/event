@@ -25,6 +25,7 @@ class Event extends Model
         'description',
         'banner',
         'banner_option',
+        'config_tax',
         'owner_id',
         'area_id',
         'place_id',

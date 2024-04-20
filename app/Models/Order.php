@@ -20,6 +20,11 @@ class Order extends Model
         'id',
     ];
 
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id', 'id');
+    }
+
     public function participante()
     {
         return $this->belongsTo(Participante::class, 'participante_id', 'id');

@@ -1234,11 +1234,23 @@ class EventAdminController extends Controller
     {
         $event = Event::where('hash', $hash)->first();
 
+        if (!$event) {
+            return redirect('/');
+        }
+
         $this->validate($request, [
             'email' => 'required',
+            'role' => 'required',
+            'status' => 'nullable',
         ]);
 
         $input = $request->all();
+
+        if(isset($input['status'])) {
+            $input['status'] = 1;
+        } else {
+            $input['status'] = 0;
+        }
 
         $participante = Participante::where('email', $input['email'])->first();
         $msgType = '';
@@ -1251,7 +1263,7 @@ class EventAdminController extends Controller
             } elseif($participante->status == 1) {
                 DB::table('participantes_events')->insert([
                     'hash' => md5($participante->name . date('Y-m-d H:i:s') . md5('papainoel')),
-                    'role' => 'guest',
+                    'role' => 'convidado',
                     'status' => 1,
                     'created_at' => date('Y-m-d H:i:s'),
                     'participante_id' => $participante->id,
@@ -1275,7 +1287,7 @@ class EventAdminController extends Controller
     {
         $guest = Participante::join('participantes_events', 'participantes_events.participante_id', '=', 'participantes.id')
             ->join('events', 'participantes_events.event_id', '=', 'events.id')
-            ->select('participantes_events.id', 'participantes.name', 'participantes.email', 'participantes_events.role', 'participantes_events.status')
+            ->select('participantes_events.id', 'participantes.name', 'participantes.email', 'participantes_events.role', 'participantes_events.status', 'events.hash as event_hash')
             ->where('participantes_events.id', $id)
             ->first();
 
@@ -1286,6 +1298,15 @@ class EventAdminController extends Controller
 
     public function updateGuest(Request $request, $id)
     {
+        if (Auth::user()->userEvent->isEmpty()) {
+            return redirect('/');
+        }
+
+        $this->validate($request, [
+            'role' => 'required',
+            'status' => 'nullable',
+        ]);
+
         $input = $request->all();
 
         if(isset($input['status'])) {
@@ -1294,7 +1315,7 @@ class EventAdminController extends Controller
             $input['status'] = 0;
         }
 
-        $participanteEvent = ParticipanteEvent::where('id', $id)->update(['status' => $input['status']]);
+        ParticipanteEvent::where('id', $id)->update(['status' => $input['status']]);
 
         $participanteEventObj = ParticipanteEvent::where('id', $id)->first();
 
@@ -1370,6 +1391,60 @@ class EventAdminController extends Controller
         return view('painel_admin.contact', compact('contact'));
     }
 
+    public function marcarComoLida(Request $request)
+    {
+        if ($request->input('action') === 'marcarLida') {
+            
+            $ids = $request->input('ids');
+
+            if (!is_array($ids) || empty($ids)) {
+                return response()->json(['error' => 'Nenhum ID de mensagem foi fornecido'], 400);
+            }
+
+            Message::whereIn('id', $ids)->update(['read' => 1]);
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['error' => 'Ação inválida'], 400);
+    }
+
+    public function marcarComoNaoLida(Request $request)
+    {
+        if ($request->input('action') === 'marcarNaoLida') {
+            
+            $ids = $request->input('ids');
+
+            if (!is_array($ids) || empty($ids)) {
+                return response()->json(['error' => 'Nenhum ID de mensagem foi fornecido'], 400);
+            }
+
+            Message::whereIn('id', $ids)->update(['read' => 0]);
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['error' => 'Ação inválida'], 400);
+    }
+
+    public function deletarMensagens(Request $request)
+    {
+        if ($request->input('action') === 'deletarMensagens') {
+            
+            $ids = $request->input('ids');
+
+            if (!is_array($ids) || empty($ids)) {
+                return response()->json(['error' => 'Nenhum ID de mensagem foi fornecido'], 400);
+            }
+
+            Message::whereIn('id', $ids)->delete();
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['error' => 'Ação inválida'], 400);
+    }
+
     public function reports(Request $request, $hash)
     {
         $event = Event::where('hash', $hash)->first();
@@ -1377,6 +1452,9 @@ class EventAdminController extends Controller
         $config = Configuration::findOrFail(1);
 
         $taxa_juros = $config->tax;
+        if($event->config_tax != 0.0) {
+            $taxa_juros = $event->config_tax;
+        }
 
         $resumo = DB::table('lotes')
             ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')

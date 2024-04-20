@@ -25,7 +25,7 @@ class ParticipanteController extends Controller
 
         $participantesConvidados = Participante::orderBy('name')
             ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
-            ->where('participantes_events.role', 'guest')
+            ->where('participantes_events.role', 'convidado')
             ->select('participantes.id', 'participantes.name')
             ->groupBy('participantes.id')
             ->get();
@@ -106,9 +106,16 @@ class ParticipanteController extends Controller
 
     public function show($id)
     {
-
         $participante = Participante::find($id);
 
         return view('participante.show', compact('participante'));
     }
+
+    public function listEvents($id)
+    {
+        $participante = Participante::find($id);
+
+        return view('participante.list_events', compact('participante'));
+    }
+    
 }

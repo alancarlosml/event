@@ -19,4 +19,9 @@ class Message extends Model
         'event_id',
         'text',
     ];
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
 }

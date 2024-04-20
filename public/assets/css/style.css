@@ -228,8 +228,7 @@ section {
   position: relative;
 }
 
-.navbar a,
-.navbar a:focus {
+.navbar a{
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -249,12 +248,16 @@ section {
   margin-left: 5px;
 }
 
-.navbar a:hover,
-.navbar .active{
-  /* background-color: #4f9bd5; */
-  color: #4f9bd5;
-  text-decoration: underline;
-  /* border-radius: 4px; */
+.navbar .dropdown a:hover, 
+.navbar .nav-link:hover {
+  color: #007bff;
+}
+
+.navbar .nav-li a:hover,
+.navbar .nav-li .active{
+  color: #fff;
+  text-decoration: none;
+  background-color: #007bff;
 }
 
 .navbar .getstarted,

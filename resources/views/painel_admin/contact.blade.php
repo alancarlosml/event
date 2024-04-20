@@ -39,12 +39,6 @@
                 <div class="card-body table-responsive p-0">
                     <div class="card-body">
                         <div class="form-group">
-                            <label for="id">ID</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ $contact->id }}
-                            </p>
-                        </div>
-                        <div class="form-group">
                             <label for="name">Nome</label>
                             <p class="text-muted" style="font-size: 18px">
                                 {{ $contact->name }}
@@ -80,6 +74,9 @@
                                 {{ \Carbon\Carbon::parse($contact->created_at)->format('j/m/Y H:i') }}
                             </p>
                         </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{{ route('event_home.messages', $contact->event->hash) }}" class="btn btn-primary">Voltar</a>
                     </div>
                 </div>
             </div>

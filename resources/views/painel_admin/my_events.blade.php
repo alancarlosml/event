@@ -113,7 +113,7 @@
                                                             <i class="fas fa-person"></i>
                                                             Usuários
                                                         </a>
-                                                        <a class="dropdown-item" href="{{route('event_home.contacts', $event->hash)}}">
+                                                        <a class="dropdown-item" href="{{route('event_home.messages', $event->hash)}}">
                                                             <i class="fa-solid fa-envelope"></i>
                                                             Contatos
                                                         </a>

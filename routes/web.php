@@ -34,19 +34,21 @@ Route::post('painel/places/get-cities-by-state', 'App\Http\Controllers\EventHome
 Route::get('painel/minhas-inscricoes', 'App\Http\Controllers\EventAdminController@myRegistrations')->middleware(['auth:participante', 'verified'])->name('event_home.my_registrations');
 Route::get('painel/meus-eventos', 'App\Http\Controllers\EventAdminController@myEvents')->middleware(['auth:participante', 'verified'])->name('event_home.my_events');
 Route::get('painel/meus-eventos/{hash}/detalhes', 'App\Http\Controllers\EventAdminController@myEventsShow')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_show');
-Route::get('painel/meus-eventos/{hash}/contatos', 'App\Http\Controllers\EventAdminController@contacts')->middleware(['auth:participante', 'verified'])->name('event_home.contacts');
 Route::get('painel/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@myEventsEdit')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_edit');
 Route::delete('painel/meus-eventos/{hash}/excluir', 'App\Http\Controllers\EventAdminController@destroy')->middleware(['auth:participante', 'verified'])->name('event_home.destroy');
 Route::get('painel/meus-eventos/{hash}/duplicar', 'App\Http\Controllers\EventAdminController@eventClone')->middleware(['auth:participante', 'verified'])->name('event_home.event_clone');
+// Route::get('painel/meus-eventos/{hash}/contatos', 'App\Http\Controllers\EventAdminController@contacts')->middleware(['auth:participante', 'verified'])->name('event_home.contacts');
+Route::get('painel/meus-eventos/{hash}/contatos', 'App\Http\Controllers\EventAdminController@contacts')->middleware(['auth:participante', 'verified'])->name('event_home.messages');
+Route::get('painel/meus-eventos/mensagens/{id}/abrir', 'App\Http\Controllers\EventAdminController@showMessage')->middleware(['auth:participante', 'verified'])->name('event_home.show_message');
+// Route::delete('painel/meus-eventos/mensagens/{id}/excluir', 'App\Http\Controllers\EventAdminController@destroyMessage')->middleware(['auth:participante', 'verified'])->name('event_home.destroy_message');
+
 Route::get('painel/meus-eventos/{hash}/convidados', 'App\Http\Controllers\EventAdminController@guests')->middleware(['auth:participante', 'verified'])->name('event_home.guests');
 Route::get('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@addGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guest_add');
 Route::post('painel/meus-eventos/{hash}/convidados/adicionar', 'App\Http\Controllers\EventAdminController@storeGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guest_store');
-Route::get('painel/meus-eventos/{hash}/mensagens', 'App\Http\Controllers\EventAdminController@listMessages')->middleware(['auth:participante', 'verified'])->name('event_home.messages');
-Route::get('painel/meus-eventos/mensagens/{id}/abrir', 'App\Http\Controllers\EventAdminController@showMessage')->middleware(['auth:participante', 'verified'])->name('event_home.show_message');
-Route::delete('painel/meus-eventos/mensagens/{id}/excluir', 'App\Http\Controllers\EventAdminController@destroyMessage')->middleware(['auth:participante', 'verified'])->name('event_home.destroy_message');
 Route::get('painel/meus-eventos/convidados/{id}/editar', 'App\Http\Controllers\EventAdminController@editGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guest_edit');
-Route::post('painel/meus-eventos/convidados/{id}/editar', 'App\Http\Controllers\EventAdminController@updateGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guests_update');
+Route::post('painel/meus-eventos/convidados/{id}/editar', 'App\Http\Controllers\EventAdminController@updateGuest')->middleware(['auth:participante', 'verified'])->name('event_home.guest_update');
 Route::delete('painel/meus-eventos/convidados/{id}/excluir', 'App\Http\Controllers\EventAdminController@destroyGuest')->middleware(['auth:participante', 'verified'])->name('event_home.destroy_guest');
+
 Route::get('painel/meus-eventos/{hash}/relatorios', 'App\Http\Controllers\EventAdminController@reports')->middleware(['auth:participante', 'verified'])->name('event_home.reports');
 
 Route::get('painel/eventos/criar-evento', 'App\Http\Controllers\EventAdminController@createEventLink')->middleware(['auth:participante', 'verified'])->name('event_home.create_event_link');
@@ -151,8 +153,8 @@ Route::get('admin/events/list', 'App\Http\Controllers\EventController@index')->m
 Route::get('admin/events/show/{id}', 'App\Http\Controllers\EventController@show')->middleware(['auth:web'])->name('event.show');
 Route::get('admin/events/{id}/lotes', 'App\Http\Controllers\EventController@lotes')->middleware(['auth:web'])->name('event.lotes');
 Route::get('admin/events/{id}/reports', 'App\Http\Controllers\EventController@reports')->middleware(['auth:web'])->name('event.reports');
-// Route::get('admin/events/create', 'App\Http\Controllers\EventController@create')->middleware(['auth:web'])->name('event.create');
-// Route::post('admin/events/store', 'App\Http\Controllers\EventController@store')->middleware(['auth:web'])->name('event.store');
+Route::get('admin/events/create', 'App\Http\Controllers\EventController@create')->middleware(['auth:web'])->name('event.create');
+Route::post('admin/events/store', 'App\Http\Controllers\EventController@store')->middleware(['auth:web'])->name('event.store');
 Route::get('admin/events/edit/{id}', 'App\Http\Controllers\EventController@edit')->middleware(['auth:web'])->name('event.edit');
 Route::post('admin/events/update/{id}', 'App\Http\Controllers\EventController@update')->middleware(['auth:web'])->name('event.update');
 Route::delete('admin/events/destroy/{id}', 'App\Http\Controllers\EventController@destroy')->middleware(['auth:web'])->name('event.destroy');
@@ -198,6 +200,7 @@ Route::post('admin/participantes/store', 'App\Http\Controllers\ParticipanteContr
 Route::get('admin/participantes/edit/{id}', 'App\Http\Controllers\ParticipanteController@edit')->middleware(['auth:web'])->name('participante.edit');
 Route::post('admin/participantes/update/{id}', 'App\Http\Controllers\ParticipanteController@update')->middleware(['auth:web'])->name('participante.update');
 Route::delete('admin/participantes/destroy/{id}', 'App\Http\Controllers\ParticipanteController@destroy')->middleware(['auth:web'])->name('participante.destroy');
+Route::get('admin/participantes/{id}/eventos', 'App\Http\Controllers\ParticipanteController@listEvents')->middleware(['auth:web'])->name('participante.list_events');
 
 Route::get('admin/events/{id}/questions', 'App\Http\Controllers\EventController@questions')->middleware(['auth:web'])->name('event.questions');
 Route::post('admin/events/{id}/questions/create', 'App\Http\Controllers\EventController@create_questions')->middleware(['auth:web'])->name('event.questions.create');

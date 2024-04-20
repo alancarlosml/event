@@ -444,6 +444,9 @@
                         </div> --}}
                     </div>
                 </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ route('event_home.my_events') }}" class="btn btn-primary">Voltar</a>
+                </div>
             </div>
         </section>
 

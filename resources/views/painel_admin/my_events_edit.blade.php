@@ -392,7 +392,7 @@
                             <div class="form-group">
                                 <label for="contact">Email*</label>
                                 <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
-                                <small id="contactHelp" class="form-text text-muted">Importante: informe o email de uma conta Mercado Pago.</small>
+                                <small id="contactHelp" class="form-text text-muted">Importante: informe o email de uma conta Mercado Pago ativa.</small>
                             </div>
                         </div>
 

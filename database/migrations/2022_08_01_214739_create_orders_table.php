@@ -26,11 +26,16 @@ return new class () extends Migration {
             $table->string('gatway_payment_method');
             $table->string('gatway_description');
             $table->timestamp('gatway_date_status');
-            $table->integer('event_date_id')->index()->unsigned();
-            $table->foreign('event_date_id')
+            $table->integer('event_id')->index()->unsigned();
+            $table->foreign('event_id')
                 ->references('id')
-                ->on('event_dates')
+                ->on('events')
                 ->onDelete('cascade');
+            // $table->integer('event_date_id')->index()->unsigned();
+            // $table->foreign('event_date_id')
+            //     ->references('id')
+            //     ->on('event_dates')
+            //     ->onDelete('cascade');
             $table->integer('participante_id')->index()->unsigned();
             $table->foreign('participante_id')
                 ->references('id')

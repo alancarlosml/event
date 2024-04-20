@@ -274,9 +274,20 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <hr>
+									<div class="card-body">
+										<h4>Configurar taxa específica</h4>
+										<div class="form-row">
+											<div class="form-group col-md-10">
+												<label for="tax">Taxa de juros*</label>
+                                                <input type="text" class="form-control" id="tax" name="tax" placeholder="Ex: 7" value="">
+                                                <small id="taxHelp" class="form-text text-muted">Ex: 7 para 7%.</small>
+											</div>
+                                        </div>
+                                    </div>
                                     <hr />
-                                    <div class="card-body">
-                                        <h4>Campos do formulário de inscrição</h4>
+                                    {{-- <div class="card-body">
+                                        <h4>Campos do formulário de inscrição</h4> --}}
                                         {{-- <div class="form-group">
                               <label for="name">Nome</label>
                               <input type="text" class="form-control" id="name" name="name" placeholder="Nome">
@@ -321,8 +332,8 @@
                                     <input type="text" class="form-control" id="zip" name="zip" placeholder="CEP">
                                 </div>
                             </div>   --}}
-                                    </div>
-                                    <hr />
+                                    {{-- </div> --}}
+                                    {{-- <hr /> --}}
                                     <div class="form-check pb-3">
                                         <div class="custom-switch">
                                             <input type="checkbox" checked="checked" class="custom-control-input"

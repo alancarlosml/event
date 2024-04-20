@@ -34,6 +34,11 @@ return new class () extends Migration {
                 ->references('id')
                 ->on('lotes')
                 ->onDelete('cascade');
+            $table->integer('event_date_id')->index()->unsigned();
+                $table->foreign('event_date_id')
+                    ->references('id')
+                    ->on('event_dates')
+                    ->onDelete('cascade');
             $table->timestamps();
         });
 

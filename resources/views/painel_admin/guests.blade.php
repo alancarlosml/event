@@ -68,12 +68,12 @@
                                         <td>@if($usuario->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
                                         <td>
                                             <div class="d-flex">
-                                                {{-- <a class="btn btn-info btn-sm mr-1" href="{{route('event_home.guest_edit', $usuario->id)}}">
+                                                <a class="btn btn-info btn-sm mr-1" href="{{route('event_home.guest_edit', $usuario->id)}}">
                                                     <i class="fas fa-pencil-alt">
                                                     </i>
                                                     Editar
-                                                </a> --}}
-                                                @if($usuario->role == 'guest')
+                                                </a>
+                                                @if($usuario->role != 'admin')
                                                     <form action="{{ route('event_home.destroy_guest', $usuario->id) }}" method="POST">
                                                         <input type="hidden" name="_method" value="DELETE">
                                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">

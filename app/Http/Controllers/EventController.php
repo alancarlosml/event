@@ -547,6 +547,9 @@ class EventController extends Controller
         $config = Configuration::findOrFail(1);
 
         $taxa_juros = $config->tax;
+        if($event->config_tax != 0.0) {
+            $taxa_juros = $event->config_tax;
+        }
 
         $resumo = DB::table('lotes')
             ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')
