@@ -280,7 +280,7 @@ class EventAdminController extends Controller
                 'description.required' => 'A descrição do evento é obrigatória.',
                 'area_id.required' => 'A área do evento é obrigatória.',
                 'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
-                'contact.required' => 'O email do administrador é obrigatório.',
+                'contact.required' => 'O email de contato é obrigatório.',
             ]);
 
             // dd($validatedDataEvent);
@@ -339,7 +339,7 @@ class EventAdminController extends Controller
                 'description.required' => 'A descrição do evento é obrigatória.',
                 'area_id.required' => 'A área do evento é obrigatória.',
                 'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
-                'contact.required' => 'O email do administrador é obrigatório.',
+                'contact.required' => 'O email de contato é obrigatório.',
                 'new_field.required' => 'As perguntas são obrigatórias.',
             ]);
 

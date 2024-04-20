@@ -41,9 +41,9 @@
                         <li class="active" id="account"><strong>Informações</strong></li>
                         <li class="active" id="personal"><strong>Inscrições</strong></li>
                         <li id="payment"><strong>Cupons</strong></li>
-                        <li id="confirm"><strong>Fim</strong></li>
+                        <li id="confirm"><strong>Publicar</strong></li>
                     </ul>
-                    <div class="card-body" id="lote_field" >
+                    <div class="card-body" id="lote_field">
                         <h4>Listagem dos lotes</h4>
                         <div class="form-group text-right">
                             <a href="{{route('event_home.lote_create')}}" class="btn btn-success">Cadastrar novo lote</a>

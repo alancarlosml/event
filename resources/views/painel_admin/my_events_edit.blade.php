@@ -41,7 +41,7 @@
                         <li class="active" id="account"><strong>Informações</strong></li>
                         <li id="personal"><strong>Inscrições</strong></li>
                         <li id="payment"><strong>Cupons</strong></li>
-                        <li id="confirm"><strong>Fim</strong></li>
+                        <li id="confirm"><strong>Publicar</strong></li>
                     </ul>
                     {{-- {{dd($event->get_category())}} --}}
                     <form method="POST" action="{{ route('event_home.create.step.one') }}">
@@ -109,6 +109,10 @@
                             <div class="form-group">
                                 <label for="max_tickets">Total máximo de vagas*</label>
                                 <input type="number" class="form-control col-lg-2 col-sm-12" id="max_tickets" name="max_tickets" value="{{ $event->max_tickets ?? old('max_tickets') }}" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact">Email para contato*</label>
+                                <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
                             </div>
                             <input type="hidden" name="admin_id" id="admin_id_hidden" value="{{Auth::user()->id}}">
                         </div>

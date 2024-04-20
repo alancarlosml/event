@@ -41,7 +41,7 @@
                         <li class="active" id="account"><strong>Informações</strong></li>
                         <li class="active" id="personal"><strong>Inscrições</strong></li>
                         <li class="active" id="payment"><strong>Cupons</strong></li>
-                        <li class="active" id="confirm"><strong>Fim</strong></li>
+                        <li class="active" id="confirm"><strong>Publicar</strong></li>
                     </ul>
                     <form method="POST" action="{{route('event_home.publish', $hash_event)}}" enctype="multipart/form-data">
                         @csrf

@@ -106,6 +106,10 @@
                                 <label for="max_tickets">Total máximo de vagas*</label>
                                 <input type="number" class="form-control col-lg-2 col-sm-12" id="max_tickets" name="max_tickets" value="{{ $event->max_tickets ?? old('max_tickets') }}" min="0">
                             </div>
+                            <div class="form-group">
+                                <label for="contact">Email para contato*</label>
+                                <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
+                            </div>
                             <input type="hidden" name="admin_id" id="admin_id_hidden" value="{{Auth::user()->id}}">
                         </div>
                         <hr>
@@ -406,11 +410,21 @@
                         <hr>
 
                         <div class="card-body">
-                            <h4>Vincular conta Mercado Pago</h4>
+                            <h4>Carteira de pagamento</h4>
                             <div class="form-group">
-                                <label for="contact">Email*</label>
-                                <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
-                                <small id="contactHelp" class="form-text text-muted">Importante: informe o email de uma conta Mercado Pago ativa.</small>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio_mercadopago" value="option_mercadopago">
+                                    <label class="form-check-label" for="inlineRadio_mercadopago">Mercado Pago <a href="https://www.mercadopago.com.br/pt-br" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a></label>
+                                </div>
+                                    <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio_nenhuma" value="option_nenhuma">
+                                    <label class="form-check-label" for="inlineRadio_nenhuma">Nenhuma (Evento gratuito)</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact">Vincular conta Mercado Pago</label> <br>
+                                <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_CLIENT_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" class="btn btn-success btn-lg">Vincular conta</a>
+
                             </div>
                         </div>
                         
