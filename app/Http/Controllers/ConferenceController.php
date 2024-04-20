@@ -665,7 +665,6 @@ class ConferenceController extends Controller
     public function oauth(Request $request){
      
         $code = $request->input('code');
-        $state = $request->input('state');
 
         // Configuração da solicitação cURL
         $apiEndpoint = 'https://api.mercadopago.com/oauth/token';
@@ -690,7 +689,9 @@ class ConferenceController extends Controller
             ]);
 
             // Obtém o corpo da resposta
-            $responseData = json_decode($response->getBody(), true);
+            // $responseData = json_decode($response->getBody(), true);
+            $responseData = json_decode($response->getBody()->getContents(), true);
+
 
             // Faça algo com os dados da resposta, se necessário
             return response()->json($responseData);
