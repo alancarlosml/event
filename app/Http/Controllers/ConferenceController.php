@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use GuzzleHttp\Client;
 
-use App\Models\City;
+use App\Models\Configuration;
 use App\Models\Coupon;
 use App\Models\Event;
 use App\Models\EventDate;
@@ -469,6 +469,14 @@ class ConferenceController extends Controller
         $tmp_explode = Str::of(Auth::user()->name)->explode(' ');
         $last_name = end($tmp_explode);
 
+        $config = Configuration::findOrFail(1);
+
+        $taxa_juros = $config->tax;
+
+        if($event->config_tax != 0.0) {
+            $taxa_juros = $event->config_tax;
+        }
+
         try {
 
             if($input->paymentType == 'credit_card') {
@@ -480,6 +488,8 @@ class ConferenceController extends Controller
                 $payment->installments = (int) $input->formData->installments;
                 $payment->payment_method_id = $input->formData->payment_method_id;
                 $payment->issuer_id = (int) $input->formData->issuer_id;
+                $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
+                $payment->application_fee = $taxa_juros;
                 // $payment->notification_url = 'http://requestbin.fullcontact.com/1ogudgk1';
 
                 $payer = new MercadoPago\Payer();
@@ -499,6 +509,8 @@ class ConferenceController extends Controller
                 $payment->transaction_amount = (float) $total;
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
+                $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
+                $payment->application_fee = $taxa_juros;
                 $payment->payer = [
                     'email' => $input->formData->payer->email,
                     'first_name' => $first_name,
@@ -526,6 +538,8 @@ class ConferenceController extends Controller
                 $payment->transaction_amount = (float) $total;
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
+                $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
+                $payment->application_fee = $taxa_juros;
                 $payment->payer = [
                     'email' => $input->formData->payer->email,
                     'first_name' => $input->formData->payer->first_name,
@@ -692,8 +706,7 @@ class ConferenceController extends Controller
             // $responseData = json_decode($response->getBody(), true);
             $responseData = json_decode($response->getBody()->getContents(), true);
 
-
-            // Faça algo com os dados da resposta, se necessário
+            
             return response()->json($responseData);
         } catch (\Exception $e) {
             // Manipule erros, se necessário

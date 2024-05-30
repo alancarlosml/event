@@ -270,6 +270,8 @@ class EventAdminController extends Controller
                 'area_id' => 'required',
                 'max_tickets' => 'required',
                 'contact' => 'required',
+                'paid' => 'required',
+                'mercadopago_link' => 'nullable',
                 'place_id_hidden' => 'nullable',
                 'admin_id' => 'required',
                 'status' => 'string',
@@ -281,6 +283,7 @@ class EventAdminController extends Controller
                 'area_id.required' => 'A área do evento é obrigatória.',
                 'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
                 'contact.required' => 'O email de contato é obrigatório.',
+                'paid.required' => 'O evento deve ser pago ou gratuito.',
             ]);
 
             // dd($validatedDataEvent);
@@ -328,6 +331,8 @@ class EventAdminController extends Controller
                 'area_id' => 'required',
                 'max_tickets' => 'required',
                 'contact' => 'required',
+                'paid' => 'required',
+                'mercadopago_link' => 'nullable',
                 'place_id_hidden' => 'nullable',
                 'status' => 'string',
                 'new_field' => 'required',
@@ -341,6 +346,7 @@ class EventAdminController extends Controller
                 'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
                 'contact.required' => 'O email de contato é obrigatório.',
                 'new_field.required' => 'As perguntas são obrigatórias.',
+                'paid.required' => 'O evento deve ser pago ou gratuito.',
             ]);
 
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');

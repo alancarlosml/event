@@ -413,18 +413,18 @@
                             <h4>Carteira de pagamento</h4>
                             <div class="form-group">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio_mercadopago" value="option_mercadopago">
+                                    <input class="form-check-input" type="radio" name="paid" id="inlineRadio_mercadopago" value="0">
                                     <label class="form-check-label" for="inlineRadio_mercadopago">Mercado Pago <a href="https://www.mercadopago.com.br/pt-br" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a></label>
                                 </div>
                                     <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio_nenhuma" value="option_nenhuma">
+                                    <input class="form-check-input" type="radio" name="paid" id="inlineRadio_nenhuma" value="1">
                                     <label class="form-check-label" for="inlineRadio_nenhuma">Nenhuma (Evento gratuito)</label>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group d-none" id="form_mercadopago">
                                 <label for="contact">Vincular conta Mercado Pago</label> <br>
                                 <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_CLIENT_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" class="btn btn-success btn-lg">Vincular conta</a>
-
+                                <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
                             </div>
                         </div>
                         
@@ -519,6 +519,14 @@
                         });
                     }
                 });
+            });
+
+            $('input[name="paid"]').on('change', function() {
+                if ($(this).val() == 0) {
+                    $('#form_mercadopago').removeClass('d-none');
+                } else {
+                    $('#form_mercadopago').addClass('d-none');
+                }
             });
 
             var category_id = $("#category").val();

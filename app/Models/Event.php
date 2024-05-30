@@ -31,6 +31,8 @@ class Event extends Model
         'place_id',
         'max_tickets',
         'theme',
+        'paid',
+        'mercadopago_link',
         'contact',
         'status',
     ];
