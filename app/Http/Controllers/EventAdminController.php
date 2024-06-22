@@ -34,6 +34,8 @@ use App\Models\Question;
 use App\Models\User;
 use App\Models\State;
 
+use App\Http\Controllers\MercadoPagoController;
+
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class EventAdminController extends Controller
@@ -134,7 +136,7 @@ class EventAdminController extends Controller
         $request->session()->put('event', $newEvent);
 
         //ENVIAR EMAIL - EVENTO CRIADO
-        Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
+        // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
 
         return redirect()->route('event_home.my_events_edit', $newEvent->hash);
     }
@@ -223,7 +225,14 @@ class EventAdminController extends Controller
             $questions = $request->session()->get('questions');
         }
 
-        return view('painel_admin.create_event', compact('categories', 'states', 'options', 'event', 'place', 'eventDate', 'questions'));
+        // Adicionei uma verificação para saber se o usuário já tem uma conta vinculada ao Mercado Pago
+        $mercadoPagoResponse  = app(MercadoPagoController::class)->checkLinkedAccount($request);
+        $mercadoPagoLinked = [
+            'linked' => $mercadoPagoResponse->getData()->linked,
+            'id' => $mercadoPagoResponse->getData()->id,
+        ];
+
+        return view('painel_admin.create_event', compact('categories', 'states', 'options', 'event', 'place', 'eventDate', 'questions', 'mercadoPagoLinked'));
     }
 
     public function postCreateStepOne(Request $request)
@@ -313,7 +322,7 @@ class EventAdminController extends Controller
             ]);
             //ENVIAR EMAIL - EVENTO CRIADO
 
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
+            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
 
             return $event;
 
@@ -362,7 +371,7 @@ class EventAdminController extends Controller
             $request->session()->put('event', $event);
             $event->save();
 
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
+            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
 
             return $event;
         }
@@ -1188,9 +1197,9 @@ class EventAdminController extends Controller
         Event::where('id', $event->id)->update(['owner_id' => $owner_id]);
 
         if(isset($validatedEvent['status'])) {
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
+            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
         } else {
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
+            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
         }
 
         return redirect()->route('event_home.my_events')->with('success', 'Evento salvo com sucesso!');

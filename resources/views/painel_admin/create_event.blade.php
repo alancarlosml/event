@@ -421,11 +421,19 @@
                                     <label class="form-check-label" for="inlineRadio_nenhuma">Nenhuma (Evento gratuito)</label>
                                 </div>
                             </div>
+
+                            @if(isset($mercadoPagoLinked['linked']) && $mercadoPagoLinked['linked'])
                             <div class="form-group d-none" id="form_mercadopago">
-                                <label for="contact">Vincular conta Mercado Pago</label> <br>
-                                <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_CLIENT_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" class="btn btn-success btn-lg">Vincular conta</a>
-                                <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
+                                <label for="contact" id="linked-acc-label">ID da Conta Vinculada: {{ $mercadoPagoLinked['id'] }}</label> <br>
+                                <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri=" target="_blank" id="link-acc-button" data-linked="true" class="btn btn-secondary btn-md">Vincular outra conta</a>
                             </div>
+                            @else
+                            <div class="form-group d-none" id="form_mercadopago">
+                                <label for="contact" id="linked-acc-label">Vincular conta Mercado Pago</label> <br>
+                                <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success btn-lg">Vincular conta</a>
+                            </div>
+                            @endif
+                            <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
                         </div>
                         
                         <!-- /.card-body -->
@@ -950,5 +958,44 @@
     </script>
       
     @endpush
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const radioButtons = document.querySelectorAll('input[name="paid"]');
+            const formMercadoPago = document.getElementById('form_mercadopago');
+            const linkAccButton = document.getElementById('link-acc-button');
+            const linkedAccLabel = document.getElementById('linked-acc-label');
+    
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === "0") {
+                        formMercadoPago.classList.remove('d-none');
+                        
+                        // Verifica o atributo 'data-linked' do botão #link-acc-button
+                        if (linkAccButton.getAttribute('data-linked') === 'false') {
+                            const intervalId = setInterval(() => {
+                                fetch('/webhooks/mercado-pago/check-linked-account')
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.linked) {
+                                            clearInterval(intervalId);
+                                            linkedAccLabel.textContent = 'ID da Conta Vinculada: ' + data.id;
+                                            linkAccButton.className = 'btn btn-secondary btn-md';
+                                            linkAccButton.textContent = 'Vincular outra conta';
+                                            linkAccButton.setAttribute('data-linked', 'true');
+                                        } else {
+                                            console.log('Nenhuma conta vinculada');
+                                        }
+                                    })
+                                    .catch(error => console.error('Erro:', error));
+                            }, 5000);
+                        }
+                    } else {
+                        formMercadoPago.classList.add('d-none');
+                    }
+                });
+            });
+        });
+    </script>    
 
 </x-site-layout>

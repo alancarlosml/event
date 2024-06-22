@@ -15,7 +15,8 @@
                         </div>
                         <div class="col-8">
                             <h3 style="font-size: 24px">{{ $event->name }}</h3>
-                            <span><b>Data:</b> {{ \Carbon\Carbon::parse($eventDate->date)->format('d/m/y') }}</span><br>
+                            <span><b>Data:</b> </span><br>
+                            {{-- <span><b>Data:</b> {{ \Carbon\Carbon::parse($eventDate->date)->format('d/m/y') }}</span><br> --}}
                             <span><b>Local:</b> {{ $event->place->name }}</span><br>
                             <span><b>Lote(s) selecionado(s):</b> </span>
                             <ul class="list-style">

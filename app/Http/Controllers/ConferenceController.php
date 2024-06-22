@@ -372,6 +372,7 @@ class ConferenceController extends Controller
         $coupon_subtotal = $request->session()->get('coupon_subtotal');
         $total = $request->session()->get('total');
         $dict_lotes = $request->session()->get('dict_lotes');
+        $dict_lotes = $request->session()->get('dict_lotes');
         $array_lotes_obj = $request->session()->get('array_lotes_obj');
         $event_date = $request->session()->get('event_date');
 
@@ -388,7 +389,8 @@ class ConferenceController extends Controller
             'gatway_status' => null,
             'gatway_payment_method' => null,
             'event_id' => $event->id,
-            'event_date_id' => $event_date->id,
+            // 'event_date_id' => $event_date->id,
+            'event_date_id' => '63',
             'participante_id' => Auth::user()->id,
             'coupon_id' => $coupon_id,
             'created_at' => now(),
@@ -396,43 +398,43 @@ class ConferenceController extends Controller
 
         $request->session()->put('order_id', $order_id);
 
-        foreach($dict_lotes as $i => $dict) {
+        // foreach($dict_lotes as $i => $dict) {
 
-            $lote = Lote::where('hash', $dict['lote_hash'])->first();
+        //     $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
-            $order_item_id = DB::table('order_items')->insertGetId([
-                'hash' => md5((time() . uniqid() . $i) . md5('papainoel')),
-                'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('papainoel')), 36),
-                'quantity' => 1,
-                'value' => $lote->value,
-                'date_use' => null,
-                'status' => 2,
-                'order_id' => $order_id,
-                'lote_id' => $lote->id,
-                'created_at' => now(),
-            ]);
+        //     $order_item_id = DB::table('order_items')->insertGetId([
+        //         'hash' => md5((time() . uniqid() . $i) . md5('papainoel')),
+        //         'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('papainoel')), 36),
+        //         'quantity' => 1,
+        //         'value' => $lote->value,
+        //         'date_use' => null,
+        //         'status' => 2,
+        //         'order_id' => $order_id,
+        //         'lote_id' => $lote->id,
+        //         'created_at' => now(),
+        //     ]);
 
-            foreach(array_keys($input) as $field) {
+        //     foreach(array_keys($input) as $field) {
 
-                if(str_contains($field, 'newfield_')) {
-                    $id = explode('_', $field);
-                    $k = $id[1];
-                    $id = $id[2];
+        //         if(str_contains($field, 'newfield_')) {
+        //             $id = explode('_', $field);
+        //             $k = $id[1];
+        //             $id = $id[2];
 
-                    $question = Question::where('id', $id)->first();
+        //             $question = Question::where('id', $id)->first();
 
-                    if($input['newfield_'. $k . '_'. $id] != '') {
+        //             if($input['newfield_'. $k . '_'. $id] != '') {
 
-                        $option_answer_id = DB::table('option_answers')->insertGetId([
-                            'answer' => $input['newfield_'. $k . '_'. $id],
-                            'question_id' => $question->id,
-                            'order_item_id' => $order_item_id,
-                            'created_at' => now(),
-                        ]);
-                    }
-                }
-            }
-        }
+        //                 $option_answer_id = DB::table('option_answers')->insertGetId([
+        //                     'answer' => $input['newfield_'. $k . '_'. $id],
+        //                     'question_id' => $question->id,
+        //                     'order_item_id' => $order_item_id,
+        //                     'created_at' => now(),
+        //                 ]);
+        //             }
+        //         }
+        //     }
+        // }
 
         return redirect()->route('conference.payment', $event->slug);
     }
@@ -600,7 +602,7 @@ class ConferenceController extends Controller
                         'created_at' => now(),
                     ]);
                     // MANDAR EMAIL COM COMPRA REALIZADA COM SUCESSO
-                    Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
+                    // Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
 
                 } elseif($input->paymentType == 'bank_transfer') {
 
