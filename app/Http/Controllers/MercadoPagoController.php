@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Configuration;
 use App\Models\MpAccount;
 use App\Models\Participante;
 use GuzzleHttp\Client;
@@ -138,7 +139,14 @@ class MercadoPagoController extends Controller
         }
 
         // Addicionar lógica para calcular a taxa da plataforma aqui
-        $fee = round(0.1 * $total, 2);
+        // $fee = round(0.1 * $total, 2);
+
+        $config = Configuration::findOrFail(1);
+
+        $fee = $config->tax;
+        if($event->config_tax != 0.0) {
+            $fee = $event->config_tax;
+        }
 
         // Monta o payload para criar a preferência no Mercado Pago
         $data = [
@@ -185,7 +193,7 @@ class MercadoPagoController extends Controller
             'gatway_payment_method' => null,
             'event_id' => $event_id,
             // 'event_date_id' => $event_date->id, // Precisei comentar para consegui testar
-            'event_date_id' => '63', // Ajustar, coloquei fixo pra testes
+            // 'event_date_id' => '63', // Ajustar, coloquei fixo pra testes
             'participante_id' => Auth::user()->id,
             'coupon_id' => NULL,
             'created_at' => now(),

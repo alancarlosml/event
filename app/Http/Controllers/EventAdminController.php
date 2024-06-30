@@ -333,7 +333,7 @@ class EventAdminController extends Controller
 
             $validatedDataEvent = $request->validate([
                 'name' => 'required',
-                'slug' => 'required|unique:events,slug,'.$event_id,
+                'slug' => 'required|unique:events,slug,' . $event_id . ',id',
                 'description' => 'required',
                 'subtitle' => 'string',
                 'category' => 'required',

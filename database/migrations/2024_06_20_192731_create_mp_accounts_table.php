@@ -14,7 +14,7 @@ class CreateMpAccountsTable extends Migration
     public function up()
     {
         Schema::create('mp_accounts', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->unsignedInteger('participante_id');
             $table->text('access_token');
             $table->text('public_key');
@@ -24,7 +24,6 @@ class CreateMpAccountsTable extends Migration
             $table->timestamp('created_at')->nullable();
             $table->timestamp('updated_at')->nullable();
 
-            $table->primary('id');
         });
     }
 

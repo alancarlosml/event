@@ -392,12 +392,30 @@
                         <hr>
 
                         <div class="card-body">
-                            <h4>Vincular conta Mercado Pago</h4>
+                            <h4>Carteira de pagamento</h4>
                             <div class="form-group">
-                                <label for="contact">Email*</label>
-                                <input type="email" class="form-control col-lg-6 col-sm-12" id="contact" name="contact" placeholder="Contato" value="{{$event->contact ?? old('contact')}}">
-                                <small id="contactHelp" class="form-text text-muted">Importante: informe o email de uma conta Mercado Pago ativa.</small>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="paid" id="inlineRadio_mercadopago" value="0">
+                                    <label class="form-check-label" for="inlineRadio_mercadopago">Mercado Pago <a href="https://www.mercadopago.com.br/pt-br" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a></label>
+                                </div>
+                                    <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="paid" id="inlineRadio_nenhuma" value="1">
+                                    <label class="form-check-label" for="inlineRadio_nenhuma">Nenhuma (Evento gratuito)</label>
+                                </div>
                             </div>
+
+                            @if(isset($mercadoPagoLinked['linked']) && $mercadoPagoLinked['linked'])
+                            <div class="form-group d-none" id="form_mercadopago">
+                                <label for="contact" id="linked-acc-label">ID da Conta Vinculada: {{ $mercadoPagoLinked['id'] }}</label> <br>
+                                <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri=" target="_blank" id="link-acc-button" data-linked="true" class="btn btn-secondary btn-md">Vincular outra conta</a>
+                            </div>
+                            @else
+                            <div class="form-group d-none" id="form_mercadopago">
+                                <label for="contact" id="linked-acc-label">Vincular conta Mercado Pago</label> <br>
+                                <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success btn-lg">Vincular conta</a>
+                            </div>
+                            @endif
+                            <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
                         </div>
 
                         <!-- /.card-body -->
@@ -471,6 +489,14 @@
                         }
                     }
                 );
+            });
+
+            $('input[name="paid"]').on('change', function() {
+                if ($(this).val() == 0) {
+                    $('#form_mercadopago').removeClass('d-none');
+                } else {
+                    $('#form_mercadopago').addClass('d-none');
+                }
             });
 
             $('#category').on('change', function() {
