@@ -144,7 +144,7 @@ Route::post('admin/places/store', 'App\Http\Controllers\PlaceController@store')-
 Route::get('admin/places/edit/{id}', 'App\Http\Controllers\PlaceController@edit')->middleware(['auth:web'])->name('place.edit');
 Route::post('admin/places/update/{id}', 'App\Http\Controllers\PlaceController@update')->middleware(['auth:web'])->name('place.update');
 Route::delete('admin/places/destroy/{id}', 'App\Http\Controllers\PlaceController@destroy')->middleware(['auth:web'])->name('place.destroy');
-Route::get('admin/places/get-cities-by-state', 'App\Http\Controllers\PlaceController@getCity')->middleware(['auth:web'])->name('place.get_city');
+Route::post('admin/places/get-cities-by-state', 'App\Http\Controllers\PlaceController@getCity')->middleware(['auth:web'])->name('place.get_city');
 
 Route::get('admin/contacts/list', 'App\Http\Controllers\ContactController@index')->middleware(['auth:web'])->name('contact.index');
 Route::get('admin/contacts/show/{id}', 'App\Http\Controllers\ContactController@show')->middleware(['auth:web'])->name('contact.show');
