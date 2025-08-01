@@ -6,7 +6,7 @@
           <div class="container">
     
             <ol>
-              <li><a href="index.html">Home</a></li>
+              <li><a href="/">Home</a></li>
               <li>Eventos</li>
             </ol>
             <h2>Gerenciar evento</h2>
@@ -79,7 +79,7 @@
                                                     </i>
                                                     Editar
                                                 </a>
-                                                <form action="{{ route('event.destroy_coupon', $coupon->hash) }}" method="POST">
+                                                <form action="{{ route('event_home.destroy_coupon', $coupon->hash) }}" method="POST">
                                                     <input type="hidden" name="_method" value="DELETE">
                                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                                     <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData('{{$coupon->hash}}')">
@@ -149,7 +149,29 @@
         }
 
         function removeSucc(hash){
+            const button = $('#btn-remove-ok-' + hash);
+            
+            // Mostra loading no botão
+            setButtonLoading(button[0], 'Excluindo...');
+            
+            // Executa a remoção
             $('#btn-remove-hidden-' + hash).click();
+            
+            // Fecha o modal
+            $('#modalMsgRemove-' + hash).modal('hide');
+            
+            // Mostra notificação de sucesso
+            showToast('Cupom removido com sucesso!', 'success');
+            
+            // Remove a linha da tabela após um pequeno delay
+            setTimeout(() => {
+                const row = $(`tr[data-coupon-hash="${hash}"]`);
+                if (row.length) {
+                    row.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }
+            }, 500);
         }
 
         $(document).ready(function() {

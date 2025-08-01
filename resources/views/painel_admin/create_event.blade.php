@@ -456,14 +456,14 @@
 
       @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
         <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
           
       @endpush
 
       @push('footer')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
         <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -473,60 +473,95 @@
             $('#description').summernote({
                 placeholder: 'Descreva em detalhes o evento',
                 tabsize: 2,
-                height: 200
+                height: 200,
+                codemirror: { // codemirror options
+                    theme: 'monokai'
+                },
+                toolbar: [
+                    // ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['help']]
+                ]
             });
 
             $('#name').keyup(function(e) {
-                $.get('{{ route('event_home.check_slug') }}', 
-                    { 'title': $(this).val() }, 
-                    function( data ) {
-                        $('#slug').val(data.slug);
-                        if(data.slug_exists == '1'){
-                            $('#slug').removeClass('is-valid');
-                            $('#slug').addClass('is-invalid');
-                            $('#slugHelp').removeClass('d-none');
-                        }else{
-                            $('#slug').removeClass('is-invalid');
-                            $('#slug').addClass('is-valid');
-                            $('#slugHelp').addClass('d-none');
+                if ($(this).val().length > 3) {
+                    $.get('{{ route('event_home.check_slug') }}', 
+                        { 'title': $(this).val() }, 
+                        function( data ) {
+                            $('#slug').val(data.slug);
+                            if(data.slug_exists == '1'){
+                                $('#slug').removeClass('is-valid input-success');
+                                $('#slug').addClass('is-invalid input-error');
+                                $('#slugHelp').removeClass('d-none');
+                                showToast('Este slug já está em uso. Escolha outro.', 'warning');
+                            }else{
+                                $('#slug').removeClass('is-invalid input-error');
+                                $('#slug').addClass('is-valid input-success');
+                                $('#slugHelp').addClass('d-none');
+                                showToast('Slug disponível!', 'success', null, 2000);
+                            }
                         }
-                    }
-                );
+                    ).fail(function() {
+                        showToast('Erro ao verificar slug. Tente novamente.', 'error');
+                    });
+                }
             });
 
             $('#slug').keyup(function(e) {
-                $.get('{{ route('event_home.create_slug') }}', 
-                    { 'title': $(this).val() }, 
-                    function( data ) {
-                        if(data.slug_exists == '1'){
-                            $('#slug').removeClass('is-valid');
-                            $('#slug').addClass('is-invalid');
-                        }else{
-                            $('#slug').removeClass('is-invalid');
-                            $('#slug').addClass('is-valid');
+                if ($(this).val().length > 2) {
+                    $.get('{{ route('event_home.create_slug') }}', 
+                        { 'title': $(this).val() }, 
+                        function( data ) {
+                            if(data.slug_exists == '1'){
+                                $('#slug').removeClass('is-valid input-success');
+                                $('#slug').addClass('is-invalid input-error');
+                                showToast('Este slug já está em uso. Escolha outro.', 'warning');
+                            }else{
+                                $('#slug').removeClass('is-invalid input-error');
+                                $('#slug').addClass('is-valid input-success');
+                                showToast('Slug disponível!', 'success', null, 2000);
+                            }
                         }
-                    }
-                );
+                    ).fail(function() {
+                        showToast('Erro ao verificar slug. Tente novamente.', 'error');
+                    });
+                }
             });
 
             $('#category').on('change', function() {
                 var category_id = this.value;
                 $("#area_id").html('');
-                $.ajax({
-                    url:"{{route('event_home.get_areas_by_category')}}",
-                    type: "POST",
-                    data: {
-                        category_id: category_id,
-                        _token: '{{csrf_token()}}' 
-                    },
-                    dataType : 'json',
-                    success: function(result){
-                        $('#area_id').html('<option value="">Selecione</option>'); 
-                        $.each(result.areas,function(key,value){
-                            $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
-                        });
-                    }
-                });
+                
+                if (category_id) {
+                    $.ajax({
+                        url:"{{route('event_home.get_areas_by_category')}}",
+                        type: "POST",
+                        data: {
+                            category_id: category_id,
+                            _token: '{{csrf_token()}}' 
+                        },
+                        dataType : 'json',
+                        success: function(result){
+                            $('#area_id').html('<option value="">Selecione</option>'); 
+                            $.each(result.areas,function(key,value){
+                                $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
+                            });
+                            if (result.areas.length > 0) {
+                                showToast(`${result.areas.length} área(s) encontrada(s)`, 'info', null, 2000);
+                            } else {
+                                showToast('Nenhuma área encontrada para esta categoria', 'warning');
+                            }
+                        },
+                        error: function() {
+                            showToast('Erro ao carregar áreas. Tente novamente.', 'error');
+                        }
+                    });
+                }
             });
 
             $('input[name="paid"]').on('change', function() {
@@ -807,6 +842,14 @@
                         },
                         success: function( data ) {
                             response(data);
+                            if (data.length > 0) {
+                                showToast(`${data.length} local(is) encontrado(s)`, 'info', null, 1500);
+                            } else if (request.term.length > 2) {
+                                showToast('Nenhum local encontrado', 'warning', null, 2000);
+                            }
+                        },
+                        error: function() {
+                            showToast('Erro ao buscar locais', 'error');
                         }
                     });
                 },
@@ -860,21 +903,32 @@
             $('#state').on('change', function() {
                 var uf = this.value;
                 $("#city").html('');
-                $.ajax({
-                    url: "{{route('event_home.get_city')}}",
-                    type: "POST",
-                    data: {
-                        uf: uf,
-                        _token: '{{csrf_token()}}' 
-                    },
-                    dataType : 'json',
-                    success: function(result){
-                        $('#city').html('<option value="">Selecione</option>'); 
-                        $.each(result.cities,function(key,value){
-                            $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
-                        });
-                    }
-                });
+                
+                if (uf) {
+                    $.ajax({
+                        url: "{{route('event_home.get_city')}}",
+                        type: "POST",
+                        data: {
+                            uf: uf,
+                            _token: '{{csrf_token()}}' 
+                        },
+                        dataType : 'json',
+                        success: function(result){
+                            $('#city').html('<option value="">Selecione</option>'); 
+                            $.each(result.cities,function(key,value){
+                                $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
+                            });
+                            if (result.cities.length > 0) {
+                                showToast(`${result.cities.length} cidade(s) encontrada(s)`, 'info', null, 2000);
+                            } else {
+                                showToast('Nenhuma cidade encontrada para este estado', 'warning');
+                            }
+                        },
+                        error: function() {
+                            showToast('Erro ao carregar cidades. Tente novamente.', 'error');
+                        }
+                    });
+                }
             });
 
             var uf = $("#state").val();

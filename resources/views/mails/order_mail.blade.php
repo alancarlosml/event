@@ -76,11 +76,11 @@
                                 <tbody>
                                   <tr>
                                     <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 192px; margin: 0;" align="center" bgcolor="#dc3545" width="192">
-                                      <a href="https://www.ticketdz6.com.br/painel/minhas-inscricoes" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Minhas compras</a>
+                                      <a href="{{ route('participante.my_registrations') }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Minhas compras</a>
                                     </td>
                                     <td>&nbsp;&nbsp;&nbsp;</td>
                                     <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 192px; margin: 0;" align="center" bgcolor="#dc3545" width="192">
-                                      <a href="https://app.bootstrapemail.com/templates" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Imprimir ingresso</a>
+                                      <a href="{{ route('participante.print_voucher', ['hash' => $order->hash]) }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Imprimir ingresso</a>
                                     </td>
                                   </tr>
                                 </tbody>

@@ -52,12 +52,35 @@
                               </tbody>
                             </table>
                             <div class="space-y-4">
-                              <h3 class="text-4xl fw-800" style="padding-top: 0; padding-bottom: 0; font-weight: 800 !important; vertical-align: baseline; font-size: 28px; margin: 0;" align="left">Olá, {{Str::of($name)->explode(' ')[0]}}!</h3>
-                                <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                              <h2 class="text-4xl fw-800" style="padding-top: 0; padding-bottom: 0; font-weight: 800 !important; vertical-align: baseline; font-size: 36px; line-height: 43.2px; margin: 0;" align="left">🎉 Pagamento Aprovado!</h2>
+                              <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
                                 <tbody>
                                   <tr>
                                     <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
                                       &#160;
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <p class="" style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left">Parabéns {{Str::of($order->get_participante()->name)->explode(' ')[0]}}! Seu pagamento foi confirmado e seus ingressos foram gerados com sucesso.</p>
+                              <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                                <tbody>
+                                  <tr>
+                                    <td style="line-height: 16px; font-size: 16px; width: 100%; height: 16px; margin: 0;" align="left" width="100%" height="16">
+                                      &#160;
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <table class="btn btn-red-500 rounded-full px-6 w-full w-lg-48" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 9999px; border-collapse: separate !important; width: 192px;" width="192">
+                                <tbody>
+                                  <tr>
+                                    <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 192px; margin: 0;" align="center" bgcolor="#dc3545" width="192">
+                                      <a href="{{ route('participante.my_registrations') }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Ver Meus Ingressos</a>
+                                    </td>
+                                    <td>&nbsp;&nbsp;&nbsp;</td>
+                                    <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 192px; margin: 0;" align="center" bgcolor="#dc3545" width="192">
+                                      <a href="{{ route('participante.print_voucher', ['hash' => $order->hash]) }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Imprimir Ingresso</a>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -76,52 +99,66 @@
                               <tbody>
                                 <tr>
                                   <td style="line-height: 24px; font-size: 16px; width: 100%; border-radius: 24px; margin: 0; padding: 40px;" align="left" bgcolor="#F1f1f5">
-                                    <strong class="text-center" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 20px; margin: 0;" align="center">Seja bem-vindo à Ticket DZ6!</strong>
-                                    <table class="btn btn-red-500 rounded-full px-6 w-full w-lg-48" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 9999px; border-collapse: separate !important; width: 192px;" width="192">
-                                    <tbody>
-									  <tr><td>&nbsp;</td></tr>
-                                      <tr>
-                                        <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 100px; margin: 0;" align="center" bgcolor="#dc3545" width="100">
-                                          <a href="{{ url('/') }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 12px; border: 1px solid #dc3545;">Acessar a Ticket DZ6</a>
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
+                                    <h3 class="text-center" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 28px; line-height: 33.6px; margin: 0;" align="center">{{$order->get_event()->name}}</h3>
+                                    <p class="text-center text-muted" style="line-height: 24px; font-size: 16px; color: #718096; width: 100%; margin: 0;" align="center">Hash da compra: {{$order->hash}}</p>
+                                    <p class="text-center text-muted" style="line-height: 24px; font-size: 16px; color: #718096; width: 100%; margin: 0;" align="center">Data da compra: {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}</p>
+                                    <table class="p-2 w-full" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin-top: 20px" width="100%">
+                                      <tbody>
+                                        @foreach($order->order_items as $item)
+                                        <tr>
+                                          <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="left" width="100%">{{$item->lote->name}}</td>
+                                          <td class="text-right" style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="right" width="100%">@money($item->lote->value)</td>
+                                        </tr>
+                                        @endforeach
+                                        <tr>
+                                          <td class="fw-700 border-top" style="line-height: 24px; font-size: 16px; border-top-width: 1px !important; border-top-color: #e2e8f0 !important; border-top-style: solid !important; width: 100%; font-weight: 700 !important; margin: 0; padding: 8px;" align="left" width="100%">Total Pago</td>
+                                          <td class="fw-700 text-right border-top" style="line-height: 24px; font-size: 16px; border-top-width: 1px !important; border-top-color: #e2e8f0 !important; border-top-style: solid !important; width: 100%; font-weight: 700 !important; margin: 0; padding: 8px;" align="right" width="100%">@money($order->total_amount)</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
                                     <table class="s-6 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
                                       <tbody>
-										<tr><td>&nbsp;</td></tr>
-										<tr>
-                                          <td style="line-height: 24px; font-size: 16px; width: 100%; height: 24px; margin: 0;" align="left" width="100%" height="24">
-                                            <p class="" style="font-size: 16px; width: 100%; margin: 0;" align="left">Caso não tenha sido você que tenha realizado esse cadastro, desconsidere esse email.</p>
+                                        <tr>
+                                          <td style="line-height: 24px; font-size: 24px; width: 100%; height: 24px; margin: 0;" align="left" width="100%" height="24">
+                                            &#160;
                                           </td>
-										</tr>
+                                        </tr>
                                       </tbody>
                                     </table>
                                     <table class="hr" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
                                       <tbody>
-									    <tr><td>&nbsp;</td></tr>
                                         <tr>
                                           <td style="line-height: 24px; font-size: 16px; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; height: 1px; width: 100%; margin: 0;" align="left">
                                           </td>
                                         </tr>
-										<tr><td>&nbsp;</td></tr>
-										<tr>
-                                          <td style="line-height: 24px; font-size: 14px; height: 1px; width: 100%; margin: 0;" align="left">
-										   <span style="color: #aaa">Caso você tenha alguma dúvida, entre em <a href="mailto:contato@ticketdz6.com.br" style="color: #0d6efd;">contato</a>.</span>
-                                          </td>
-                                        </tr>
-										<tr>
-                                          <td style="line-height: 24px; font-size: 14px; height: 1px; width: 100%; margin: 0;" align="left">
-										   <span style="color: #aaa">Atenciosamente,</span>
-                                          </td>
-                                        </tr>
-										<tr>
-                                          <td style="line-height: 24px; font-size: 14px; height: 1px; width: 100%; margin: 0;" align="left">
-										   <span style="color: #aaa">Ticket DZ6, {{ date('Y') }}. Todos os direitos reservado.</span>
+                                      </tbody>
+                                    </table>
+                                    <table class="s-6 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                                      <tbody>
+                                        <tr>
+                                          <td style="line-height: 24px; font-size: 24px; width: 100%; height: 24px; margin: 0;" align="left" width="100%" height="24">
+                                            &#160;
                                           </td>
                                         </tr>
                                       </tbody>
                                     </table>
+                                    <p style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left"><strong>Próximos passos:</strong></p>
+                                    <ul style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding-left: 20px;" align="left">
+                                      <li>Imprima ou salve seu ingresso</li>
+                                      <li>Leve o ingresso no dia do evento</li>
+                                      <li>Chegue com antecedência</li>
+                                      <li>Divirta-se!</li>
+                                    </ul>
+                                    <table class="s-6 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
+                                      <tbody>
+                                        <tr>
+                                          <td style="line-height: 24px; font-size: 24px; width: 100%; height: 24px; margin: 0;" align="left" width="100%" height="24">
+                                            &#160;
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                    <p style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left">Caso você tenha alguma dúvida, entre em contato: <a href="mailto:contato@ticketdz6.com.br" style="color: #0d6efd;">contato@ticketdz6.com.br</a>.</p>
                                   </td>
                                 </tr>
                               </tbody>
@@ -153,4 +190,4 @@
         </tr>
       </tbody>
     </table>
-</html>
+</html> 

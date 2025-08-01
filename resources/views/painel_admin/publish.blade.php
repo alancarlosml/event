@@ -125,7 +125,7 @@
                             <div id="banner_organizador">
                                 <label for="banner">Banner do organizador</label>
                                 @if(isset($event->owner->icon) == false)
-                                    <input class="form-control" type="file" id="icon" name="icon">
+                                    <input class="form-control" type="file" id="icon" name="icon" required>
                                 @else
                                 <div class="form-group">
                                     <img src="{{ asset('storage/'.$event->owner->icon) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 200px">

@@ -205,4 +205,8 @@ Route::get('admin/participantes/{id}/eventos', 'App\Http\Controllers\Participant
 Route::get('admin/events/{id}/questions', 'App\Http\Controllers\EventController@questions')->middleware(['auth:web'])->name('event.questions');
 Route::post('admin/events/{id}/questions/create', 'App\Http\Controllers\EventController@create_questions')->middleware(['auth:web'])->name('event.questions.create');
 
+// Mercado Pago Webhooks
+Route::post('/webhooks/mercado-pago/notification', 'App\Http\Controllers\MercadoPagoController@notification');
+Route::get('/webhooks/mercado-pago/check-linked-account', 'App\Http\Controllers\MercadoPagoController@checkLinkedAccount')->middleware(['auth:participante', 'verified']);
+
 require __DIR__.'/auth.php';

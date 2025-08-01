@@ -26,7 +26,7 @@
                                     <h6 class="card-subtitle mb-2 text-muted">{{ \Carbon\Carbon::parse($item->data_chosen)->format('d/m/Y') }}</h6>
                                     <p class="card-text">{{$item->place_name}}</p>
                                     <div class="my-3">
-                                        {!! QrCode::size(300)->generate($item->purchase_hash); !!}
+                                        {!! QrCode::size(300)->generate($item->purchase_hash) !!}
                                     </div>
                                 </div>
                             </div>
@@ -49,16 +49,9 @@
 
     @push('footer')
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
-        <script src="https://sdk.mercadopago.com/js/v2"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js">
-        </script>
-        <script type="text/javascript"
-                src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
         <script>
-
             $(document).ready(function() {
-
-              
+                // Scripts específicos para impressão de voucher
             });
         </script>
     @endpush

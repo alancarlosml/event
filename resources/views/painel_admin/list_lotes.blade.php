@@ -6,7 +6,7 @@
           <div class="container">
     
             <ol>
-              <li><a href="index.html">Home</a></li>
+              <li><a href="/">Home</a></li>
               <li>Eventos</li>
             </ol>
             <h2>Gerenciar evento</h2>
@@ -174,7 +174,29 @@
         }
 
         function removeSucc(hash){
+            const button = $('#btn-remove-ok-' + hash);
+            
+            // Mostra loading no botão
+            setButtonLoading(button[0], 'Excluindo...');
+            
+            // Executa a remoção
             $('#btn-remove-hidden-' + hash).click();
+            
+            // Fecha o modal
+            $('#modalMsgRemove-' + hash).modal('hide');
+            
+            // Mostra notificação de sucesso
+            showToast('Lote removido com sucesso!', 'success');
+            
+            // Remove a linha da tabela após um pequeno delay
+            setTimeout(() => {
+                const row = $(`tr[data-lote-hash="${hash}"]`);
+                if (row.length) {
+                    row.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }
+            }, 500);
         }
 
         $(document).ready(function() {

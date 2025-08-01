@@ -9,6 +9,8 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Carbon;
 
 class MercadoPagoController extends Controller
@@ -161,7 +163,7 @@ class MercadoPagoController extends Controller
                     "picture_url" => $img
                 ]
             ],
-            "marketplace" => $this->accessToken,
+            "marketplace" => env('MERCADO_PAGO_ACCESS_TOKEN'),
             "marketplace_fee" => $fee,
             "back_urls" => [
                 "success" => env('APP_URL') . "/" . $slug . "/obrigado",
@@ -210,9 +212,119 @@ class MercadoPagoController extends Controller
     // Recebe os webhooks do Mercado Pago
     public function notification (Request $r)
     {
-        // Adicionar lógica para processar os webhooks
-        // dd($r->all());
-        return response()->json(['success' => 'true'], 200);
+        try {
+            $data = $r->all();
+            
+            // Verificar se é uma notificação válida do Mercado Pago
+            if (!isset($data['type']) || !isset($data['data']['id'])) {
+                return response()->json(['error' => 'Invalid notification'], 400);
+            }
+            
+            // Processar apenas notificações de pagamento
+            if ($data['type'] === 'payment') {
+                $paymentId = $data['data']['id'];
+                
+                // Buscar informações do pagamento no Mercado Pago
+                $client = new Client();
+                $response = $client->get("https://api.mercadopago.com/v1/payments/{$paymentId}", [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->accessToken,
+                        'Content-Type' => 'application/json'
+                    ]
+                ]);
+                
+                $paymentData = json_decode($response->getBody(), true);
+                
+                // Buscar o pedido correspondente
+                $order = DB::table('orders')
+                    ->where('gatway_hash', $paymentId)
+                    ->first();
+                
+                if ($order) {
+                    // Atualizar status do pedido baseado no status do pagamento
+                    $status = $this->mapPaymentStatus($paymentData['status']);
+                    
+                    DB::table('orders')
+                        ->where('id', $order->id)
+                        ->update([
+                            'status' => $status,
+                            'gatway_status' => $paymentData['status'],
+                            'gatway_payment_method' => $paymentData['payment_method_id'],
+                            'gatway_date_status' => $paymentData['date_created'],
+                            'updated_at' => now()
+                        ]);
+                    
+                    // Se o pagamento foi aprovado, gerar ingressos
+                    if ($paymentData['status'] === 'approved') {
+                        $this->generateTickets($order->id);
+                        // Enviar email de confirmação
+                        $orderModel = \App\Models\Order::find($order->id);
+                        if ($orderModel) {
+                            Mail::to($orderModel->get_participante()->email)->send(new \App\Mail\PaymentApprovedMail($orderModel));
+                        }
+                    }
+                }
+            }
+            
+            return response()->json(['success' => true], 200);
+            
+        } catch (\Exception $e) {
+            Log::error('Mercado Pago Webhook Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal server error'], 500);
+        }
+    }
+    
+    // Mapear status do Mercado Pago para status interno
+    private function mapPaymentStatus($mpStatus)
+    {
+        $statusMap = [
+            'pending' => 2,      // Pendente
+            'approved' => 1,     // Aprovado
+            'authorized' => 2,   // Autorizado (pendente)
+            'in_process' => 2,   // Em processo
+            'in_mediation' => 2, // Em mediação
+            'rejected' => 3,     // Rejeitado
+            'cancelled' => 4,    // Cancelado
+            'refunded' => 5,     // Reembolsado
+            'charged_back' => 6  // Contestado
+        ];
+        
+        return $statusMap[$mpStatus] ?? 2; // Default: pendente
+    }
+    
+    // Gerar ingressos após pagamento aprovado
+    private function generateTickets($orderId)
+    {
+        try {
+            $order = DB::table('orders')->where('id', $orderId)->first();
+            
+            if (!$order) {
+                throw new \Exception('Order not found');
+            }
+            
+            // Buscar detalhes dos lotes do pedido
+            $orderItems = DB::table('order_items')
+                ->where('order_id', $orderId)
+                ->get();
+            
+            foreach ($orderItems as $item) {
+                // Gerar ingressos para cada item
+                for ($i = 0; $i < $item->quantity; $i++) {
+                    DB::table('tickets')->insert([
+                        'hash' => md5(time() . uniqid() . $orderId . $i),
+                        'order_id' => $orderId,
+                        'lote_id' => $item->lote_id,
+                        'participante_id' => $order->participante_id,
+                        'status' => 1, // Ativo
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Error generating tickets: ' . $e->getMessage());
+        }
     }
 
     public function thanks (Request $r)

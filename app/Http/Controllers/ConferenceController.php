@@ -23,6 +23,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use MercadoPago;
 
 class ConferenceController extends Controller
@@ -602,7 +603,7 @@ class ConferenceController extends Controller
                         'created_at' => now(),
                     ]);
                     // MANDAR EMAIL COM COMPRA REALIZADA COM SUCESSO
-                    // Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
+                    Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
 
                 } elseif($input->paymentType == 'bank_transfer') {
 
@@ -617,6 +618,8 @@ class ConferenceController extends Controller
                         'created_at' => now(),
                     ]);
                     // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DA CHAVE PIX
+                    $pixDetails = DB::table('pix_details')->where('id', $pix_detail_id)->first();
+                    Mail::to(Auth::user()->email)->send(new \App\Mail\PixPendingMail($order, $pixDetails));
 
                 } elseif($input->paymentType == 'ticket') {
 
@@ -630,6 +633,8 @@ class ConferenceController extends Controller
                         'created_at' => now(),
                     ]);
                     // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DO BOLETO
+                    $boletoDetails = DB::table('boleto_details')->where('id', $boleto_detail_id)->first();
+                    Mail::to(Auth::user()->email)->send(new \App\Mail\BoletoPendingMail($order, $boletoDetails));
 
                 }
 
@@ -645,35 +650,34 @@ class ConferenceController extends Controller
                 date_default_timezone_set('America/Fortaleza');
                 $curr_date = date('Y-m-d H:i:s');
 
-                if($input->paymentType == 'credit_card') {
+                // Atualizar status do pedido para rejeitado
+                DB::table('orders')
+                    ->where('id', $order_id)
+                    ->update([
+                        'status' => 3, // Rejeitado
+                        'gatway_status' => $output->status ?? 'rejected',
+                        'gatway_payment_method' => $input->paymentType,
+                        'gatway_date_status' => $curr_date,
+                        'gatway_description' => $output->message ?? 'Payment failed',
+                        'updated_at' => now()
+                    ]);
 
-                    DB::table('orders')
-                        ->where('id', $order_id)
-                        ->update([
-                            'status' => 3,
-                            'gatway_status' => $output->status,
-                            'gatway_payment_method' => 'credit_card',
-                            'gatway_date_status' => $curr_date,
-                            'gatway_description' => $output->message,
-                        ]);
+                // Log do erro para debugging
+                Log::error('Mercado Pago Payment Failed', [
+                    'order_id' => $order_id,
+                    'payment_type' => $input->paymentType,
+                    'error' => $output
+                ]);
 
-                    // MANDAR EMAIL COM COMPRA NÃO REALIZADA
-
-                } elseif($input->paymentType == 'bank_transfer') {
-
-                    // MANDAR EMAIL COM COMPRA NÃO REALIZADA
-
-                } elseif($input->paymentType == 'ticket') {
-
-                    // MANDAR EMAIL COM COMPRA NÃO REALIZADA
-                }
-
-                return $result;
+                // MANDAR EMAIL COM COMPRA NÃO REALIZADA
+                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Falha no pagamento'));
             }
 
-        } catch(Exception $exception) {
+            return $result;
 
-            return $exception;
+        } catch(Exception $exception) {
+            Log::error('Mercado Pago Exception: ' . $exception->getMessage());
+            return response()->json(['error' => 'Internal server error'], 500);
         }
 
     }
@@ -710,7 +714,7 @@ class ConferenceController extends Controller
 
             
             return response()->json($responseData);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manipule erros, se necessário
             return response()->json(['error' => $e->getMessage()], 500);
         }

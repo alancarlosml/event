@@ -187,7 +187,7 @@
                     </ul>
                 </div>
 
-                <div class="col-lg-2 col-6 footer-links">
+                {{-- <div class="col-lg-2 col-6 footer-links">
                     <h4>Nossos serviços</h4>
                     <ul>
                         <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
@@ -196,7 +196,7 @@
                         <li><i class="bi bi-chevron-right"></i> <a href="#">Marketing</a></li>
                         <li><i class="bi bi-chevron-right"></i> <a href="#">Graphic Design</a></li>
                     </ul>
-                </div>
+                </div> --}}
 
                 <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
                     <h4>Contato</h4>

@@ -136,7 +136,7 @@ class EventAdminController extends Controller
         $request->session()->put('event', $newEvent);
 
         //ENVIAR EMAIL - EVENTO CRIADO
-        // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
+        Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($newEvent, 'Evento criado com sucesso', 'criado'));
 
         return redirect()->route('event_home.my_events_edit', $newEvent->hash);
     }
@@ -322,7 +322,7 @@ class EventAdminController extends Controller
             ]);
             //ENVIAR EMAIL - EVENTO CRIADO
 
-            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
 
             return $event;
 
@@ -371,7 +371,7 @@ class EventAdminController extends Controller
             $request->session()->put('event', $event);
             $event->save();
 
-            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
 
             return $event;
         }
@@ -1151,14 +1151,16 @@ class EventAdminController extends Controller
         $event->fill($validatedEvent);
         $event->save();
 
-        if(isset($input['icon'])) {
+        if($owner && $owner->icon) {
             $validatedOwner = $request->validate([
                 'owner_name' => 'required',
                 'description' => 'required',
                 'status' => 'nullable',
+                'icon' => 'nullable|mimes:jpg,jpeg,bmp,png|max:2048',
             ],[
                 'owner_name.required' => 'O nome do proprietário é obrigatório',
                 'description.required' => 'A descrição do proprietário é obrigatória',
+                'icon.mimes' => 'Os formatos aceitos para as imagens são: jpg, jpeg, bmp, png',
             ]);
         } else {
             $validatedOwner = $request->validate([
@@ -1169,7 +1171,8 @@ class EventAdminController extends Controller
             ],[
                 'owner_name.required' => 'O nome do proprietário é obrigatório',
                 'description.required' => 'A descrição do proprietário é obrigatória',
-                'icon.required' => 'Os formatos aceitos para as imagens são: jpg, jpeg, bmp, png',
+                'icon.required' => 'O ícone do organizador é obrigatório',
+                'icon.mimes' => 'Os formatos aceitos para as imagens são: jpg, jpeg, bmp, png',
             ]);
         }
 
@@ -1197,9 +1200,9 @@ class EventAdminController extends Controller
         Event::where('id', $event->id)->update(['owner_id' => $owner_id]);
 
         if(isset($validatedEvent['status'])) {
-            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
         } else {
-            // Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
         }
 
         return redirect()->route('event_home.my_events')->with('success', 'Evento salvo com sucesso!');

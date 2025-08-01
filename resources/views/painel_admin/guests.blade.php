@@ -141,7 +141,29 @@
         }
 
         function removeSucc(id){
+            const button = $('#btn-remove-ok-' + id);
+            
+            // Mostra loading no botão
+            setButtonLoading(button[0], 'Excluindo...');
+            
+            // Executa a remoção
             $('#btn-remove-hidden-' + id).click();
+            
+            // Fecha o modal
+            $('#modalMsgRemove-' + id).modal('hide');
+            
+            // Mostra notificação de sucesso
+            showToast('Usuário removido com sucesso!', 'success');
+            
+            // Remove a linha da tabela após um pequeno delay
+            setTimeout(() => {
+                const row = $(`tr[data-guest-id="${id}"]`);
+                if (row.length) {
+                    row.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }
+            }, 500);
         }
 
         // $(document).ready(function() {

@@ -233,10 +233,15 @@
                 {{ $event->place->get_city()->name }}-{{ $event->place->get_city()->uf }}
             </div>
             <div class="row">
-                <div class="col-12" id="map_canvas">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3985.841148750037!2d-44.311417949527524!3d-2.5584934981266056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7f6860324886045%3A0x1024f6caa9406aaa!2sUniversidade%20Federal%20do%20Maranh%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1659628612287!5m2!1spt-BR!2sbr"
-                            width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <div class="col-12" id="map_canvas" style="height: 450px; width: 100%; position: relative;">
+                    <div id="map-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Carregando mapa...</span>
+                            </div>
+                            <p class="mt-2 mb-0">Carregando mapa...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -450,32 +455,128 @@
         <script src="{{ asset('assets_conference/js/custom-editors.js') }}"></script>
         <script src="{{ asset('assets_conference/js/validate.js') }}"></script>
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
-        <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk"><script async defer src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_AQUI&callback=initMap"></script>
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <!-- Leaflet JavaScript -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
         <script>
 
             $(document).ready(function() {
-
-                let geocoder = new google.maps.Geocoder();
-
-                geocoder.geocode({'address': '{{ $event->place->address }}, {{ $event->place->number }}, {{ $event->place->district }}. {{ $event->place->zip }}. {{ $event->place->get_city()->name }}-{{$event->place->get_city()->uf }}'}, function(results, status) {
-                    if (status == 'OK') {
-                        let latitude = results[0].geometry.location.lat();
-                        let longitude = results[0].geometry.location.lng();
-
-                        let map = new google.maps.Map(document.getElementById('map_canvas'), {
-                            center: {lat: latitude, lng: longitude},
-                            zoom: 14
-                        });
-
-                        let marker = new google.maps.Marker({
-                            position: {lat: latitude, lng: longitude},
-                            map: map
-                        });
-                    } else {
-                        alert('Geocode was not successful for the following reason: ' + status);
+                // Função para criar mapa padrão (fallback)
+                function createDefaultMap() {
+                    document.getElementById('map-loading').style.display = 'none';
+                    const map = L.map('map_canvas').setView([-15.7801, -47.9292], 4);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = 'position: absolute; top: 10px; left: 10px; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000;';
+                    errorDiv.innerHTML = '<p style="margin: 0; color: #dc3545; font-size: 14px;">⚠️ Não foi possível carregar a localização exata</p>';
+                    document.getElementById('map_canvas').appendChild(errorDiv);
+                }
+                
+                // Função para criar o mapa
+                function createMap(lat, lon) {
+                    document.getElementById('map-loading').style.display = 'none';
+                    // Criar mapa com Leaflet
+                    const map = L.map('map_canvas').setView([lat, lon], 15);
+                    
+                    // Adicionar camada de tiles do OpenStreetMap
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    
+                    // Adicionar marcador
+                    const marker = L.marker([lat, lon]).addTo(map);
+                    
+                    // Adicionar popup com informações do local
+                    const popupContent = `
+                        <div style="text-align: center;">
+                            <strong>{{ $event->place->name }}</strong><br>
+                            {{ $event->place->address }}, {{ $event->place->number }}<br>
+                            {{ $event->place->district }}<br>
+                            {{ $event->place->get_city()->name }}-{{ $event->place->get_city()->uf }}
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent);
+                }
+                
+                // Função para geocodificar endereço usando Nominatim (OpenStreetMap)
+                function geocodeAddress(address, isRetry = false) {
+                    // Verificar cache local primeiro
+                    const cacheKey = `map_${btoa(address).replace(/[^a-zA-Z0-9]/g, '')}`;
+                    const cachedData = localStorage.getItem(cacheKey);
+                    
+                    if (cachedData && !isRetry) {
+                        try {
+                            const data = JSON.parse(cachedData);
+                            if (data.timestamp && (Date.now() - data.timestamp) < 86400000) { // 24 horas
+                                createMap(data.lat, data.lon);
+                                return;
+                            }
+                        } catch (e) {
+                            // Cache inválido, continuar com geocodificação
+                        }
                     }
-                });
+                    
+                    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+                    
+                    fetch(nominatimUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Esconder indicador de carregamento
+                            document.getElementById('map-loading').style.display = 'none';
+                            
+                            if (data && data.length > 0) {
+                                const lat = parseFloat(data[0].lat);
+                                const lon = parseFloat(data[0].lon);
+                                
+                                // Salvar no cache
+                                if (!isRetry) {
+                                    localStorage.setItem(cacheKey, JSON.stringify({
+                                        lat: lat,
+                                        lon: lon,
+                                        timestamp: Date.now()
+                                    }));
+                                }
+                                
+                                createMap(lat, lon);
+                                
+                            } else if (!isRetry) {
+                                // Se não conseguir geocodificar, tentar com endereço mais simples
+                                const simpleAddress = '{{ $event->place->get_city()->name }}, {{ $event->place->get_city()->uf }}, Brasil';
+                                geocodeAddress(simpleAddress, true);
+                            } else {
+                                createDefaultMap();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao geocodificar:', error);
+                            createDefaultMap();
+                        });
+                }
+                
+
+                
+                // Endereço completo para geocodificação
+                const fullAddress = '{{ $event->place->address }}, {{ $event->place->number }}, {{ $event->place->district }}, {{ $event->place->get_city()->name }}, {{ $event->place->get_city()->uf }}, Brasil';
+                
+                // Timeout para evitar carregamento infinito (8 segundos)
+                const timeoutId = setTimeout(() => {
+                    createDefaultMap();
+                }, 8000);
+                
+                // Iniciar geocodificação
+                geocodeAddress(fullAddress);
+                
+                // Limpar timeout quando o mapa for carregado com sucesso
+                const originalGeocodeAddress = geocodeAddress;
+                geocodeAddress = function(address, isRetry = false) {
+                    clearTimeout(timeoutId);
+                    originalGeocodeAddress(address, isRetry);
+                };
 
                 $('#msg_phone').mask('(00) 00000-0000');
 

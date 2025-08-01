@@ -43,6 +43,9 @@
 
     <!-- Template Main CSS File -->
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+    
+    <!-- Async Feedback CSS -->
+    <link href="{{ asset('assets_admin/css/async-feedback.css') }}" rel="stylesheet">
 
 </head>
 
@@ -243,6 +246,9 @@
 
 <!-- Template Main JS File -->
 <script src="{{ asset('assets/js/main.js') }}"></script>
+
+<!-- Async Feedback JS -->
+<script src="{{ asset('assets_admin/js/async-feedback.js') }}"></script>
 
 @stack('footer')
 

@@ -60,7 +60,7 @@ class RegisteredUserController extends Controller
 
         $email_participante = $request->email;
 
-        // $participante->notify(new WelcomeEmailNotification($participante));
+        $participante->notify(new WelcomeEmailNotification($participante));
 
         event(new Registered($participante));
 

@@ -50,7 +50,7 @@
                         </thead>
                         <tbody>
                             @foreach($events as $event)
-                                <tr @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "") style="background:#faceca" @endif>
+                                <tr data-event-id="{{$event->hash}}" @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "") style="background:#faceca" @endif>
                                     <td>{{$event->id}}</td>
                                     <td>
                                         <b>Nome:</b> {{$event->name}} <br/>
@@ -175,7 +175,7 @@
       @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-        <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
+        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
       @endpush
@@ -183,7 +183,7 @@
       @push('footer')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-        <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
+        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
@@ -201,7 +201,30 @@
         }
 
         function removeSucc(id){
+            const button = $('#btn-remove-ok-' + id);
+            const originalText = button.text();
+            
+            // Mostra loading no botão
+            setButtonLoading(button[0], 'Excluindo...');
+            
+            // Executa a remoção
             $('#btn-remove-hidden-' + id).click();
+            
+            // Fecha o modal
+            $('#modalMsgRemove-' + id).modal('hide');
+            
+            // Mostra notificação de sucesso
+            showToast('Evento removido com sucesso!', 'success');
+            
+            // Remove a linha da tabela após um pequeno delay
+            setTimeout(() => {
+                const row = $(`tr[data-event-id="${id}"]`);
+                if (row.length) {
+                    row.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }
+            }, 500);
         }
 
         $(document).ready(function() {
