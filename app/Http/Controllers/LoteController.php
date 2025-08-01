@@ -86,7 +86,7 @@ class LoteController extends Controller
             $input['form_pagamento'] = implode(',', $input['form_pagamento']);
         }
 
-        $input['hash'] = md5($input['name'] . $input['description'] . md5('papainoel'));
+        $input['hash'] = md5($input['name'] . $input['description'] . $input['event_id'] . time() . uniqid() . md5('papainoel'));
 
         Lote::create($input);
 
@@ -177,10 +177,28 @@ class LoteController extends Controller
     public function destroy($id)
     {
         $lote = Lote::findOrFail($id);
-
+        $event_id = $lote->event_id;
         $lote->delete();
 
-        return redirect()->route('event.lotes', $lote->event_id);
+        return redirect()->route('event.lotes', $event_id);
+    }
+
+    /**
+     * Corrigir hashes de lotes existentes
+     */
+    public function fixLoteHashes()
+    {
+        $lotes = Lote::all();
+        
+        foreach($lotes as $lote) {
+            // Gerar novo hash único
+            $newHash = md5($lote->name . $lote->description . $lote->event_id . $lote->id . time() . uniqid() . md5('papainoel'));
+            
+            // Atualizar o hash
+            $lote->update(['hash' => $newHash]);
+        }
+        
+        return response()->json(['success' => 'Hashes dos lotes corrigidos com sucesso!']);
     }
 
     public function save_lotes(Request $request, $id)

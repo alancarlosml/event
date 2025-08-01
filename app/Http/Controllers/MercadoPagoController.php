@@ -215,14 +215,20 @@ class MercadoPagoController extends Controller
         try {
             $data = $r->all();
             
+            // Log da notificação recebida
+            Log::info('Mercado Pago Webhook received', $data);
+            
             // Verificar se é uma notificação válida do Mercado Pago
             if (!isset($data['type']) || !isset($data['data']['id'])) {
+                Log::error('Invalid Mercado Pago notification', $data);
                 return response()->json(['error' => 'Invalid notification'], 400);
             }
             
             // Processar apenas notificações de pagamento
             if ($data['type'] === 'payment') {
                 $paymentId = $data['data']['id'];
+                
+                Log::info('Processing payment notification', ['payment_id' => $paymentId]);
                 
                 // Buscar informações do pagamento no Mercado Pago
                 $client = new Client();
@@ -234,6 +240,8 @@ class MercadoPagoController extends Controller
                 ]);
                 
                 $paymentData = json_decode($response->getBody(), true);
+                
+                Log::info('Payment data retrieved', ['payment_data' => $paymentData]);
                 
                 // Buscar o pedido correspondente
                 $order = DB::table('orders')
@@ -254,6 +262,12 @@ class MercadoPagoController extends Controller
                             'updated_at' => now()
                         ]);
                     
+                    Log::info('Order status updated', [
+                        'order_id' => $order->id,
+                        'status' => $status,
+                        'payment_status' => $paymentData['status']
+                    ]);
+                    
                     // Se o pagamento foi aprovado, gerar ingressos
                     if ($paymentData['status'] === 'approved') {
                         $this->generateTickets($order->id);
@@ -262,14 +276,21 @@ class MercadoPagoController extends Controller
                         if ($orderModel) {
                             Mail::to($orderModel->get_participante()->email)->send(new \App\Mail\PaymentApprovedMail($orderModel));
                         }
+                        
+                        Log::info('Payment approved - tickets generated and email sent', ['order_id' => $order->id]);
                     }
+                } else {
+                    Log::warning('Order not found for payment', ['payment_id' => $paymentId]);
                 }
             }
             
             return response()->json(['success' => true], 200);
             
         } catch (\Exception $e) {
-            Log::error('Mercado Pago Webhook Error: ' . $e->getMessage());
+            Log::error('Mercado Pago Webhook Error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'data' => $r->all()
+            ]);
             return response()->json(['error' => 'Internal server error'], 500);
         }
     }

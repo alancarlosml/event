@@ -91,6 +91,9 @@ Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceControlle
 Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEventDate')->name('conference.setEventDate');
 Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLotesPorData')->name('conference.getLotesPorData');
 
+// Rota para corrigir hashes de lotes (temporária)
+Route::get('/fix-lote-hashes', 'App\Http\Controllers\LoteController@fixLoteHashes')->name('lote.fix_hashes');
+
 // Route::post('painel/lotes/{id}/store', 'App\Http\Controllers\LoteController@store')->middleware(['auth:participante', 'verified'])->name('lote.store');
 // Route::get('painel/lotes/{id}/edit', 'App\Http\Controllers\LoteController@edit')->middleware(['auth:participante', 'verified'])->name('lote.edit');
 // Route::post('painel/lotes/{id}/update', 'App\Http\Controllers\LoteController@update')->middleware(['auth:participante', 'verified'])->name('lote.update');

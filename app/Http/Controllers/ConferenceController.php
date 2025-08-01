@@ -107,7 +107,7 @@ class ConferenceController extends Controller
                 $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
                 if($quantity > 0) {
-                    if($lote->tax_servico == 0) {
+                    if($lote->tax_service == 0) {
                         $array = ['id' => $lote->id, 'quantity' => $quantity, 'value' => ($lote->value + $lote->value * 0.1), 'name' => $lote->name];
                     } else {
                         $array = ['id' => $lote->id, 'quantity' => $quantity,  'value' => $lote->value, 'name' => $lote->name];
@@ -118,7 +118,7 @@ class ConferenceController extends Controller
 
                 if($quantity > 0) {
                     for($j = 0; $j < $quantity; $j++) {
-                        if($lote->tax_servico == 0) {
+                        if($lote->tax_service == 0) {
                             $array_obj = ['id' => $lote->id, 'quantity' => 1, 'value' => ($lote->value + $lote->value * 0.1), 'name' => $lote->name];
                         } else {
                             $array_obj = ['id' => $lote->id, 'quantity' => 1,  'value' => $lote->value, 'name' => $lote->name];
@@ -189,10 +189,12 @@ class ConferenceController extends Controller
 
                 if($lote->type == 0) {
 
-                    if($lote->tax_servico == 0) {
-                        $subtotal += ($lote->value + $lote->value * 0.1) * $quantity;
+                    if($lote->tax_service == 0) {
+                        $valor_calculado = ($lote->value + $lote->value * 0.1) * $quantity;
+                        $subtotal += $valor_calculado;
                     } else {
-                        $subtotal += $lote->value * $quantity;
+                        $valor_calculado = $lote->value * $quantity;
+                        $subtotal += $valor_calculado;
                     }
 
                     $coupon = $request->session()->get('coupon');
@@ -390,8 +392,7 @@ class ConferenceController extends Controller
             'gatway_status' => null,
             'gatway_payment_method' => null,
             'event_id' => $event->id,
-            // 'event_date_id' => $event_date->id,
-            'event_date_id' => '63',
+            'event_date_id' => $event_date->id,
             'participante_id' => Auth::user()->id,
             'coupon_id' => $coupon_id,
             'created_at' => now(),
@@ -450,17 +451,31 @@ class ConferenceController extends Controller
 
     public function thanks(Request $request)
     {
+        // Validar se o usuário está autenticado
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Usuário não autenticado'], 401);
+        }
 
-        // echo $request->getContent();
-        // dd($request->getContent());
-        // return $request;
+        // Validar se há dados de pagamento
+        if (!$request->getContent()) {
+            return response()->json(['error' => 'Dados de pagamento não fornecidos'], 400);
+        }
 
         $input = json_decode($request->getContent());
-        // var_dump($input);
-        // dd($input);
-        // return $input;
+        
+        // Validar estrutura dos dados
+        if (!$input || !isset($input->paymentType) || !isset($input->formData)) {
+            return response()->json(['error' => 'Dados de pagamento inválidos'], 400);
+        }
 
-        MercadoPago\SDK::setAccessToken(env('MERCADO_PAGO_ACCESS_TOKEN', ''));
+        // Validar se as credenciais do Mercado Pago estão configuradas
+        $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN', '');
+        if (empty($accessToken)) {
+            Log::error('Mercado Pago Access Token não configurado');
+            return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
+        }
+
+        MercadoPago\SDK::setAccessToken($accessToken);
 
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
@@ -480,6 +495,9 @@ class ConferenceController extends Controller
             $taxa_juros = $event->config_tax;
         }
 
+        // Calcular a taxa como porcentagem do valor total
+        $application_fee = ($total * $taxa_juros) / 100;
+
         try {
 
             if($input->paymentType == 'credit_card') {
@@ -492,7 +510,7 @@ class ConferenceController extends Controller
                 $payment->payment_method_id = $input->formData->payment_method_id;
                 $payment->issuer_id = (int) $input->formData->issuer_id;
                 $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
-                $payment->application_fee = $taxa_juros;
+                $payment->application_fee = $application_fee;
                 // $payment->notification_url = 'http://requestbin.fullcontact.com/1ogudgk1';
 
                 $payer = new MercadoPago\Payer();
@@ -501,7 +519,7 @@ class ConferenceController extends Controller
                 $payer->last_name = $last_name;
                 $payer->identification = [
                     'type' => $input->formData->payer->identification->type,
-                    'number' => $input->formData->payer->identification->type,
+                    'number' => $input->formData->payer->identification->number,
                 ];
 
                 $payment->payer = $payer;
@@ -513,7 +531,7 @@ class ConferenceController extends Controller
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
                 $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
-                $payment->application_fee = $taxa_juros;
+                $payment->application_fee = $application_fee;
                 $payment->payer = [
                     'email' => $input->formData->payer->email,
                     'first_name' => $first_name,
@@ -542,7 +560,7 @@ class ConferenceController extends Controller
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
                 $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
-                $payment->application_fee = $taxa_juros;
+                $payment->application_fee = $application_fee;
                 $payment->payer = [
                     'email' => $input->formData->payer->email,
                     'first_name' => $input->formData->payer->first_name,

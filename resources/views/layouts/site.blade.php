@@ -79,7 +79,7 @@
               </ul> --}}
                 <div class="d-flex" style="margin-left: auto;">
                     <ul>
-                        <li class="dropdown"><a href="#"><span>Serviços</span> <i
+                        {{-- <li class="dropdown"><a href="#"><span>Serviços</span> <i
                                     class="bi bi-chevron-down"></i></a>
                             <ul>
                                 <li><a href="#">Drop Down 1</a></li>
@@ -87,7 +87,7 @@
                                 <li><a href="#">Drop Down 3</a></li>
                                 <li><a href="#">Drop Down 4</a></li>
                             </ul>
-                        </li>
+                        </li> --}}
                         <li><a class="nav-link" href="/eventos">Eventos</a></li>
                         <li><a class="nav-link" href="/contato">Contato</a></li>
                         <li><a class="getstarted" href="{{ route('event_home.create_event_link') }}">Criar evento</a>
