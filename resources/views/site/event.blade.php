@@ -303,9 +303,15 @@
                                                     <div class="collapsed card-header">
                                                         <div class="row">
                                                             <div class="col-sm-2 col-md-2">
-                                                                <img src="{{ URL::asset('storage/' . $event->owner->icon) }}"
-                                                                     alt="{{ $event->owner->name }}"
-                                                                     class="img-fluid">
+                                                                @if($event->owner->icon && $event->owner->icon != "")
+                                                                    <img src="{{ URL::asset('storage/' . $event->owner->icon) }}"
+                                                                         alt="{{ $event->owner->name }}"
+                                                                         class="img-fluid">
+                                                                @else
+                                                                    <div class="img-fluid" style="width: 100%; height: 100px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px solid #dee2e6;">
+                                                                        <i class="fas fa-user" style="font-size: 2rem; color: #6c757d;"></i>
+                                                                    </div>
+                                                                @endif
                                                             </div>
                                                             <div class="col-sm-10 col-md-10">
                                                                 <h6>{{ $event->owner->name }}</h6>

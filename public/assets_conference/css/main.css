@@ -97,7 +97,7 @@ ul li,ol li{
     position:relative;
     margin-bottom:10px
 }
-.section-title:before{
+/* .section-title:before{
     content:"{";
     color:#ff4a67;
     padding-right:10px
@@ -106,7 +106,7 @@ ul li,ol li{
     content:"}";
     color:#ff4a67;
     padding-left:10px
-}
+} */
 .section-subcontent{
     font-size:16px;
     text:center;

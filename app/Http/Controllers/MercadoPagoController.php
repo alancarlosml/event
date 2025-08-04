@@ -187,7 +187,7 @@ class MercadoPagoController extends Controller
         // Salva o pedido no banco de dados
         // (necessário ajustes)
         $order_id = DB::table('orders')->insertGetId([
-            'hash' => md5(time() . uniqid() . md5('papainoel')),
+            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
             'status' => 2,
             'gatway_hash' => null,
             'gatway_reference' => null,

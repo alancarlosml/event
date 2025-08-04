@@ -123,8 +123,8 @@
                                 <textarea type="password" class="form-control" id="description" name="description" rows="6">{{ $event->owner->description ?? '' }}</textarea>
                             </div>
                             <div id="banner_organizador">
-                                <label for="banner">Banner do organizador</label>
-                                @if(isset($event->owner->icon) == false)
+                                <label for="banner">Banner do organizador*</label>
+                                @if($event->owner->icon == "" || !$event->owner->icon)
                                     <input class="form-control" type="file" id="icon" name="icon" required>
                                 @else
                                 <div class="form-group">

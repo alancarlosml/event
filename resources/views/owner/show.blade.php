@@ -57,8 +57,14 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="icon">Banner da empresa</label> <br />
-                                    <img src="{{ asset('storage/' . $owner->icon) }}" alt="Banner da empresa"
-                                         class="img-fluid img-thumbnail" style="width: 200px">
+                                    @if($owner->icon && $owner->icon != "")
+                                        <img src="{{ asset('storage/' . $owner->icon) }}" alt="Banner da empresa"
+                                             class="img-fluid img-thumbnail" style="width: 200px">
+                                    @else
+                                        <div class="img-fluid img-thumbnail" style="width: 200px; height: 150px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px solid #dee2e6;">
+                                            <i class="fas fa-user" style="font-size: 3rem; color: #6c757d;"></i>
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="form-group">
                                     <label for="description">Descrição</label>

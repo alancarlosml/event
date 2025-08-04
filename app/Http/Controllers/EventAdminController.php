@@ -297,7 +297,7 @@ class EventAdminController extends Controller
 
             // dd($validatedDataEvent);
 
-            $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('papainoel'));
+            $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
             $validatedDataEvent['status'] = 0;
             $validatedDataEvent['place_id'] = $validatedDataEvent['place_id_hidden'];
@@ -623,7 +623,7 @@ class EventAdminController extends Controller
 
         if($participante_evento->count() == 0) {
             DB::table('participantes_events')->insert([
-                'hash' => md5(Auth::user()->name . date('Y-m-d H:i:s') . md5('papainoel')),
+                'hash' => md5(Auth::user()->name . date('Y-m-d H:i:s') . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
                 'role' => 'admin',
                 'status' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -747,7 +747,7 @@ class EventAdminController extends Controller
             $validatedData['form_pagamento'] = implode(',', $validatedData['form_pagamento']);
         }
 
-        $validatedData['hash'] = md5($validatedData['name'] . $validatedData['description'] . md5('papainoel'));
+        $validatedData['hash'] = md5($validatedData['name'] . $validatedData['description'] . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
 
         $lote = new Lote();
         $lote->fill($validatedData);
@@ -964,7 +964,7 @@ class EventAdminController extends Controller
         }
 
         $input['event_id'] = $event->id;
-        $input['hash'] = md5($input['code'] . $input['event_id'] . md5('papainoel'));
+        $input['hash'] = md5($input['code'] . $input['event_id'] . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
 
         $id_coupon = Coupon::create($input)->id;
 
@@ -1280,7 +1280,7 @@ class EventAdminController extends Controller
                 //ENVIAR EMAIL SOLICITANDO REATIVAÇÃO DA CONTA
             } elseif($participante->status == 1) {
                 DB::table('participantes_events')->insert([
-                    'hash' => md5($participante->name . date('Y-m-d H:i:s') . md5('papainoel')),
+                    'hash' => md5($participante->name . date('Y-m-d H:i:s') . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
                     'role' => 'convidado',
                     'status' => 1,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -1695,7 +1695,7 @@ class EventAdminController extends Controller
                 order_items.number,
                 order_items.created_at,
                 order_items.hash as order_items_hash,
-                md5(concat(orders.hash, order_items.hash, order_items.number, order_items.created_at, md5("papainoel"))) as purchase_hash'
+                md5(concat(orders.hash, order_items.hash, order_items.number, order_items.created_at, md5("7bc05eb02415fe73101eeea0180e258d45e8ba2b"))) as purchase_hash'
             )
             ->where('orders.hash', $hash)
             ->where('orders.gatway_status', '1')

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Configuration;
 use App\Models\Lote;
+use App\Models\Event; // Added this import for the new validation
 
 class LoteController extends Controller
 {
@@ -45,16 +46,35 @@ class LoteController extends Controller
                 'type' => 'required|integer',
                 'tax_parcelamento' => 'required|integer',
                 'tax_service' => 'required|integer',
-                'value' => 'required',
+                'value' => 'required|numeric|min:0',
                 'name' => 'required',
-                'quantity' => 'required',
+                'quantity' => 'required|integer|min:1',
                 'description' => 'required',
-                'limit_min' => 'required|min:1',
-                'limit_max' => 'required|gte:limit_min',
-                'datetime_begin' => 'required',
-                'datetime_end' => 'required',
+                'limit_min' => 'required|integer|min:1',
+                'limit_max' => 'required|integer|gte:limit_min',
+                'datetime_begin' => 'required|date|after:now',
+                'datetime_end' => 'required|date|after:datetime_begin',
                 'form_pagamento' => 'nullable',
                 'visibility' => 'required',
+            ], [
+                'value.required' => 'O valor do lote é obrigatório.',
+                'value.numeric' => 'O valor deve ser um número.',
+                'value.min' => 'O valor não pode ser negativo.',
+                'quantity.required' => 'A quantidade é obrigatória.',
+                'quantity.integer' => 'A quantidade deve ser um número inteiro.',
+                'quantity.min' => 'A quantidade deve ser pelo menos 1.',
+                'limit_min.required' => 'O limite mínimo é obrigatório.',
+                'limit_min.integer' => 'O limite mínimo deve ser um número inteiro.',
+                'limit_min.min' => 'O limite mínimo deve ser pelo menos 1.',
+                'limit_max.required' => 'O limite máximo é obrigatório.',
+                'limit_max.integer' => 'O limite máximo deve ser um número inteiro.',
+                'limit_max.gte' => 'O limite máximo deve ser maior ou igual ao limite mínimo.',
+                'datetime_begin.required' => 'A data de início é obrigatória.',
+                'datetime_begin.date' => 'A data de início deve ser uma data válida.',
+                'datetime_begin.after' => 'A data de início deve ser posterior ao momento atual.',
+                'datetime_end.required' => 'A data de fim é obrigatória.',
+                'datetime_end.date' => 'A data de fim deve ser uma data válida.',
+                'datetime_end.after' => 'A data de fim deve ser posterior à data de início.',
             ]);
         } else {
 
@@ -62,14 +82,52 @@ class LoteController extends Controller
                 'name' => 'required',
                 'description' => 'required',
                 'type' => 'required|integer',
-                'quantity' => 'required',
+                'quantity' => 'required|integer|min:1',
                 'visibility' => 'required',
-                'limit_min' => 'required|min:1',
-                'limit_max' => 'required|gte:limit_min',
-                'datetime_begin' => 'required',
-                'datetime_end' => 'required',
+                'limit_min' => 'required|integer|min:1',
+                'limit_max' => 'required|integer|gte:limit_min',
+                'datetime_begin' => 'required|date|after:now',
+                'datetime_end' => 'required|date|after:datetime_begin',
                 'event_id' => 'nullable',
+            ], [
+                'quantity.required' => 'A quantidade é obrigatória.',
+                'quantity.integer' => 'A quantidade deve ser um número inteiro.',
+                'quantity.min' => 'A quantidade deve ser pelo menos 1.',
+                'limit_min.required' => 'O limite mínimo é obrigatório.',
+                'limit_min.integer' => 'O limite mínimo deve ser um número inteiro.',
+                'limit_min.min' => 'O limite mínimo deve ser pelo menos 1.',
+                'limit_max.required' => 'O limite máximo é obrigatório.',
+                'limit_max.integer' => 'O limite máximo deve ser um número inteiro.',
+                'limit_max.gte' => 'O limite máximo deve ser maior ou igual ao limite mínimo.',
+                'datetime_begin.required' => 'A data de início é obrigatória.',
+                'datetime_begin.date' => 'A data de início deve ser uma data válida.',
+                'datetime_begin.after' => 'A data de início deve ser posterior ao momento atual.',
+                'datetime_end.required' => 'A data de fim é obrigatória.',
+                'datetime_end.date' => 'A data de fim deve ser uma data válida.',
+                'datetime_end.after' => 'A data de fim deve ser posterior à data de início.',
             ]);
+        }
+
+        // VALIDATION: Check if event exists and has dates
+        $event = Event::find($id);
+        if (!$event) {
+            return redirect()->back()->withErrors(['error' => 'Evento não encontrado.']);
+        }
+
+        if ($event->event_dates()->count() == 0) {
+            return redirect()->back()->withErrors(['error' => 'O evento deve ter pelo menos uma data antes de criar lotes.']);
+        }
+
+        // VALIDATION: Check if lot sales period doesn't exceed event dates
+        $eventDates = $event->event_dates()->orderBy('date')->get();
+        $lotBegin = \Carbon\Carbon::parse($input['datetime_begin']);
+        $lotEnd = \Carbon\Carbon::parse($input['datetime_end']);
+        
+        $eventStartDate = $eventDates->first()->date;
+        $eventEndDate = $eventDates->last()->date;
+        
+        if ($lotEnd->date() > $eventEndDate) {
+            return redirect()->back()->withErrors(['error' => 'O período de venda do lote não pode ultrapassar a data do evento.']);
         }
 
         $number_lotes = Lote::where('event_id', $id)->count();
@@ -86,7 +144,7 @@ class LoteController extends Controller
             $input['form_pagamento'] = implode(',', $input['form_pagamento']);
         }
 
-        $input['hash'] = md5($input['name'] . $input['description'] . $input['event_id'] . time() . uniqid() . md5('papainoel'));
+        $input['hash'] = md5($input['name'] . $input['description'] . $input['event_id'] . time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
 
         Lote::create($input);
 
@@ -124,16 +182,34 @@ class LoteController extends Controller
                 'type' => 'required|integer',
                 'tax_parcelamento' => 'required|integer',
                 'tax_service' => 'required|integer',
-                'value' => 'required',
+                'value' => 'required|numeric|min:0',
                 'name' => 'required',
-                'quantity' => 'required',
+                'quantity' => 'required|integer|min:1',
                 'description' => 'required',
-                'limit_min' => 'required|min:1',
-                'limit_max' => 'required|gte:limit_min',
-                'datetime_begin' => 'required',
-                'datetime_end' => 'required',
+                'limit_min' => 'required|integer|min:1',
+                'limit_max' => 'required|integer|gte:limit_min',
+                'datetime_begin' => 'required|date',
+                'datetime_end' => 'required|date|after:datetime_begin',
                 'form_pagamento' => 'nullable',
                 'visibility' => 'required',
+            ], [
+                'value.required' => 'O valor do lote é obrigatório.',
+                'value.numeric' => 'O valor deve ser um número.',
+                'value.min' => 'O valor não pode ser negativo.',
+                'quantity.required' => 'A quantidade é obrigatória.',
+                'quantity.integer' => 'A quantidade deve ser um número inteiro.',
+                'quantity.min' => 'A quantidade deve ser pelo menos 1.',
+                'limit_min.required' => 'O limite mínimo é obrigatório.',
+                'limit_min.integer' => 'O limite mínimo deve ser um número inteiro.',
+                'limit_min.min' => 'O limite mínimo deve ser pelo menos 1.',
+                'limit_max.required' => 'O limite máximo é obrigatório.',
+                'limit_max.integer' => 'O limite máximo deve ser um número inteiro.',
+                'limit_max.gte' => 'O limite máximo deve ser maior ou igual ao limite mínimo.',
+                'datetime_begin.required' => 'A data de início é obrigatória.',
+                'datetime_begin.date' => 'A data de início deve ser uma data válida.',
+                'datetime_end.required' => 'A data de fim é obrigatória.',
+                'datetime_end.date' => 'A data de fim deve ser uma data válida.',
+                'datetime_end.after' => 'A data de fim deve ser posterior à data de início.',
             ]);
         } else {
 
@@ -141,14 +217,51 @@ class LoteController extends Controller
                 'name' => 'required',
                 'description' => 'required',
                 'type' => 'required|integer',
-                'quantity' => 'required',
+                'quantity' => 'required|integer|min:1',
                 'visibility' => 'required',
-                'limit_min' => 'required|min:1',
-                'limit_max' => 'required|gte:limit_min',
-                'datetime_begin' => 'required',
-                'datetime_end' => 'required',
+                'limit_min' => 'required|integer|min:1',
+                'limit_max' => 'required|integer|gte:limit_min',
+                'datetime_begin' => 'required|date',
+                'datetime_end' => 'required|date|after:datetime_begin',
                 'event_id' => 'nullable',
+            ], [
+                'quantity.required' => 'A quantidade é obrigatória.',
+                'quantity.integer' => 'A quantidade deve ser um número inteiro.',
+                'quantity.min' => 'A quantidade deve ser pelo menos 1.',
+                'limit_min.required' => 'O limite mínimo é obrigatório.',
+                'limit_min.integer' => 'O limite mínimo deve ser um número inteiro.',
+                'limit_min.min' => 'O limite mínimo deve ser pelo menos 1.',
+                'limit_max.required' => 'O limite máximo é obrigatório.',
+                'limit_max.integer' => 'O limite máximo deve ser um número inteiro.',
+                'limit_max.gte' => 'O limite máximo deve ser maior ou igual ao limite mínimo.',
+                'datetime_begin.required' => 'A data de início é obrigatória.',
+                'datetime_begin.date' => 'A data de início deve ser uma data válida.',
+                'datetime_end.required' => 'A data de fim é obrigatória.',
+                'datetime_end.date' => 'A data de fim deve ser uma data válida.',
+                'datetime_end.after' => 'A data de fim deve ser posterior à data de início.',
             ]);
+        }
+
+        // VALIDATION: Check if event exists and has dates
+        $event = Event::find($input['event_id']);
+        if (!$event) {
+            return redirect()->back()->withErrors(['error' => 'Evento não encontrado.']);
+        }
+
+        if ($event->event_dates()->count() == 0) {
+            return redirect()->back()->withErrors(['error' => 'O evento deve ter pelo menos uma data antes de editar lotes.']);
+        }
+
+        // VALIDATION: Check if lot sales period doesn't exceed event dates
+        $eventDates = $event->event_dates()->orderBy('date')->get();
+        $lotBegin = \Carbon\Carbon::parse($input['datetime_begin']);
+        $lotEnd = \Carbon\Carbon::parse($input['datetime_end']);
+        
+        $eventStartDate = $eventDates->first()->date;
+        $eventEndDate = $eventDates->last()->date;
+        
+        if ($lotEnd->date() > $eventEndDate) {
+            return redirect()->back()->withErrors(['error' => 'O período de venda do lote não pode ultrapassar a data do evento.']);
         }
 
         $number_lotes = Lote::where('event_id', $input['event_id'])->count();
@@ -192,7 +305,7 @@ class LoteController extends Controller
         
         foreach($lotes as $lote) {
             // Gerar novo hash único
-            $newHash = md5($lote->name . $lote->description . $lote->event_id . $lote->id . time() . uniqid() . md5('papainoel'));
+            $newHash = md5($lote->name . $lote->description . $lote->event_id . $lote->id . time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
             
             // Atualizar o hash
             $lote->update(['hash' => $newHash]);

@@ -227,6 +227,10 @@ class AsyncFeedback {
         const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
         
         if (submitBtn) {
+            // Obter a largura atual e definir como estilo inline
+            const currentWidth = submitBtn.offsetWidth;
+            submitBtn.style.width = `${currentWidth}px`;
+            submitBtn.style.padding = '.375rem .75rem';
             this.setButtonLoading(submitBtn, 'Enviando...');
         }
         

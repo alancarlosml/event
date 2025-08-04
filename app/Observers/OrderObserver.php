@@ -16,7 +16,7 @@ class OrderObserver
      */
     public function created(Order $order)
     {
-        $order->hash = md5($order->id . $order->created_at . md5('papainoel'));
+        $order->hash = md5($order->id . $order->created_at . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
         $order->save();
     }
 

@@ -39,6 +39,7 @@ class ConferenceController extends Controller
         $request->session()->forget('total');
         $request->session()->forget('dict_lotes');
         $request->session()->forget('event_date_result');
+        $request->session()->forget('event_date');
 
         if($event) {
             $total_dates = count($event->event_dates);
@@ -96,7 +97,18 @@ class ConferenceController extends Controller
         $event = Event::where('slug', $slug)->first();
         $request->session()->put('event', $event);
         $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
+        
+        // Verificar se event_date_result existe na sessão
+        if (!$event_date_result) {
+            return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi selecionada.']);
+        }
+        
         $eventDate = EventDate::where('id', $event_date_result)->first();
+        
+        // Verificar se a data do evento foi encontrada
+        if (!$eventDate) {
+            return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi encontrada.']);
+        }
 
         if($dict_lotes) {
             $array_lotes = [];
@@ -142,6 +154,7 @@ class ConferenceController extends Controller
             $request->session()->forget('total');
             $request->session()->forget('dict_lotes');
             $request->session()->forget('event_date_result');
+            $request->session()->forget('event_date');
 
             return redirect()->route('conference.index', $event->slug);
         }
@@ -154,18 +167,21 @@ class ConferenceController extends Controller
 
         $event_date_result = $data['event_date_result'];
 
-        $request->session()->put('event_date_result', $event_date_result);
-
-        if($event_date_result) {
-
-            return response()->json(['success' => 'Ajax request submitted successfully']);
-
-        } else {
-
-            return redirect()->back();
+        // Validar se o event_date_result foi fornecido
+        if (!$event_date_result) {
+            return response()->json(['error' => 'Data do evento não foi fornecida'], 400);
         }
 
-        return redirect()->back();
+        // Verificar se a data do evento existe no banco
+        $eventDate = EventDate::where('id', $event_date_result)->first();
+        if (!$eventDate) {
+            return response()->json(['error' => 'Data do evento não foi encontrada'], 400);
+        }
+
+        $request->session()->put('event_date_result', $event_date_result);
+
+        return response()->json(['success' => 'Data do evento selecionada com sucesso']);
+
     }
 
     public function getSubTotal(Request $request)
@@ -186,6 +202,48 @@ class ConferenceController extends Controller
 
                 $quantity = $dict['lote_quantity'];
                 $lote = Lote::where('hash', $dict['lote_hash'])->first();
+
+                // VALIDATION 1: Check if lot exists
+                if (!$lote) {
+                    return response()->json(['error' => 'Lote não encontrado.'], 400);
+                }
+
+                // VALIDATION 2: Check if lot is currently available for sale
+                $now = now();
+                if ($lote->datetime_begin > $now || $lote->datetime_end < $now) {
+                    return response()->json(['error' => 'Este lote não está disponível para venda no momento.'], 400);
+                }
+
+                // VALIDATION 3: Check quantity limits per user
+                if ($quantity < $lote->limit_min || $quantity > $lote->limit_max) {
+                    return response()->json(['error' => "Quantidade deve ser entre {$lote->limit_min} e {$lote->limit_max} ingressos."], 400);
+                }
+
+                // VALIDATION 4: Check if lot has enough available tickets
+                $soldTickets = DB::table('order_items')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('order_items.lote_id', $lote->id)
+                    ->where('orders.status', '!=', 3) // Exclude cancelled orders
+                    ->sum('order_items.quantity');
+                
+                $availableTickets = $lote->quantity - $soldTickets;
+                if ($quantity > $availableTickets) {
+                    return response()->json(['error' => "Apenas {$availableTickets} ingressos disponíveis neste lote."], 400);
+                }
+
+                // VALIDATION 5: Check if user already purchased tickets for this lot
+                if (Auth::check()) {
+                    $userPurchases = DB::table('order_items')
+                        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                        ->where('order_items.lote_id', $lote->id)
+                        ->where('orders.participante_id', Auth::user()->id)
+                        ->where('orders.status', '!=', 3)
+                        ->sum('order_items.quantity');
+                    
+                    if (($userPurchases + $quantity) > $lote->limit_max) {
+                        return response()->json(['error' => "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}."], 400);
+                    }
+                }
 
                 if($lote->type == 0) {
 
@@ -252,7 +310,15 @@ class ConferenceController extends Controller
 
         $evento = Event::where('hash', $eventHash)->first();
 
-        // $coupon = Coupon::where('code', $couponCode)->where('status', '1')->where('event_id', $evento->id)->first();
+        // VALIDATION 1: Check if event exists
+        if (!$evento) {
+            return response()->json(['error' => 'Evento não encontrado.'], 400);
+        }
+
+        // VALIDATION 2: Check if coupon code is provided
+        if (empty($couponCode)) {
+            return response()->json(['error' => 'Código do cupom é obrigatório.'], 400);
+        }
 
         // VERIFICA O LIMIT_BUY PARA O CUPOM QUE ESTÁ SENDO ADICIONADO
         $coupon = Coupon::select('coupons.*')
@@ -266,6 +332,33 @@ class ConferenceController extends Controller
                     ->where('event_id', $evento->id)
                     ->havingRaw('usage_count < limit_buy OR limit_buy IS NULL')
                     ->first();
+
+        // VALIDATION 3: Check if coupon exists and is valid
+        if (!$coupon) {
+            return response()->json(['error' => 'Cupom inválido ou indisponível.'], 400);
+        }
+
+        // VALIDATION 4: Check if coupon is currently active
+        $now = now();
+        if (isset($coupon->valid_from) && $coupon->valid_from > $now) {
+            return response()->json(['error' => 'Este cupom ainda não está disponível.'], 400);
+        }
+        if (isset($coupon->valid_until) && $coupon->valid_until < $now) {
+            return response()->json(['error' => 'Este cupom expirou.'], 400);
+        }
+
+        // VALIDATION 5: Check if user already used this coupon
+        if (Auth::check()) {
+            $userCouponUsage = DB::table('orders')
+                ->where('coupon_id', $coupon->id)
+                ->where('participante_id', Auth::user()->id)
+                ->where('status', '!=', 3) // Exclude cancelled orders
+                ->count();
+            
+            if ($userCouponUsage > 0) {
+                return response()->json(['error' => 'Você já utilizou este cupom.'], 400);
+            }
+        }
 
         $coupon_session = $request->session()->get('coupon');
 
@@ -312,7 +405,7 @@ class ConferenceController extends Controller
     //     $coupon = $request->session()->get('coupon');
 
     //     $order = Order::create([
-    //         'hash' => md5(time() . uniqid() . md5('papainoel')),
+    //         'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
     //         'status' => 2,
     //         'event_date_id' => $request->session()->get('event_date')->id,
     //         'participante_id' => Auth::user()->id,
@@ -334,8 +427,8 @@ class ConferenceController extends Controller
     //         $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
     //         $orderItem = $order->items()->create([
-    //             'hash' => md5((time() . uniqid() . $i) . md5('papainoel')),
-    //             'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('papainoel')), 36),
+    //             'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+    //             'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
     //             'quantity' => 1,
     //             'value' => $lote->value,
     //             'status' => 2,
@@ -379,13 +472,76 @@ class ConferenceController extends Controller
         $array_lotes_obj = $request->session()->get('array_lotes_obj');
         $event_date = $request->session()->get('event_date');
 
+        // Debug: Log para verificar o estado da sessão
+        Log::info('Payment method - Session data:', [
+            'event_date' => $event_date,
+            'event_date_result' => $request->session()->get('event_date_result'),
+            'dict_lotes' => $request->session()->get('dict_lotes'),
+            'event' => $request->session()->get('event')
+        ]);
+
+        // Verificar se a data do evento foi selecionada
+        if (!$event_date) {
+            return redirect()->back()->withErrors(['error' => 'Data do evento não foi selecionada. Por favor, selecione uma data válida.']);
+        }
+
+        // FINAL VALIDATION: Re-validate all lots before payment
+        if ($dict_lotes) {
+            foreach ($dict_lotes as $dict) {
+                $quantity = $dict['lote_quantity'];
+                $lote = Lote::where('hash', $dict['lote_hash'])->first();
+
+                // Check if lot exists
+                if (!$lote) {
+                    return redirect()->back()->withErrors(['error' => 'Lote não encontrado.']);
+                }
+
+                // Check sales period
+                $now = now();
+                if ($lote->datetime_begin > $now || $lote->datetime_end < $now) {
+                    return redirect()->back()->withErrors(['error' => 'Este lote não está disponível para venda no momento.']);
+                }
+
+                // Check quantity limits
+                if ($quantity < $lote->limit_min || $quantity > $lote->limit_max) {
+                    return redirect()->back()->withErrors(['error' => "Quantidade deve ser entre {$lote->limit_min} e {$lote->limit_max} ingressos."]);
+                }
+
+                // Check available tickets
+                $soldTickets = DB::table('order_items')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('order_items.lote_id', $lote->id)
+                    ->where('orders.status', '!=', 3)
+                    ->sum('order_items.quantity');
+                
+                $availableTickets = $lote->quantity - $soldTickets;
+                if ($quantity > $availableTickets) {
+                    return redirect()->back()->withErrors(['error' => "Apenas {$availableTickets} ingressos disponíveis neste lote."]);
+                }
+
+                // Check user purchase limits
+                if (Auth::check()) {
+                    $userPurchases = DB::table('order_items')
+                        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                        ->where('order_items.lote_id', $lote->id)
+                        ->where('orders.participante_id', Auth::user()->id)
+                        ->where('orders.status', '!=', 3)
+                        ->sum('order_items.quantity');
+                    
+                    if (($userPurchases + $quantity) > $lote->limit_max) {
+                        return redirect()->back()->withErrors(['error' => "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}."]);
+                    }
+                }
+            }
+        }
+
         $coupon_id = null;
         if($coupon) {
             $coupon_id = $coupon->id;
         }
 
         $order_id = DB::table('orders')->insertGetId([
-            'hash' => md5(time() . uniqid() . md5('papainoel')),
+            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
             'status' => 2,
             'gatway_hash' => null,
             'gatway_reference' => null,
@@ -405,8 +561,8 @@ class ConferenceController extends Controller
         //     $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
         //     $order_item_id = DB::table('order_items')->insertGetId([
-        //         'hash' => md5((time() . uniqid() . $i) . md5('papainoel')),
-        //         'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('papainoel')), 36),
+        //         'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+        //         'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
         //         'quantity' => 1,
         //         'value' => $lote->value,
         //         'date_use' => null,

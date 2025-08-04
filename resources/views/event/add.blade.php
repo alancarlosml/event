@@ -123,7 +123,8 @@
                                                     data-target-input="nearest">
                                                     <input type="text" class="form-control datetimepicker-input"
                                                         id="datetimepicker_day_input"
-                                                        data-target="#datetimepicker_day" />
+                                                        data-target="#datetimepicker_day" 
+                                                        autocomplete="off"/>
                                                     <div class="input-group-append" data-target="#datetimepicker_day"
                                                         data-toggle="datetimepicker">
                                                         <div class="input-group-text"><i class="fa fa-calendar"></i>

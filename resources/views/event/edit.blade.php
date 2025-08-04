@@ -136,8 +136,10 @@
 															data-target-input="nearest">
 															<input
 																class="form-control datetimepicker-input datetimepicker_day"
+                                                                autocomplete="off"
 																data-target="#datetimepicker_day_{{ $date->id }}"
-																name="date[]" value="{{ $date->date }}" />
+																name="date[]" 
+                                                                value="{{ $date->date }}" />
 															<div class="input-group-append"
 																data-target="#datetimepicker_day_{{ $date->id }}"
 																data-toggle="datetimepicker">
@@ -154,8 +156,10 @@
 															data-target-input="nearest">
 															<input type="text"
 																class="form-control datetimepicker-input datetimepicker_hour_begin"
+                                                                autocomplete="off"
 																data-target="#datetimepicker_hour_begin_{{ $date->id }}"
-																name="time_begin[]" value="{{ $date->time_begin }}" />
+																name="time_begin[]" 
+                                                                value="{{ $date->time_begin }}" />
 															<div class="input-group-append"
 																data-target="#datetimepicker_hour_begin_{{ $date->id }}"
 																data-toggle="datetimepicker">
@@ -171,8 +175,10 @@
 															data-target-input="nearest">
 															<input type="text"
 																class="form-control datetimepicker-input datetimepicker_hour_end"
+                                                                autocomplete="off"
 																data-target="#datetimepicker_hour_end_{{ $date->id }}"
-																name="time_end[]" value="{{ $date->time_end }}" />
+																name="time_end[]" 
+                                                                value="{{ $date->time_end }}" />
 															<div class="input-group-append"
 																data-target="#datetimepicker_hour_end_{{ $date->id }}"
 																data-toggle="datetimepicker">
@@ -205,7 +211,10 @@
 												<div class="form-group col-md-3">
 													<label for="number">Data</label>
 													<div class="input-group date" data-target-input="nearest">
-														<input class="form-control datetimepicker-input datetimepicker_day" name="date[]" value=""/>
+														<input class="form-control datetimepicker-input datetimepicker_day"
+                                                                autocomplete="off"
+                                                                name="date[]" 
+                                                                value=""/>
 														<div class="input-group-append" data-toggle="datetimepicker">
 															<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 														</div>
@@ -215,7 +224,11 @@
 												<div class="form-group col-md-2">
 													<label for="number">Hora início</label>
 													<div class="input-group date" data-target-input="nearest">
-														<input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" value=""/>
+														<input type="text" 
+                                                                class="form-control datetimepicker-input datetimepicker_hour_begin" 
+                                                                autocomplete="off"
+                                                                name="time_begin[]" 
+                                                                value=""/>
 														<div class="input-group-append" data-toggle="datetimepicker">
 															<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>
 														</div>
@@ -224,7 +237,11 @@
 												<div class="form-group col-md-2">
 													<label for="number">Hora fim</label>
 													<div class="input-group date" data-target-input="nearest">
-														<input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" value=""/>
+														<input type="text" 
+                                                                class="form-control datetimepicker-input datetimepicker_hour_end" 
+                                                                autocomplete="off"
+                                                                name="time_end[]" 
+                                                                value=""/>
 														<div class="input-group-append" data-toggle="datetimepicker">
 															<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>
 														</div>
@@ -584,7 +601,7 @@
                         '<div class="form-group col-md-3">' +
                         '<label for="number">Data</label>' +
                         '<div class="input-group date" data-target-input="nearest">' +
-                        '<input class="form-control datetimepicker-input datetimepicker_day" name="date[]" value=""/>' +
+                        '<input class="form-control datetimepicker-input datetimepicker_day" autocomplete="off" name="date[]" value=""/>' +
                         '<div class="input-group-append" data-toggle="datetimepicker">' +
                         '<div class="input-group-text"><i class="fa fa-calendar"></i></div>' +
                         '</div>' +
@@ -593,7 +610,7 @@
                         '<div class="form-group col-md-2">' +
                         '<label for="number">Hora início</label>' +
                         '<div class="input-group date" data-target-input="nearest">' +
-                        '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" value=""/>' +
+                        '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" autocomplete="off" name="time_begin[]" value=""/>' +
                         '<div class="input-group-append" data-toggle="datetimepicker">' +
                         '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>' +
                         '</div>' +
@@ -602,7 +619,7 @@
                         '<div class="form-group col-md-2">' +
                         '<label for="number">Hora fim</label>' +
                         '<div class="input-group date" data-target-input="nearest">' +
-                        '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" value=""/>' +
+                        '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" autocomplete="off" name="time_end[]" value=""/>' +
                         '<div class="input-group-append" data-toggle="datetimepicker">' +
                         '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>' +
                         '</div>' +

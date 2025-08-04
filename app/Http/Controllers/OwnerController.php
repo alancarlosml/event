@@ -121,4 +121,23 @@ class OwnerController extends Controller
 
         return view('owner.show', compact('owner'));
     }
+
+    public function delete_file($id)
+    {
+        $owner = Owner::findOrFail($id);
+
+        // Deletar o arquivo físico
+        if($owner->icon) {
+            $path = public_path().'/storage/'.$owner->icon;
+            if(file_exists($path)) {
+                unlink($path);
+            }
+        }
+
+        // Limpar o campo no banco
+        $owner->icon = '';
+        $owner->save();
+
+        return back()->with('success', 'Banner do organizador removido com sucesso!');
+    }
 }
