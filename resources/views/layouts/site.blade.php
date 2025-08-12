@@ -4,55 +4,57 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content="" name="description">
-    <meta content="" name="keywords">
+    <meta content="Plataforma de eventos moderna e acessível" name="description"> <!-- Melhorado para SEO -->
+    <meta content="eventos, ingressos, gerenciamento" name="keywords">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <title>Ticket DZ6</title>
 
-    <!-- Favicons -->
+    <!-- Favicons (adicionado mais tamanhos para melhor compatibilidade) -->
     <link rel="icon" href="{{ asset('assets/img/favicon/favicon.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/favicon/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/favicon/favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/img/favicon/favicon-16x16.png') }}">
     <link rel="manifest" href="{{ asset('assets/img/favicon/site.webmanifest') }}">
 
-    <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
-        rel="stylesheet">
+    <!-- Google Fonts (adicionado Inter para look mais moderno) -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Vendor CSS Files -->
+    <!-- Vendor CSS Files (padronizado Bootstrap 5.3.3) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
-    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"> --}}
-    {{-- <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet"> --}}
-    <!-- {!! RecaptchaV3::initJs() !!} -->
-    @stack('head')
-    @stack('bootstrap_version')
-
-    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /> --}}
-    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css" integrity="sha512-Ez0cGzNzHR1tYAv56860NLspgUGuQw16GiOOp/I2LuTmpSK9xDXlgJz3XN4cnpXWDmkNBKXR/VDMTCnAaEooxA==" crossorigin="anonymous" referrerpolicy="no-referrer" /> --}}
-
     <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
-        integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Template Main CSS File -->
+    <!-- Template Main CSS File (adicionado CSS variables para modernização) -->
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
-    
+    <style>
+        :root {
+            --primary-color: #007bff; /* Cor primária moderna */
+            --secondary-color: #6c757d;
+            --bg-light: #f8f9fa;
+            --shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombras suaves */
+            --transition: all 0.3s ease; /* Transições suaves */
+        }
+        body { font-family: 'Inter', sans-serif; } /* Tipografia moderna */
+        img { loading: lazy; } /* Lazy loading global */
+        .card, .info-box { transition: var(--transition); box-shadow: var(--shadow); border-radius: 8px; } /* Moderno cards */
+        .card:hover, .info-box:hover { transform: translateY(-5px); }
+    </style>
+
     <!-- Async Feedback CSS -->
     <link href="{{ asset('assets_admin/css/async-feedback.css') }}" rel="stylesheet">
 
+    @stack('head')
 </head>
 
 <body>
 
     <!-- ======= Header ======= -->
-    <header id="header" class="header fixed-top">
+    <header id="header" class="header fixed-top" role="banner">
         <div class="container-fluid container-xl d-flex align-items-center">
 
             <a href="/" class="logo d-flex align-items-center">
@@ -60,7 +62,7 @@
                 {{-- <span>FlexStart</span> --}}
             </a>
 
-            <nav id="navbar" class="navbar d-flex">
+            <nav id="navbar" class="navbar navbar-expand-lg navbar-light">
                 {{-- <ul class="d-flex">
                   <li class="dropdown"><a href="#"><span>Serviços</span> <i class="bi bi-chevron-down"></i></a>
                     <ul>
@@ -78,7 +80,7 @@
                 <li><a class="getstarted" href="{{ route('event_home.create_event_link')}}">Criar evento</a></li> 
               </ul> --}}
                 <div class="d-flex" style="margin-left: auto;">
-                    <ul>
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
                         {{-- <li class="dropdown"><a href="#"><span>Serviços</span> <i
                                     class="bi bi-chevron-down"></i></a>
                             <ul>
@@ -93,31 +95,27 @@
                         <li><a class="getstarted" href="{{ route('event_home.create_event_link') }}">Criar evento</a>
                         </li>
                         @if (!Auth::user())
-                            <li class="nav-li"><a class="nav-link nav-login" href="{{ route('login') }}"><i
-                                        class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li>
+                            <li class="nav-item"><a class="nav-link nav-login" href="{{ route('login') }}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li>
                         @else
-                            <li class="nav-li dropdown">
-                                <a class="nav-link nav-login" data-toggle="dropdown" href="javascript:;">
-                                    <i class="fa-regular fa-circle-user"></i>&nbsp;{{ Auth::user()->name }}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-regular fa-circle-user me-1"></i> {{ Auth::user()->name }}
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
-                                    <a href="{{ route('event_home.my_events') }}" class="dropdown-item">
-                                        Meus eventos
-                                    </a>
-                                    <a href="{{ route('event_home.my_registrations') }}" class="dropdown-item">
-                                        Minhas inscrições
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                        onclick="event.preventDefault();
-                              document.getElementById('logout-form').submit();">
-                                        Sair
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST"
-                                        class="d-none">
-                                        @csrf
-                                    </form>
-                                </div>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="{{ route('event_home.my_events') }}">Meus eventos</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('event_home.my_registrations') }}">Minhas inscrições</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('logout') }}"
+                                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            Sair
+                                        </a>
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         @endif
                     </ul>
@@ -132,7 +130,7 @@
     {{ $slot }}
 
     <!-- ======= Footer ======= -->
-    <footer id="footer" class="footer">
+    <footer id="footer" class="footer" role="contentinfo">
 
         {{-- <div class="footer-newsletter">
             <div class="container">
@@ -219,37 +217,26 @@
                 Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
             </div>
         </div>
-    </footer><!-- End Footer -->
+    </footer>
 
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
-            class="bi bi-arrow-up-short"></i></a>
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center" aria-label="Voltar ao topo"><i class="bi bi-arrow-up-short"></i></a>
 
+    <!-- Vendor JS Files (atualizado jQuery para 3.7.1) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
+    <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
 
+    <!-- Template Main JS File -->
+    <script src="{{ asset('assets/js/main.js') }}"></script>
+
+    <!-- Async Feedback JS -->
+    <script src="{{ asset('assets_admin/js/async-feedback.js') }}"></script>
+
+    @stack('footer')
 </body>
-
-<!-- Vendor JS Files -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"
-    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous">
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.2/js/OverlayScrollbars.min.js"
-    integrity="sha512-5UqQ4jRiUk3pxl9wZxAtep5wCxqcoo6Yu4FI5ufygoOMV2I2/lOtH1YjKdt3FcQ9uhcKFJapG0HAQ0oTC5LnOw=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
-<script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
-{{-- <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script> --}}
-<script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
-<script src="{{ asset('assets/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
-<script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
-<script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
-
-<!-- Template Main JS File -->
-<script src="{{ asset('assets/js/main.js') }}"></script>
-
-<!-- Async Feedback JS -->
-<script src="{{ asset('assets_admin/js/async-feedback.js') }}"></script>
-
-@stack('footer')
-
 </html>

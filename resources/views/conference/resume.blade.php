@@ -8,10 +8,9 @@
             </div>
             <div class="card mb-5 pt-3 pb-3">
                 <div class="container">
-                    <div class="row">
+                    <div class="row gy-3"> <!-- gy-3 para responsividade -->
                         <div class="col-4">
-                            <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ $event->name }}"
-                                class="img-fluid">
+                            <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ $event->name }}" class="img-fluid" loading="lazy">
                         </div>
                         <div class="col-8">
                             <h3 style="font-size: 24px">{{ $event->name }}</h3>
@@ -19,31 +18,25 @@
                             {{-- <span><b>Data:</b> {{ \Carbon\Carbon::parse($eventDate->date)->format('d/m/y') }}</span><br> --}}
                             <span><b>Local:</b> {{ $event->place->name }}</span><br>
                             <span><b>Lote(s) selecionado(s):</b> </span>
-                            <ul class="list-style">
+                            <ul class="list-style" role="list" aria-label="Lotes selecionados">
                                 @foreach ($array_lotes as $array_lote)
-                                    <li class="ml-4" style="list-style-type: circle">{{ $array_lote['quantity'] }}
-                                        x {{ $array_lote['name'] }}</li>
+                                    <li class="ml-4" style="list-style-type: circle">{{ $array_lote['quantity'] }} x {{ $array_lote['name'] }}</li>
                                 @endforeach
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row gy-4"> <!-- gy-4 para espaçamento -->
                 <div class="col-md-4 order-md-2 mb-4">
                     <div class="section-title-header text-center">
                         <h2 class="section-title wow fadeInUp animated">Resumo da compra</h2>
                     </div>
-                    <ul class="list-group mb-3">
+                    <ul class="list-group mb-3" role="list" aria-label="Resumo da compra">
                         @foreach ($array_lotes as $array_lote)
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between">
-                                    <div>{{ $array_lote['quantity'] }} @if ($array_lote['quantity'] == 1)
-                                            ingresso
-                                        @else
-                                            ingressos
-                                        @endif
-                                    </div>
+                                    <div>{{ $array_lote['quantity'] }} @if ($array_lote['quantity'] == 1) ingresso @else ingressos @endif</div>
                                     @if ($array_lote['value'] == 0)
                                         <div class="text-muted">Grátis</div>
                                     @else
@@ -80,8 +73,7 @@
                         <div class="row">
                             <div class="col-12 d-flex justify-content-between">
                                 <strong>Compra 100% segura!&nbsp;&nbsp;&nbsp;</strong>
-                                <img src="/assets_conference/imgs/mercado-pago-logo.png" alt="Mercado Pago"
-                                    height="30px" />
+                                <img src="/assets_conference/imgs/mercado-pago-logo.png" alt="Mercado Pago" height="30px" loading="lazy" />
                             </div>
                         </div>
                     </div>
@@ -357,17 +349,14 @@
     @push('theme')
         @if ($event->theme == 'red')
             <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">
-        @elseif($event->theme == 'blue')
+        @elseif ($event->theme == 'blue')
             <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/blue.css') }}" type="text/css">
-        @elseif($event->theme == 'green')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/green.css') }}"
-                type="text/css">
-        @elseif($event->theme == 'purple')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/purple.css') }}"
-                type="text/css">
-        @elseif($event->theme == 'orange')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/orange.css') }}"
-                type="text/css">
+        @elseif ($event->theme == 'green')
+            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/green.css') }}" type="text/css">
+        @elseif ($event->theme == 'purple')
+            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/purple.css') }}" type="text/css">
+        @elseif ($event->theme == 'orange')
+            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/orange.css') }}" type="text/css">
         @endif
     @endpush
 
@@ -377,10 +366,8 @@
     @push('footer')
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
         <script src="https://sdk.mercadopago.com/js/v2"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js">
-        </script>
-        <script type="text/javascript"
-            src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
         <script>
             $(document).ready(function() {
 

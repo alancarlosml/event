@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 use App\Models\Category;
@@ -52,12 +53,32 @@ class EventHomeController extends Controller
         $state_val = $request->state_val;
         $period_val = $request->period_val;
 
-        if($request->ajax()) {
-            $events = Event::getEvents($event_val, $category_val, $area_val, $state_val, $period_val);
-            $events_list = view('site.events_data', compact('events'))->render();
+        // Log para debug
+        Log::info('Parâmetros de busca:', [
+            'event_val' => $event_val,
+            'category_val' => $category_val,
+            'area_val' => $area_val,
+            'state_val' => $state_val,
+            'period_val' => $period_val
+        ]);
 
-            return response()->json(['succes' => true, 'events_list' => $events_list]);
+        if($request->ajax()) {
+            try {
+                $events = Event::getEvents($event_val, $category_val, $area_val, $state_val, $period_val);
+                
+                // Log para debug
+                Log::info('Quantidade de eventos encontrados: ' . $events->count());
+                
+                $events_list = view('site.events_data', compact('events'))->render();
+
+                return response()->json(['success' => true, 'events_list' => $events_list]);
+            } catch (\Exception $e) {
+                Log::error('Erro na busca de eventos: ' . $e->getMessage());
+                return response()->json(['success' => false, 'error' => 'Erro ao buscar eventos'], 500);
+            }
         }
+        
+        return response()->json(['success' => false, 'error' => 'Requisição inválida'], 400);
     }
 
     public function getCity(Request $request)

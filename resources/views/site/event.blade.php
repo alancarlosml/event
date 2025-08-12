@@ -1,45 +1,45 @@
 <x-event-layout>
     <div class="hero-image" id="home">
-        <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ $event->name }}" class="img-fluid">
+        <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ $event->name }}" class="img-fluid" loading="lazy">
     </div>
     <section id="information-bar">
         <div class="container">
             <div class="row inforation-wrapper">
                 <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
-                    <ul>
+                    <ul role="list" aria-label="Informações de localização do evento">
                         <li>
-                            <i class="fa-solid fa-location-dot"></i>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                         </li>
-                        <li><span><b>Local</b> {{ $event->place->name }},
-                                {{ $event->place->get_city()->name }}-{{ $event->place->get_city()->uf }}</span></li>
+                        <li><span><b>Local</b> {{ $event->place->name }}, {{ $event->place->get_city()->name }}-{{ $event->place->get_city()->uf }}</span></li>
                     </ul>
                 </div>
                 <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
-                    <ul>
+                    <ul role="list" aria-label="Data e hora do evento">
                         <li>
-                            <i class="fa-solid fa-calendar-check"></i>
+                            <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
                         </li>
                         <li><span><b>Data &amp; Hora</b>
-                                @if ($event->min_event_dates() != $event->max_event_dates())
-                                    De {{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m') }} a
-                                    {{ \Carbon\Carbon::parse($event->max_event_dates())->format('d/m') }}@else{{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m') }}
-                                @endif,
-                                {{ \Carbon\Carbon::parse($event->min_event_time())->format('H:i') }}h
-                            </span></li>
+                            @if ($event->min_event_dates() != $event->max_event_dates())
+                                De {{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m') }} a {{ \Carbon\Carbon::parse($event->max_event_dates())->format('d/m') }}
+                            @else
+                                {{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m') }}
+                            @endif ,
+                            {{ \Carbon\Carbon::parse($event->min_event_time())->format('H:i') }}h
+                        </span></li>
                     </ul>
                 </div>
                 <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
-                    <ul>
+                    <ul role="list" aria-label="Categoria do evento">
                         <li>
-                            <i class="fa-solid fa-list-check"></i>
+                            <i class="fa-solid fa-list-check" aria-hidden="true"></i>
                         </li>
                         <li><span><b>Categoria</b> {{ $event->area->category->description }}</span></li>
                     </ul>
                 </div>
                 <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
-                    <ul>
+                    <ul role="list" aria-label="Total de vagas do evento">
                         <li>
-                            <i class="fa-solid fa-id-badge"></i>
+                            <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
                         </li>
                         <li><span><b>Total de vagas</b> {{ $event->max_tickets }}</span></li>
                     </ul>
@@ -47,12 +47,12 @@
             </div>
             <div class="row mt-4">
                 <div class="mx-auto">
-                    {{-- {{dd($event->max_event_dates())}} --}}
                     @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                        <a href="#inscricoes" class="btn btn-common sub-btn">Inscreva-se</a>
+                        <a href="#inscricoes" class="btn btn-common sub-btn" aria-label="Inscrever-se no evento">Inscreva-se</a>
                     @else
-                        <button class="btn btn-common sub-btn disabled">Encerrado</button>
+                        <button class="btn btn-common sub-btn disabled" aria-label="Evento encerrado" disabled>Encerrado</button>
                     @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -85,7 +85,7 @@
             <div class="row intro-wrapper">
                 <div class="col-lg-8 col-sm-12">
                     @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                        <ul class="nav nav-tabs">
+                        <ul class="nav nav-tabs" role="tablist">
                             @foreach ($event->event_dates as $event_date)
                                 <li class="nav-item">
                                     <a class="nav-link event_date_nav @if ($total_dates == 1) active @endif" href="javascript:;" data-tab="{{ $event_date->id }}">{{ \Carbon\Carbon::parse($event_date->date)->format('d/m') }}</a>
@@ -95,7 +95,7 @@
                     @endif
                     <input type="hidden" name="event_date_result" id="event_date_result" value="@if ($total_dates == 1) {{ $date_min->id }} @endif">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-hover">
                             <tbody>
                                 <thead>
                                     <th>Lote</th>
@@ -149,7 +149,9 @@
                                                         <input class="inp-number" name="inp-number" type="number"
                                                                style="min-width: 1.5rem"
                                                                value="{{ old('inp-number', 0) }}" min="0"
-                                                               max="{{ $lote->limit_max }}" />
+                                                               max="{{ $lote->limit_max }}" 
+                                                               data-min="{{ $lote->limit_min }}" 
+                                                               data-max="{{ $lote->limit_max }}" />
                                                         {{-- <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"> --}}
                                                     </span>
                                                 @else
@@ -624,6 +626,41 @@
                 $("input[type=number].inp-number").change(function(e) {
                     // let lote_hash = $(this).parents('tr').attr('lote_hash');
                     // let lote_quantity = $(this).val();
+                    
+                    // Validação client-side antes de chamar setSubTotal
+                    let quantity = parseInt($(this).val()) || 0;
+                    let loteHash = $(this).parents('tr').attr('lote_hash');
+                    let limitMin = parseInt($(this).attr('data-min')) || 0;
+                    let limitMax = parseInt($(this).attr('data-max')) || 999;
+                    
+                    // Validar limites mínimos e máximos
+                    if (quantity > 0) {
+                        if (quantity < limitMin) {
+                            $('#modal_txt').text(`Quantidade mínima para este lote é ${limitMin} ingressos.`);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
+                            $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
+                            
+                            // Resetar valor para 0
+                            $(this).val(0);
+                            return;
+                        }
+                        
+                        if (quantity > limitMax) {
+                            $('#modal_txt').text(`Quantidade máxima para este lote é ${limitMax} ingressos.`);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
+                            $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
+                            
+                            // Ajustar valor para o máximo permitido
+                            $(this).val(limitMax);
+                        }
+                    }
+                    
                     setSubTotal();
                     // alert(lote_hash);
                     // $('.inp-number').each(function() {
@@ -668,10 +705,44 @@
                         }
 
                         if (response.error) {
-                            location.reload();
-                            // $('#subtotal').html(response.subtotal);
+                            // Mostrar erro para o usuário em vez de apenas recarregar
+                            $('#modal_txt').text(response.error);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                            $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
+                            
+                            // Resetar valores para 0 em caso de erro
+                            $("input[type=number].inp-number").each(function() {
+                                if ($(this).val() > 0) {
+                                    $(this).val(0);
+                                }
+                            });
+                            
+                            // Atualizar subtotal para 0
+                            $('#subtotal').html('R$ 0,00');
+                            $('#coupon_subtotal').html('R$ 0,00');
+                            $('#total').html('R$ 0,00');
                         }
                     },
+                    error: function(xhr, status, error) {
+                        // Tratar erros de rede ou servidor
+                        let errorMessage = 'Erro ao processar solicitação. Tente novamente.';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMessage = xhr.responseJSON.error;
+                        }
+                        
+                        $('#modal_txt').text(errorMessage);
+                        $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                        $('#cupomModal').modal('show');
+                        $('#cupomModal').css('padding-right', '0');
+                        $('body').css('padding-right', '0');
+                        $('.navbar').css('padding-right', '0');
+                        
+                        console.log('Erro na requisição:', xhr.responseText);
+                    }
                 });
             }
 

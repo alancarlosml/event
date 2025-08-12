@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 use App\Mail\EventAdminControllerMail;
@@ -256,10 +257,19 @@ class EventAdminController extends Controller
 
         } catch (Exception $e) {
             // Alguma coisa deu errado. Reverter as operações de banco de dados.
-    DB::rollback();
+            DB::rollback();
 
-            // Reenviar o erro para manipulação adicional (por exemplo, log, exibição para o usuário).
-            throw $e;
+            // Log do erro para debugging
+            Log::error('Erro ao criar evento: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'request_data' => $request->except(['password']),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Retornar erro específico para o usuário
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Erro ao criar evento: ' . $e->getMessage()]);
         }
 
         return redirect()->route('event_home.create.step.two');
@@ -270,29 +280,43 @@ class EventAdminController extends Controller
         if(empty($request->session()->get('event'))) {
 
             $validatedDataEvent = $request->validate([
-                'name' => 'required',
+                'name' => 'required|min:3|max:255',
                 'hash' => 'string',
-                'slug' => 'required|unique:events',
-                'subtitle' => 'string',
-                'description' => 'required',
-                // 'category' => 'required',
-                'area_id' => 'required',
-                'max_tickets' => 'required',
-                'contact' => 'required',
-                'paid' => 'required',
-                'mercadopago_link' => 'nullable',
-                'place_id_hidden' => 'nullable',
-                'admin_id' => 'required',
+                'slug' => 'required|min:2|max:100|unique:events',
+                'subtitle' => 'nullable|string|max:255',
+                'description' => 'required|min:10',
+                'category' => 'required|exists:categories,id',
+                'area_id' => 'required|exists:areas,id',
+                'max_tickets' => 'required|integer|min:1',
+                'contact' => 'required|email',
+                'paid' => 'required|in:0,1',
+                'mercadopago_link' => 'nullable|string',
+                'place_id_hidden' => 'nullable|exists:places,id',
+                'admin_id' => 'required|exists:participantes,id',
                 'status' => 'string',
             ], [
-                'name.required' => 'O nome do evento é obrigatório.',
-                'slug.required' => 'A URL do evento é obrigatório.',
-                'slug.unique' => 'A URL do evento já está em uso.',
-                'description.required' => 'A descrição do evento é obrigatória.',
-                'area_id.required' => 'A área do evento é obrigatória.',
-                'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
-                'contact.required' => 'O email de contato é obrigatório.',
-                'paid.required' => 'O evento deve ser pago ou gratuito.',
+                'name.required' => 'O nome do evento é obrigatório.',
+                'name.min' => 'O nome do evento deve ter pelo menos 3 caracteres.',
+                'name.max' => 'O nome do evento não pode ter mais de 255 caracteres.',
+                'slug.required' => 'A URL do evento é obrigatória.',
+                'slug.min' => 'A URL do evento deve ter pelo menos 2 caracteres.',
+                'slug.max' => 'A URL do evento não pode ter mais de 100 caracteres.',
+                'slug.unique' => 'A URL do evento já está em uso.',
+                'description.required' => 'A descrição do evento é obrigatória.',
+                'description.min' => 'A descrição do evento deve ter pelo menos 10 caracteres.',
+                'category.required' => 'A categoria do evento é obrigatória.',
+                'category.exists' => 'A categoria selecionada não existe.',
+                'area_id.required' => 'A área do evento é obrigatória.',
+                'area_id.exists' => 'A área selecionada não existe.',
+                'max_tickets.required' => 'O número máximo de ingressos é obrigatório.',
+                'max_tickets.integer' => 'O número máximo de ingressos deve ser um número inteiro.',
+                'max_tickets.min' => 'O número máximo de ingressos deve ser pelo menos 1.',
+                'contact.required' => 'O email de contato é obrigatório.',
+                'contact.email' => 'O email de contato deve ser um email válido.',
+                'paid.required' => 'O tipo de pagamento é obrigatório.',
+                'paid.in' => 'O tipo de pagamento deve ser pago ou gratuito.',
+                'admin_id.required' => 'O organizador é obrigatório.',
+                'admin_id.exists' => 'O organizador selecionado não existe.',
             ]);
 
             // dd($validatedDataEvent);
@@ -844,6 +868,7 @@ class EventAdminController extends Controller
                 'limit_max.required' => 'Limite máximo maior ou igual ao limíte mínimo é obrigatório',
                 'datetime_begin.required' => 'Data de inicio é obrigatória',
                 'datetime_end.required' => 'Data de fim é obrigatória',
+                'form_pagamento.required' => 'Forma de pagamento é obrigatória',
                 'visibility.required' => 'Visibilidade do lote é obrigatória',
             ]);
         }

@@ -49,11 +49,12 @@
                         <div class="card-body">
                             <h4>Sobre o evento</h4>
                             <div class="form-group">
-                                <label for="name">Nome do evento*</label>
+                                <label for="name">Nome do evento <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control col-12" id="name" name="name" placeholder="Nome do evento" value="{{$event->name ?? old('name') }}" required>
+                                <div class="invalid-feedback" id="name-error"></div>
                             </div>
                             <div class="form-group">
-                                <label for="slug">URL do evento*</label>
+                                <label for="slug">URL do evento <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
                                       <span class="input-group-text" id="basic-addon3">https://www.ticketdz6.com.br/</span>
@@ -61,6 +62,7 @@
                                     <input type="text" class="form-control col-lg-12 col-sm-12" id="slug" name="slug" placeholder="URL do evento" aria-describedby="basic-addon3" value="{{ $event->slug ?? old('slug') }}" required>
                                   </div>
                                 <small id="slugHelp" class="form-text text-danger d-none">Essa URL já está em uso, por favor, selecione outra.</small>
+                                <div class="invalid-feedback" id="slug-error"></div>
                             </div>
                             <div class="form-group">
                                 <label for="subtitle">Subtítulo</label>
@@ -492,10 +494,64 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
         <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.7/jquery.inputmask.min.js" integrity="sha512-jTgBq4+dMYh73dquskmUFEgMY5mptcbqSw2rmhOZZSJjZbD2wMt0H5nhqWtleVkyBEjmzid5nyERPSNBafG4GQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         <script>
         $(document).ready(function() {
+
+            // Validação do formulário antes do envio
+            $('form').on('submit', function(e) {
+                let isValid = true;
+                const requiredFields = $(this).find('[required]');
+                
+                requiredFields.each(function() {
+                    const $field = $(this);
+                    const value = $field.val().trim();
+                    
+                    if (!value) {
+                        $field.addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $field.removeClass('is-invalid');
+                    }
+                });
+                
+                // Validação específica para email
+                const emailField = $('#contact');
+                const emailValue = emailField.val().trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (emailValue && !emailRegex.test(emailValue)) {
+                    emailField.addClass('is-invalid');
+                    $('#contact-error').text('Email inválido');
+                    isValid = false;
+                }
+                
+                // Validação para datas
+                const dateFields = $('input[name="date[]"]');
+                dateFields.each(function() {
+                    const dateValue = $(this).val();
+                    if (dateValue) {
+                        const selectedDate = new Date(dateValue);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (selectedDate < today) {
+                            $(this).addClass('is-invalid');
+                            isValid = false;
+                        }
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    showToast('Por favor, corrija os erros no formulário.', 'error');
+                    return false;
+                }
+                
+                // Mostrar loading
+                $('button[type="submit"]').prop('disabled', true).text('Salvando...');
+            });
 
             $('#description').summernote({
                 placeholder: 'Descreva em detalhes o evento',
@@ -515,10 +571,34 @@
                 ]
             });
 
-            $('#name').keyup(function(e) {
-                if ($(this).val().length > 3) {
+            // Debounce function para evitar muitas requisições
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Validação melhorada do nome
+            $('#name').on('blur keyup', debounce(function(e) {
+                const name = $(this).val().trim();
+                const $nameField = $(this);
+                const $nameError = $('#name-error');
+                
+                if (name.length < 3) {
+                    $nameField.addClass('is-invalid');
+                    $nameError.text('Nome deve ter pelo menos 3 caracteres');
+                    return;
+                }
+                
+                if (name.length > 3) {
                     $.get('{{ route('event_home.check_slug') }}', 
-                        { 'title': $(this).val() }, 
+                        { 'title': name }, 
                         function( data ) {
                             $('#slug').val(data.slug);
                             if(data.slug_exists == '1'){
@@ -537,20 +617,36 @@
                         showToast('Erro ao verificar slug. Tente novamente.', 'error');
                     });
                 }
-            });
+                
+                $nameField.removeClass('is-invalid');
+                $nameError.text('');
+            }, 500));
 
-            $('#slug').keyup(function(e) {
-                if ($(this).val().length > 2) {
+            // Validação melhorada do slug
+            $('#slug').on('blur keyup', debounce(function(e) {
+                const slug = $(this).val().trim();
+                const $slugField = $(this);
+                const $slugError = $('#slug-error');
+                
+                if (slug.length < 2) {
+                    $slugField.addClass('is-invalid');
+                    $slugError.text('URL deve ter pelo menos 2 caracteres');
+                    return;
+                }
+                
+                if (slug.length > 2) {
                     $.get('{{ route('event_home.create_slug') }}', 
-                        { 'title': $(this).val() }, 
+                        { 'title': slug }, 
                         function( data ) {
                             if(data.slug_exists == '1'){
-                                $('#slug').removeClass('is-valid input-success');
-                                $('#slug').addClass('is-invalid input-error');
+                                $slugField.removeClass('is-valid input-success');
+                                $slugField.addClass('is-invalid input-error');
+                                $slugError.text('Esta URL já está em uso');
                                 showToast('Este slug já está em uso. Escolha outro.', 'warning');
                             }else{
-                                $('#slug').removeClass('is-invalid input-error');
-                                $('#slug').addClass('is-valid input-success');
+                                $slugField.removeClass('is-invalid input-error');
+                                $slugField.addClass('is-valid input-success');
+                                $slugError.text('');
                                 showToast('Slug disponível!', 'success', null, 2000);
                             }
                         }
@@ -558,7 +654,7 @@
                         showToast('Erro ao verificar slug. Tente novamente.', 'error');
                     });
                 }
-            });
+            }, 500));
 
             $('#category').on('change', function() {
                 var category_id = this.value;

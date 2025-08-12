@@ -1,16 +1,16 @@
 <x-site-layout>
     <section id="hero" class="hero owl-carousel">
         <div class="hero_img">
-            <img src="{{ asset('site/home1.jpg') }}" alt="">
+            <img src="{{ asset('site/home1.jpg') }}" alt="" loading="lazy">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home2.jpg') }}" alt="">
+            <img src="{{ asset('site/home2.jpg') }}" alt="" loading="lazy">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home3.jpg') }}" alt="">
+            <img src="{{ asset('site/home3.jpg') }}" alt="" loading="lazy">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home4.jpg') }}" alt="">
+            <img src="{{ asset('site/home4.jpg') }}" alt="" loading="lazy">
         </div>
     </section><!-- End Hero -->
 
@@ -729,35 +729,114 @@
     @endpush
 
     @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
-              crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     @endpush
 
     @push('footer')
         <script src="{{ asset('assets/vendor/owlcarousel/owl.carousel.min.js') }}"></script>
         <script type="text/javascript">
             $(document).ready(function() {
+                // Configuração do carrossel com melhor performance
                 $('.owl-carousel').owlCarousel({
                     loop: true,
                     autoplay: true,
-                    autoplayTimeout: 3000,
+                    autoplayTimeout: 5000,
+                    autoplayHoverPause: true,
                     animateOut: 'fadeOut',
                     margin: 0,
                     nav: false,
-                    responsive: {
-                        0: {
-                            items: 1
-                        },
-                        600: {
-                            items: 1
-                        },
-                        1000: {
-                            items: 1
-                        }
+                    dots: true,
+                    responsive: { // Melhor responsividade
+                        0: { items: 1 },
+                        768: { items: 1 }
                     }
-                })
+                });
+                
+                // Animações suaves para scroll
+                $('a[href^="#"]').on('click', function(event) {
+                    var target = $(this.getAttribute('href'));
+                    if (target.length) {
+                        event.preventDefault();
+                        $('html, body').stop().animate({
+                            scrollTop: target.offset().top - 80
+                        }, 1000);
+                    }
+                });
+                
+                // Efeito hover nos cards de eventos
+                $('.single-blog-item').hover(
+                    function() {
+                        $(this).addClass('shadow-lg').css('transform', 'translateY(-5px)');
+                    },
+                    function() {
+                        $(this).removeClass('shadow-lg').css('transform', 'translateY(0)');
+                    }
+                );
+                
+                // Feedback visual para botões
+                $('.btn-get-started').hover(
+                    function() {
+                        $(this).addClass('pulse-animation');
+                    },
+                    function() {
+                        $(this).removeClass('pulse-animation');
+                    }
+                );
+                
+                // Lazy loading para imagens
+                if ('IntersectionObserver' in window) {
+                    const imageObserver = new IntersectionObserver((entries, observer) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                img.src = img.dataset.src;
+                                img.classList.remove('lazy');
+                                imageObserver.unobserve(img);
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('img[data-src]').forEach(img => {
+                        imageObserver.observe(img);
+                    });
+                }
             });
         </script>
+        
+        <style>
+            .pulse-animation {
+                animation: pulse 0.6s ease-in-out;
+            }
+            
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            
+            .single-blog-item {
+                transition: all 0.3s ease;
+            }
+            
+            .lazy {
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            
+            .lazy.loaded {
+                opacity: 1;
+            }
+            
+            @media (max-width: 768px) {
+                .hero h1 {
+                    font-size: 2rem;
+                }
+                
+                .hero h2 {
+                    font-size: 1.2rem;
+                }
+            }
+        </style>
     @endpush
 
 </x-site-layout>
