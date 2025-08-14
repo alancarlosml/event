@@ -728,10 +728,6 @@
         <link rel="stylesheet" href="{{ asset('assets/vendor/owlcarousel/owl.theme.default.min.css') }}">
     @endpush
 
-    @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    @endpush
-
     @push('footer')
         <script src="{{ asset('assets/vendor/owlcarousel/owl.carousel.min.js') }}"></script>
         <script type="text/javascript">

@@ -7,6 +7,9 @@ a:hover, a:focus{
 .btn-common{
     background-color: #ff4a67;
 }
+.btn-common:hover{
+  background-color: #fa1f44;
+}
 .slicknav_btn{
   background-color:#ff4a67; 
 }

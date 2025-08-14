@@ -10,6 +10,9 @@ a:hover, a:focus{
 .btn-common{
     background-color: #1cb9c8;
 }
+.btn-common:hover{
+    background-color: #0ccee0;
+}
 .section-title:before,
 .section-title:after{
   color: #1cb9c8;

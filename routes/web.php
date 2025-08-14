@@ -202,8 +202,10 @@ Route::get('admin/participantes/create', 'App\Http\Controllers\ParticipanteContr
 Route::post('admin/participantes/store', 'App\Http\Controllers\ParticipanteController@store')->middleware(['auth:web'])->name('participante.store');
 Route::get('admin/participantes/edit/{id}', 'App\Http\Controllers\ParticipanteController@edit')->middleware(['auth:web'])->name('participante.edit');
 Route::post('admin/participantes/update/{id}', 'App\Http\Controllers\ParticipanteController@update')->middleware(['auth:web'])->name('participante.update');
-Route::delete('admin/participantes/destroy/{id}', 'App\Http\Controllers\ParticipanteController@destroy')->middleware(['auth:web'])->name('participante.destroy');
+Route::get('admin/participantes/destroy/{id}', 'App\Http\Controllers\ParticipanteController@destroy')->middleware(['auth:web'])->name('participante.destroy');
 Route::get('admin/participantes/{id}/eventos', 'App\Http\Controllers\ParticipanteController@listEvents')->middleware(['auth:web'])->name('participante.list_events');
+
+Route::post('admin/participantes/{id}/nova-cobranca', 'App\Http\Controllers\MercadoPagoController@novaCobranca')->middleware(['auth:web'])->name('participante.nova_cobranca');
 
 Route::get('admin/events/{id}/questions', 'App\Http\Controllers\EventController@questions')->middleware(['auth:web'])->name('event.questions');
 Route::post('admin/events/{id}/questions/create', 'App\Http\Controllers\EventController@create_questions')->middleware(['auth:web'])->name('event.questions.create');

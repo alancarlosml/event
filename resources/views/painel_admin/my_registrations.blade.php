@@ -60,17 +60,17 @@
                                     <td>{{ \Carbon\Carbon::parse($order->event_date)->format('d/m/Y') }}</td>
                                     <td>
                                         @if(isset($order->gatway_status)) 
-                                            @if($order->gatway_status == 1) <span class="badge badge-success"> Confirmado </span>
-                                            @elseif($order->gatway_status == 2) <span class="badge badge-info"> Pendente </span>
-                                            @elseif($order->gatway_status == 3) <span class="badge badge-danger">Cancelado </span>
+                                            @if($order->gatway_status == 1) <span class="badge bg-success"> Confirmado </span>
+                                            @elseif($order->gatway_status == 2) <span class="badge bg-info"> Pendente </span>
+                                            @elseif($order->gatway_status == 3) <span class="badge bg-danger">Cancelado </span>
                                             @endif 
-                                            @else <span class="badge badge-warning"> Não processado </span>
+                                            @else <span class="badge bg-warning"> Não processado </span>
                                         @endif
                                     </td>
                                     <td>
                                         <div class="d-flex">
                                             <div class="btn-group" role="group">
-                                                <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm mr-1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm mr-1 dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fa-solid fa-gear"></i> Configurações
                                                 </button>
                                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
@@ -98,14 +98,10 @@
     
       </main><!-- End #main -->
 
-      @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-      @endpush
-
       @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-        <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
+        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
       @endpush
@@ -113,7 +109,7 @@
       @push('footer')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-        <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
+        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>

@@ -370,7 +370,7 @@ class MercadoPagoController extends Controller
         ];
         return view('feedback', $data);
 
-    }
+}
 
     public function pending (Request $r)
     {
@@ -381,7 +381,111 @@ class MercadoPagoController extends Controller
             'subtitle' => 'Confira seu e-mail para mais informações.',
         ];
         return view('feedback', $data);
-
     }
 
+    /**
+     * Generate a new boleto for a participant and send it via email
+     *
+     * @param int $id Participant ID
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function novaCobranca($id, Request $request)
+    {
+        try {
+            // Find the participant
+            $participant = \App\Models\Participante::findOrFail($id);
+            
+            // Find the pending order for this participant
+            $order = \App\Models\Order::where('participante_id', $participant->id)
+                ->where('status', 2) // Pending status
+                ->firstOrFail();
+            
+            // Find the event
+            $event = \App\Models\Event::findOrFail($order->event_id);
+            
+            // Find the event creator's Mercado Pago account
+            $mpAccount = \App\Models\MpAccount::where('participante_id', $event->user_id)->firstOrFail();
+            
+            // Create a new payment preference
+            $client = new Client();
+            
+            // Get the order items
+            $orderItems = \App\Models\OrderItem::where('order_id', $order->id)->get();
+            $items = [];
+            $total = 0;
+            
+            foreach ($orderItems as $item) {
+                $items[] = [
+                    'title' => $event->name,
+                    'quantity' => $item->quantity,
+                    'currency_id' => 'BRL',
+                    'unit_price' => $item->price
+                ];
+                $total += $item->price * $item->quantity;
+            }
+            
+            // Get platform fee from configuration
+            $config = \App\Models\Configuration::first();
+            $fee = $event->config_tax ?? $config->tax;
+            
+            // Create payment preference data
+            $data = [
+                'notification_url' => env('APP_URL') . "/webhooks/mercado-pago/notification",
+                'external_reference' => $order->id,
+                'items' => $items,
+                'marketplace' => env('MERCADO_PAGO_ACCESS_TOKEN'),
+                'marketplace_fee' => $fee,
+                'back_urls' => [
+                    'success' => env('APP_URL') . "/{$event->slug}/obrigado",
+                    'failure' => env('APP_URL') . "/{$event->slug}/erro",
+                    'pending' => env('APP_URL') . "/{$event->slug}/pendente"
+                ],
+                'payment_methods' => [
+                    'excluded_payment_methods' => [
+                        ['id' => 'credit_card'],
+                        ['id' => 'debit_card'],
+                        ['id' => 'pix']
+                    ],
+                    'installments' => 1
+                ]
+            ];
+            
+            // Create the payment preference
+            $response = $client->post('https://api.mercadopago.com/checkout/preferences', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $mpAccount->access_token,
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => $data
+            ]);
+            
+            $body = json_decode($response->getBody(), true);
+            
+            if (!isset($body['init_point'])) {
+                throw new \Exception('Failed to generate boleto link');
+            }
+            
+            // Update order with new payment link
+            $order->update([
+                'gatway_hash' => $body['id'],
+                'gatway_status' => 'pending',
+                'updated_at' => now()
+            ]);
+            
+            // Send email with boleto link
+            Mail::to($participant->email)->send(new \App\Mail\BoletoPendingMail($order, $body['init_point']));
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Nova cobrança gerada e enviada por e-mail com sucesso!'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error generating new boleto: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao gerar nova cobrança: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

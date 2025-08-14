@@ -7,8 +7,11 @@ a:hover, a:focus{
 .btn-common{
     background-color: #8546c9;
 }
+.btn-common:hover{
+  background-color: #7c31cd;
+}
 .slicknav_btn{
-  background-color:#8546c9; 
+  background-color:#8129de; 
 }
 .section-title:before,
 .section-title:after{

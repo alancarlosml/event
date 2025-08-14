@@ -46,10 +46,6 @@
         </div>
     </section>
 
-    @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    @endpush
-
     @push('theme')
         @if ($event->theme == 'red')
             <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">

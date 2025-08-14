@@ -15,7 +15,7 @@
     
         <section class="inner-page" id="create-event-form">
             <div class="container">
-                <div class="form-group pl-3 pr-3">
+                <div class="mb-3 ps-3 pe-3">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success">
                             <strong>{{ $message }}</strong>
@@ -29,9 +29,7 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                 </div>
@@ -64,14 +62,28 @@
                                     {{-- <td>@if($event->date_event_min == $event->date_event_max){{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} @else De {{ \Carbon\Carbon::parse($event->date_event_min)->format('d/m/Y') }} <br/> a {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }} @endif</td> --}}
                                     <td>{{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y') }}</td>
                                     <td>
-                                        @if($event->place_name == "" || $event->participante_name == "" || $event->event_date == "" || $event->lote_name == "")
-                                            {{-- <span class="badge badge-danger">Incompleto</span> --}}
-                                            <a href="#" class="badge badge-danger" data-toggle="popover" data-trigger="hover" title="O que falta?" data-content="@if ($event->place_name == "") - Cadastrar local do evento <br> @endif @if ($event->event_date == "") - Cadastrar data do evento <br> @endif @if ($event->lote_name == "") - Cadastrar lotes @endif">Incompleto</a>
+                                        @php
+                                            $missing = [];
+                                            if(empty($event->place_name)) $missing[] = 'Cadastrar local do evento';
+                                            if(empty($event->event_date)) $missing[] = 'Cadastrar data do evento';
+                                            if(empty($event->lote_name)) $missing[] = 'Cadastrar lotes';
+                                            $popoverContent = implode('<br>', array_map(fn($item) => "- {$item}", $missing));
+                                        @endphp
+                                        @if(!empty($missing))
+                                            <a href="javascript:void(0)" 
+                                               class="badge bg-danger" 
+                                               data-bs-toggle="popover" 
+                                               data-bs-trigger="hover" 
+                                               data-bs-html="true"
+                                               data-bs-title="O que falta?" 
+                                               data-bs-content="{{ $popoverContent }}">
+                                                Incompleto
+                                            </a>
                                         @else
                                             @if($event->status == 1) 
-                                                <span class="badge badge-success">Ativo</span> 
+                                                <span class="badge bg-success">Ativo</span> 
                                             @else
-                                                <span class="badge badge-warning">Não ativo</span> 
+                                                <span class="badge bg-warning">Não ativo</span> 
                                             @endif
                                         @endif
                                     </td>
@@ -90,7 +102,7 @@
                                                 Cupons
                                             </a> --}}
                                             <div class="btn-group" role="group">
-                                                <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm mr-1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm me-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="fa-solid fa-gear"></i> Ações
                                                 </button>
                                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
@@ -144,16 +156,14 @@
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de evento</h5>
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                    </button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                                                 </div>
                                                 <div class="modal-body">
                                                     Deseja realmente remover esse evento?
                                                 </div>
                                                 <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
                                                     <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$event->hash}}" onclick="removeSucc('{{$event->hash}}')">Sim</button>
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -168,10 +178,6 @@
     
       </main><!-- End #main -->
 
-      @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-      @endpush
-
       @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
@@ -181,6 +187,7 @@
       @endpush
 
       @push('footer')
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
         <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
@@ -192,7 +199,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 
         <script>
 
@@ -228,9 +234,45 @@
         }
 
         $(document).ready(function() {
-
-            $('[data-toggle="popover"]').popover({
-                html:true
+            // Inicializa os popovers manualmente
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.forEach(function (popoverTriggerEl) {
+                var popover = new bootstrap.Popover(popoverTriggerEl, {
+                    html: true,
+                    trigger: 'hover',
+                    container: 'body',
+                    sanitize: false
+                });
+                
+                // Força a exibição do popover no hover
+                popoverTriggerEl.addEventListener('mouseenter', function() {
+                    popover.show();
+                });
+                
+                popoverTriggerEl.addEventListener('mouseleave', function() {
+                    setTimeout(function() {
+                        if (!$(popover._element).is(':hover') && !$(popover._tip).is(':hover')) {
+                            popover.hide();
+                        }
+                    }, 100);
+                });
+                
+                // Evita que o popover feche ao mover o mouse para ele
+                $(document).on('mouseenter', '.popover', function() {
+                    $('[data-bs-toggle="popover"]').each(function() {
+                        var popover = bootstrap.Popover.getInstance(this);
+                        if (popover) {
+                            clearTimeout($(this).data('bs.popover')._timeout);
+                        }
+                    });
+                }).on('mouseleave', '.popover', function() {
+                    $('[data-bs-toggle="popover"]').each(function() {
+                        var popover = bootstrap.Popover.getInstance(this);
+                        if (popover) {
+                            popover.hide();
+                        }
+                    });
+                });
             });
 
             $('#list_events').DataTable({

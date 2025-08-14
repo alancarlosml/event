@@ -20,7 +20,7 @@
                                     <div class="col-12">
                                         <div class="row gy-2"> <!-- gy-2 para mobile stack -->
                                             <!-- Selects com ARIA labels -->
-                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
                                                 <label for="category"><b>Categoria</b></label>
                                                 <select name="category" id="category" class="form-select" aria-label="Selecione categoria">
                                                     <option value="0">Selecione uma opção</option>
@@ -30,13 +30,13 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
                                                 <label><b>Área</b></label>
                                                 <select name="area_id" id="area_id" class="form-select" placeholder="Área">
                                                     <option value="0">Selecione uma categoria</option>
                                                 </select>
                                             </div>
-                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
                                                 <label><b>Local</b></label>
                                                 <select name="state" id="state" class="form-select" placeholder="Estado">
                                                     <option value="0">Selecione uma opção</option>
@@ -45,7 +45,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="form-group col-lg-3 col-sm-12 text-left">
+                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
                                                 <label><b>Período</b></label>
                                                 <select name="period" id="period" class="form-select" placeholder="Período">
                                                     <option value="0">Selecione uma opção</option>
@@ -70,7 +70,7 @@
                                         </div>
                                         <div class="row mt-3">
                                             <div class="col-12">
-                                                <div class="form-group">
+                                                <div class="mb-3">
                                                     <div class="input-group">
                                                         <input type="search" class="form-control" id="event_name_search" placeholder="Nome do evento" aria-label="Buscar por nome do evento">
                                                     </div>
@@ -93,21 +93,12 @@
                     <p class="mt-2">Buscando eventos...</p>
                 </div>
                 <div class="container d-flex justify-content-center">
-                    {{ $events->links('pagination::bootstrap-4') }}
+                    {{ $events->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </section>
 
     </main><!-- End #main -->
-
-    @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
-              crossorigin="anonymous" referrerpolicy="no-referrer" />
-    @endpush
-
-    @push('head')
-    
-    @endpush
 
     @push('footer')
         <script>

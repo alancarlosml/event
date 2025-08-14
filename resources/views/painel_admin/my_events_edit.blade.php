@@ -357,52 +357,75 @@
                                             }    
                                             
                                         @endphp
-                                        @if($id<2)
-                                            <div class="form-group">
-                                                <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
-                                                <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
+                                        <div class="row mb-3">
+                                            <div class="col-9">
+                                                <label for="new_field_{{$id}}" class="form-label">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
+                                                <input type="text" class="form-control new_field" id="new_field_{{$id}}" name="new_field[]" value="{{$var_options}}" readonly>
                                                 <input type="hidden" name="new_field_id[]" value="{{$question->id}}"/>
                                             </div>
-                                        @else
-                                            <div class="row">
-                                                <div class="form-group col-9">
-                                                    <label for="new_field">Campo {{$id+1}}@if($question->required == 1)* @endif</label>
-                                                    <input type="text" class="form-control new_field" name="new_field[]" value="{{$var_options}}" readonly>
-                                                    <input type="hidden" name="new_field_id[]" value="{{$question->id}}"/>
-                                                </div>
-                                                <div class="form-group col-3">
-                                                    <a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px;" href="javascript:;">
-                                                        <i class="fa-solid fa-remove"></i> Remover
-                                                    </a>
-                                                    <a class="btn btn-secondary btn-sm mr-1 up" href="javascript:;" style="margin-top: 35px;" >
+                                            <div class="col-3 d-flex align-items-end">
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-danger btn-sm btn-remove-field" title="Remover">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                    @if(!$loop->first)
+                                                    <button type="button" class="btn btn-secondary btn-sm up" title="Mover para cima">
                                                         <i class="fas fa-arrow-up"></i>
-                                                    </a>
-                                                    <a class="btn btn-secondary btn-sm mr-1 down" href="javascript:;" style="margin-top: 35px;" >
+                                                    </button>
+                                                    @endif
+                                                    @if(!$loop->last)
+                                                    <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
                                                         <i class="fas fa-arrow-down"></i>
-                                                    </a>
+                                                    </button>
+                                                    @endif
                                                 </div>
                                             </div>
-                                        @endif
+                                        </div>
                                     @endforeach
                                 @else
-                                    <div class="form-group">
-                                        <label for="name_new_field">Campo 1*</label>
-                                        <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
-                                        <input type="hidden" name="new_field_id[]" value=""/>
+                                    <div class="row mb-3">
+                                        <div class="col-9">
+                                            <label for="name_new_field" class="form-label">Campo 1*</label>
+                                            <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
+                                            <input type="hidden" name="new_field_id[]" value=""/>
+                                        </div>
+                                        <div class="col-3 d-flex align-items-end">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-danger btn-sm btn-remove-field" title="Remover">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary btn-sm up" title="Mover para cima" disabled>
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    {{-- <div class="form-group">
-                                        <label for="name_new_field">Campo 2*</label>
-                                        <input type="text" class="form-control new_field" name="new_field[]" id="cpf_new_field" value="CPF; (Tipo: CPF); Obrigatório; Único" readonly>
-                                    </div> --}}
-                                    <div class="form-group">
-                                        <label for="email_new_field">Campo 2*</label>
-                                        <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
-                                        <input type="hidden" name="new_field_id[]" value=""/>
+                                    <div class="row mb-3">
+                                        <div class="col-9">
+                                            <label for="email_new_field" class="form-label">Campo 2*</label>
+                                            <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
+                                            <input type="hidden" name="new_field_id[]" value=""/>
+                                        </div>
+                                        <div class="col-3 d-flex align-items-end">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-danger btn-sm btn-remove-field" title="Remover">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary btn-sm up" title="Mover para cima">
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo" disabled>
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
                             </div>
                         </div>
-                        
                         <hr>
 
                         <div class="card-body">
@@ -446,21 +469,17 @@
     
       </main><!-- End #main -->
 
-      @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-      @endpush
-
       @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
-        <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
+        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
           
       @endpush
 
       @push('footer')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
-        <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
+        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         <script>
@@ -481,161 +500,214 @@
             });
 
             $('#name').keyup(function(e) {
-                $.get('{{ route('event_home.check_slug') }}', 
-                    { 'title': $(this).val() }, 
-                    function( data ) {
-                        $('#slug').val(data.slug);
-                        if(data.slug_exists == '1'){
-                            $('#slug').removeClass('is-valid');
-                            $('#slug').addClass('is-invalid');
-                            $('#slugHelp').removeClass('d-none');
-                        }else{
-                            $('#slug').removeClass('is-invalid');
-                            $('#slug').addClass('is-valid');
-                            $('#slugHelp').addClass('d-none');
-                        }
+                try {
+                    const title = $(this).val();
+                    if (title !== undefined && title !== null) {
+                        $.get('{{ route('event_home.check_slug') }}', 
+                            { 'title': title }, 
+                            function( data ) {
+                                $('#slug').val(data.slug);
+                                if(data.slug_exists == '1'){
+                                    $('#slug').removeClass('is-valid');
+                                    $('#slug').addClass('is-invalid');
+                                    $('#slugHelp').removeClass('d-none');
+                                }else{
+                                    $('#slug').removeClass('is-invalid');
+                                    $('#slug').addClass('is-valid');
+                                    $('#slugHelp').addClass('d-none');
+                                }
+                            }
+                        ).fail(function() {
+                            console.error('Erro ao verificar slug');
+                        });
                     }
-                );
+                } catch (error) {
+                    console.error('Erro ao processar validação do nome:', error);
+                }
             });
 
             $('#slug').keyup(function(e) {
-                $.get('{{ route('event_home.create_slug') }}', 
-                    { 'title': $(this).val() }, 
-                    function( data ) {
-                        if(data.slug_exists == '1'){
-                            $('#slug').removeClass('is-valid');
-                            $('#slug').addClass('is-invalid');
-                        }else{
-                            $('#slug').removeClass('is-invalid');
-                            $('#slug').addClass('is-valid');
-                        }
+                try {
+                    const title = $(this).val();
+                    if (title !== undefined && title !== null) {
+                        $.get('{{ route('event_home.create_slug') }}', 
+                            { 'title': title }, 
+                            function( data ) {
+                                if(data.slug_exists == '1'){
+                                    $('#slug').removeClass('is-valid');
+                                    $('#slug').addClass('is-invalid');
+                                }else{
+                                    $('#slug').removeClass('is-invalid');
+                                    $('#slug').addClass('is-valid');
+                                }
+                            }
+                        ).fail(function() {
+                            console.error('Erro ao verificar slug');
+                        });
                     }
-                );
+                } catch (error) {
+                    console.error('Erro ao processar validação do slug:', error);
+                }
             });
 
             $('input[name="paid"]').on('change', function() {
-                if ($(this).val() == 0) {
-                    $('#form_mercadopago').removeClass('d-none');
-                } else {
-                    $('#form_mercadopago').addClass('d-none');
+                try {
+                    const value = $(this).val();
+                    if (value !== undefined && value !== null) {
+                        if (value == 0) {
+                            $('#form_mercadopago').removeClass('d-none');
+                        } else {
+                            $('#form_mercadopago').addClass('d-none');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erro ao processar mudança de pagamento:', error);
                 }
             });
 
             $('#category').on('change', function() {
-                var category_id = this.value;
-                $("#area_id").html('');
-                $.ajax({
-                    url:"{{route('event_home.get_areas_by_category')}}",
-                    type: "POST",
-                    data: {
-                        category_id: category_id,
-                        _token: '{{csrf_token()}}' 
-                    },
-                    dataType : 'json',
-                    success: function(result){
-                        $('#area_id').html('<option value="">Selecione</option>'); 
-                        $.each(result.areas,function(key,value){
-                            $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
+                try {
+                    const category_id = this.value;
+                    if (category_id !== undefined && category_id !== null) {
+                        $("#area_id").html('');
+                        $.ajax({
+                            url:"{{route('event_home.get_areas_by_category')}}",
+                            type: "POST",
+                            data: {
+                                category_id: category_id,
+                                _token: '{{csrf_token()}}' 
+                            },
+                            dataType : 'json',
+                            success: function(result){
+                                $('#area_id').html('<option value="">Selecione</option>'); 
+                                $.each(result.areas,function(key,value){
+                                    $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Erro ao carregar áreas:', error);
+                            }
                         });
                     }
-                });
+                } catch (error) {
+                    console.error('Erro ao processar mudança de categoria:', error);
+                }
             });
 
-            var category_id = $("#category").val();
-                $("#area_id").html('');
-                $.ajax({
-                    url:"{{route('event_home.get_areas_by_category')}}",
-                    type: "POST",
-                    data: {
-                        category_id: category_id,
-                        _token: '{{csrf_token()}}' 
-                    },
-                    dataType : 'json',
-                    success: function(result){
-                        $('#area_id').html('<option value="">Selecione</option>'); 
-                        area_id = $('#area_id_hidden').val();
-                        $.each(result.areas,function(key,value){
-                            $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
-                        });
-                        $('#area_id option[value='+area_id+']').attr('selected','selected');
-                    }
-                });
+            // Verificar se o elemento category existe antes de tentar acessar seu valor
+            if ($("#category").length > 0) {
+                const category_id = $("#category").val();
+                if (category_id !== undefined && category_id !== null) {
+                    $("#area_id").html('');
+                    $.ajax({
+                        url:"{{route('event_home.get_areas_by_category')}}",
+                        type: "POST",
+                        data: {
+                            category_id: category_id,
+                            _token: '{{csrf_token()}}' 
+                        },
+                        dataType : 'json',
+                        success: function(result){
+                            $('#area_id').html('<option value="">Selecione</option>'); 
+                            const area_id = $('#area_id_hidden').val();
+                            $.each(result.areas,function(key,value){
+                                $("#area_id").append('<option value="'+value.id+'">'+value.name+'</option>');
+                            });
+                            if (area_id) {
+                                $('#area_id option[value='+area_id+']').attr('selected','selected');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Erro ao carregar áreas:', error);
+                        }
+                    });
+                }
+            }
 
             $('#cmd').click(function(){
-                $('#card-date').append('<div class="form-row">' + 
-                        '<div class="form-group col-md-3">' +
-                            '<label for="number">Data</label>'+
-                            '<div class="input-group date" data-target-input="nearest">'+
-                                '<input class="form-control datetimepicker-input datetimepicker_day" autocomplete="off" name="date[]" value=""/>'+
-                                '<div class="input-group-append" data-toggle="datetimepicker">'+
-                                    '<div class="input-group-text"><i class="fa fa-calendar"></i></div>'+
+                try {
+                    $('#card-date').append('<div class="form-row">' + 
+                            '<div class="form-group col-md-3">' +
+                                '<label for="number">Data</label>'+
+                                '<div class="input-group date" data-target-input="nearest">'+
+                                    '<input class="form-control datetimepicker-input datetimepicker_day" autocomplete="off" name="date[]" value=""/>'+
+                                    '<div class="input-group-append" data-toggle="datetimepicker">'+
+                                        '<div class="input-group-text"><i class="fa fa-calendar"></i></div>'+
+                                    '</div>'+
                                 '</div>'+
                             '</div>'+
-                        '</div>'+
-                        '<div class="form-group col-md-2">'+
-                            '<label for="number">Hora início</label>'+
-                            '<div class="input-group date" data-target-input="nearest">'+
-                                '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" autocomplete="off" name="time_begin[]" value=""/>'+
-                                '<div class="input-group-append" data-toggle="datetimepicker">'+
-                                    '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
+                            '<div class="form-group col-md-2">'+
+                                '<label for="number">Hora início</label>'+
+                                '<div class="input-group date" data-target-input="nearest">'+
+                                    '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" autocomplete="off" name="time_begin[]" value=""/>'+
+                                    '<div class="input-group-append" data-toggle="datetimepicker">'+
+                                        '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
+                                    '</div>'+
                                 '</div>'+
                             '</div>'+
-                        '</div>'+
-                        '<div class="form-group col-md-2">'+
-                            '<label for="number">Hora fim</label>'+
-                            '<div class="input-group date" data-target-input="nearest">'+
-                                '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" autocomplete="off" name="time_end[]" value=""/>'+
-                                '<div class="input-group-append" data-toggle="datetimepicker">'+
-                                    '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
+                            '<div class="form-group col-md-2">'+
+                                '<label for="number">Hora fim</label>'+
+                                '<div class="input-group date" data-target-input="nearest">'+
+                                    '<input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" autocomplete="off" name="time_end[]" value=""/>'+
+                                    '<div class="input-group-append" data-toggle="datetimepicker">'+
+                                        '<div class="input-group-text"><i class="fa-regular fa-clock"></i></div>'+
+                                    '</div>'+
                                 '</div>'+
                             '</div>'+
-                        '</div>'+
-                        '<div class="form-group col-md-2">'+
-                            '<a class="btn btn-danger btn-sm mr-1 btn-remove" style="margin-top: 35px" href="javascript:;">'+
-                                '<i class="fa-solid fa-remove"></i>'+
-                                ' Remover'+
-                            '</a>'+
-                        '</div>'+ 
-                    '</div>'
-                );
+                            '<div class="form-group col-md-2">'+
+                                '<a class="btn btn-danger btn-sm mr-1 btn-remove" style="margin-top: 35px" href="javascript:;">'+
+                                    '<i class="fa-solid fa-remove"></i>'+
+                                    ' Remover'+
+                                '</a>'+
+                            '</div>'+ 
+                        '</div>'
+                    );
+                } catch (error) {
+                    console.error('Erro ao adicionar data/hora:', error);
+                }
             });
 
             $('#option').change(function(){
+                try {
+                    const id_option_select = $(this).val();
+                    if (id_option_select !== undefined && id_option_select !== null) {
+                        if(id_option_select == 2 || id_option_select == 3 || id_option_select == 4 || id_option_select == 14){
+                            $('#div_new_options').show();
+                            if(id_option_select == 14){
+                                $('#new_options').val('AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO');
+                            }
+                        } else {
+                            $('#div_new_options').hide();
+                            if(id_option_select == 14){
+                                $('#new_options').val('');
+                            }
+                        }
 
-                var id_option_select = $(this).val();
-
-                if(id_option_select == 2 || id_option_select == 3 || id_option_select == 4 || id_option_select == 14){
-                    $('#div_new_options').show();
-                    if(id_option_select == 14){
-                        $('#new_options').val('AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO');
+                        if(id_option_select == 9 || id_option_select == 10){
+                            $('#div_new_number').show();
+                        } else {
+                            $('#div_new_number').hide();
+                        }
                     }
-                } else {
-                    $('#div_new_options').hide();
-                    if(id_option_select == 14){
-                        $('#new_options').val('');
-                    }
-                }
-
-                if(id_option_select == 9 || id_option_select == 10){
-                    $('#div_new_number').show();
-                } else {
-                    $('#div_new_number').hide();
+                } catch (error) {
+                    console.error('Erro ao processar mudança de opção:', error);
                 }
             });
 
             var i_field = parseInt($('input.new_field').length);
             $('#add_new_field').click(function(){
-                var field = $(this).parent().parent().find('#question').val();
-                var option = $(this).parent().parent().find('#option').val();
-                var option_text = $(this).parent().parent().find('#option:selected').text();
-                var required = $(this).parent().parent().find('#required').is(":checked");
-                var unique = $(this).parent().parent().find('#unique').is(":checked");
+                try {
+                    const field = $(this).parent().parent().find('#question').val();
+                    const option = $(this).parent().parent().find('#option').val();
+                    const option_text = $(this).parent().parent().find('#option:selected').text();
+                    const required = $(this).parent().parent().find('#required').is(":checked");
+                    const unique = $(this).parent().parent().find('#unique').is(":checked");
 
-                if(field === ''){
+                    if(field === ''){
 
-                    alert('Por favor, preencha o nome do campo!');
-                    return false;
-                }
+                        alert('Por favor, preencha o nome do campo!');
+                        return false;
+                    }
 
                 var required_star = required ? '*':'';
                 var field_text = '';
@@ -698,12 +770,12 @@
                     case '9':
                         field_text = '(Tipo: Número inteiro)';
                         field_name = 'integer';
-                        field_options = '; [Opções: ' + $('.val_min_option').val() + '|' + + $('.val_max_option').val() +']';
+                        field_options = '; [Opções: ' + ($('.val_min_option').val() || '') + '|' + ($('.val_max_option').val() || '') + ']';
                         break;
                     case '10':
                         field_text = '(Tipo: Número decimal)';
                         field_name = 'decimal';
-                        field_options = '; [Opções: ' + $('.val_min_option').val() + '|' + + $('.val_max_option').val() +']';
+                        field_options = '; [Opções: ' + ($('.val_min_option').val() || '') + '|' + ($('.val_max_option').val() || '') + ']';
                         break;
                     case '11':
                         field_text = '(Tipo: Arquivo)';
@@ -723,117 +795,217 @@
                         break;
                 }
 
-                $('#card-new-field').append('<div class="form-row">' +
-                    '<div class="form-group col-9">'+
-                        '<label for="field_'+i_field+'">Campo ' + i_field + required_star + '</label>' +
-                        '<input type="text" class="form-control new_field" name="new_field[]" value="'+field+'; ' + field_text + '' + field_options + '' + field_required + '' + field_unique +'" readonly>' +
+                const newField = $('<div class="row mb-3">' +
+                    '<div class="col-9">' +
+                        '<label class="form-label">Campo ' + i_field + required_star + '</label>' +
+                        '<input type="text" class="form-control new_field" name="new_field[]" value="' + field + '; ' + field_text + field_options + field_required + field_unique + '" readonly>' +
                         '<input type="hidden" name="new_field_id[]" value="">' +
-                    '</div>'+
-                    '<div class="form-group col-3">'+
-                        '<a class="btn btn-danger btn-sm mr-1 btn-remove-field" style="margin-top: 35px; margin-left: 17px;" href="javascript:;">'+
-                            '<i class="fa-solid fa-remove"></i>'+
-                            ' Remover'+
-                        '</a>'+
-                        '<a class="btn btn-secondary btn-sm mr-1 up" href="javascript:;" style="margin-top: 35px;" >'+
-                            '<i class="fas fa-arrow-up"></i>'+
-                        '</a>'+
-                        '<a class="btn btn-secondary btn-sm mr-1 down" href="javascript:;" style="margin-top: 35px;" >'+
-                            '<i class="fas fa-arrow-down"></i>'+
-                        '</a>'+
-                    '</div>'+
+                    '</div>' +
+                    '<div class="col-3 d-flex align-items-end">' +
+                        '<div class="btn-group" role="group">' +
+                            '<button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">' +
+                                '<i class="fa-solid fa-trash"></i>' +
+                            '</button>' +
+                            '<button type="button" class="btn btn-secondary btn-sm up me-1" title="Mover para cima">' +
+                                '<i class="fas fa-arrow-up"></i>' +
+                            '</button>' +
+                            '<button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">' +
+                                '<i class="fas fa-arrow-down"></i>' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
                 '</div>');
 
-                $("#card-new-field .up:first").hide();
-                $("#card-new-field .down:last").hide();
-                $("#card-new-field .down:not(:last)").show();
+                $('#card-new-field').append(newField);
+                updateFieldNumbers();
 
-                $('#new_options').val('');
-                $('.val_min_option').val('');
-                $('.val_max_option').val('');
+                    $('#new_options').val('');
+                    $('.val_min_option').val('');
+                    $('.val_max_option').val('');
+                } catch (error) {
+                    console.error('Erro ao adicionar novo campo:', error);
+                }
             });
 
             $("#card-new-field .up:first").hide();
             $("#card-new-field .down:last").hide();
             
-            $(".up,.down").click(function () {
-                
-                var $element = this;
-                var row = $($element).parents("div:first").parents("div:first");
-                
-                if($(this).is('.up')){
-                    row.insertBefore(row.prev());
+            $(document).on('click', '.btn-remove-field', function() {
+                try {
+                    $(this).closest('.row.mb-3').remove();
+                    updateFieldNumbers();
+                } catch (error) {
+                    console.error('Erro ao remover campo:', error);
                 }
-                else{
-                    row.insertAfter(row.next());
-                }
-
-                $("#card-new-field .up:first").hide();
-                $("#card-new-field .down:last").hide();
-                $("#card-new-field .up:not(:first)").show();
-                $("#card-new-field .down:not(:last)").show();
             });
 
+            $(document).on('click', '.up, .down', function(e) {
+                try {
+                    e.preventDefault();
+                    const $row = $(this).closest('.row.mb-3');
+                    
+                    if ($(this).hasClass('up')) {
+                        $row.insertBefore($row.prev());
+                    } else {
+                        $row.insertAfter($row.next());
+                    }
+                    
+                    updateFieldNumbers();
+                } catch (error) {
+                    console.error('Erro ao mover campo:', error);
+                }
+            });
+
+            function updateFieldNumbers() {
+                $('.row.mb-3').each(function(index) {
+                    const fieldNumber = index + 1;
+                    $(this).find('.form-label').text('Campo ' + fieldNumber + ($(this).find('.form-control').is('[required]') ? '*' : ''));
+                    
+                    // Update buttons visibility
+                    $(this).find('.up').toggle(index > 0);
+                    $(this).find('.down').toggle(index < $('.row.mb-3').length - 1);
+                });
+            }
+
             $('#add_place').click(function(){
-                $('#place_name').val('');
-                $('#address').val('');
-                $('#address').prop("readonly", false);
-                $('#number').val('');
-                $('#number').prop("readonly", false);
-                $('#district').val('');
-                $('#district').prop("readonly", false);
-                $('#complement').val('');
-                $('#complement').prop("readonly", false);
-                $('#zip').val('');
-                $('#zip').prop("readonly", false);
-                
-                $('#state').prop("disabled", false);
-                $('#state').prop('selectedIndex',0);
-                $('#city').prop("disabled", false);
-                $('#city').prop('selectedIndex',0);
-                $('#city_id_hidden').val('');
-                
-                // $('#state option[value="'+ui.item.uf+'"]').prop("selected", true);
-                // $('#state').prop("readonly", true);
-                // $('#city').prop("readonly", true);                 
+                try {
+                    $('#place_name').val('');
+                    $('#address').val('');
+                    $('#address').prop("readonly", false);
+                    $('#number').val('');
+                    $('#number').prop("readonly", false);
+                    $('#district').val('');
+                    $('#district').prop("readonly", false);
+                    $('#complement').val('');
+                    $('#complement').prop("readonly", false);
+                    $('#zip').val('');
+                    $('#zip').prop("readonly", false);
+                    
+                    $('#state').prop("disabled", false);
+                    $('#state').prop('selectedIndex',0);
+                    $('#city').prop("disabled", false);
+                    $('#city').prop('selectedIndex',0);
+                    $('#city_id_hidden').val('');
+                } catch (error) {
+                    console.error('Erro ao limpar campos do local:', error);
+                }
             });
 
             var path = "{{route('event_home.autocomplete_place')}}";
             $("#place_name").autocomplete({
                 source: function( request, response ) {
-                    $.ajax({
-                        url: path,
-                        type: 'GET',
-                        dataType: "json",
-                        data: {
-                            search: request.term
-                        },
-                        success: function( data ) {
-                            response(data);
-                        }
-                    });
+                    try {
+                        $.ajax({
+                            url: path,
+                            type: 'GET',
+                            dataType: "json",
+                            data: {
+                                search: request.term
+                            },
+                            success: function( data ) {
+                                response(data);
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Erro ao buscar locais:', error);
+                                response([]);
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Erro no autocomplete:', error);
+                        response([]);
+                    }
                 },
                 select: function (event, ui) {
-                    $('#place_name').val(ui.item.label);
-                    $('#place_id_hidden').val(ui.item.id);
-                    $('#address').val(ui.item.address);
-                    $('#address').prop("readonly", true);
-                    $('#number').val(ui.item.number);
-                    $('#number').prop("readonly", true);
-                    $('#district').val(ui.item.district);
-                    $('#district').prop("readonly", true);
-                    $('#complement').val(ui.item.complement);
-                    $('#complement').prop("readonly", true);
-                    $('#zip').val(ui.item.zip);
-                    $('#zip').prop("readonly", true);
-                    
-                    $('#state option[value="'+ui.item.uf+'"]').prop("selected", true);
-                    $('#state').prop("disabled", true);
-                    $('#city').prop("disabled", true);
-                    
-                    var uf = $("#state").val();
+                    try {
+                        $('#place_name').val(ui.item.label);
+                        $('#place_id_hidden').val(ui.item.id);
+                        $('#address').val(ui.item.address);
+                        $('#address').prop("readonly", true);
+                        $('#number').val(ui.item.number);
+                        $('#number').prop("readonly", true);
+                        $('#district').val(ui.item.district);
+                        $('#district').prop("readonly", true);
+                        $('#complement').val(ui.item.complement);
+                        $('#complement').prop("readonly", true);
+                        $('#zip').val(ui.item.zip);
+                        $('#zip').prop("readonly", true);
+                        
+                        $('#state option[value="'+ui.item.uf+'"]').prop("selected", true);
+                        $('#state').prop("disabled", true);
+                        $('#city').prop("disabled", true);
+                        
+                        const uf = $("#state").val();
+                        if (uf !== undefined && uf !== null) {
+                            $("#city").html('');
+                            $.ajax({
+                                url:"{{route('event_home.get_city')}}",
+                                type: "POST",
+                                data: {
+                                    uf: uf,
+                                    _token: '{{csrf_token()}}' 
+                                },
+                                dataType : 'json',
+                                success: function(result){
+                                    $('#city').html('<option value="">Selecione</option>'); 
+                                    const city_id = $('#city_id_hidden').val();
+
+                                    $.each(result.cities,function(key,value){
+                                        $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
+                                    });
+
+                                    if (ui.item.city_id) {
+                                        $('#city option[value="'+ui.item.city_id+'"]').prop("selected", true);
+                                        $('#city_id_hidden').val(ui.item.city_id);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('Erro ao carregar cidades:', error);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Erro ao selecionar local:', error);
+                    }
+                    return false;
+                }
+            });
+
+            $('#state').on('change', function() {
+                try {
+                    const uf = this.value;
+                    if (uf !== undefined && uf !== null) {
+                        $("#city").html('');
+                        $.ajax({
+                            url: "{{route('event_home.get_city')}}",
+                            type: "POST",
+                            data: {
+                                uf: uf,
+                                _token: '{{csrf_token()}}' 
+                            },
+                            dataType : 'json',
+                            success: function(result){
+                                $('#city').html('<option value="">Selecione</option>'); 
+                                $.each(result.cities,function(key,value){
+                                    $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Erro ao carregar cidades:', error);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro ao processar mudança de estado:', error);
+                }
+            });
+
+            // Verificar se o elemento state existe antes de tentar acessar seu valor
+            if ($("#state").length > 0) {
+                const uf = $("#state").val();
+                if (uf !== undefined && uf !== null) {
                     $("#city").html('');
                     $.ajax({
-                        url:"{{route('event_home.get_city')}}",
+                        url: "{{route('event_home.get_city')}}",
                         type: "POST",
                         data: {
                             uf: uf,
@@ -842,106 +1014,94 @@
                         dataType : 'json',
                         success: function(result){
                             $('#city').html('<option value="">Selecione</option>'); 
-                            city_id = $('#city_id_hidden').val();
+                            const city_id = $('#city_id_hidden').val();
 
                             $.each(result.cities,function(key,value){
                                 $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
                             });
 
-                            $('#city option[value="'+ui.item.city_id+'"]').prop("selected", true);
-                            $('#city_id_hidden').val(ui.item.city_id);
+                            if (city_id) {
+                                $('#city option[value='+city_id+']').attr('selected','selected');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Erro ao carregar cidades:', error);
                         }
                     });
-
-                    return false;
                 }
-            });
-
-            $('#state').on('change', function() {
-                var uf = this.value;
-                $("#city").html('');
-                $.ajax({
-                    url: "{{route('event_home.get_city')}}",
-                    type: "POST",
-                    data: {
-                        uf: uf,
-                        _token: '{{csrf_token()}}' 
-                    },
-                    dataType : 'json',
-                    success: function(result){
-                        $('#city').html('<option value="">Selecione</option>'); 
-                        $.each(result.cities,function(key,value){
-                            $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
-                        });
-                    }
-                });
-            });
-
-            var uf = $("#state").val();
-            $("#city").html('');
-            $.ajax({
-                url: "{{route('event_home.get_city')}}",
-                type: "POST",
-                data: {
-                    uf: uf,
-                    _token: '{{csrf_token()}}' 
-                },
-                dataType : 'json',
-                success: function(result){
-                    $('#city').html('<option value="">Selecione</option>'); 
-                    city_id = $('#city_id_hidden').val();
-
-                    $.each(result.cities,function(key,value){
-                        $("#city").append('<option value="'+value.id+'">'+value.name+'</option>');
-                    });
-
-                    $('#city option[value='+city_id+']').attr('selected','selected');
-                }
-            });
+            }
 
             $('body').on('click',".btn-remove-field", function(){
-                $(this).parent().parent().remove();
-                i_field = i_field-1;
-                $("#card-new-field .up:first").hide();
-                $("#card-new-field .down:last").hide();
+                try {
+                    $(this).parent().parent().remove();
+                    i_field = i_field-1;
+                    $("#card-new-field .up:first").hide();
+                    $("#card-new-field .down:last").hide();
+                } catch (error) {
+                    console.error('Erro ao remover campo:', error);
+                }
             });
 
             $('body').on('click',".btn-remove", function(){
-                $(this).parent().parent().remove();
+                try {
+                    $(this).parent().parent().remove();
+                } catch (error) {
+                    console.error('Erro ao remover data/hora:', error);
+                }
             });
 
             $('body').on('mousedown',".datetimepicker_day", function(){
-                $(this).datetimepicker({
-                    timepicker:false,
-                    format:'d/m/Y',
-                    mask:true
-                });
+                try {
+                    $(this).datetimepicker({
+                        timepicker:false,
+                        format:'d/m/Y',
+                        mask:true
+                    });
+                } catch (error) {
+                    console.error('Erro ao inicializar datepicker:', error);
+                }
             });
 
             $('body').on('mousedown',".datetimepicker_hour_begin", function(){
-                $(this).datetimepicker({
-                    datepicker:false,
-                    format:'H:i',
-                    mask:true,
-                    onShow:function( ct ){
-                        this.setOptions({
-                            maxTime:$(this).val()?$(this).val():false
-                        })
-                    }
-                });
+                try {
+                    $(this).datetimepicker({
+                        datepicker:false,
+                        format:'H:i',
+                        mask:true,
+                        onShow:function( ct ){
+                            try {
+                                this.setOptions({
+                                    maxTime:$(this).val()?$(this).val():false
+                                });
+                            } catch (error) {
+                                console.error('Erro no onShow do timepicker início:', error);
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao inicializar timepicker início:', error);
+                }
             });
 
             $('body').on('mousedown',".datetimepicker_hour_end", function(){
-                $(this).datetimepicker({
-                    datepicker:false,
-                    format:'H:i',
-                    mask:true,
-                    onShow:function( ct ){
-                        this.setOptions({
-                            minTime:$(this).val()?$(this).val():false
-                        })
-                    }
-                });
+                try {
+                    $(this).datetimepicker({
+                        datepicker:false,
+                        format:'H:i',
+                        mask:true,
+                        onShow:function( ct ){
+                            try {
+                                this.setOptions({
+                                    minTime:$(this).val()?$(this).val():false
+                                });
+                            } catch (error) {
+                                console.error('Erro no onShow do timepicker fim:', error);
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao inicializar timepicker fim:', error);
+                }
             });
         });
     

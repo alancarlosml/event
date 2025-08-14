@@ -71,10 +71,10 @@
                                         <td>@if($coupon->discount_type == 0) {{$coupon->discount_value*100}}% @elseif($coupon->discount_type == 1) @money($coupon->discount_value) @endif</td>
                                         <td>{{$coupon->limit_buy}}</td>
                                         <td>{{$coupon->limit_tickets}}</td>
-                                        <td>@if($coupon->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
+                                        <td>@if($coupon->status == 1) <span class="badge bg-success">Ativo</span> @else <span class="badge bg-danger">Não ativo</span> @endif</td>
                                         <td>
                                             <div class="d-flex">
-                                                <a class="btn btn-info btn-sm mr-1" href="{{route('event_home.coupon_edit', $coupon->hash)}}">
+                                                <a class="btn btn-info btn-sm" href="{{route('event_home.coupon_edit', $coupon->hash)}}">
                                                     <i class="fas fa-pencil-alt">
                                                     </i>
                                                     Editar
@@ -82,7 +82,7 @@
                                                 <form action="{{ route('event_home.destroy_coupon', $coupon->hash) }}" method="POST">
                                                     <input type="hidden" name="_method" value="DELETE">
                                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                    <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData('{{$coupon->hash}}')">
+                                                    <a class="btn btn-danger btn-sm ms-1"  href="javascript:;" onclick="removeData('{{$coupon->hash}}')">
                                                         <i class="fas fa-trash">
                                                         </i>
                                                         Remover
@@ -125,60 +125,40 @@
     
       </main><!-- End #main -->
 
-      @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-      @endpush
-
-      {{-- @push('head')
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-        <link href="../../../assets_admin/jquery.datetimepicker.min.css " rel="stylesheet">
-          
-      @endpush --}}
-
       @push('footer')
-        {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-        <script src="../../../assets_admin/jquery.datetimepicker.full.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> --}}
-
         <script>
 
-        function removeData(hash){
-            $('#modalMsgRemove-' + hash).modal('show');
-        }
+            function removeData(hash){
+                $('#modalMsgRemove-' + hash).modal('show');
+            }
 
-        function removeSucc(hash){
-            const button = $('#btn-remove-ok-' + hash);
-            
-            // Mostra loading no botão
-            setButtonLoading(button[0], 'Excluindo...');
-            
-            // Executa a remoção
-            $('#btn-remove-hidden-' + hash).click();
-            
-            // Fecha o modal
-            $('#modalMsgRemove-' + hash).modal('hide');
-            
-            // Mostra notificação de sucesso
-            showToast('Cupom removido com sucesso!', 'success');
-            
-            // Remove a linha da tabela após um pequeno delay
-            setTimeout(() => {
-                const row = $(`tr[data-coupon-hash="${hash}"]`);
-                if (row.length) {
-                    row.fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                }
-            }, 500);
-        }
-
-        $(document).ready(function() {
-
-        });
-    
-    </script>
+            function removeSucc(hash){
+                const button = $('#btn-remove-ok-' + hash);
+                
+                // Mostra loading no botão
+                setButtonLoading(button[0], 'Excluindo...');
+                
+                // Executa a remoção
+                $('#btn-remove-hidden-' + hash).click();
+                
+                // Fecha o modal
+                $('#modalMsgRemove-' + hash).modal('hide');
+                
+                // Mostra notificação de sucesso
+                showToast('Cupom removido com sucesso!', 'success');
+                
+                // Remove a linha da tabela após um pequeno delay
+                setTimeout(() => {
+                    const row = $(`tr[data-coupon-hash="${hash}"]`);
+                    if (row.length) {
+                        row.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                    }
+                }, 500);
+            }
+        
+        </script>
       
     @endpush
 

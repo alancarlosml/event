@@ -222,7 +222,7 @@ ul li,ol li{
     -moz-transition:all .5s ease-out 0s;
     -ms-transition:all .5s ease-out 0s;
     -o-transition:all .5s ease-out 0s;
-    transition:all .5s ease-out 0s
+    transition:all .5s ease-out 0s;
 }
 .btn-common:hover::before{
     background-color:rgba(255,255,255,.2);

@@ -35,4 +35,28 @@ class Question extends Model
 
         return $option_value;
     }
+
+    // app/Models/Question.php (exemplo)
+    public function getFormattedOptionsAttribute()
+    {
+        $parts = [
+            $this->question,
+            "(Tipo: {$this->option->option})"
+        ];
+
+        if ($this->value()->count() > 0) {
+            $values = $this->value()->pluck('value')->implode(', ');
+            $parts[] = "[Opções: {$values}]";
+        }
+
+        if ($this->required) {
+            $parts[] = 'Obrigatório';
+        }
+
+        if ($this->unique) {
+            $parts[] = 'Único';
+        }
+
+        return implode('; ', $parts);
+    }
 }

@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="row mt-4">
-                <div class="mx-auto">
+                <div class="text-center">
                     @if ($event->max_event_dates() >= \Carbon\Carbon::now())
                         <a href="#inscricoes" class="btn btn-common sub-btn" aria-label="Inscrever-se no evento">Inscreva-se</a>
                     @else
@@ -171,12 +171,9 @@
                         <hr>
                         @if ($event->max_event_dates() >= \Carbon\Carbon::now())
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control ps-2" placeholder="CUPOM" aria-label="CUPOM"
-                                       aria-describedby="button-cupom" id="inp_coupon">
+                                <input type="text" class="form-control ps-2" placeholder="CUPOM" aria-label="CUPOM" aria-describedby="button-cupom" id="inp_coupon">
                                 <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary btn_apply_coupon" style="font-weight: 700"
-                                            type="button" id="button-cupom"
-                                            onclick="setCoupon('{{ $event->hash }}')">Aplicar</button>
+                                    <button class="btn btn-outline-secondary btn_apply_coupon rounded-0" style="font-weight: 700" type="button" id="button-cupom" onclick="setCoupon('{{ $event->hash }}')">Aplicar</button>
                                 </div>
                             </div>
                             <div class="d-flex flex-column b-bottom">
@@ -388,14 +385,6 @@
 
                                         <button type="submit" class="btn btn-common">Enviar mensagem</button>
                                     </div>
-
-                                    {{-- <div class="col-md-12">
-                                        
-                                        <div class="form-submit">
-                                            <button type="submit" class="btn btn-common" id="form-submit" style="pointer-events: all; cursor: pointer;"><i class="fa fa-paper-plane" aria-hidden="true"></i> Enviar</button>
-                                            <div id="msgSubmit" class="h3 text-center hidden"></div>
-                                        </div>
-                                    </div> --}}
                                 </div>
                             </form>
                         </div>
@@ -431,11 +420,6 @@
 
     @push('event_name')
         {{ $event->name }}
-    @endpush
-
-    @push('bootstrap_version')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
-              crossorigin="anonymous" referrerpolicy="no-referrer" />
     @endpush
 
     @push('theme')
