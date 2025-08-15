@@ -6,11 +6,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Home</a></li>
                     <li class="breadcrumb-item"><a href="/painel/meus-eventos">Meus eventos</a></li>
-                    @if(isset($event) && $event->id)
-                    <li class="breadcrumb-item active">Editar evento</li>
-                    @else
-                    <li class="breadcrumb-item active">Novo evento</li>
-                    @endif
+                    <li class="breadcrumb-item"></li>
                 </ol>
                 <h2>@if(isset($event) && $event->id) Editar @else Criar @endif evento</h2>
             </div>
@@ -450,505 +446,505 @@
                             <div class="card-footer text-end">
                                 <button type="submit" class="btn btn-primary">Próximo</button>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
-            </section>
-        </main><!-- End #main -->
+        </section>
+    </main><!-- End #main -->
 
-        @push('head')
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-            <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
-            <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
-        @endpush
+    @push('head')
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
+        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
+    @endpush
 
-        @push('footer')
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-            <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
-            <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @push('footer')
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
+        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-            <script>
-                $(document).ready(function() {
-                    // Utility function for debouncing
-                    function debounce(func, wait) {
-                        let timeout;
-                        return function(...args) {
-                            const context = this;
-                            clearTimeout(timeout);
-                            timeout = setTimeout(() => func.apply(context, args), wait);
-                        };
+        <script>
+            $(document).ready(function() {
+                // Utility function for debouncing
+                function debounce(func, wait) {
+                    let timeout;
+                    return function(...args) {
+                        const context = this;
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(context, args), wait);
+                    };
+                }
+
+                // Utility function to show toast notifications
+                function showToast(message, type, title = null, timeout = 3000) {
+                    // Implementation of toast (assuming a toast library is used, e.g., Bootstrap toast)
+                    console.log(`[${type}] ${title || ''}: ${message}`);
+                    // Add actual toast implementation if needed
+                }
+
+                // Initialize Summernote editor
+                function initSummernote() {
+                    try {
+                        $('#description').summernote({
+                            placeholder: 'Descreva em detalhes o evento',
+                            tabsize: 2,
+                            height: 200,
+                            codemirror: { theme: 'monokai' },
+                            toolbar: [
+                                ['font', ['bold', 'underline', 'clear']],
+                                ['color', ['color']],
+                                ['para', ['ul', 'ol', 'paragraph']],
+                                ['table', ['table']],
+                                ['insert', ['link', 'picture', 'video']],
+                                ['view', ['help']]
+                            ]
+                        });
+                    } catch (error) {
+                        console.error('Erro ao inicializar Summernote:', error);
                     }
+                }
 
-                    // Utility function to show toast notifications
-                    function showToast(message, type, title = null, timeout = 3000) {
-                        // Implementation of toast (assuming a toast library is used, e.g., Bootstrap toast)
-                        console.log(`[${type}] ${title || ''}: ${message}`);
-                        // Add actual toast implementation if needed
-                    }
-
-                    // Initialize Summernote editor
-                    function initSummernote() {
-                        try {
-                            $('#description').summernote({
-                                placeholder: 'Descreva em detalhes o evento',
-                                tabsize: 2,
-                                height: 200,
-                                codemirror: { theme: 'monokai' },
-                                toolbar: [
-                                    ['font', ['bold', 'underline', 'clear']],
-                                    ['color', ['color']],
-                                    ['para', ['ul', 'ol', 'paragraph']],
-                                    ['table', ['table']],
-                                    ['insert', ['link', 'picture', 'video']],
-                                    ['view', ['help']]
-                                ]
-                            });
-                        } catch (error) {
-                            console.error('Erro ao inicializar Summernote:', error);
-                        }
-                    }
-
-                    // Initialize form validation
-                    function initFormValidation() {
-                        $('form.needs-validation').on('submit', function(e) {
-                            if (!this.checkValidity()) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                showToast('Por favor, corrija os erros no formulário.', 'error');
-                                $(this).addClass('was-validated');
-                                $('button[type="submit"]').prop('disabled', false).text('Próximo');
-                                return false;
-                            }
+                // Initialize form validation
+                function initFormValidation() {
+                    $('form.needs-validation').on('submit', function(e) {
+                        if (!this.checkValidity()) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            showToast('Por favor, corrija os erros no formulário.', 'error');
                             $(this).addClass('was-validated');
-                            $('button[type="submit"]').prop('disabled', true).text('Salvando...');
+                            $('button[type="submit"]').prop('disabled', false).text('Próximo');
+                            return false;
+                        }
+                        $(this).addClass('was-validated');
+                        $('button[type="submit"]').prop('disabled', true).text('Salvando...');
+                    });
+                }
+
+                // Initialize datetimepickers
+                function initDateTimePickers() {
+                    $(document).on('focus', '.datetimepicker_day', function() {
+                        $(this).datetimepicker({
+                            timepicker: false,
+                            format: 'd/m/Y',
+                            mask: true,
+                            minDate: new Date(),
+                            lang: 'pt-BR'
                         });
-                    }
+                    });
 
-                    // Initialize datetimepickers
-                    function initDateTimePickers() {
-                        $(document).on('focus', '.datetimepicker_day', function() {
-                            $(this).datetimepicker({
-                                timepicker: false,
-                                format: 'd/m/Y',
-                                mask: true,
-                                minDate: new Date(),
-                                lang: 'pt-BR'
-                            });
+                    $(document).on('focus', '.datetimepicker_hour_begin', function() {
+                        $(this).datetimepicker({
+                            datepicker: false,
+                            format: 'H:i',
+                            mask: true
                         });
+                    });
 
-                        $(document).on('focus', '.datetimepicker_hour_begin', function() {
-                            $(this).datetimepicker({
-                                datepicker: false,
-                                format: 'H:i',
-                                mask: true
-                            });
+                    $(document).on('focus', '.datetimepicker_hour_end', function() {
+                        $(this).datetimepicker({
+                            datepicker: false,
+                            format: 'H:i',
+                            mask: true
                         });
+                    });
+                }
 
-                        $(document).on('focus', '.datetimepicker_hour_end', function() {
-                            $(this).datetimepicker({
-                                datepicker: false,
-                                format: 'H:i',
-                                mask: true
-                            });
-                        });
-                    }
+                // Initialize name validation
+                function initNameValidation() {
+                    $('#name').on('blur keyup', debounce(function() {
+                        const name = $(this).val()?.trim() || '';
+                        const $nameField = $(this);
+                        const $nameError = $('#name-error');
 
-                    // Initialize name validation
-                    function initNameValidation() {
-                        $('#name').on('blur keyup', debounce(function() {
-                            const name = $(this).val()?.trim() || '';
-                            const $nameField = $(this);
-                            const $nameError = $('#name-error');
-
-                            if (name.length < 3) {
-                                $nameField.addClass('is-invalid').removeClass('is-valid');
-                                $nameError.text('Nome deve ter pelo menos 3 caracteres');
-                                return;
-                            }
-
-                            $.get('{{ route('event_home.check_slug') }}', { title: name })
-                                .done(data => {
-                                    $('#slug').val(data.slug);
-                                    if (data.slug_exists == '1') {
-                                        $('#slug').addClass('is-invalid').removeClass('is-valid');
-                                        showToast('Este slug já está em uso. Escolha outro.', 'warning');
-                                    } else {
-                                        $('#slug').addClass('is-valid').removeClass('is-invalid');
-                                        showToast('Slug disponível!', 'success', null, 2000);
-                                    }
-                                })
-                                .fail(() => showToast('Erro ao verificar slug. Tente novamente.', 'error'));
-
-                            $nameField.removeClass('is-invalid');
-                            $nameError.text('');
-                        }, 500));
-                    }
-
-                    // Initialize slug validation
-                    function initSlugValidation() {
-                        $('#slug').on('blur keyup', debounce(function() {
-                            const slug = $(this).val().trim();
-                            const $slugField = $(this);
-                            const $slugError = $('#slug-error');
-
-                            if (slug.length < 2) {
-                                $slugField.addClass('is-invalid').removeClass('is-valid');
-                                $slugError.text('URL deve ter pelo menos 2 caracteres');
-                                return;
-                            }
-
-                            $.get('{{ route('event_home.create_slug') }}', { title: slug })
-                                .done(data => {
-                                    if (data.slug_exists == '1') {
-                                        $slugField.addClass('is-invalid').removeClass('is-valid');
-                                        $slugError.text('Esta URL já está em uso');
-                                        showToast('Este slug já está em uso. Escolha outro.', 'warning');
-                                    } else {
-                                        $slugField.addClass('is-valid').removeClass('is-invalid');
-                                        $slugError.text('');
-                                        showToast('Slug disponível!', 'success', null, 2000);
-                                    }
-                                })
-                                .fail(() => showToast('Erro ao verificar slug. Tente novamente.', 'error'));
-                        }, 500));
-                    }
-
-                    // Initialize category and area handling
-                    function initCategoryArea() {
-                        function loadAreas(categoryId) {
-                            if (!categoryId) return;
-                            $.ajax({
-                                url: "{{ route('event_home.get_areas_by_category') }}",
-                                type: "POST",
-                                data: { category_id: categoryId, _token: '{{ csrf_token() }}' },
-                                dataType: 'json',
-                                success: function(result) {
-                                    const $areaSelect = $('#area_id');
-                                    $areaSelect.html('<option value="">Selecione</option>');
-                                    $.each(result.areas, function(key, value) {
-                                        $areaSelect.append(`<option value="${value.id}">${value.name}</option>`);
-                                    });
-                                    const areaId = $('#area_id_hidden').val();
-                                    if (areaId) $areaSelect.val(areaId);
-                                    showToast(`${result.areas.length} área(s) encontrada(s)`, 'info', null, 2000);
-                                },
-                                error: () => showToast('Erro ao carregar áreas. Tente novamente.', 'error')
-                            });
+                        if (name.length < 3) {
+                            $nameField.addClass('is-invalid').removeClass('is-valid');
+                            $nameError.text('Nome deve ter pelo menos 3 caracteres');
+                            return;
                         }
 
-                        $('#category').on('change', function() {
-                            loadAreas(this.value);
-                        });
-
-                        // Load initial areas if category is selected
-                        if ($('#category').val()) {
-                            loadAreas($('#category').val());
-                        }
-                    }
-
-                    // Initialize state and city handling
-                    function initStateCity() {
-                        function loadCities(uf, callback = null) {
-                            if (!uf) {
-                                $('#city').html('<option value="">Selecione um estado primeiro</option>');
-                                if (callback) callback();
-                                return;
-                            }
-                            $.ajax({
-                                url: "{{ route('event_home.get_city') }}",
-                                type: "POST",
-                                data: { uf: uf, _token: '{{ csrf_token() }}' },
-                                dataType: 'json',
-                                success: function(result) {
-                                    const $citySelect = $('#city');
-                                    $citySelect.html('<option value="">Selecione a cidade</option>');
-                                    $.each(result.cities, function(key, value) {
-                                        $citySelect.append(`<option value="${value.id}">${value.name}</option>`);
-                                    });
-                                    showToast(`${result.cities.length} cidade(s) encontrada(s)`, 'info', null, 2000);
-                                    if (callback) callback();
-                                },
-                                error: () => {
-                                    showToast('Erro ao carregar cidades. Tente novamente.', 'error');
-                                    if (callback) callback();
+                        $.get('{{ route('event_home.check_slug') }}', { title: name })
+                            .done(data => {
+                                $('#slug').val(data.slug);
+                                if (data.slug_exists == '1') {
+                                    $('#slug').addClass('is-invalid').removeClass('is-valid');
+                                    showToast('Este slug já está em uso. Escolha outro.', 'warning');
+                                } else {
+                                    $('#slug').addClass('is-valid').removeClass('is-invalid');
+                                    showToast('Slug disponível!', 'success', null, 2000);
                                 }
-                            });
+                            })
+                            .fail(() => showToast('Erro ao verificar slug. Tente novamente.', 'error'));
+
+                        $nameField.removeClass('is-invalid');
+                        $nameError.text('');
+                    }, 500));
+                }
+
+                // Initialize slug validation
+                function initSlugValidation() {
+                    $('#slug').on('blur keyup', debounce(function() {
+                        const slug = $(this).val().trim();
+                        const $slugField = $(this);
+                        const $slugError = $('#slug-error');
+
+                        if (slug.length < 2) {
+                            $slugField.addClass('is-invalid').removeClass('is-valid');
+                            $slugError.text('URL deve ter pelo menos 2 caracteres');
+                            return;
                         }
-                        // Expose globally so other initializers (e.g., place autocomplete) can call it
-                        window.loadCities = loadCities;
 
-                        $('#state').on('change', function() {
-                            loadCities(this.value);
-                        });
+                        $.get('{{ route('event_home.create_slug') }}', { title: slug })
+                            .done(data => {
+                                if (data.slug_exists == '1') {
+                                    $slugField.addClass('is-invalid').removeClass('is-valid');
+                                    $slugError.text('Esta URL já está em uso');
+                                    showToast('Este slug já está em uso. Escolha outro.', 'warning');
+                                } else {
+                                    $slugField.addClass('is-valid').removeClass('is-invalid');
+                                    $slugError.text('');
+                                    showToast('Slug disponível!', 'success', null, 2000);
+                                }
+                            })
+                            .fail(() => showToast('Erro ao verificar slug. Tente novamente.', 'error'));
+                    }, 500));
+                }
 
-                        $('#city').on('change', function() {
-                            $('#city_id_hidden').val(this.value);
-                        });
-
-                        // Load initial cities if state is selected
-                        if ($('#state').val()) {
-                            loadCities($('#state').val());
-                        }
-                    }
-
-                    // Initialize place autocomplete
-                    function initPlaceAutocomplete() {
-                        $('#place_name').autocomplete({
-                            source: function(request, response) {
-                                $.ajax({
-                                    url: "{{ route('event_home.autocomplete_place') }}",
-                                    type: 'GET',
-                                    dataType: "json",
-                                    data: { search: request.term },
-                                    success: function(data) {
-                                        console.log('Autocomplete data received:', data); // For debugging
-                                        response($.map(data, function(item) {
-                                            // Backend returns `value` as the place name
-                                            return {
-                                                label: item.value,
-                                                value: item.value,
-                                                id: item.id,
-                                                address: item.address,
-                                                number: item.number,
-                                                district: item.district,
-                                                complement: item.complement,
-                                                zip: item.zip,
-                                                city_id: item.city_id,
-                                                uf: item.uf
-                                            };
-                                        }));
-                                        showToast(`${data.length} local(is) encontrado(s)`, 'info', null, 1500);
-                                    },
-                                    error: () => showToast('Erro ao buscar locais', 'error')
+                // Initialize category and area handling
+                function initCategoryArea() {
+                    function loadAreas(categoryId) {
+                        if (!categoryId) return;
+                        $.ajax({
+                            url: "{{ route('event_home.get_areas_by_category') }}",
+                            type: "POST",
+                            data: { category_id: categoryId, _token: '{{ csrf_token() }}' },
+                            dataType: 'json',
+                            success: function(result) {
+                                const $areaSelect = $('#area_id');
+                                $areaSelect.html('<option value="">Selecione</option>');
+                                $.each(result.areas, function(key, value) {
+                                    $areaSelect.append(`<option value="${value.id}">${value.name}</option>`);
                                 });
+                                const areaId = $('#area_id_hidden').val();
+                                if (areaId) $areaSelect.val(areaId);
+                                showToast(`${result.areas.length} área(s) encontrada(s)`, 'info', null, 2000);
                             },
-                            minLength: 2,
-                            select: function(event, ui) {
-                                $('#place_name').val(ui.item.label);
-                                $('#place_id_hidden').val(ui.item.id);
-                                $('#address').val(ui.item.address).prop('readonly', true);
-                                $('#number').val(ui.item.number).prop('readonly', true);
-                                $('#district').val(ui.item.district).prop('readonly', true);
-                                $('#complement').val(ui.item.complement).prop('readonly', true);
-                                $('#zip').val(ui.item.zip).prop('readonly', true);
-                                $('#state').val(ui.item.uf).prop('disabled', true);
-                                loadCities(ui.item.uf, () => {
-                                    $('#city').val(ui.item.city_id).prop('disabled', true);
-                                    $('#city_id_hidden').val(ui.item.city_id);
-                                });
-                                return false;
-                            }
-                        });
-
-                        $('#add_place').on('click', function() {
-                            $('#place_name, #address, #number, #district, #complement, #zip').val('').prop('readonly', false);
-                            $('#state, #city').prop('disabled', false).val('');
-                            $('#city_id_hidden, #place_id_hidden').val('');
+                            error: () => showToast('Erro ao carregar áreas. Tente novamente.', 'error')
                         });
                     }
 
-                    // Initialize dynamic fields
-                    function initDynamicFields() {
-                        let fieldCount = $('input.new_field').length;
+                    $('#category').on('change', function() {
+                        loadAreas(this.value);
+                    });
 
-                        function updateFieldNumbers() {
-                            // Only renumber labels inside the dynamic fields container
-                            const $container = $('#card-new-field');
-                            $container.children('.row.mb-3').each(function(index) {
-                                const fieldNumber = index + 1;
-                                const $label = $(this).find('.form-label').first();
-                                const original = $label.text();
-                                // Only adjust labels that start with "Campo"
-                                const updated = original.replace(/^Campo\s+\d+/, `Campo ${fieldNumber}`);
-                                $label.text(updated);
-                                $(this).find('.up').toggle(index > 0);
-                                $(this).find('.down').toggle(index < $container.children('.row.mb-3').length - 1);
+                    // Load initial areas if category is selected
+                    if ($('#category').val()) {
+                        loadAreas($('#category').val());
+                    }
+                }
+
+                // Initialize state and city handling
+                function initStateCity() {
+                    function loadCities(uf, callback = null) {
+                        if (!uf) {
+                            $('#city').html('<option value="">Selecione um estado primeiro</option>');
+                            if (callback) callback();
+                            return;
+                        }
+                        $.ajax({
+                            url: "{{ route('event_home.get_city') }}",
+                            type: "POST",
+                            data: { uf: uf, _token: '{{ csrf_token() }}' },
+                            dataType: 'json',
+                            success: function(result) {
+                                const $citySelect = $('#city');
+                                $citySelect.html('<option value="">Selecione a cidade</option>');
+                                $.each(result.cities, function(key, value) {
+                                    $citySelect.append(`<option value="${value.id}">${value.name}</option>`);
+                                });
+                                showToast(`${result.cities.length} cidade(s) encontrada(s)`, 'info', null, 2000);
+                                if (callback) callback();
+                            },
+                            error: () => {
+                                showToast('Erro ao carregar cidades. Tente novamente.', 'error');
+                                if (callback) callback();
+                            }
+                        });
+                    }
+                    // Expose globally so other initializers (e.g., place autocomplete) can call it
+                    window.loadCities = loadCities;
+
+                    $('#state').on('change', function() {
+                        loadCities(this.value);
+                    });
+
+                    $('#city').on('change', function() {
+                        $('#city_id_hidden').val(this.value);
+                    });
+
+                    // Load initial cities if state is selected
+                    if ($('#state').val()) {
+                        loadCities($('#state').val());
+                    }
+                }
+
+                // Initialize place autocomplete
+                function initPlaceAutocomplete() {
+                    $('#place_name').autocomplete({
+                        source: function(request, response) {
+                            $.ajax({
+                                url: "{{ route('event_home.autocomplete_place') }}",
+                                type: 'GET',
+                                dataType: "json",
+                                data: { search: request.term },
+                                success: function(data) {
+                                    console.log('Autocomplete data received:', data); // For debugging
+                                    response($.map(data, function(item) {
+                                        // Backend returns `value` as the place name
+                                        return {
+                                            label: item.value,
+                                            value: item.value,
+                                            id: item.id,
+                                            address: item.address,
+                                            number: item.number,
+                                            district: item.district,
+                                            complement: item.complement,
+                                            zip: item.zip,
+                                            city_id: item.city_id,
+                                            uf: item.uf
+                                        };
+                                    }));
+                                    showToast(`${data.length} local(is) encontrado(s)`, 'info', null, 1500);
+                                },
+                                error: () => showToast('Erro ao buscar locais', 'error')
                             });
+                        },
+                        minLength: 2,
+                        select: function(event, ui) {
+                            $('#place_name').val(ui.item.label);
+                            $('#place_id_hidden').val(ui.item.id);
+                            $('#address').val(ui.item.address).prop('readonly', true);
+                            $('#number').val(ui.item.number).prop('readonly', true);
+                            $('#district').val(ui.item.district).prop('readonly', true);
+                            $('#complement').val(ui.item.complement).prop('readonly', true);
+                            $('#zip').val(ui.item.zip).prop('readonly', true);
+                            $('#state').val(ui.item.uf).prop('disabled', true);
+                            loadCities(ui.item.uf, () => {
+                                $('#city').val(ui.item.city_id).prop('disabled', true);
+                                $('#city_id_hidden').val(ui.item.city_id);
+                            });
+                            return false;
+                        }
+                    });
+
+                    $('#add_place').on('click', function() {
+                        $('#place_name, #address, #number, #district, #complement, #zip').val('').prop('readonly', false);
+                        $('#state, #city').prop('disabled', false).val('');
+                        $('#city_id_hidden, #place_id_hidden').val('');
+                    });
+                }
+
+                // Initialize dynamic fields
+                function initDynamicFields() {
+                    let fieldCount = $('input.new_field').length;
+
+                    function updateFieldNumbers() {
+                        // Only renumber labels inside the dynamic fields container
+                        const $container = $('#card-new-field');
+                        $container.children('.row.mb-3').each(function(index) {
+                            const fieldNumber = index + 1;
+                            const $label = $(this).find('.form-label').first();
+                            const original = $label.text();
+                            // Only adjust labels that start with "Campo"
+                            const updated = original.replace(/^Campo\s+\d+/, `Campo ${fieldNumber}`);
+                            $label.text(updated);
+                            $(this).find('.up').toggle(index > 0);
+                            $(this).find('.down').toggle(index < $container.children('.row.mb-3').length - 1);
+                        });
+                    }
+
+                    $('#option').on('change', function() {
+                        const id = parseInt(this.value);
+                        $('#div_new_options').toggle([2, 3, 4, 14].includes(id));
+                        if (id === 14) {
+                            $('#new_options').val('AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO');
+                        } else {
+                            $('#new_options').val('');
+                        }
+                        $('#div_new_number').toggle([9, 10].includes(id));
+                    });
+
+                    $('#add_new_field').on('click', function() {
+                        const field = $('#question').val().trim();
+                        const option = $('#option').val();
+                        const optionText = $('#option option:selected').text();
+                        const required = $('#required').is(':checked');
+                        const unique = $('#unique').is(':checked');
+
+                        if (!field) {
+                            showToast('Por favor, preencha o nome do campo!', 'error');
+                            return;
                         }
 
-                        $('#option').on('change', function() {
-                            const id = parseInt(this.value);
-                            $('#div_new_options').toggle([2, 3, 4, 14].includes(id));
-                            if (id === 14) {
-                                $('#new_options').val('AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO');
-                            } else {
-                                $('#new_options').val('');
-                            }
-                            $('#div_new_number').toggle([9, 10].includes(id));
-                        });
+                        const fieldConfig = {
+                            1: { text: '(Tipo: Texto (Até 200 caracteres))', name: 'text' },
+                            2: { text: '(Tipo: Seleção)', name: 'select', options: `; [Opções: ${$('#new_options').val()}]` },
+                            3: { text: '(Tipo: Marcação)', name: 'checkbox', options: `; [Opções: ${$('#new_options').val()}]` },
+                            4: { text: '(Tipo: Múltipla escolha)', name: 'multiselect', options: `; [Opções: ${$('#new_options').val()}]` },
+                            5: { text: '(Tipo: CPF)', name: 'cpf' },
+                            6: { text: '(Tipo: CNPJ)', name: 'cnpj' },
+                            7: { text: '(Tipo: Data)', name: 'date' },
+                            8: { text: '(Tipo: Telefone)', name: 'phone' },
+                            9: { text: '(Tipo: Número inteiro)', name: 'integer', options: `; [Opções: ${$('#val_min').val()}|${$('#val_max').val()}]` },
+                            10: { text: '(Tipo: Número decimal)', name: 'decimal', options: `; [Opções: ${$('#val_min').val()}|${$('#val_max').val()}]` },
+                            11: { text: '(Tipo: Arquivo)', name: 'file' },
+                            12: { text: '(Tipo: Textarea (+ de 200 caracteres))', name: 'textarea' },
+                            13: { text: '(Tipo: E-mail)', name: 'new_email' },
+                            14: { text: '(Tipo: Estados (BRA))', name: 'states' }
+                        };
 
-                        $('#add_new_field').on('click', function() {
-                            const field = $('#question').val().trim();
-                            const option = $('#option').val();
-                            const optionText = $('#option option:selected').text();
-                            const required = $('#required').is(':checked');
-                            const unique = $('#unique').is(':checked');
+                        const config = fieldConfig[option] || {};
+                        const fieldText = `${field}; ${config.text}${config.options || ''}${required ? '; Obrigatório' : ''}${unique ? '; Único' : ''}`;
+                        fieldCount++;
 
-                            if (!field) {
-                                showToast('Por favor, preencha o nome do campo!', 'error');
-                                return;
-                            }
-
-                            const fieldConfig = {
-                                1: { text: '(Tipo: Texto (Até 200 caracteres))', name: 'text' },
-                                2: { text: '(Tipo: Seleção)', name: 'select', options: `; [Opções: ${$('#new_options').val()}]` },
-                                3: { text: '(Tipo: Marcação)', name: 'checkbox', options: `; [Opções: ${$('#new_options').val()}]` },
-                                4: { text: '(Tipo: Múltipla escolha)', name: 'multiselect', options: `; [Opções: ${$('#new_options').val()}]` },
-                                5: { text: '(Tipo: CPF)', name: 'cpf' },
-                                6: { text: '(Tipo: CNPJ)', name: 'cnpj' },
-                                7: { text: '(Tipo: Data)', name: 'date' },
-                                8: { text: '(Tipo: Telefone)', name: 'phone' },
-                                9: { text: '(Tipo: Número inteiro)', name: 'integer', options: `; [Opções: ${$('#val_min').val()}|${$('#val_max').val()}]` },
-                                10: { text: '(Tipo: Número decimal)', name: 'decimal', options: `; [Opções: ${$('#val_min').val()}|${$('#val_max').val()}]` },
-                                11: { text: '(Tipo: Arquivo)', name: 'file' },
-                                12: { text: '(Tipo: Textarea (+ de 200 caracteres))', name: 'textarea' },
-                                13: { text: '(Tipo: E-mail)', name: 'new_email' },
-                                14: { text: '(Tipo: Estados (BRA))', name: 'states' }
-                            };
-
-                            const config = fieldConfig[option] || {};
-                            const fieldText = `${field}; ${config.text}${config.options || ''}${required ? '; Obrigatório' : ''}${unique ? '; Único' : ''}`;
-                            fieldCount++;
-
-                            $('#card-new-field').append(`
-                                <div class="row mb-3">
-                                    <div class="col-9">
-                                        <label class="form-label">Campo ${fieldCount}${required ? '*' : ''}</label>
-                                        <input type="text" class="form-control new_field" name="new_field[]" value="${fieldText}" readonly>
-                                        <input type="hidden" name="new_field_id[]" value="">
-                                    </div>
-                                    <div class="col-3 d-flex align-items-end">
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-secondary btn-sm up me-1" title="Mover para cima">
-                                                <i class="fas fa-arrow-up"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
-                                                <i class="fas fa-arrow-down"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                        $('#card-new-field').append(`
+                            <div class="row mb-3">
+                                <div class="col-9">
+                                    <label class="form-label">Campo ${fieldCount}${required ? '*' : ''}</label>
+                                    <input type="text" class="form-control new_field" name="new_field[]" value="${fieldText}" readonly>
+                                    <input type="hidden" name="new_field_id[]" value="">
                                 </div>
-                            `);
-
-                            $('#question, #new_options, #val_min, #val_max').val('');
-                            $('#option').prop('selectedIndex', 0);
-                            $('#required, #unique').prop('checked', false);
-                            updateFieldNumbers();
-                        });
-
-                        $(document).on('click', '.btn-remove-field', function() {
-                            $(this).closest('.row.mb-3').remove();
-                            fieldCount--;
-                            updateFieldNumbers();
-                        });
-
-                        $(document).on('click', '.up', function() {
-                            const $row = $(this).closest('.row.mb-3');
-                            $row.insertBefore($row.prev());
-                            updateFieldNumbers();
-                        });
-
-                        $(document).on('click', '.down', function() {
-                            const $row = $(this).closest('.row.mb-3');
-                            $row.insertAfter($row.next());
-                            updateFieldNumbers();
-                        });
-
-                        updateFieldNumbers();
-                    }
-
-                    // Initialize date adding
-                    function initDateAdding() {
-                        $('#add-date').on('click', function() {
-                            const index = $('.row.mb-3[data-date-index]').length;
-                            $('#card-date').append(`
-                                <div class="row mb-3 g-3" data-date-index="${index}">
-                                    <input type="hidden" name="date_id[]" value="">
-                                    <div class="col-md-3 pe-3">
-                                        <label for="datetimepicker_day_${index}" class="form-label">Data <span class="text-danger">*</span></label>
-                                        <div class="input-group date" id="datetimepicker_day_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_day" name="date[]" autocomplete="off" required>
-                                            <span class="input-group-text">
-                                                <i class="fas fa-calendar"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 pe-3">
-                                        <label for="datetimepicker_begin_${index}" class="form-label">Hora início <span class="text-danger">*</span></label>
-                                        <div class="input-group date" id="datetimepicker_begin_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" autocomplete="off" required>
-                                            <span class="input-group-text">
-                                                <i class="fas fa-clock"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 pe-3">
-                                        <label for="datetimepicker_end_${index}" class="form-label">Hora fim <span class="text-danger">*</span></label>
-                                        <div class="input-group date" id="datetimepicker_end_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" autocomplete="off" required>
-                                            <span class="input-group-text">
-                                                <i class="fas fa-clock"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">&nbsp;</label>
-                                        <button type="button" class="btn btn-danger d-block remove-date">
-                                            <i class="fas fa-trash"></i> Remover
+                                <div class="col-3 d-flex align-items-end">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btn-sm up me-1" title="Mover para cima">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
+                                            <i class="fas fa-arrow-down"></i>
                                         </button>
                                     </div>
                                 </div>
-                            `);
-                        });
+                            </div>
+                        `);
 
-                        $(document).on('click', '.remove-date', function() {
-                            $(this).closest('.row.mb-3').remove();
-                        });
-                    }
+                        $('#question, #new_options, #val_min, #val_max').val('');
+                        $('#option').prop('selectedIndex', 0);
+                        $('#required, #unique').prop('checked', false);
+                        updateFieldNumbers();
+                    });
 
-                    // Initialize Mercado Pago handling
-                    function initMercadoPago() {
-                        const $formMercadoPago = $('#form_mercadopago');
-                        const $linkAccButton = $('#link-acc-button');
-                        const $linkedAccLabel = $('#linked-acc-label');
+                    $(document).on('click', '.btn-remove-field', function() {
+                        $(this).closest('.row.mb-3').remove();
+                        fieldCount--;
+                        updateFieldNumbers();
+                    });
 
-                        $('input[name="paid"]').on('change', function() {
-                            $formMercadoPago.toggleClass('d-none', this.value !== '0');
-                            if (this.value === '0' && $linkAccButton.attr('data-linked') === 'false') {
-                                const intervalId = setInterval(() => {
-                                    $.get('/webhooks/mercado-pago/check-linked-account')
-                                        .done(data => {
-                                            if (data.linked) {
-                                                clearInterval(intervalId);
-                                                $linkedAccLabel.text(`ID da Conta Vinculada: ${data.id}`);
-                                                $linkAccButton.removeClass('btn-success').addClass('btn-secondary').text('Vincular outra conta').attr('data-linked', 'true');
-                                            }
-                                        })
-                                        .fail(error => console.error('Erro ao verificar conta Mercado Pago:', error));
-                                }, 5000);
-                            }
-                        });
-                    }
+                    $(document).on('click', '.up', function() {
+                        const $row = $(this).closest('.row.mb-3');
+                        $row.insertBefore($row.prev());
+                        updateFieldNumbers();
+                    });
 
-                    // Initialize all functionality
-                    initSummernote();
-                    initFormValidation();
-                    initDateTimePickers();
-                    initNameValidation();
-                    initSlugValidation();
-                    initCategoryArea();
-                    initStateCity();
-                    initPlaceAutocomplete();
-                    initDynamicFields();
-                    initDateAdding();
-                    initMercadoPago();
-                });
-            </script>
-        @endpush
+                    $(document).on('click', '.down', function() {
+                        const $row = $(this).closest('.row.mb-3');
+                        $row.insertAfter($row.next());
+                        updateFieldNumbers();
+                    });
+
+                    updateFieldNumbers();
+                }
+
+                // Initialize date adding
+                function initDateAdding() {
+                    $('#add-date').on('click', function() {
+                        const index = $('.row.mb-3[data-date-index]').length;
+                        $('#card-date').append(`
+                            <div class="row mb-3 g-3" data-date-index="${index}">
+                                <input type="hidden" name="date_id[]" value="">
+                                <div class="col-md-3 pe-3">
+                                    <label for="datetimepicker_day_${index}" class="form-label">Data <span class="text-danger">*</span></label>
+                                    <div class="input-group date" id="datetimepicker_day_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                        <input type="text" class="form-control datetimepicker-input datetimepicker_day" name="date[]" autocomplete="off" required>
+                                        <span class="input-group-text">
+                                            <i class="fas fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 pe-3">
+                                    <label for="datetimepicker_begin_${index}" class="form-label">Hora início <span class="text-danger">*</span></label>
+                                    <div class="input-group date" id="datetimepicker_begin_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                        <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" autocomplete="off" required>
+                                        <span class="input-group-text">
+                                            <i class="fas fa-clock"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 pe-3">
+                                    <label for="datetimepicker_end_${index}" class="form-label">Hora fim <span class="text-danger">*</span></label>
+                                    <div class="input-group date" id="datetimepicker_end_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                        <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" autocomplete="off" required>
+                                        <span class="input-group-text">
+                                            <i class="fas fa-clock"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-danger d-block remove-date">
+                                        <i class="fas fa-trash"></i> Remover
+                                    </button>
+                                </div>
+                            </div>
+                        `);
+                    });
+
+                    $(document).on('click', '.remove-date', function() {
+                        $(this).closest('.row.mb-3').remove();
+                    });
+                }
+
+                // Initialize Mercado Pago handling
+                function initMercadoPago() {
+                    const $formMercadoPago = $('#form_mercadopago');
+                    const $linkAccButton = $('#link-acc-button');
+                    const $linkedAccLabel = $('#linked-acc-label');
+
+                    $('input[name="paid"]').on('change', function() {
+                        $formMercadoPago.toggleClass('d-none', this.value !== '0');
+                        if (this.value === '0' && $linkAccButton.attr('data-linked') === 'false') {
+                            const intervalId = setInterval(() => {
+                                $.get('/webhooks/mercado-pago/check-linked-account')
+                                    .done(data => {
+                                        if (data.linked) {
+                                            clearInterval(intervalId);
+                                            $linkedAccLabel.text(`ID da Conta Vinculada: ${data.id}`);
+                                            $linkAccButton.removeClass('btn-success').addClass('btn-secondary').text('Vincular outra conta').attr('data-linked', 'true');
+                                        }
+                                    })
+                                    .fail(error => console.error('Erro ao verificar conta Mercado Pago:', error));
+                            }, 5000);
+                        }
+                    });
+                }
+
+                // Initialize all functionality
+                initSummernote();
+                initFormValidation();
+                initDateTimePickers();
+                initNameValidation();
+                initSlugValidation();
+                initCategoryArea();
+                initStateCity();
+                initPlaceAutocomplete();
+                initDynamicFields();
+                initDateAdding();
+                initMercadoPago();
+            });
+        </script>
+    @endpush
 </x-site-layout>
