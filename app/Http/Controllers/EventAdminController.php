@@ -191,6 +191,44 @@ class EventAdminController extends Controller
         return view('painel_admin.create_event', compact('categories', 'states', 'options', 'event', 'place', 'dates', 'questions', 'mercadoPagoLinked'));
     }
 
+    public function updateEvent(Request $request, $hash)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Localiza o evento pelo hash e garante que esteja na sessão
+            $event = Event::where('hash', $hash)->firstOrFail();
+            $request->session()->put('event', $event);
+            $request->session()->put('event_id', $event->id);
+
+            // Atualiza dados principais do evento
+            $event = $this->saveEvent($request);
+
+            // Atualiza/relaciona lugar, datas e perguntas
+            $this->savePlace($request, $event);
+            $this->saveEventDates($request, $event);
+            $this->saveQuestions($request, $event);
+            $this->saveUserAdmin($request, $event);
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::error('Erro ao atualizar evento: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'hash' => $hash,
+                'request_data' => $request->except(['password']),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Erro ao atualizar evento: ' . $e->getMessage()]);
+        }
+
+        return redirect()->route('event_home.create.step.two');
+    }
+
     public function createEventLink(Request $request)
     {
         $request->session()->forget([
