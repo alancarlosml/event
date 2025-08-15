@@ -24,9 +24,16 @@ class Place extends Model
         'status',
     ];
 
+    // Canonical relationship: place belongs to a city
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
+    // Backward-compatible alias (typo kept intentionally)
     public function cite()
     {
-        return $this->belongsTo(City::class);
+        return $this->city();
     }
 
     public function events()
@@ -34,10 +41,16 @@ class Place extends Model
         return $this->hasMany(Event::class);
     }
 
+    // Backward-compatible helper: return the actual City model
     public function get_city()
     {
-        return City::join('states', 'cities.uf', '=', 'states.id')
-            ->where('cities.id', $this->city_id)
-            ->selectRaw('cities.name, states.uf')->first();
+        // Ensure callers like $place->get_city()->name receive a model, not a Relation
+        return $this->city; // lazy-loads the related City model
+    }
+
+    // Accessor to allow usage like $place->get_city->name
+    public function getGetCityAttribute()
+    {
+        return $this->city;
     }
 }

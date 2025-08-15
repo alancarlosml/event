@@ -10,7 +10,7 @@
                         <li>
                             <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                         </li>
-                        <li><span><b>Local</b> {{ $event->place->name }}, {{ $event->place->get_city()->name }}-{{ $event->place->get_city()->uf }}</span></li>
+                        <li><span><b>Local</b> {{ $event->place->name }}, {{ optional($event->place->get_city)->name }}-{{ optional($event->place->get_city)->uf }}</span></li>
                     </ul>
                 </div>
                 <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">

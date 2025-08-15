@@ -261,13 +261,13 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group col-md-5">
-                                        <label for="state">Estado*</label>
-                                        <select id="state" class="form-control" name="state" @if($event->place) readonly @endif required>
-                                            <option>Selecione</option>
-                                            @foreach ($states as $state)
-                                                <option value="{{$state->id}}" @if(isset($event->place)) @if($event->place->get_city()->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
-                                            @endforeach
-                                        </select>
+                                         <label for="state">Estado*</label>
+                                         <select id="state" class="form-control" name="state" @if($event->place) readonly @endif required>
+                                             <option>Selecione</option>
+                                             @foreach ($states as $state)
+                                                 <option value="{{$state->id}}" @if(isset($event->place)) @if(optional($event->place->get_city)->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
+                                             @endforeach
+                                         </select>
                                     </div>
                                     <div class="form-group col-md-5">
                                         <label for="city">Cidade*</label>

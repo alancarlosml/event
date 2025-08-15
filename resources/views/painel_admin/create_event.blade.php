@@ -4,10 +4,15 @@
         <section class="breadcrumbs">
             <div class="container">
                 <ol class="breadcrumb">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/painel/meus-eventos">Meus eventos</a></li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/painel/meus-eventos">Meus eventos</a></li>
+                    @if(isset($event) && $event->id)
+                    <li class="breadcrumb-item active">Editar evento</li>
+                    @else
+                    <li class="breadcrumb-item active">Novo evento</li>
+                    @endif
                 </ol>
-                <h2>Gerenciar evento</h2>
+                <h2>@if(isset($event) && $event->id) Editar @else Criar @endif evento</h2>
             </div>
         </section><!-- End Breadcrumbs -->
 
@@ -39,7 +44,15 @@
                         <li class="nav-item" id="payment"><strong>Cupons</strong></li>
                         <li class="nav-item" id="confirm"><strong>Publicar</strong></li>
                     </ul>
-                    <form method="POST" action="{{ route('event_home.create.step.one') }}" class="needs-validation" novalidate>
+                    @php
+                        $isEdit = isset($event) && $event->id;
+                        $formAction = $isEdit ? route('event_home.my_events_edit.update', $event->hash) : route('event_home.create.step.one');
+                        $formMethod = $isEdit ? 'PUT' : 'POST';
+                    @endphp
+                    <form method="POST" action="{{ $formAction }}" class="needs-validation" novalidate>
+                        @if($isEdit)
+                            @method('PUT')
+                        @endif
                         @csrf
                         <div class="card-body">
                             <h4>Sobre o evento</h4>
@@ -49,21 +62,39 @@
                                 <div class="invalid-feedback" id="name-error"></div>
                             </div>
                             <div class="mb-3">
-                                <label for="slug" class="form-label">URL do evento <span class="text-danger">*</span></label>
+                                <label for="slug" class="form-label">URL personalizada <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text">https://www.ticketdz6.com.br/</span>
-                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="URL do evento" value="{{ $event->slug ?? old('slug') }}" required>
+                                    <span class="input-group-text">{{ config('app.url') }}</span>
+                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="url-personalizada" value="{{ $event->slug ?? old('slug') }}" {{ $isEdit ? 'readonly' : 'required' }}>
                                 </div>
-                                <div class="invalid-feedback d-none" id="slugHelp">Essa URL já está em uso, por favor, selecione outra.</div>
+                                @if($isEdit)
+                                    <small class="form-text text-muted">A URL não pode ser alterada após a criação do evento.</small>
+                                @endif
                                 <div class="invalid-feedback" id="slug-error"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="subtitle" class="form-label">Subtítulo</label>
-                                <input type="text" class="form-control" id="subtitle" name="subtitle" placeholder="Subtítulo" value="{{ $event->subtitle ?? old('subtitle') }}">
+                                <input type="text" class="form-control" id="subtitle" name="subtitle" placeholder="Subtítulo do evento (opcional)" value="{{ $event->subtitle ?? old('subtitle') }}">
+                            </div>
+                            @if($isEdit && $event->banner)
+                            <div class="mb-3">
+                                <label class="form-label">Banner atual</label>
+                                <div>
+                                    <img src="{{ asset('storage/' . $event->banner) }}" alt="Banner do evento" class="img-fluid mb-2" style="max-height: 200px;">
+                                </div>
+                            </div>
+                            @endif
+                            <div class="mb-3">
+                                <label for="banner" class="form-label">{{ $isEdit ? 'Alterar banner' : 'Banner do evento' }}</label>
+                                <input class="form-control" type="file" id="banner" name="banner" accept="image/*">
                             </div>
                             <div class="mb-3">
-                                <label for="description" class="form-label">Descrição <span class="text-danger">*</span></label>
+                                <label for="description" class="form-label">Descrição do evento <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="description" name="description" required>{{ $event->description ?? old('description') }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">E-mail de contato <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="contact" name="contact" placeholder="contato@exemplo.com" value="{{ $event->contact ?? old('contact') }}" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-3 mb-3">
@@ -102,91 +133,100 @@
 
                         <div class="card-body" id="card-date">
                             <h4>Data e hora do evento</h4>
-                            @if(isset($eventDate))
-                                @foreach ($eventDate as $date)
-                                    <div class="row mb-3">
-                                        <div class="col-md-3">
-                                            <label for="datetimepicker_day_{{ $loop->index }}" class="form-label">Data</label>
-                                            <div class="input-group" data-target-input="nearest">
-                                                <input class="form-control datetimepicker-input datetimepicker_day" id="datetimepicker_day_{{ $loop->index }}" name="date[]" value="{{ $date['date'] }}" autocomplete="off" required>
-                                                <span class="input-group-text" data-target="#datetimepicker_day_{{ $loop->index }}" data-toggle="datetimepicker">
-                                                    <i class="fa fa-calendar"></i>
+                            @php
+                                // Para compatibilidade com o formato antigo
+                                $eventDates = $dates ?? ($eventDate ?? []);
+                            @endphp
+                            @if(count($eventDates) > 0)
+                                @foreach ($eventDates as $index => $date)
+                                    @php
+                                        $rawDate = is_object($date) ? ($date->date ?? null) : ($date['date'] ?? null);
+                                        if ($rawDate instanceof \Carbon\Carbon) {
+                                            $dateValue = $rawDate->format('d/m/Y');
+                                        } else {
+                                            $dateValue = is_string($rawDate) ? $rawDate : '';
+                                        }
+                                        $timeBegin = is_object($date) ? ($date->time_begin ?? '') : ($date['time_begin'] ?? '');
+                                        $timeEnd = is_object($date) ? ($date->time_end ?? '') : ($date['time_end'] ?? '');
+                                        $dateId = is_object($date) ? ($date->id ?? '') : ($date['id'] ?? '');
+                                    @endphp
+                                    <div class="row mb-3 g-3" data-date-index="{{ $index }}">
+                                        <input type="hidden" name="date_id[]" value="{{ $dateId }}">
+                                        <div class="col-md-3 pe-3">
+                                            <label for="datetimepicker_day_{{$index}}" class="form-label">Data <span class="text-danger">*</span></label>
+                                            <div class="input-group date" id="datetimepicker_day_{{$index}}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                                <input type="text" class="form-control datetimepicker-input datetimepicker_day" name="date[]" value="{{ $dateValue }}" autocomplete="off" required>
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-calendar"></i>
                                                 </span>
                                             </div>
-                                            <input type="hidden" name="date_id[]" value="{{ $date['id'] }}">
-                                            <div class="invalid-feedback">Selecione uma data.</div>
+                                        </div>
+                                        <div class="col-md-2 pe-3">
+                                            <label for="datetimepicker_begin_{{$index}}" class="form-label">Hora início <span class="text-danger">*</span></label>
+                                            <div class="input-group date" id="datetimepicker_begin_{{$index}}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                                <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" value="{{ $timeBegin }}" autocomplete="off" required>
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-clock"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 pe-3">
+                                            <label for="datetimepicker_end_{{$index}}" class="form-label">Hora fim <span class="text-danger">*</span></label>
+                                            <div class="input-group date" id="datetimepicker_end_{{$index}}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                                <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" value="{{ $timeEnd }}" autocomplete="off" required>
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-clock"></i>
+                                                </span>
+                                            </div>
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="datetimepicker_hour_begin_{{ $loop->index }}" class="form-label">Hora início</label>
-                                            <div class="input-group" data-target-input="nearest">
-                                                <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" id="datetimepicker_hour_begin_{{ $loop->index }}" name="time_begin[]" value="{{ $date['time_begin'] }}" autocomplete="off" required>
-                                                <span class="input-group-text" data-target="#datetimepicker_hour_begin_{{ $loop->index }}" data-toggle="datetimepicker">
-                                                    <i class="fa-regular fa-clock"></i>
-                                                </span>
-                                            </div>
-                                            <div class="invalid-feedback">Selecione a hora de início.</div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label for="datetimepicker_hour_end_{{ $loop->index }}" class="form-label">Hora fim</label>
-                                            <div class="input-group" data-target-input="nearest">
-                                                <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" id="datetimepicker_hour_end_{{ $loop->index }}" name="time_end[]" value="{{ $date['time_end'] }}" autocomplete="off" required>
-                                                <span class="input-group-text" data-target="#datetimepicker_hour_end_{{ $loop->index }}" data-toggle="datetimepicker">
-                                                    <i class="fa-regular fa-clock"></i>
-                                                </span>
-                                            </div>
-                                            <div class="invalid-feedback">Selecione a hora de fim.</div>
-                                        </div>
-                                        @if ($loop->first)
-                                            <div class="col-md-2">
-                                                <button type="button" class="btn btn-success btn-sm" id="cmd" style="margin-top: 35px;">
-                                                    <i class="fa-solid fa-plus"></i> Adicionar novo
+                                            <label class="form-label">&nbsp;</label>
+                                            @if($index === 0)
+                                                <button type="button" class="btn btn-primary d-block" id="add-date">
+                                                    <i class="fas fa-plus"></i> Adicionar
                                                 </button>
-                                            </div>
-                                        @else
-                                            <div class="col-md-2">
-                                                <button type="button" class="btn btn-danger btn-sm btn-remove" style="margin-top: 35px;">
-                                                    <i class="fa-solid fa-trash"></i> Remover
+                                            @else
+                                                <button type="button" class="btn btn-danger d-block remove-date">
+                                                    <i class="fas fa-trash"></i> Remover
                                                 </button>
-                                            </div>
-                                        @endif
+                                            @endif
+                                        </div>
                                     </div>
                                 @endforeach
                             @else
-                                <div class="row mb-3">
-                                    <div class="col-md-3">
+                                <div class="row mb-3 g-3" data-date-index="0">
+                                    <input type="hidden" name="date_id[]" value="">
+                                    <div class="col-md-3 pe-3">
                                         <label for="datetimepicker_day_0" class="form-label">Data <span class="text-danger">*</span></label>
-                                        <div class="input-group" data-target-input="nearest">
-                                            <input class="form-control datetimepicker-input datetimepicker_day" id="datetimepicker_day_0" name="date[]" value="" autocomplete="off" required>
-                                            <span class="input-group-text" data-toggle="datetimepicker">
-                                                <i class="fa fa-calendar"></i>
+                                        <div class="input-group date" id="datetimepicker_day_0" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_day" name="date[]" autocomplete="off" required>
+                                            <span class="input-group-text">
+                                                <i class="fas fa-calendar"></i>
                                             </span>
                                         </div>
-                                        <input type="hidden" name="date_id[]" value="">
-                                        <div class="invalid-feedback">Selecione uma data.</div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <label for="datetimepicker_hour_begin_0" class="form-label">Hora início <span class="text-danger">*</span></label>
-                                        <div class="input-group" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" id="datetimepicker_hour_begin_0" name="time_begin[]" value="" autocomplete="off" required>
-                                            <span class="input-group-text" data-toggle="datetimepicker">
-                                                <i class="fa-regular fa-clock"></i>
+                                    <div class="col-md-2 pe-3">
+                                        <label for="datetimepicker_begin_0" class="form-label">Hora início <span class="text-danger">*</span></label>
+                                        <div class="input-group date" id="datetimepicker_begin_0" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" autocomplete="off" required>
+                                            <span class="input-group-text">
+                                                <i class="fas fa-clock"></i>
                                             </span>
                                         </div>
-                                        <div class="invalid-feedback">Selecione a hora de início.</div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <label for="datetimepicker_hour_end_0" class="form-label">Hora fim <span class="text-danger">*</span></label>
-                                        <div class="input-group" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" id="datetimepicker_hour_end_0" name="time_end[]" value="" autocomplete="off" required>
-                                            <span class="input-group-text" data-toggle="datetimepicker">
-                                                <i class="fa-regular fa-clock"></i>
+                                    <div class="col-md-2 pe-3">
+                                        <label for="datetimepicker_end_0" class="form-label">Hora fim <span class="text-danger">*</span></label>
+                                        <div class="input-group date" id="datetimepicker_end_0" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" autocomplete="off" required>
+                                            <span class="input-group-text">
+                                                <i class="fas fa-clock"></i>
                                             </span>
                                         </div>
-                                        <div class="invalid-feedback">Selecione a hora de fim.</div>
                                     </div>
                                     <div class="col-md-2">
-                                        <button type="button" class="btn btn-success btn-sm" id="cmd" style="margin-top: 35px;">
-                                            <i class="fa-solid fa-plus"></i> Adicionar novo
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="button" class="btn btn-primary d-block" id="add-date">
+                                            <i class="fas fa-plus"></i> Adicionar
                                         </button>
                                     </div>
                                 </div>
@@ -196,66 +236,72 @@
 
                         <div class="card-body">
                             <h4>Endereço do evento</h4>
-                            <div class="row mb-3">
-                                <div class="col-md-10">
+                            <div class="row mb-3 g-3">
+                                <div class="col-md-10 pe-3">
                                     <label for="place_name" class="form-label">Local <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{ $place->name ?? old('place_name') }}" required>
-                                    <div class="form-text">Comece a digitar para buscar o local do evento, caso não o encontre, preencha os campos deste formulário.</div>
-                                    <div class="invalid-feedback">Insira o nome do local.</div>
+                                    <input type="text" class="form-control" id="place_name" name="place_name" placeholder="Local" value="{{ $event->place->name ?? old('place_name') }}" required>
+                                    <small id="place_nameHelp" class="form-text text-muted">Comece a digitar para buscar o local do evento, caso não o encontre, preencha os campos deste formulário.</small>
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="form-label d-block">&nbsp;</label>
-                                    <button type="button" class="btn btn-warning btn-sm" id="add_place" style="margin-top: 6px">Limpar campos</button>
-                                </div>
+                                    <label class="form-label">&nbsp;</label><br>
+                                    <a class="btn btn-warning btn-sm" id="add_place" href="javascript:;">
+                                        Limpar campos
+                                    </a>
+                                </div>  
                             </div>
                             <div id="event_address">
-                                <div class="row mb-3">
-                                    <div class="col-md-10">
+                                <div class="row mb-3 g-3">
+                                    <div class="col-md-10 pe-3">
                                         <label for="address" class="form-label">Rua <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="address" name="address" placeholder="Rua" @if($place) readonly @endif value="{{ $place->address ?? old('address') }}" required>
-                                        <div class="invalid-feedback">Insira a rua.</div>
+                                        <input type="text" class="form-control" id="address" name="address" placeholder="Rua" @if(isset($event->place)) readonly @endif value="{{ $event->place->address ?? old('address') }}" required>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 pe-3">
                                         <label for="number" class="form-label">Número <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="number" name="number" placeholder="Número" @if($place) readonly @endif value="{{ $place->number ?? old('number') }}" required>
-                                        <div class="invalid-feedback">Insira o número.</div>
+                                        <input type="text" class="form-control" id="number" name="number" placeholder="Número" @if(isset($event->place)) readonly @endif value="{{ $event->place->number ?? old('number') }}" required>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="district" class="form-label">Bairro <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="district" name="district" placeholder="Bairro" @if($place) readonly @endif value="{{ $place->district ?? old('district') }}" required>
-                                    <div class="invalid-feedback">Insira o bairro.</div>
+                                <div class="row mb-3 g-3">
+                                    <div class="col-md-6 pe-3">
+                                        <label for="district" class="form-label">Bairro <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="district" name="district" placeholder="Bairro" @if(isset($event->place)) readonly @endif value="{{ $event->place->district ?? old('district') }}" required>
+                                    </div>
+                                    <div class="col-md-6 pe-3">
+                                        <label for="complement" class="form-label">Complemento</label>
+                                        <input type="text" class="form-control" id="complement" name="complement" placeholder="Complemento" @if(isset($event->place)) readonly @endif value="{{ $event->place->complement ?? old('complement') }}">
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="complement" class="form-label">Complemento</label>
-                                    <input type="text" class="form-control" id="complement" name="complement" placeholder="Complemento" @if($place) readonly @endif value="{{ $place->complement ?? old('complement') }}">
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-5">
+                                <div class="row mb-3 g-3">
+                                    <div class="col-md-5 pe-3">
                                         <label for="state" class="form-label">Estado <span class="text-danger">*</span></label>
-                                        <select id="state" class="form-select" name="state" @if($place) disabled @endif required>
+                                        <select id="state" class="form-select" name="state" @if(isset($event->place)) disabled @endif required>
                                             <option value="">Selecione</option>
                                             @foreach ($states as $state)
-                                                <option value="{{ $state->id }}" @if(isset($place) && $place->get_city()->uf == $state->uf) selected @endif>{{ $state->name }}</option>
+                                                <option value="{{$state->id}}"
+                                                    @if(isset($event->place) && optional($event->place->get_city)->uf == $state->id)
+                                                        selected
+                                                    @endif>
+                                                    {{$state->name}}
+                                                </option>
                                             @endforeach
                                         </select>
-                                        <div class="invalid-feedback">Selecione um estado.</div>
                                     </div>
-                                    <div class="col-md-5">
+                                    <div class="col-md-5 pe-3">
                                         <label for="city" class="form-label">Cidade <span class="text-danger">*</span></label>
-                                        <select id="city" class="form-select" name="city_id" @if($place) disabled @endif required>
+                                        <select id="city" class="form-select" name="city_id" @if(isset($event->place)) disabled @endif required>
                                             <option value="">Selecione</option>
-                                            <option>...</option>
+                                            @if(isset($event->place) && $event->place->get_city)
+                                                <option value="{{ $event->place->city_id }}" selected>
+                                                    {{ optional($event->place->get_city)->name }}
+                                                </option>
+                                            @endif
                                         </select>
-                                        <div class="invalid-feedback">Selecione uma cidade.</div>
-                                        <input type="hidden" name="city_id_hidden" id="city_id_hidden" value="{{ $place->city_id ?? '' }}">
+                                        <input type="hidden" name="city_id_hidden" id="city_id_hidden" value="{{ $event->place->city_id ?? '' }}">
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 pe-3">
                                         <label for="zip" class="form-label">CEP <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="zip" name="zip" placeholder="CEP" @if($place) readonly @endif value="{{ $place->zip ?? old('zip') }}" required>
-                                        <div class="invalid-feedback">Insira o CEP.</div>
+                                        <input type="text" class="form-control" id="zip" name="zip" placeholder="CEP" @if(isset($event->place)) readonly @endif value="{{ $event->place->zip ?? old('zip') }}" required>
                                     </div>
-                                    <input type="hidden" name="place_id_hidden" id="place_id_hidden" value="{{ $place->id ?? '' }}">
+                                    <input type="hidden" name="place_id_hidden" id="place_id_hidden" value="{{ $event->place->id ?? '' }}">
                                 </div>
                             </div>
                         </div>
@@ -266,13 +312,13 @@
                             <div class="card p-2 mb-3">
                                 <label for="question" class="form-label">Novo campo</label>
                                 <div class="row g-0">
-                                    <div class="col-md-5">
+                                    <div class="col-md-5" style="margin-right: 10px; margin-bottom: 10px">
                                         <input type="text" class="form-control" id="question" name="question" placeholder="Nome do campo">
                                     </div>
                                     <div class="col-md-5">
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
-                                                <select id="option" class="form-select" name="option" style="margin-left: 10px" required>
+                                                <select id="option" class="form-select" name="option" required>
                                                     @foreach ($options as $option)
                                                         <option value="{{ $option->id }}">{{ $option->option }}</option>
                                                     @endforeach
@@ -320,7 +366,7 @@
                                             @if($id < 2)
                                                 <div class="mb-3">
                                                     <label for="new_field_{{ $id }}" class="form-label">Campo {{ $id + 1 }}{{ $question->required == 1 ? '*' : '' }}</label>
-                                                    <input type="text" class="form-control" name="new_field[]" value="{{ $question->formatted_options }}" readonly>
+                                                    <input type="text" class="form-control new_field" name="new_field[]" value="{{ $question->formatted_options }}" readonly>
                                                     <input type="hidden" name="new_field_id[]" value="{{ $question->id }}">
                                                 </div>
                                             @else
@@ -366,702 +412,543 @@
                                         <label for="email_new_field" class="form-label">Campo 2*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
                                         <input type="hidden" name="new_field_id[]" value="">
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            <hr>
+
+                            <div class="card-body">
+                                <h4>Carteira de pagamento</h4>
+                                <div class="mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="paid" id="inlineRadio_mercadopago" value="0">
+                                        <label class="form-check-label" for="inlineRadio_mercadopago">Mercado Pago <a href="https://www.mercadopago.com.br/" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a></label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="paid" id="inlineRadio_nenhuma" value="1">
+                                        <label class="form-check-label" for="inlineRadio_nenhuma">Nenhuma (Evento gratuito)</label>
+                                    </div>
+                                </div>
+
+                                @if(isset($mercadoPagoLinked['linked']) && $mercadoPagoLinked['linked'])
+                                    <div class="mb-3 d-none" id="form_mercadopago">
+                                        <label for="contact" id="linked-acc-label" class="form-label">ID da Conta Vinculada: {{ $mercadoPagoLinked['id'] }}</label>
+                                        <br>
+                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri=" target="_blank" id="link-acc-button" data-linked="true" class="btn btn-secondary">Vincular outra conta</a>
+                                    </div>
+                                @else
+                                    <div class="mb-3 d-none" id="form_mercadopago">
+                                        <label for="contact" id="linked-acc-label" class="form-label">Vincular conta Mercado Pago</label>
+                                        <br>
+                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success">Vincular conta</a>
                                     </div>
                                 @endif
-                            </div>
-                        </div>
-                        <hr>
-
-                        <div class="card-body">
-                            <h4>Carteira de pagamento</h4>
-                            <div class="mb-3">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="paid" id="inlineRadio_mercadopago" value="0">
-                                    <label class="form-check-label" for="inlineRadio_mercadopago">Mercado Pago <a href="https://www.mercadopago.com.br/" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a></label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="paid" id="inlineRadio_nenhuma" value="1">
-                                    <label class="form-check-label" for="inlineRadio_nenhuma">Nenhuma (Evento gratuito)</label>
-                                </div>
+                                <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
                             </div>
 
-                            @if(isset($mercadoPagoLinked['linked']) && $mercadoPagoLinked['linked'])
-                                <div class="mb-3 d-none" id="form_mercadopago">
-                                    <label for="contact" id="linked-acc-label" class="form-label">ID da Conta Vinculada: {{ $mercadoPagoLinked['id'] }}</label>
-                                    <br>
-                                    <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri=" target="_blank" id="link-acc-button" data-linked="true" class="btn btn-secondary">Vincular outra conta</a>
-                                </div>
-                            @else
-                                <div class="mb-3 d-none" id="form_mercadopago">
-                                    <label for="contact" id="linked-acc-label" class="form-label">Vincular conta Mercado Pago</label>
-                                    <br>
-                                    <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success">Vincular conta</a>
-                                </div>
-                            @endif
-                            <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
-                        </div>
-
-                        <div class="card-footer text-end">
-                            <button type="submit" class="btn btn-primary">Próximo</button>
-                        </div>
-                    </form>
+                            <div class="card-footer text-end">
+                                <button type="submit" class="btn btn-primary">Próximo</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </section>
-    </main><!-- End #main -->
+            </section>
+        </main><!-- End #main -->
 
-    @push('head')
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
-        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
-    @endpush
+        @push('head')
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
+            <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
+        @endpush
 
-    @push('footer')
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
-        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        @push('footer')
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
+            <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-        <script>
-            $(document).ready(function() {
-                // Form validation
-                $('form.needs-validation').on('submit', function(e) {
-                    if (!this.checkValidity()) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        showToast('Por favor, corrija os erros no formulário.', 'error');
-                        $(this).addClass('was-validated');
-                        $('button[type="submit"]').prop('disabled', false).text('Próximo');
-                        return false;
-                    }
-                    $(this).addClass('was-validated');
-                    $('button[type="submit"]').prop('disabled', true).text('Salvando...');
-                });
-
-                $('#description').summernote({
-                    placeholder: 'Descreva em detalhes o evento',
-                    tabsize: 2,
-                    height: 200,
-                    codemirror: { theme: 'monokai' },
-                    toolbar: [
-                        ['font', ['bold', 'underline', 'clear']],
-                        ['color', ['color']],
-                        ['para', ['ul', 'ol', 'paragraph']],
-                        ['table', ['table']],
-                        ['insert', ['link', 'picture', 'video']],
-                        ['view', ['help']]
-                    ]
-                });
-
-                function debounce(func, wait) {
-                    let timeout;
-                    return function executedFunction(...args) {
-                        const context = this; // Capture the context (this)
-                        const later = () => {
+            <script>
+                $(document).ready(function() {
+                    // Utility function for debouncing
+                    function debounce(func, wait) {
+                        let timeout;
+                        return function(...args) {
+                            const context = this;
                             clearTimeout(timeout);
-                            func.apply(context, args); // Apply the correct context
+                            timeout = setTimeout(() => func.apply(context, args), wait);
                         };
-                        clearTimeout(timeout);
-                        timeout = setTimeout(later, wait);
-                    };
-                }
-
-                // Name validation
-                $('#name').on('blur keyup', debounce(function(e) {
-                    const name = $(this).val()?.trim() || ''; // Use optional chaining or fallback to empty string
-                    const $nameField = $(this);
-                    const $nameError = $('#name-error');
-
-                    if (name.length < 3) {
-                        $nameField.addClass('is-invalid');
-                        $nameError.text('Nome deve ter pelo menos 3 caracteres');
-                        return;
                     }
 
-                    if (name.length > 3) {
-                        $.get('{{ route('event_home.check_slug') }}', 
-                            { 'title': name }, 
-                            function(data) {
-                                $('#slug').val(data.slug);
-                                if (data.slug_exists == '1') {
-                                    $('#slug').addClass('is-invalid').removeClass('is-valid');
-                                    $('#slugHelp').removeClass('d-none');
-                                    showToast('Este slug já está em uso. Escolha outro.', 'warning');
-                                } else {
-                                    $('#slug').addClass('is-valid').removeClass('is-invalid');
-                                    $('#slugHelp').addClass('d-none');
-                                    showToast('Slug disponível!', 'success', null, 2000);
-                                }
+                    // Utility function to show toast notifications
+                    function showToast(message, type, title = null, timeout = 3000) {
+                        // Implementation of toast (assuming a toast library is used, e.g., Bootstrap toast)
+                        console.log(`[${type}] ${title || ''}: ${message}`);
+                        // Add actual toast implementation if needed
+                    }
+
+                    // Initialize Summernote editor
+                    function initSummernote() {
+                        try {
+                            $('#description').summernote({
+                                placeholder: 'Descreva em detalhes o evento',
+                                tabsize: 2,
+                                height: 200,
+                                codemirror: { theme: 'monokai' },
+                                toolbar: [
+                                    ['font', ['bold', 'underline', 'clear']],
+                                    ['color', ['color']],
+                                    ['para', ['ul', 'ol', 'paragraph']],
+                                    ['table', ['table']],
+                                    ['insert', ['link', 'picture', 'video']],
+                                    ['view', ['help']]
+                                ]
+                            });
+                        } catch (error) {
+                            console.error('Erro ao inicializar Summernote:', error);
+                        }
+                    }
+
+                    // Initialize form validation
+                    function initFormValidation() {
+                        $('form.needs-validation').on('submit', function(e) {
+                            if (!this.checkValidity()) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                showToast('Por favor, corrija os erros no formulário.', 'error');
+                                $(this).addClass('was-validated');
+                                $('button[type="submit"]').prop('disabled', false).text('Próximo');
+                                return false;
                             }
-                        ).fail(function() {
-                            showToast('Erro ao verificar slug. Tente novamente.', 'error');
+                            $(this).addClass('was-validated');
+                            $('button[type="submit"]').prop('disabled', true).text('Salvando...');
                         });
                     }
 
-                    $nameField.removeClass('is-invalid');
-                    $nameError.text('');
-                }, 500));
+                    // Initialize datetimepickers
+                    function initDateTimePickers() {
+                        $(document).on('focus', '.datetimepicker_day', function() {
+                            $(this).datetimepicker({
+                                timepicker: false,
+                                format: 'd/m/Y',
+                                mask: true,
+                                minDate: new Date(),
+                                lang: 'pt-BR'
+                            });
+                        });
 
-                // Slug validation
-                $('#slug').on('blur keyup', debounce(function() {
-                    const slug = $(this).val().trim();
-                    const $slugField = $(this);
-                    const $slugError = $('#slug-error');
+                        $(document).on('focus', '.datetimepicker_hour_begin', function() {
+                            $(this).datetimepicker({
+                                datepicker: false,
+                                format: 'H:i',
+                                mask: true
+                            });
+                        });
 
-                    if (slug.length < 2) {
-                        $slugField.addClass('is-invalid');
-                        $slugError.text('URL deve ter pelo menos 2 caracteres');
-                        return;
+                        $(document).on('focus', '.datetimepicker_hour_end', function() {
+                            $(this).datetimepicker({
+                                datepicker: false,
+                                format: 'H:i',
+                                mask: true
+                            });
+                        });
                     }
 
-                    if (slug.length > 2) {
-                        $.get('{{ route('event_home.create_slug') }}', { 'title': slug }, function(data) {
-                            if (data.slug_exists == '1') {
+                    // Initialize name validation
+                    function initNameValidation() {
+                        $('#name').on('blur keyup', debounce(function() {
+                            const name = $(this).val()?.trim() || '';
+                            const $nameField = $(this);
+                            const $nameError = $('#name-error');
+
+                            if (name.length < 3) {
+                                $nameField.addClass('is-invalid').removeClass('is-valid');
+                                $nameError.text('Nome deve ter pelo menos 3 caracteres');
+                                return;
+                            }
+
+                            $.get('{{ route('event_home.check_slug') }}', { title: name })
+                                .done(data => {
+                                    $('#slug').val(data.slug);
+                                    if (data.slug_exists == '1') {
+                                        $('#slug').addClass('is-invalid').removeClass('is-valid');
+                                        showToast('Este slug já está em uso. Escolha outro.', 'warning');
+                                    } else {
+                                        $('#slug').addClass('is-valid').removeClass('is-invalid');
+                                        showToast('Slug disponível!', 'success', null, 2000);
+                                    }
+                                })
+                                .fail(() => showToast('Erro ao verificar slug. Tente novamente.', 'error'));
+
+                            $nameField.removeClass('is-invalid');
+                            $nameError.text('');
+                        }, 500));
+                    }
+
+                    // Initialize slug validation
+                    function initSlugValidation() {
+                        $('#slug').on('blur keyup', debounce(function() {
+                            const slug = $(this).val().trim();
+                            const $slugField = $(this);
+                            const $slugError = $('#slug-error');
+
+                            if (slug.length < 2) {
                                 $slugField.addClass('is-invalid').removeClass('is-valid');
-                                $slugError.text('Esta URL já está em uso');
-                                showToast('Este slug já está em uso. Escolha outro.', 'warning');
-                            } else {
-                                $slugField.addClass('is-valid').removeClass('is-invalid');
-                                $slugError.text('');
-                                showToast('Slug disponível!', 'success', null, 2000);
+                                $slugError.text('URL deve ter pelo menos 2 caracteres');
+                                return;
                             }
-                        }).fail(function() {
-                            showToast('Erro ao verificar slug. Tente novamente.', 'error');
-                        });
-                    }
-                }, 500));
 
-                $('#category').on('change', function() {
-                    try {
-                        const category_id = this.value;
-                        if (category_id !== undefined && category_id !== null) {
-                            $("#area_id").html('');
-
-                            if (category_id) {
-                                $.ajax({
-                                    url: "{{ route('event_home.get_areas_by_category') }}",
-                                    type: "POST",
-                                    data: { category_id: category_id, _token: '{{ csrf_token() }}' },
-                                    dataType: 'json',
-                                    success: function(result) {
-                                        $('#area_id').html('<option value="">Selecione</option>');
-                                        $.each(result.areas, function(key, value) {
-                                            $("#area_id").append('<option value="' + value.id + '">' + value.name + '</option>');
-                                        });
-                                        if (result.areas.length > 0) {
-                                            showToast(`${result.areas.length} área(s) encontrada(s)`, 'info', null, 2000);
-                                        } else {
-                                            showToast('Nenhuma área encontrada para esta categoria', 'warning');
-                                        }
-                                    },
-                                    error: function() {
-                                        showToast('Erro ao carregar áreas. Tente novamente.', 'error');
+                            $.get('{{ route('event_home.create_slug') }}', { title: slug })
+                                .done(data => {
+                                    if (data.slug_exists == '1') {
+                                        $slugField.addClass('is-invalid').removeClass('is-valid');
+                                        $slugError.text('Esta URL já está em uso');
+                                        showToast('Este slug já está em uso. Escolha outro.', 'warning');
+                                    } else {
+                                        $slugField.addClass('is-valid').removeClass('is-invalid');
+                                        $slugError.text('');
+                                        showToast('Slug disponível!', 'success', null, 2000);
                                     }
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Erro ao processar mudança de categoria:', error);
+                                })
+                                .fail(() => showToast('Erro ao verificar slug. Tente novamente.', 'error'));
+                        }, 500));
                     }
-                });
 
-                $('input[name="paid"]').on('change', function() {
-                    try {
-                        const value = $(this).val();
-                        if (value !== undefined && value !== null) {
-                            if (value == 0) {
-                                $('#form_mercadopago').removeClass('d-none');
-                            } else {
-                                $('#form_mercadopago').addClass('d-none');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Erro ao processar mudança de pagamento:', error);
-                    }
-                });
-
-                // Verificar se o elemento category existe antes de tentar acessar seu valor
-                if ($("#category").length > 0) {
-                    const category_id = $("#category").val();
-                    $("#area_id").html('');
-                    $.ajax({
-                        url: "{{ route('event_home.get_areas_by_category') }}",
-                        type: "POST",
-                        data: { category_id: category_id, _token: '{{ csrf_token() }}' },
-                        dataType: 'json',
-                        success: function(result) {
-                            $('#area_id').html('<option value="">Selecione</option>');
-                            const area_id = $('#area_id_hidden').val();
-                            $.each(result.areas, function(key, value) {
-                                $("#area_id").append('<option value="' + value.id + '">' + value.name + '</option>');
+                    // Initialize category and area handling
+                    function initCategoryArea() {
+                        function loadAreas(categoryId) {
+                            if (!categoryId) return;
+                            $.ajax({
+                                url: "{{ route('event_home.get_areas_by_category') }}",
+                                type: "POST",
+                                data: { category_id: categoryId, _token: '{{ csrf_token() }}' },
+                                dataType: 'json',
+                                success: function(result) {
+                                    const $areaSelect = $('#area_id');
+                                    $areaSelect.html('<option value="">Selecione</option>');
+                                    $.each(result.areas, function(key, value) {
+                                        $areaSelect.append(`<option value="${value.id}">${value.name}</option>`);
+                                    });
+                                    const areaId = $('#area_id_hidden').val();
+                                    if (areaId) $areaSelect.val(areaId);
+                                    showToast(`${result.areas.length} área(s) encontrada(s)`, 'info', null, 2000);
+                                },
+                                error: () => showToast('Erro ao carregar áreas. Tente novamente.', 'error')
                             });
-                            if (area_id) {
-                                $('#area_id option[value=' + area_id + ']').attr('selected', 'selected');
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Erro ao carregar áreas:', error);
                         }
-                    });
-                }
 
-                $('#cmd').click(function() {
-                    $('#card-date').append(`
-                        <div class="row mb-3">
-                            <div class="col-md-3">
-                                <label class="form-label">Data</label>
-                                <div class="input-group" data-target-input="nearest">
-                                    <input class="form-control datetimepicker-input datetimepicker_day" autocomplete="off" name="date[]" value=""/>
-                                    <span class="input-group-text" data-toggle="datetimepicker">
-                                        <i class="fa fa-calendar"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Hora início</label>
-                                <div class="input-group" data-target-input="nearest">
-                                    <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" autocomplete="off" name="time_begin[]" value=""/>
-                                    <span class="input-group-text" data-toggle="datetimepicker">
-                                        <i class="fa-regular fa-clock"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label">Hora fim</label>
-                                <div class="input-group" data-target-input="nearest">
-                                    <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" autocomplete="off" name="time_end[]" value=""/>
-                                    <span class="input-group-text" data-toggle="datetimepicker">
-                                        <i class="fa-regular fa-clock"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-danger btn-sm btn-remove" style="margin-top: 35px;">
-                                    <i class="fa-solid fa-trash"></i> Remover
-                                </button>
-                            </div>
-                        </div>
-                    `);
-                });
-
-                $('#option').change(function() {
-                    try {
-                        const id_option_select = $(this).val();
-                        if (id_option_select !== undefined && id_option_select !== null) {
-                            if ([2, 3, 4, 14].includes(parseInt(id_option_select))) {
-                                $('#div_new_options').removeClass('d-none');
-                                if (id_option_select == 14) {
-                                    $('#new_options').val('AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO');
-                                }
-                            } else {
-                                $('#div_new_options').addClass('d-none');
-                                if (id_option_select == 14) {
-                                    $('#new_options').val('');
-                                }
-                            }
-
-                            if ([9, 10].includes(parseInt(id_option_select))) {
-                                $('#div_new_number').removeClass('d-none');
-                            } else {
-                                $('#div_new_number').addClass('d-none');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Erro ao processar mudança de opção:', error);
-                    }
-                });
-
-                let i_field = parseInt($('input.new_field').length);
-                $('#add_new_field').click(function() {
-                    const field = $(this).parent().parent().find('#question').val();
-                    const option = $(this).parent().parent().find('#option').val();
-                    const option_text = $(this).parent().parent().find('#option:selected').text();
-                    const required = $(this).parent().parent().find('#required').is(":checked");
-                    const unique = $(this).parent().parent().find('#unique').is(":checked");
-
-                    if (field === '') {
-                        alert('Por favor, preencha o nome do campo!');
-                        return false;
-                    }
-
-                    const required_star = required ? '*' : '';
-                    let field_text = '';
-                    let field_name = '';
-                    let field_required = required ? '; Obrigatório' : '';
-                    let field_unique = unique ? '; Único' : '';
-                    let field_options = '';
-
-                    i_field++;
-
-                    $('#question').val('');
-                    $('#option').prop('selectedIndex', 0);
-                    $('#required').prop('checked', false);
-                    $('#unique').prop('checked', false);
-
-                    switch (option) {
-                        case '1':
-                            field_text = '(Tipo: Texto (Até 200 caracteres))';
-                            field_name = 'text';
-                            break;
-                        case '2':
-                            field_text = '(Tipo: Seleção)';
-                            field_name = 'select';
-                            field_options = '; [Opções: ' + $('#new_options').val() + ']';
-                            break;
-                        case '3':
-                            field_text = '(Tipo: Marcação)';
-                            field_name = 'checkbox';
-                            field_options = '; [Opções: ' + $('#new_options').val() + ']';
-                            break;
-                        case '4':
-                            field_text = '(Tipo: Múltipla escolha)';
-                            field_name = 'multiselect';
-                            field_options = '; [Opções: ' + $('#new_options').val() + ']';
-                            break;
-                        case '5':
-                            field_text = '(Tipo: CPF)';
-                            field_name = 'cpf';
-                            break;
-                        case '6':
-                            field_text = '(Tipo: CNPJ)';
-                            field_name = 'cnpj';
-                            break;
-                        case '7':
-                            field_text = '(Tipo: Data)';
-                            field_name = 'date';
-                            break;
-                        case '8':
-                            field_text = '(Tipo: Telefone)';
-                            field_name = 'phone';
-                            break;
-                        case '9':
-                            field_text = '(Tipo: Número inteiro)';
-                            field_name = 'integer';
-                            field_options = '; [Opções: ' + $('.val_min_option').val() + '|' + $('.val_max_option').val() + ']';
-                            break;
-                        case '10':
-                            field_text = '(Tipo: Número decimal)';
-                            field_name = 'decimal';
-                            field_options = '; [Opções: ' + $('.val_min_option').val() + '|' + $('.val_max_option').val() + ']';
-                            break;
-                        case '11':
-                            field_text = '(Tipo: Arquivo)';
-                            field_name = 'file';
-                            break;
-                        case '12':
-                            field_text = '(Tipo: Textarea (+ de 200 caracteres))';
-                            field_name = 'textearea';
-                            break;
-                        case '13':
-                            field_text = '(Tipo: E-mail)';
-                            field_name = 'new_email';
-                            break;
-                        case '14':
-                            field_text = '(Tipo: Estados (BRA))';
-                            field_name = 'states';
-                            break;
-                    }
-
-                    // Create new field row with proper structure
-                    const newField = $(`
-                        <div class="row mb-3">
-                            <div class="col-9">
-                                <label class="form-label">Campo ${i_field}${required_star}</label>
-                                <input type="text" class="form-control new_field" name="new_field[]" value="${field}; ${field_text}${field_options}${field_required}${field_unique}" readonly>
-                                <input type="hidden" name="new_field_id[]" value="">
-                            </div>
-                            <div class="col-3 d-flex align-items-end">
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-secondary btn-sm up me-1" title="Mover para cima">
-                                        <i class="fas fa-arrow-up"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
-                                        <i class="fas fa-arrow-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `);
-
-                    $('#card-new-field').append(newField);
-                    updateFieldNumbers();
-                    $('#new_options').val('');
-                    $('.val_min_option').val('');
-                    $('.val_max_option').val('');
-                });
-
-                // Initialize field numbers and button visibility
-                updateFieldNumbers();
-
-                // Handle field removal with event delegation
-                $(document).on('click', '.btn-remove-field', function() {
-                    try {
-                        $(this).closest('.row.mb-3').remove();
-                        updateFieldNumbers();
-                    } catch (error) {
-                        console.error('Erro ao remover campo:', error);
-                    }
-                });
-
-                // Handle field reordering with event delegation
-                $(document).on('click', '.up, .down', function(e) {
-                    try {
-                        e.preventDefault();
-                        const $row = $(this).closest('.row.mb-3');
-                        
-                        if ($(this).hasClass('up')) {
-                            $row.insertBefore($row.prev());
-                        } else {
-                            $row.insertAfter($row.next());
-                        }
-                        
-                        updateFieldNumbers();
-                    } catch (error) {
-                        console.error('Erro ao mover campo:', error);
-                    }
-                });
-
-                // Update field numbers and button visibility
-                function updateFieldNumbers() {
-                    $('.row.mb-3').each(function(index) {
-                        const fieldNumber = index + 1;
-                        const $label = $(this).find('.form-label');
-                        const labelText = $label.text().replace(/Campo \d+/, 'Campo ' + fieldNumber);
-                        $label.text(labelText);
-                        
-                        // Update buttons visibility
-                        $(this).find('.up').toggle(index > 0);
-                        $(this).find('.down').toggle(index < $('.row.mb-3').length - 1);
-                    });
-                }
-
-                $('#add_place').click(function() {
-                    $('#place_name').val('');
-                    $('#address').val('').prop("readonly", false);
-                    $('#number').val('').prop("readonly", false);
-                    $('#district').val('').prop("readonly", false);
-                    $('#complement').val('').prop("readonly", false);
-                    $('#zip').val('').prop("readonly", false);
-                    $('#state').prop("disabled", false).prop('selectedIndex', 0);
-                    $('#city').prop("disabled", false).prop('selectedIndex', 0);
-                    $('#city_id_hidden').val('');
-                });
-
-                const path = "{{ route('event_home.autocomplete_place') }}";
-                $("#place_name").autocomplete({
-                    source: function(request, response) {
-                        $.ajax({
-                            url: path,
-                            type: 'GET',
-                            dataType: "json",
-                            data: { search: request.term },
-                            success: function(data) {
-                                response(data);
-                                if (data.length > 0) {
-                                    showToast(`${data.length} local(is) encontrado(s)`, 'info', null, 1500);
-                                } else if (request.term.length > 2) {
-                                    showToast('Nenhum local encontrado', 'warning', null, 2000);
-                                }
-                            },
-                            error: function() {
-                                showToast('Erro ao buscar locais', 'error');
-                            }
+                        $('#category').on('change', function() {
+                            loadAreas(this.value);
                         });
-                    },
-                    select: function(event, ui) {
-                        $('#place_name').val(ui.item.label);
-                        $('#place_id_hidden').val(ui.item.id);
-                        $('#address').val(ui.item.address).prop("readonly", true);
-                        $('#number').val(ui.item.number).prop("readonly", true);
-                        $('#district').val(ui.item.district).prop("readonly", true);
-                        $('#complement').val(ui.item.complement).prop("readonly", true);
-                        $('#zip').val(ui.item.zip).prop("readonly", true);
-                        $('#state option[value="' + ui.item.uf + '"]').prop("selected", true);
-                        $('#state').prop("disabled", true);
-                        $('#city').prop("disabled", true);
 
-                        const uf = $("#state").val();
-                        $("#city").html('');
-                        $.ajax({
-                            url: "{{ route('event_home.get_city') }}",
-                            type: "POST",
-                            data: { uf: uf, _token: '{{ csrf_token() }}' },
-                            dataType: 'json',
-                            success: function(result) {
-                                $('#city').html('<option value="">Selecione</option>');
-                                $.each(result.cities, function(key, value) {
-                                    $("#city").append('<option value="' + value.id + '">' + value.name + '</option>');
+                        // Load initial areas if category is selected
+                        if ($('#category').val()) {
+                            loadAreas($('#category').val());
+                        }
+                    }
+
+                    // Initialize state and city handling
+                    function initStateCity() {
+                        function loadCities(uf, callback = null) {
+                            if (!uf) {
+                                $('#city').html('<option value="">Selecione um estado primeiro</option>');
+                                if (callback) callback();
+                                return;
+                            }
+                            $.ajax({
+                                url: "{{ route('event_home.get_city') }}",
+                                type: "POST",
+                                data: { uf: uf, _token: '{{ csrf_token() }}' },
+                                dataType: 'json',
+                                success: function(result) {
+                                    const $citySelect = $('#city');
+                                    $citySelect.html('<option value="">Selecione a cidade</option>');
+                                    $.each(result.cities, function(key, value) {
+                                        $citySelect.append(`<option value="${value.id}">${value.name}</option>`);
+                                    });
+                                    showToast(`${result.cities.length} cidade(s) encontrada(s)`, 'info', null, 2000);
+                                    if (callback) callback();
+                                },
+                                error: () => {
+                                    showToast('Erro ao carregar cidades. Tente novamente.', 'error');
+                                    if (callback) callback();
+                                }
+                            });
+                        }
+                        // Expose globally so other initializers (e.g., place autocomplete) can call it
+                        window.loadCities = loadCities;
+
+                        $('#state').on('change', function() {
+                            loadCities(this.value);
+                        });
+
+                        $('#city').on('change', function() {
+                            $('#city_id_hidden').val(this.value);
+                        });
+
+                        // Load initial cities if state is selected
+                        if ($('#state').val()) {
+                            loadCities($('#state').val());
+                        }
+                    }
+
+                    // Initialize place autocomplete
+                    function initPlaceAutocomplete() {
+                        $('#place_name').autocomplete({
+                            source: function(request, response) {
+                                $.ajax({
+                                    url: "{{ route('event_home.autocomplete_place') }}",
+                                    type: 'GET',
+                                    dataType: "json",
+                                    data: { search: request.term },
+                                    success: function(data) {
+                                        console.log('Autocomplete data received:', data); // For debugging
+                                        response($.map(data, function(item) {
+                                            // Backend returns `value` as the place name
+                                            return {
+                                                label: item.value,
+                                                value: item.value,
+                                                id: item.id,
+                                                address: item.address,
+                                                number: item.number,
+                                                district: item.district,
+                                                complement: item.complement,
+                                                zip: item.zip,
+                                                city_id: item.city_id,
+                                                uf: item.uf
+                                            };
+                                        }));
+                                        showToast(`${data.length} local(is) encontrado(s)`, 'info', null, 1500);
+                                    },
+                                    error: () => showToast('Erro ao buscar locais', 'error')
                                 });
-                                if (ui.item.city_id) {
-                                    $('#city option[value="' + ui.item.city_id + '"]').prop("selected", true);
+                            },
+                            minLength: 2,
+                            select: function(event, ui) {
+                                $('#place_name').val(ui.item.label);
+                                $('#place_id_hidden').val(ui.item.id);
+                                $('#address').val(ui.item.address).prop('readonly', true);
+                                $('#number').val(ui.item.number).prop('readonly', true);
+                                $('#district').val(ui.item.district).prop('readonly', true);
+                                $('#complement').val(ui.item.complement).prop('readonly', true);
+                                $('#zip').val(ui.item.zip).prop('readonly', true);
+                                $('#state').val(ui.item.uf).prop('disabled', true);
+                                loadCities(ui.item.uf, () => {
+                                    $('#city').val(ui.item.city_id).prop('disabled', true);
                                     $('#city_id_hidden').val(ui.item.city_id);
-                                }
+                                });
+                                return false;
                             }
                         });
-                        return false;
-                    }
-                });
 
-                $('#state').on('change', function() {
-                    try {
-                        const uf = this.value;
-                        if (uf !== undefined && uf !== null) {
-                            $("#city").html('');
-                            if (uf) {
-                                $.ajax({
-                                    url: "{{ route('event_home.get_city') }}",
-                                    type: "POST",
-                                    data: { uf: uf, _token: '{{ csrf_token() }}' },
-                                    dataType: 'json',
-                                    success: function(result) {
-                                        $('#city').html('<option value="">Selecione</option>');
-                                        $.each(result.cities, function(key, value) {
-                                            $("#city").append('<option value="' + value.id + '">' + value.name + '</option>');
-                                        });
-                                        if (result.cities.length > 0) {
-                                            showToast(`${result.cities.length} cidade(s) encontrada(s)`, 'info', null, 2000);
-                                        } else {
-                                            showToast('Nenhuma cidade encontrada para este estado', 'warning');
-                                        }
-                                    },
-                                    error: function() {
-                                        showToast('Erro ao carregar cidades. Tente novamente.', 'error');
-                                    }
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Erro ao processar mudança de estado:', error);
-                    }
-                });
-
-                // Verificar se o elemento state existe antes de tentar acessar seu valor
-                if ($("#state").length > 0) {
-                    const uf = $("#state").val();
-                    if (uf !== undefined && uf !== null) {
-                        $("#city").html('');
-                        $.ajax({
-                            url: "{{ route('event_home.get_city') }}",
-                            type: "POST",
-                            data: { uf: uf, _token: '{{ csrf_token() }}' },
-                            dataType: 'json',
-                            success: function(result) {
-                                $('#city').html('<option value="">Selecione</option>');
-                                const city_id = $('#city_id_hidden').val();
-                                $.each(result.cities, function(key, value) {
-                                    $("#city").append('<option value="' + value.id + '">' + value.name + '</option>');
-                                });
-                                if (city_id) {
-                                    $('#city option[value=' + city_id + ']').attr('selected', 'selected');
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Erro ao carregar cidades:', error);
-                            }
+                        $('#add_place').on('click', function() {
+                            $('#place_name, #address, #number, #district, #complement, #zip').val('').prop('readonly', false);
+                            $('#state, #city').prop('disabled', false).val('');
+                            $('#city_id_hidden, #place_id_hidden').val('');
                         });
                     }
-                }
 
-                $('#city').change(function() {
-                    try {
-                        const city_id = $('#city').val();
-                        if (city_id !== undefined && city_id !== null) {
-                            $('#city_id_hidden').val(city_id);
+                    // Initialize dynamic fields
+                    function initDynamicFields() {
+                        let fieldCount = $('input.new_field').length;
+
+                        function updateFieldNumbers() {
+                            // Only renumber labels inside the dynamic fields container
+                            const $container = $('#card-new-field');
+                            $container.children('.row.mb-3').each(function(index) {
+                                const fieldNumber = index + 1;
+                                const $label = $(this).find('.form-label').first();
+                                const original = $label.text();
+                                // Only adjust labels that start with "Campo"
+                                const updated = original.replace(/^Campo\s+\d+/, `Campo ${fieldNumber}`);
+                                $label.text(updated);
+                                $(this).find('.up').toggle(index > 0);
+                                $(this).find('.down').toggle(index < $container.children('.row.mb-3').length - 1);
+                            });
                         }
-                    } catch (error) {
-                        console.error('Erro ao processar mudança de cidade:', error);
+
+                        $('#option').on('change', function() {
+                            const id = parseInt(this.value);
+                            $('#div_new_options').toggle([2, 3, 4, 14].includes(id));
+                            if (id === 14) {
+                                $('#new_options').val('AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO');
+                            } else {
+                                $('#new_options').val('');
+                            }
+                            $('#div_new_number').toggle([9, 10].includes(id));
+                        });
+
+                        $('#add_new_field').on('click', function() {
+                            const field = $('#question').val().trim();
+                            const option = $('#option').val();
+                            const optionText = $('#option option:selected').text();
+                            const required = $('#required').is(':checked');
+                            const unique = $('#unique').is(':checked');
+
+                            if (!field) {
+                                showToast('Por favor, preencha o nome do campo!', 'error');
+                                return;
+                            }
+
+                            const fieldConfig = {
+                                1: { text: '(Tipo: Texto (Até 200 caracteres))', name: 'text' },
+                                2: { text: '(Tipo: Seleção)', name: 'select', options: `; [Opções: ${$('#new_options').val()}]` },
+                                3: { text: '(Tipo: Marcação)', name: 'checkbox', options: `; [Opções: ${$('#new_options').val()}]` },
+                                4: { text: '(Tipo: Múltipla escolha)', name: 'multiselect', options: `; [Opções: ${$('#new_options').val()}]` },
+                                5: { text: '(Tipo: CPF)', name: 'cpf' },
+                                6: { text: '(Tipo: CNPJ)', name: 'cnpj' },
+                                7: { text: '(Tipo: Data)', name: 'date' },
+                                8: { text: '(Tipo: Telefone)', name: 'phone' },
+                                9: { text: '(Tipo: Número inteiro)', name: 'integer', options: `; [Opções: ${$('#val_min').val()}|${$('#val_max').val()}]` },
+                                10: { text: '(Tipo: Número decimal)', name: 'decimal', options: `; [Opções: ${$('#val_min').val()}|${$('#val_max').val()}]` },
+                                11: { text: '(Tipo: Arquivo)', name: 'file' },
+                                12: { text: '(Tipo: Textarea (+ de 200 caracteres))', name: 'textarea' },
+                                13: { text: '(Tipo: E-mail)', name: 'new_email' },
+                                14: { text: '(Tipo: Estados (BRA))', name: 'states' }
+                            };
+
+                            const config = fieldConfig[option] || {};
+                            const fieldText = `${field}; ${config.text}${config.options || ''}${required ? '; Obrigatório' : ''}${unique ? '; Único' : ''}`;
+                            fieldCount++;
+
+                            $('#card-new-field').append(`
+                                <div class="row mb-3">
+                                    <div class="col-9">
+                                        <label class="form-label">Campo ${fieldCount}${required ? '*' : ''}</label>
+                                        <input type="text" class="form-control new_field" name="new_field[]" value="${fieldText}" readonly>
+                                        <input type="hidden" name="new_field_id[]" value="">
+                                    </div>
+                                    <div class="col-3 d-flex align-items-end">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-secondary btn-sm up me-1" title="Mover para cima">
+                                                <i class="fas fa-arrow-up"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
+                                                <i class="fas fa-arrow-down"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `);
+
+                            $('#question, #new_options, #val_min, #val_max').val('');
+                            $('#option').prop('selectedIndex', 0);
+                            $('#required, #unique').prop('checked', false);
+                            updateFieldNumbers();
+                        });
+
+                        $(document).on('click', '.btn-remove-field', function() {
+                            $(this).closest('.row.mb-3').remove();
+                            fieldCount--;
+                            updateFieldNumbers();
+                        });
+
+                        $(document).on('click', '.up', function() {
+                            const $row = $(this).closest('.row.mb-3');
+                            $row.insertBefore($row.prev());
+                            updateFieldNumbers();
+                        });
+
+                        $(document).on('click', '.down', function() {
+                            const $row = $(this).closest('.row.mb-3');
+                            $row.insertAfter($row.next());
+                            updateFieldNumbers();
+                        });
+
+                        updateFieldNumbers();
                     }
-                });
 
-                $('body').on('click', ".btn-remove-field", function() {
-                    $(this).parent().parent().remove();
-                    i_field--;
-                    $("#card-new-field .up:first").addClass('d-none');
-                    $("#card-new-field .down:last").addClass('d-none');
-                });
+                    // Initialize date adding
+                    function initDateAdding() {
+                        $('#add-date').on('click', function() {
+                            const index = $('.row.mb-3[data-date-index]').length;
+                            $('#card-date').append(`
+                                <div class="row mb-3 g-3" data-date-index="${index}">
+                                    <input type="hidden" name="date_id[]" value="">
+                                    <div class="col-md-3 pe-3">
+                                        <label for="datetimepicker_day_${index}" class="form-label">Data <span class="text-danger">*</span></label>
+                                        <div class="input-group date" id="datetimepicker_day_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_day" name="date[]" autocomplete="off" required>
+                                            <span class="input-group-text">
+                                                <i class="fas fa-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 pe-3">
+                                        <label for="datetimepicker_begin_${index}" class="form-label">Hora início <span class="text-danger">*</span></label>
+                                        <div class="input-group date" id="datetimepicker_begin_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_begin" name="time_begin[]" autocomplete="off" required>
+                                            <span class="input-group-text">
+                                                <i class="fas fa-clock"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 pe-3">
+                                        <label for="datetimepicker_end_${index}" class="form-label">Hora fim <span class="text-danger">*</span></label>
+                                        <div class="input-group date" id="datetimepicker_end_${index}" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input type="text" class="form-control datetimepicker-input datetimepicker_hour_end" name="time_end[]" autocomplete="off" required>
+                                            <span class="input-group-text">
+                                                <i class="fas fa-clock"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="button" class="btn btn-danger d-block remove-date">
+                                            <i class="fas fa-trash"></i> Remover
+                                        </button>
+                                    </div>
+                                </div>
+                            `);
+                        });
 
-                $('body').on('click', ".btn-remove", function() {
-                    $(this).parent().parent().remove();
-                });
+                        $(document).on('click', '.remove-date', function() {
+                            $(this).closest('.row.mb-3').remove();
+                        });
+                    }
 
-                $('body').on('mousedown', ".datetimepicker_day", function() {
-                    $(this).datetimepicker({
-                        timepicker: false,
-                        format: 'd/m/Y',
-                        mask: true,
-                        minDate: new Date(),
-                        lang: 'pt-BR',
-                    });
-                });
+                    // Initialize Mercado Pago handling
+                    function initMercadoPago() {
+                        const $formMercadoPago = $('#form_mercadopago');
+                        const $linkAccButton = $('#link-acc-button');
+                        const $linkedAccLabel = $('#linked-acc-label');
 
-                $('body').on('mousedown', ".datetimepicker_hour_begin", function() {
-                    $(this).datetimepicker({
-                        datepicker: false,
-                        format: 'H:i',
-                        mask: true,
-                        onShow: function(ct) {
-                            this.setOptions({
-                                maxTime: $(this).val() ? $(this).val() : false
-                            });
-                        }
-                    });
-                });
-
-                $('body').on('mousedown', ".datetimepicker_hour_end", function() {
-                    $(this).datetimepicker({
-                        datepicker: false,
-                        format: 'H:i',
-                        mask: true,
-                        onShow: function(ct) {
-                            this.setOptions({
-                                minTime: $(this).val() ? $(this).val() : false
-                            });
-                        }
-                    });
-                });
-            });
-        </script>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const radioButtons = document.querySelectorAll('input[name="paid"]');
-                const formMercadoPago = document.getElementById('form_mercadopago');
-                const linkAccButton = document.getElementById('link-acc-button');
-                const linkedAccLabel = document.getElementById('linked-acc-label');
-
-                radioButtons.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        if (this.value === "0") {
-                            formMercadoPago.classList.remove('d-none');
-                            if (linkAccButton.getAttribute('data-linked') === 'false') {
+                        $('input[name="paid"]').on('change', function() {
+                            $formMercadoPago.toggleClass('d-none', this.value !== '0');
+                            if (this.value === '0' && $linkAccButton.attr('data-linked') === 'false') {
                                 const intervalId = setInterval(() => {
-                                    fetch('/webhooks/mercado-pago/check-linked-account')
-                                        .then(response => response.json())
-                                        .then(data => {
+                                    $.get('/webhooks/mercado-pago/check-linked-account')
+                                        .done(data => {
                                             if (data.linked) {
                                                 clearInterval(intervalId);
-                                                linkedAccLabel.textContent = 'ID da Conta Vinculada: ' + data.id;
-                                                linkAccButton.className = 'btn btn-secondary';
-                                                linkAccButton.textContent = 'Vincular outra conta';
-                                                linkAccButton.setAttribute('data-linked', 'true');
-                                            } else {
-                                                console.log('Nenhuma conta vinculada');
+                                                $linkedAccLabel.text(`ID da Conta Vinculada: ${data.id}`);
+                                                $linkAccButton.removeClass('btn-success').addClass('btn-secondary').text('Vincular outra conta').attr('data-linked', 'true');
                                             }
                                         })
-                                        .catch(error => console.error('Erro:', error));
+                                        .fail(error => console.error('Erro ao verificar conta Mercado Pago:', error));
                                 }, 5000);
                             }
-                        } else {
-                            formMercadoPago.classList.add('d-none');
-                        }
-                    });
+                        });
+                    }
+
+                    // Initialize all functionality
+                    initSummernote();
+                    initFormValidation();
+                    initDateTimePickers();
+                    initNameValidation();
+                    initSlugValidation();
+                    initCategoryArea();
+                    initStateCity();
+                    initPlaceAutocomplete();
+                    initDynamicFields();
+                    initDateAdding();
+                    initMercadoPago();
                 });
-            });
-        </script>
-    @endpush
+            </script>
+        @endpush
 </x-site-layout>

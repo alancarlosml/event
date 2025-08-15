@@ -35,6 +35,7 @@ Route::get('painel/minhas-inscricoes', 'App\Http\Controllers\EventAdminControlle
 Route::get('painel/meus-eventos', 'App\Http\Controllers\EventAdminController@myEvents')->middleware(['auth:participante', 'verified'])->name('event_home.my_events');
 Route::get('painel/meus-eventos/{hash}/detalhes', 'App\Http\Controllers\EventAdminController@myEventsShow')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_show');
 Route::get('painel/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@myEventsEdit')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_edit');
+Route::put('painel/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@updateEvent')->middleware(['auth:participante', 'verified'])->name('event_home.my_events_edit.update');
 Route::delete('painel/meus-eventos/{hash}/excluir', 'App\Http\Controllers\EventAdminController@destroy')->middleware(['auth:participante', 'verified'])->name('event_home.destroy');
 Route::get('painel/meus-eventos/{hash}/duplicar', 'App\Http\Controllers\EventAdminController@eventClone')->middleware(['auth:participante', 'verified'])->name('event_home.event_clone');
 // Route::get('painel/meus-eventos/{hash}/contatos', 'App\Http\Controllers\EventAdminController@contacts')->middleware(['auth:participante', 'verified'])->name('event_home.contacts');

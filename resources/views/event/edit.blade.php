@@ -297,7 +297,7 @@
 													<select id="state" class="form-control" name="state" @if($event->place) readonly @endif required>
 														<option>Selecione</option>
 														@foreach ($states as $state)
-															<option value="{{$state->id}}" @if(isset($event->place)) @if($event->place->get_city()->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
+															<option value="{{$state->id}}" @if(isset($event->place)) @if(optional($event->place->get_city)->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
 														@endforeach
 													</select>
 												</div>
@@ -381,7 +381,7 @@
                                                     <select id="state" class="form-control" name="state" required>
                                                         <option>Selecione</option>
 														@foreach ($states as $state)
-															<option value="{{$state->id}}" @if(isset($event->place)) @if($event->place->get_city()->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
+															<option value="{{$state->id}}" @if(isset($event->place)) @if(optional($event->place->get_city)->uf == $state->uf) selected @endif @endif>{{$state->name}}</option>
 														@endforeach
                                                     </select>
                                                 </div>

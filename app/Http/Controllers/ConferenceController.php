@@ -535,6 +535,93 @@ class ConferenceController extends Controller
             }
         }
 
+        // Bypass de pagamento para eventos/lotes gratuitos (total <= 0)
+        if (!$total || (float) $total <= 0) {
+            $coupon_id = $coupon ? $coupon->id ?? (is_array($coupon) && isset($coupon[0]['id']) ? $coupon[0]['id'] : null) : null;
+
+            $order_id = DB::table('orders')->insertGetId([
+                'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+                'status' => 1, // concluído/confirmado
+                'gatway_hash' => null,
+                'gatway_reference' => null,
+                'gatway_status' => 'free',
+                'gatway_payment_method' => 'free',
+                'event_id' => $event->id,
+                'event_date_id' => $event_date->id,
+                'participante_id' => Auth::user()->id,
+                'coupon_id' => $coupon_id,
+                'created_at' => now(),
+            ]);
+
+            $request->session()->put('order_id', $order_id);
+
+            // Criar itens da ordem para cada ingresso selecionado
+            if ($array_lotes_obj && is_array($array_lotes_obj)) {
+                $kIndex = 1; // index dos participantes/ingressos para mapear respostas
+                foreach ($array_lotes_obj as $i => $entry) {
+                    // Recupera o lote pelo ID presente no array
+                    $lote = Lote::where('id', $entry['id'])->first();
+                    if (!$lote) {
+                        // Se algum lote não existir mais, ignore este item
+                        continue;
+                    }
+
+                    $order_item_id = DB::table('order_items')->insertGetId([
+                        'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+                        'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
+                        'quantity' => 1,
+                        'value' => $entry['value'] ?? $lote->value,
+                        'date_use' => null,
+                        'status' => 1,
+                        'order_id' => $order_id,
+                        'lote_id' => $lote->id,
+                        'created_at' => now(),
+                    ]);
+
+                    // Salvar respostas dos campos personalizados para este ingresso (kIndex)
+                    foreach (array_keys($input) as $field) {
+                        if (!str_contains($field, 'newfield_')) continue;
+
+                        $parts = explode('_', $field);
+                        if (count($parts) !== 3) continue;
+
+                        // newfield_{k}_{id}
+                        $kField = (int) $parts[1];
+                        $questionId = (int) $parts[2];
+                        if ($kField !== $kIndex) continue;
+
+                        $answer = $input[$field];
+                        if ($answer === null || $answer === '') continue;
+
+                        $question = Question::find($questionId);
+                        if (!$question) continue;
+
+                        DB::table('option_answers')->insert([
+                            'answer' => $answer,
+                            'question_id' => $question->id,
+                            'order_item_id' => $order_item_id,
+                            'created_at' => now(),
+                        ]);
+                    }
+
+                    $kIndex++;
+                }
+            }
+
+            // Enviar confirmação por email (inscrição gratuita)
+            try {
+                $order = Order::find($order_id);
+                if ($order) {
+                    Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Inscrição gratuita realizada com sucesso'));
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Falha ao enviar email de confirmação para pedido gratuito', ['error' => $e->getMessage()]);
+            }
+
+            return redirect()->route('conference.resume', $event->slug)
+                ->with('success', 'Inscrição gratuita realizada com sucesso!');
+        }
+
         $coupon_id = null;
         if($coupon) {
             $coupon_id = $coupon->id;

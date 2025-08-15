@@ -152,7 +152,6 @@ class EventAdminController extends Controller
 
     public function myEventsEdit(Request $request, $hash)
     {
-
         $event = Event::where('hash', $hash)->first();
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
@@ -171,11 +170,25 @@ class EventAdminController extends Controller
             ->orderBy('event_dates.date')
             ->get();
 
+        // Carregar dados do local do evento
+        $place = $event->place;
+        
+        // Adicionar dados à sessão para o template unificado
         $request->session()->put('dates', $dates);
         $request->session()->put('event', $event);
         $request->session()->put('event_id', $event->id);
+        $request->session()->put('place', $place);
+        $request->session()->put('questions', $questions);
 
-        return view('painel_admin.my_events_edit', compact('event', 'categories', 'options', 'states', 'dates', 'questions'));
+        // Verificar conta do Mercado Pago
+        $mercadoPagoResponse = app(MercadoPagoController::class)->checkLinkedAccount($request);
+        $mercadoPagoLinked = [
+            'linked' => $mercadoPagoResponse->getData()->linked,
+            'id' => $mercadoPagoResponse->getData()->id,
+        ];
+
+        // Usar o template unificado
+        return view('painel_admin.create_event', compact('categories', 'states', 'options', 'event', 'place', 'dates', 'questions', 'mercadoPagoLinked'));
     }
 
     public function createEventLink(Request $request)
@@ -199,6 +212,7 @@ class EventAdminController extends Controller
     {
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
+        
         $options = Option::orderBy('id')->get();
         // $questions = Question::orderBy('order')->get();
 
