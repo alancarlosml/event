@@ -104,7 +104,6 @@
                                 <div class="form-group col-md-12">
                                     <label for="owner_name">Organizador do evento*</label>
                                     <input type="text" class="form-control" id="owner_name" name="owner_name" placeholder="Organizador" value="{{ $event->owner->name ?? '' }}" required>
-                                    <small id="owner_nameHelp" class="form-text text-muted">Busque pelo local do evento, caso não o encontre, clique no botão a seguir para cadastrar um novo local.</small>
                                 </div>
                                 {{-- <div class="form-group col-md-3">
                                     <label for="place_name">Não encontrou o organizador?</label><br>
