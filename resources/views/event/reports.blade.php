@@ -35,7 +35,7 @@
                                             <li>{{ $error }}</li>
                                         @endforeach
                                     </ul>
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+                                    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>

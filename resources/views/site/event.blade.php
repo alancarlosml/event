@@ -401,7 +401,7 @@
                         <strong class="modal-title" id="cupomModalLabel"><img id="modal_icon"
                                  src="/assets_conference/imgs/success.png" style="max-height: 48px"> <span
                                   id="modal_txt">Cupom adicionado com sucesso!</span></strong>
-                        {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        {{-- <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&#10005;</span>
                         </button> --}}
                     </div>
@@ -410,7 +410,7 @@
                     </div> --}}
                     <div class="modal-footer">
                         <button type="button" id="modal_close" class="btn btn-secondary"
-                                data-dismiss="modal">Ok</button>
+                                data-bs-dismiss="modal">Ok</button>
                         {{-- <button type="button" class="btn btn-primary">Ok</button> --}}
                     </div>
                 </div>
