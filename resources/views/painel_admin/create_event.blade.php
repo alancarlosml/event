@@ -60,7 +60,7 @@
                             <div class="mb-3">
                                 <label for="slug" class="form-label">URL personalizada <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text">{{ config('app.url') }}</span>
+                                    <span class="input-group-text">{{ config('app.url') }}/</span>
                                     <input type="text" class="form-control" id="slug" name="slug" placeholder="url-personalizada" value="{{ $event->slug ?? old('slug') }}" {{ $isEdit ? 'readonly' : 'required' }}>
                                 </div>
                                 @if($isEdit)
