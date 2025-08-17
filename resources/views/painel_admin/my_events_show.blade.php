@@ -303,7 +303,7 @@
                 });
 
             $('#cmd').click(function(){
-                $('#card-date').append('<div class="form-row">' + 
+                $('#card-date').append('<div class="row">' + 
                         '<div class="form-group col-md-3">' +
                             '<label for="number">Data</label>'+
                             '<div class="input-group date" data-target-input="nearest">'+
@@ -424,7 +424,7 @@
                         break;
                 }
 
-                $('#card-new-field').append('<div class="form-row">' +
+                $('#card-new-field').append('<div class="row">' +
                     '<div class="form-group col-10">'+
                         '<label for="field_'+i_field+'">Campo ' + i_field + required_star + '</label>' +
                         '<input type="text" class="form-control" name="'+field_name+'_new_field" value="'+field+' '+field_text +'" readonly>' +

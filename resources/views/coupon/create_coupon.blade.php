@@ -61,7 +61,7 @@
                                                     único.</small>
                                             </div>
                                         </div>
-                                        <div class="form-row mb-3" style="margin-left: 0;">
+                                        <div class="row mb-3" style="margin-left: 0;">
                                             <label for="discount_type">Valor*</label>
                                             <div class="input-group">
                                                 <select class="form-control col-1" id="discount_type"

@@ -88,10 +88,6 @@
                                 <label for="description" class="form-label">Descrição do evento <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="description" name="description" required>{{ $event->description ?? old('description') }}</textarea>
                             </div>
-                            <div class="mb-3">
-                                <label for="contact" class="form-label">E-mail de contato <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="contact" name="contact" placeholder="contato@exemplo.com" value="{{ $event->contact ?? old('contact') }}" required>
-                            </div>
                             <div class="row">
                                 <div class="col-md-3 mb-3">
                                     <label for="category" class="form-label">Categoria <span class="text-danger">*</span></label>

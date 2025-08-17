@@ -100,36 +100,32 @@
                             <hr>
                             <h4>Organização do evento</h4>
                             <input type="hidden" name="owner_id" value="{{$owner_id}}">
-                            <div class="form-row">
+                            <div class="row mb-3">
                                 <div class="form-group col-md-12">
                                     <label for="owner_name">Organizador do evento*</label>
                                     <input type="text" class="form-control" id="owner_name" name="owner_name" placeholder="Organizador" value="{{ $event->owner->name ?? '' }}" required>
                                 </div>
-                                {{-- <div class="form-group col-md-3">
-                                    <label for="place_name">Não encontrou o organizador?</label><br>
-                                    <a class="btn btn-warning btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_owner">
-                                        <i class="fa-solid fa-plus"></i>
-                                        Adicionar
-                                    </a>
-                                </div>  --}}
                             </div>
-                            {{-- <div class="form-group">
-                                <label for="owner_email">Organizador*</label>
-                                <input type="text" class="form-control col-lg-6 col-sm-12" id="owner_email" name="owner_email" placeholder="Organizador">
-                            </div> --}}
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label for="description">Descrição</label>
                                 <textarea type="password" class="form-control" id="description" name="description" rows="6">{{ $event->owner->description ?? '' }}</textarea>
                             </div>
-                            <div id="banner_organizador">
+                            <div id="banner_organizador mb-3">
                                 <label for="banner">Banner do organizador*</label>
-                                @if($event->owner->icon === null || $event->owner->icon === '')
+                                @if($event->owner === null)
+                                    <!-- If no owner exists, always show the file input for uploading an icon -->
                                     <input class="form-control" type="file" id="icon" name="icon" required>
                                 @else
-                                <div class="form-group">
-                                    <img src="{{ asset('storage/'.$event->owner->icon) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 200px">
-                                    <a href="{{route('event_home.delete_file_icon', $event->owner->id)}}" class="btn btn-danger ml-1">Excluir</a>
-                                </div>
+                                    <!-- If owner exists, check if icon is set -->
+                                    @if($event->owner->icon && $event->owner->icon !== '')
+                                        <div class="form-group">
+                                            <img src="{{ asset('storage/' . $event->owner->icon) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 200px">
+                                            <a href="{{ route('event_home.delete_file_icon', $event->owner->id) }}" class="btn btn-danger ml-1">Excluir</a>
+                                        </div>
+                                    @else
+                                        <!-- If owner exists but has no icon, show the file input -->
+                                        <input class="form-control" type="file" id="icon" name="icon" required>
+                                    @endif
                                 @endif
                             </div>
                             <hr>

@@ -205,8 +205,9 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-column b-bottom mt-4">
-                                <a href="{{ route('conference.resume', $event->slug) }}"
-                                   onclick="return validSubmition()" class="btn btn-common">Continuar</a>
+                                <form id="registration-form" action="{{ route('conference.resume', $event->slug) }}" method="GET" style="display: none;"></form>
+
+                                <button onclick="validSubmition(event)" class="btn btn-common">Continuar</button>
                             </div>
                         @else
                             <span>Esse evento já ocorreu. Agradecemos seu interesse!</span>
@@ -854,7 +855,8 @@
             }
 
 
-            function validSubmition() {
+            function validSubmition(event) {
+                event.preventDefault(); // Prevenir o comportamento padrão do botão
 
                 // let customSelect = $('.custom-select').val();
 
@@ -885,10 +887,50 @@
                     $('.navbar').css('padding-right', '0');
                     $('#modal_txt').text('Por favor, selecione ao menos uma data válida.');
                     $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
-                    return false;
+                    return;
                 }
 
-                return true;
+                const totalText = $('#total').text().trim();
+                const totalValue = parseFloat(totalText.replace('R$', '').replace('.', '').replace(',', '.').trim());
+
+                const form = $('#registration-form');
+
+                if (totalValue === 0) {
+                    // Inscrição gratuita
+                    form.attr('action', '{{ route('conference.store_free_registration', $event->slug) }}');
+                    form.attr('method', 'POST');
+
+                    // Adicionar CSRF token
+                    if (!form.find('input[name="_token"]').length) {
+                        form.append('<input type="hidden" name="_token" value="{{ csrf_token() }}">');
+                    }
+
+                    // Adicionar dados dos lotes
+                    let dict = [];
+                    $("input[type=number].inp-number").each(function() {
+                        if ($(this).val() > 0) {
+                            dict.push({
+                                lote_hash: $(this).parents('tr').attr('lote_hash'),
+                                lote_quantity: $(this).val()
+                            });
+                        }
+                    });
+
+                    if (!form.find('input[name="dict"]').length) {
+                        form.append(`<input type="hidden" name="dict" value='${JSON.stringify(dict)}'>`);
+                    } else {
+                        form.find('input[name="dict"]').val(JSON.stringify(dict));
+                    }
+
+                } else {
+                    // Inscrição paga, continuar para o resumo
+                    form.attr('action', '{{ route('conference.resume', $event->slug) }}');
+                    form.attr('method', 'GET');
+                    form.find('input[name="_token"]').remove();
+                    form.find('input[name="dict"]').remove();
+                }
+
+                form.submit();
             }
         </script>
     @endpush

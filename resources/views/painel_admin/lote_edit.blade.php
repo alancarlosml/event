@@ -48,7 +48,7 @@
                             @csrf
                             <input type="hidden" name="event_id" value="{{$lote->event_id}}">
                             <div class="card-body">
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="type">Tipo do lote*</label>
                                     <select id="type" class="form-control col-md-3" id="type" name="type">
                                     <option selected>Selecione</option>
@@ -57,7 +57,7 @@
                                     </select>
                                     <input type="hidden" name="type_hidden" id="type_hidden" value="{{$lote->type}}">
                                 </div>
-                                <div class="form-row card-body mb-2" style="border: solid 1px #ddd; border-radius: 0.25rem;" id="value_div">
+                                <div class="row card-body mb-3 mb-2" style="border: solid 1px #ddd; border-radius: 0.25rem;" id="value_div">
                                     <div class="form-group col-md-3">
                                         <label for="tax_parcelamento">Juros do parcelamento*<a href="javascript:;" data-toggle="tooltip" data-placement="right" title="Tooltip on right"><i class="fa-solid fa-circle-question"></i></a></label>
                                         <select id="tax_parcelamento" class="form-control" id="tax_parcelamento" name="tax_parcelamento">
@@ -94,7 +94,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div class="row mb-3">
                                     <div class="form-group col-md-8">
                                         <label for="name">Nome do lote*</label>
                                         <input type="text" class="form-control" id="name" name="name" placeholder="Nome" value="{{$lote->name ?? old('name')}}">
@@ -104,11 +104,11 @@
                                         <input type="number" class="form-control" id="quantity" name="quantity" placeholder="0" value="{{$lote->quantity ?? old('quantity')}}" min="0">
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="description">Descrição</label>
                                     <input type="text" class="form-control" id="description" name="description" placeholder="Descrição" value="{{$lote->description ?? old('description')}}">
                                 </div>
-                                <div class="form-row">
+                                <div class="row mb-3">
                                     <label class="col-md-12">Limite por compra*</label>
                                     <div class="form-group col-md-3">
                                     Mínimo
@@ -119,7 +119,7 @@
                                     <input type="number" class="form-control" id="limit_max" name="limit_max" placeholder="0" value="{{old('limit_max', $lote->limit_max)}}" min="0">
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div class="row mb-3">
                                     <label class="col-md-12">Período de vendas*</label>
                                     <div class="form-group col-md-3">
                                         <label for="number">Início</label>
@@ -139,28 +139,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                    {{-- <div class="form-group col-md-3">
-                                        Início
-                                        <div class="input-group date" id="reservationtime_begin" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input" id="reservationtime_begin_input" data-target="#reservationtime_begin" name="datetime_begin"/>
-                                            <div class="input-group-append" data-target="#reservationtime_begin" data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
-                                        </div>
-                                        <input type="hidden" name="reservationtime_begin_hidden" id="reservationtime_begin_hidden" value="{{$lote->datetime_begin}}">
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        Fim
-                                        <div class="input-group date" id="reservationtime_end" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input" id="reservationtime_end_input" data-target="#reservationtime_end" name="datetime_end"/>
-                                            <div class="input-group-append" data-target="#reservationtime_end" data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
-                                        </div>
-                                        <input type="hidden" name="reservationtime_end_hidden" id="reservationtime_end_hidden" value="{{$lote->datetime_end}}">
-                                    </div> --}}
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="visibility">Visibilidade*</label>
                                     <select id="visibility" class="form-control col-md-3" name="visibility">
                                     <option selected>Selecione</option>
@@ -169,15 +149,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
-                            {{-- <div class="form-check pb-3">
-                                <label for="visibility">Visibilidade</label>
-                                <div class="custom-switch">
-                                    <input type="checkbox" checked="checked" class="custom-control-input" name="visibility" id="visibility" value="1">
-                                    <label class="custom-control-label" for="visibility">Público</label>
-                                </div>
-                            </div> --}}
-            
                             <div class="card-footer d-flex justify-content-between">
                                 <a href="{{ route('event_home.create.step.two') }}" class="btn btn-primary">Voltar</a>
                                 <button type="submit" class="btn btn-primary">Salvar</button>

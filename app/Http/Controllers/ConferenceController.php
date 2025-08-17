@@ -692,6 +692,101 @@ class ConferenceController extends Controller
         return view('conference.payment', compact('event', 'total'));
     }
 
+    public function store_free_registration(Request $request, $slug)
+    {
+        // 1. Get initial data and validate
+        $event = Event::where('slug', $slug)->first();
+        if (!$event) {
+            return redirect()->route('home')->withErrors(['error' => 'Evento não encontrado.']);
+        }
+
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Você precisa estar logado para se inscrever.');
+        }
+
+        $input = $request->all();
+        $lotes_data = json_decode($input['dict'] ?? '[]', true);
+
+        if (empty($lotes_data)) {
+            return redirect()->back()->withErrors(['error' => 'Nenhum ingresso selecionado.']);
+        }
+
+        $event_date_id = $request->session()->get('event_date_result');
+        if (!$event_date_id) {
+            return redirect()->back()->withErrors(['error' => 'Data do evento não foi selecionada.']);
+        }
+        $event_date = EventDate::find($event_date_id);
+        if (!$event_date) {
+            return redirect()->back()->withErrors(['error' => 'Data do evento inválida.']);
+        }
+
+        // 2. Re-validate lots and calculate total
+        $total = 0;
+        $array_lotes_obj = [];
+
+        foreach ($lotes_data as $dict) {
+            $quantity = $dict['lote_quantity'];
+            $lote = Lote::where('hash', $dict['lote_hash'])->first();
+
+            if (!$lote || $lote->event_id !== $event->id) {
+                return redirect()->back()->withErrors(['error' => 'Um dos lotes selecionados é inválido.']);
+            }
+            
+            $total += $lote->value * $quantity;
+
+            for ($j = 0; $j < $quantity; $j++) {
+                array_push($array_lotes_obj, ['id' => $lote->id, 'value' => $lote->value, 'name' => $lote->name]);
+            }
+        }
+
+        if ($total > 0) {
+            return redirect()->back()->withErrors(['error' => 'Este formulário é apenas para inscrições gratuitas.']);
+        }
+
+        // 3. Create Order and Order Items
+        $order_id = DB::table('orders')->insertGetId([
+            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+            'status' => 1, // 1 = concluído/confirmado
+            'gatway_status' => 'free',
+            'gatway_payment_method' => 'free',
+            'event_id' => $event->id,
+            'event_date_id' => $event_date->id,
+            'participante_id' => Auth::user()->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        foreach ($array_lotes_obj as $i => $entry) {
+            DB::table('order_items')->insert([
+                'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+                'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
+                'quantity' => 1,
+                'value' => $entry['value'],
+                'status' => 1, // 1 = confirmado
+                'order_id' => $order_id,
+                'lote_id' => $entry['id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // 4. Send confirmation email
+        try {
+            $order = Order::find($order_id);
+            if ($order) {
+                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Inscrição realizada com sucesso'));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Falha ao enviar email de confirmação para inscrição gratuita', ['order_id' => $order_id, 'error' => $e->getMessage()]);
+        }
+        
+        // 5. Clear session and redirect
+        $request->session()->forget(['coupon', 'subtotal', 'coupon_subtotal', 'total', 'dict_lotes', 'event_date_result', 'event_date']);
+
+        return redirect()->route('event_home.my_registrations')
+            ->with('success', 'Inscrição realizada com sucesso!');
+    }
+
     public function thanks(Request $request)
     {
         // Validar se o usuário está autenticado

@@ -91,6 +91,7 @@ Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')
 Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');
 Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEventDate')->name('conference.setEventDate');
 Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLotesPorData')->name('conference.getLotesPorData');
+Route::post('{slug}/inscricao-gratuita', 'App\Http\Controllers\ConferenceController@store_free_registration')->middleware(['auth:participante', 'verified'])->name('conference.store_free_registration');
 
 // Rota para corrigir hashes de lotes (temporária)
 Route::get('/fix-lote-hashes', 'App\Http\Controllers\LoteController@fixLoteHashes')->name('lote.fix_hashes');

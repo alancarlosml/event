@@ -49,7 +49,7 @@
                             <input type="hidden" name="hash_event" value="{{$hash}}">
                             <div class="card-body">
 
-                                <div class="form-row mb-3">
+                                <div class="row mb-3">
                                     <label for="code" class="ml-2">Código do cupom*</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control col-2" placeholder="Código" aria-label="Código" aria-describedby="basic-addon2" name="code" value="{{$coupon_code ?? old('code')}}" style="margin-left: 5px">
@@ -59,7 +59,7 @@
                                     </div>
                                     <small id="codeHelp" class="form-text text-muted ml-2">Sugestão de código único.</small>
                                 </div>
-                                <div class="form-row mb-3" style="margin-left: 0;">
+                                <div class="row mb-3" style="margin-left: 0;">
                                     <label for="discount_type">Valor*</label>
                                     <div class="input-group">
                                         <select class="form-control col-1" id="discount_type" name="discount_type">

@@ -48,14 +48,14 @@
                             @csrf
                             <input type="hidden" name="event_id" value="">
                             <div class="card-body">
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="type">Tipo do lote*</label>
                                     <select id="type" class="form-control col-md-3" id="type" name="type">
                                         <option value="0">Pago</option>
                                         <option value="1">Grátis</option>
                                     </select>
                                 </div>
-                                <div class="form-row card-body mb-2"
+                                <div class="row card-body mb-3 p-2"
                                      style="border: solid 1px #ddd; border-radius: 0.25rem;" id="value_div">
                                     <div class="form-group col-md-3">
                                         <label for="tax_parcelamento">Juros do parcelamento* <a href="javascript:;"
@@ -107,7 +107,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div class="row mb-3">
                                     <div class="form-group col-md-10">
                                         <label for="name">Nome do lote*</label>
                                         <input type="text" class="form-control" id="name" name="name" placeholder="Nome" value="{{ $lote->name ?? old('name') }}">
@@ -117,11 +117,11 @@
                                         <input type="number" class="form-control" id="quantity" name="quantity" placeholder="0" min="0" value="{{ $lote->quantity ?? old('quantity') }}">
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="description">Descrição</label>
                                     <input type="text" class="form-control" id="description" name="description" placeholder="Descrição" value="{{ $lote->description ?? old('description') }}">
                                 </div>
-                                <div class="form-row">
+                                <div class="row mb-3">
                                     <label class="col-md-12">Limite por compra*</label>
                                     <div class="form-group col-md-3">
                                         Mínimo
@@ -132,7 +132,7 @@
                                         <input type="number" class="form-control" id="limit_max" name="limit_max" placeholder="0" value="{{ $lote->limit_max ?? old('limit_max') }}" min="0">
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div class="row mb-3">
                                     <label class="col-md-12">Período de vendas*</label>
                                     <div class="form-group col-md-3">
                                         <label for="number">Início</label>
@@ -142,10 +142,6 @@
                                                    id="input_datetimepicker_day_begin"
                                                    data-target="#datetimepicker_day_begin" name="datetime_begin"
                                                    autocomplete="off" />
-                                            {{-- <div class="input-group-append" data-target="#datetimepicker_day_begin"
-                                                 data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div> --}}
                                         </div>
                                     </div>
                                     <div class="form-group col-md-3">
@@ -156,32 +152,10 @@
                                                    id="input_datetimepicker_day_end"
                                                    data-target="#datetimepicker_day_end" name="datetime_end"
                                                    autocomplete="off" />
-                                            {{-- <div class="input-group-append" data-target="#datetimepicker_day_end"
-                                                 data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div> --}}
                                         </div>
                                     </div>
-                                    {{-- <div class="form-group col-md-3">
-                                        Início
-                                        <div class="input-group date" id="reservationtime_begin" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input" id="reservationtime_begin_input" data-target="#reservationtime_begin" name="datetime_begin"/>
-                                            <div class="input-group-append" data-target="#reservationtime_begin" data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        Fim
-                                        <div class="input-group date" id="reservationtime_end" data-target-input="nearest">
-                                            <input type="text" class="form-control datetimepicker-input" id="reservationtime_end_input" data-target="#reservationtime_end" name="datetime_end"/>
-                                            <div class="input-group-append" data-target="#reservationtime_end" data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
-                                        </div>
-                                    </div> --}}
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="visibility">Visibilidade*</label>
                                     <select id="visibility" class="form-control col-md-3" name="visibility">
                                         <option selected value="">Selecione</option>
@@ -190,14 +164,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
-                            {{-- <div class="form-check pb-3">
-                                <label for="visibility">Visibilidade</label>
-                                <div class="custom-switch">
-                                    <input type="checkbox" checked="checked" class="custom-control-input" name="visibility" id="visibility" value="1">
-                                    <label class="custom-control-label" for="visibility">Público</label>
-                                </div>
-                            </div> --}}
 
                             <div class="card-footer d-flex justify-content-between">
                                 <a href="{{ route('event_home.create.step.two') }}" class="btn btn-primary">Voltar</a>
@@ -279,57 +245,7 @@
                             maxDate: date
                         })
                     }
-                    //onlyTimepicker: true
                 })
-
-                // $('#reservationtime_input').daterangepicker({
-                //     timePicker: true,
-                //     timePickerIncrement: 30,
-                //     locale: {
-                //         format: 'MM/DD/YYYY hh:mm A'
-                //     }
-                // });
-
-                // $('body').on('mousedown', "#input_datetimepicker_day_begin", function() {
-                //     $(this).datetimepicker({
-                //         timepicker: true,
-                //         format: 'd/m/Y H:i',
-                //         mask: true,
-                //         minDate: new Date(),
-                //         /*onShow: function(ct) {
-                //             this.setOptions({
-                //                 maxDate: $('#input_datetimepicker_day_end').val() ? $(
-                //                     '#input_datetimepicker_day_end').val() : false
-                //             })
-                //         },*/
-                //     });
-                // });
-
-                // $('body').on('mousedown', "#input_datetimepicker_day_end", function() {
-                //     $(this).datetimepicker({
-                //         timepicker: true,
-                //         format: 'd/m/Y H:i',
-                //         mask: true,
-                //         minDate:new Date(),
-                //     });
-                // });
-
-                // $('#reservationtime_begin').datetimepicker({ 
-                //     icons: { time: 'far fa-clock' },
-                //     format: 'DD/MM/YYYY hh:mm A' 
-                // });
-
-                // $('#reservationtime_end').datetimepicker({ 
-                //     icons: { time: 'far fa-clock' },
-                //     format: 'DD/MM/YYYY hh:mm A' 
-                // });
-
-                // $("#reservationtime_begin").on("change.datetimepicker", function (e) {
-                //     $('#reservationtime_end').datetimepicker('minDate', e.date);
-                // });
-                // $("#reservationtime_end").on("change.datetimepicker", function (e) {
-                //     $('#reservationtime_begin').datetimepicker('maxDate', e.date);
-                // });
             });
         </script>
     @endpush
