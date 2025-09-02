@@ -76,7 +76,7 @@
                                     </div>
                                 </div>
                                 <div class="card-footer d-flex justify-content-between">
-                                    <a href="{{ route('event_home.guests', $guest->event_hash) }}" class="btn btn-primary">Anterior</a>
+                                    <a href="{{ route('event_home.guests', $guest->event_hash) }}" class="btn btn-secondary">Anterior</a>
                                     <button type="submit" class="btn btn-primary">Salvar</button>
                                 </div>
                             </div>

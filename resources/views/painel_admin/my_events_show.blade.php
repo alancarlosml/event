@@ -103,7 +103,7 @@
                         <div class="form-group">
                             <label for="created_at">Data de criação</label>
                             <p class="text-muted" style="font-size: 18px">
-                                {{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}
+                                {{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}
                             </p>
                         </div>
                         <div class="form-group">
@@ -198,7 +198,7 @@
                     </div>
                     <!-- /.card-body -->
                     <div class="card-footer d-flex justify-content-between">
-                        <a href="{{ route('event_home.my_events') }}" class="btn btn-primary">Voltar</a>
+                        <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">Voltar</a>
                     </div>
                 </div>
             </div>

@@ -57,7 +57,7 @@
                                                 <td>{{ $participante->name }}</td>
                                                 <td>{{ $participante->email }}</td>
                                                 <td>{{ $participante->phone }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($participante->created_at)->format('j/m/Y H:i') }}
+                                                <td>{{ \Carbon\Carbon::parse($participante->created_at)->format('d/m/Y H:i') }}
                                                 </td>
                                                 <td>
                                                     @if ($participante->status == 1)

@@ -94,14 +94,48 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="form-group col-md-8">
-                                        <label for="name">Nome do lote*</label>
-                                        <input type="text" class="form-control" id="name" name="name" placeholder="Nome" value="{{$lote->name ?? old('name')}}">
+                                <div class="row mb-3 g-3">
+                                    <div class="col-12 col-md-8">
+                                        <label for="name" class="form-label">
+                                            Nome do lote
+                                            <span class="text-danger" aria-label="obrigatório">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="name"
+                                            name="name"
+                                            placeholder="Nome"
+                                            value="{{ $lote->name ?? old('name') }}"
+                                            required
+                                            aria-describedby="name-help"
+                                            minlength="2"
+                                            maxlength="255"
+                                        >
+                                        <div id="name-help" class="form-text">
+                                            Mínimo 2 caracteres, máximo 255
+                                        </div>
                                     </div>
-                                    <div class="form-group col-md-2">
-                                        <label for="quantity">Quantidade*</label>
-                                        <input type="number" class="form-control" id="quantity" name="quantity" placeholder="0" value="{{$lote->quantity ?? old('quantity')}}" min="0">
+                                    <div class="col-12 col-md-4">
+                                        <label for="quantity" class="form-label">
+                                            Quantidade
+                                            <span class="text-danger" aria-label="obrigatório">*</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            class="form-control"
+                                            id="quantity"
+                                            name="quantity"
+                                            placeholder="0"
+                                            value="{{ $lote->quantity ?? old('quantity') }}"
+                                            min="0"
+                                            max="999999"
+                                            required
+                                            aria-describedby="quantity-help"
+                                        >
+                                        <div id="quantity-help" class="form-text">
+                                            Número de ingressos disponíveis
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group mb-3">
@@ -124,7 +158,7 @@
                                     <div class="form-group col-md-3">
                                         <label for="number">Início</label>
                                         <div class="input-group date" id="datetimepicker_day_begin" data-target-input="nearest">
-                                            <input class="form-control datetimepicker-input datetimepicker_day" id="input_datetimepicker_day_begin" data-target="#datetimepicker_day_begin" name="datetime_begin" autocomplete="off" value="{{ \Carbon\Carbon::parse($lote->datetime_begin)->format('j/m/Y H:i') }}"/>
+                                            <input class="form-control datetimepicker-input datetimepicker_day" id="input_datetimepicker_day_begin" data-target="#datetimepicker_day_begin" name="datetime_begin" autocomplete="off" value="{{ \Carbon\Carbon::parse($lote->datetime_begin)->format('d/m/Y H:i') }}"/>
                                             <div class="input-group-append" data-target="#datetimepicker_day_begin" data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                             </div>
@@ -133,7 +167,7 @@
                                     <div class="form-group col-md-3">
                                         <label for="number">Fim</label>
                                         <div class="input-group date" id="datetimepicker_day_end" data-target-input="nearest">
-                                            <input class="form-control datetimepicker-input datetimepicker_day" id="input_datetimepicker_day_end" data-target="#datetimepicker_day_end" name="datetime_end" autocomplete="off" value="{{ \Carbon\Carbon::parse($lote->datetime_end)->format('j/m/Y H:i') }}"/>
+                                            <input class="form-control datetimepicker-input datetimepicker_day" id="input_datetimepicker_day_end" data-target="#datetimepicker_day_end" name="datetime_end" autocomplete="off" value="{{ \Carbon\Carbon::parse($lote->datetime_end)->format('d/m/Y H:i') }}"/>
                                             <div class="input-group-append" data-target="#datetimepicker_day_end" data-toggle="datetimepicker">
                                                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                             </div>
@@ -150,7 +184,7 @@
                                 </div>
                             </div>
                             <div class="card-footer d-flex justify-content-between">
-                                <a href="{{ route('event_home.create.step.two') }}" class="btn btn-primary">Voltar</a>
+                                <a href="{{ route('event_home.create.step.two') }}" class="btn btn-secondary">Voltar</a>
                                 <button type="submit" class="btn btn-primary">Salvar</button>
                             </div>
                         </form>
@@ -165,7 +199,8 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
             integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.css">
+        {{-- <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet"> --}}
       @endpush
 
       @push('footer')
@@ -174,10 +209,14 @@
             integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
+        {{-- <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script> --}}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js">
+        {{-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js">
+        <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.js"></script> --}}
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.js"></script>
+
         </script>
 
         <script>
@@ -232,7 +271,6 @@
                         minDate: date
                     })
                 }
-                //onlyTimepicker: true
             })
 
             dpMax = new AirDatepicker('#input_datetimepicker_day_end', {
@@ -244,58 +282,7 @@
                         maxDate: date
                     })
                 }
-                //onlyTimepicker: true
             })
-
-            // $('#reservationtime_input').daterangepicker({
-            //     timePicker: true,
-            //     timePickerIncrement: 30,
-            //     locale: {
-            //         format: 'MM/DD/YYYY hh:mm A'
-            //     }
-            // });
-    
-            // $('#reservationtime_begin').datetimepicker({ 
-            //     icons: { time: 'far fa-clock' },
-            //     format: 'DD/MM/YYYY hh:mm A',
-            //     defaultDate: $('#reservationtime_begin_hidden').val()
-            // });
-
-            // $('#reservationtime_end').datetimepicker({ 
-            //     icons: { time: 'far fa-clock' },
-            //     format: 'DD/MM/YYYY hh:mm A',
-            //     defaultDate: $('#reservationtime_end_hidden').val()
-            // });
-
-            // $("#reservationtime_begin").on("change.datetimepicker", function (e) {
-            //     $('#reservationtime_end').datetimepicker('minDate', e.date);
-            // });
-            // $("#reservationtime_end").on("change.datetimepicker", function (e) {
-            //     $('#reservationtime_begin').datetimepicker('maxDate', e.date);
-            // });
-
-            // $('body').on('mousedown',"#input_datetimepicker_day_begin", function(){
-            //     $(this).datetimepicker({
-            //         timepicker:true,
-            //         format:'d/m/Y H:i',
-            //         mask:true,
-            //         minDate:new Date(),
-            //         /*onShow:function( ct ){
-            //             this.setOptions({
-            //                 minDate:$('#input_datetimepicker_day_begin').val()?$('#input_datetimepicker_day_begin').val():false
-            //             })
-            //         },*/
-            //     });
-            // });
-
-            // $('body').on('mousedown',"#input_datetimepicker_day_end", function(){
-            //     $(this).datetimepicker({
-            //         timepicker:true,
-            //         format:'d/m/Y H:i',
-            //         mask:true,
-            //         minDate:new Date(),
-            //     });
-            // });
         });
     
     </script>

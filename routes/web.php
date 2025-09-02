@@ -82,7 +82,7 @@ Route::get('painel/eventos/organizador/{id}/delete_file_icon', 'App\Http\Control
 
 Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->name('conference.index');
 Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->name('contact_event');
-Route::get('{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
+Route::match(['GET', 'POST'], '{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
 Route::get('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.payment');
 Route::post('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@payment')->middleware(['auth:participante', 'verified'])->name('conference.payment');
 // Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
@@ -91,7 +91,6 @@ Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')
 Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');
 Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEventDate')->name('conference.setEventDate');
 Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLotesPorData')->name('conference.getLotesPorData');
-Route::post('{slug}/inscricao-gratuita', 'App\Http\Controllers\ConferenceController@store_free_registration')->middleware(['auth:participante', 'verified'])->name('conference.store_free_registration');
 
 // Rota para corrigir hashes de lotes (temporária)
 Route::get('/fix-lote-hashes', 'App\Http\Controllers\LoteController@fixLoteHashes')->name('lote.fix_hashes');

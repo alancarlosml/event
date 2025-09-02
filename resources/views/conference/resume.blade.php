@@ -79,7 +79,7 @@
                     </div>
                 </div>
                 <div class="col-md-8 order-md-1">
-                    <div class="form-group pl-3 pr-3">
+                    <div class="form-group p-3">
                         @if ($message = Session::get('success'))
                             <div class="alert alert-success">
                                 <strong>{{ $message }}</strong>
@@ -94,6 +94,12 @@
                                 </ul>
                             </div>
                         @endif
+
+                        {{-- Container para exibir os erros de validação --}}
+                        <div id="validation-errors" class="alert alert-danger" style="display: none;">
+                            <strong>Por favor, corrija os seguintes erros:</strong>
+                            <ul></ul>
+                        </div>
                     </div>
                     <form method="POST" id="checkout_submit" action="{{ route('conference.payment', $event->slug) }}">
                         @csrf
@@ -107,7 +113,7 @@
                                     @switch($question->option_id)
                                         @case(1)
                                             {{-- Campo texto --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -120,7 +126,7 @@
 
                                         @case(2)
                                             {{-- Campo seleção --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -138,7 +144,7 @@
 
                                         @case(3)
                                             {{-- Campo marcação --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -156,7 +162,7 @@
 
                                         @case(4)
                                             {{-- Campo multipla escolha --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -173,7 +179,7 @@
 
                                         @case(5)
                                             {{-- Campo CPF --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -186,7 +192,7 @@
 
                                         @case(6)
                                             {{-- Campo CNPJ --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -199,7 +205,7 @@
 
                                         @case(7)
                                             {{-- Campo Data --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -212,7 +218,7 @@
 
                                         @case(8)
                                             {{-- Campo Telefone --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -225,7 +231,7 @@
 
                                         @case(9)
                                             {{-- Campo Número inteiro --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -238,7 +244,7 @@
 
                                         @case(10)
                                             {{-- Campo Número decimal --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -251,7 +257,7 @@
 
                                         @case(11)
                                             {{-- Campo arquivo --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -264,7 +270,7 @@
 
                                         @case(12)
                                             {{-- Campo Textarea --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -276,7 +282,7 @@
 
                                         @case(13)
                                             {{-- Campo Email --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -289,7 +295,7 @@
 
                                         @case(14)
                                             {{-- Campo estados --}}
-                                            <div class="form-group">
+                                            <div class="form-group mb-3">
                                                 <label for="new_field">{{ $question->question }}@if ($question->required == 1)
                                                         *
                                                     @endif
@@ -409,68 +415,6 @@
                         }
                     }
                 });
-
-                // const mp = new MercadoPago('{{ env('MERCADO_PAGO_PUBLIC_KEY', '') }}', {
-                //     locale: 'pt-BR'
-                // });
-
-                // const bricksBuilder = mp.bricks();
-                // const renderPaymentBrick = async (bricksBuilder) => {
-                // const settings = {
-                // initialization: {
-                //     amount: 100, // valor total a ser pago
-                //     locale: 'pt-BR',
-                // },
-                // customization: {
-                //     maxInstallments: 10,
-                //     paymentMethods: {
-                //         creditCard: 'all',
-                //         ticket: ['bolbradesco'],
-                //         bankTransfer: ['pix'],
-                //     },
-                // },
-                // callbacks: {
-                //     onReady: () => {
-                //         /*
-                //         Callback chamado quando o Brick estiver pronto.
-                //         Aqui você pode ocultar loadings do seu site, por exemplo.
-                //         */
-                //     },
-                //     onSubmit: ({ selectedPaymentMethod, formData }) => {
-                //     // callback chamado ao clicar no botão de submissão dos dados
-
-                //         return new Promise((resolve, reject) => {
-                //         fetch("/processar-pago", {
-                //             method: "POST",
-                //             headers: {
-                //             "Content-Type": "application/json",
-                //             },
-                //             body: JSON.stringify(formData)
-                //         })
-                //             .then((response) => {
-                //             // receber o resultado do pagamento
-                //             resolve();
-                //             })
-                //             .catch((error) => {
-                //             // lidar com a resposta de erro ao tentar criar o pagamento
-                //             reject();
-                //             })
-                //         });
-
-                //     },
-                //     onError: (error) => {
-                //     // callback chamado para todos os casos de erro do Brick
-                //     console.error(error);
-                //     },
-                // },
-                // };
-                // window.paymentBrickController = await bricksBuilder.create(
-                //     'payment',
-                //     'paymentBrick_container',
-                //     settings
-                //     );
-                // };
-                // renderPaymentBrick(bricksBuilder);
 
             });
 

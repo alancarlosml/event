@@ -147,12 +147,14 @@
                                                                         {{ $order->participante_email }}
                                                                     </td>
                                                                     <td>
-                                                                        @if ($order->gatway_payment_method == 'credit')
+                                                                        @if ($order->gatway_payment_method == 'credit_card')
                                                                             Crédito
-                                                                        @elseif($order->gatway_payment_method == 'boleto')
+                                                                        @elseif($order->gatway_payment_method == 'ticket')
                                                                             Boleto
-                                                                        @elseif($order->gatway_payment_method == 'pix')
+                                                                        @elseif($order->gatway_payment_method == 'bank_transfer')
                                                                             Pix
+                                                                        @elseif($order->gatway_payment_method == 'free')
+                                                                            Grátis
                                                                         @else
                                                                             Não informado
                                                                         @endif
@@ -872,10 +874,16 @@
                 size_obj_methods = Object.keys(pieData['original']).length;
                 for (var i = 0; i < size_obj_methods; i++) {
                     total_methods.push(pieData['original'][i].payment_methods_total);
-                    if (pieData['original'][i].gatway_payment_method == 'credit') {
+                    if (pieData['original'][i].gatway_payment_method == 'credit_card') {
                         methods.push('Cartão de crédito');
-                    } else if (pieData['original'][i].gatway_payment_method == 'boleto') {
+                    } else if (pieData['original'][i].gatway_payment_method == 'ticket') {
                         methods.push('Boleto');
+                    }
+                    else if (pieData['original'][i].gatway_payment_method == 'bank_transfer') {
+                        methods.push('Pix');
+                    }
+                    else if (pieData['original'][i].gatway_payment_method == 'free') {
+                        methods.push('Grátis');
                     }
                 }
 

@@ -69,7 +69,7 @@
                                     <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ $message->email }}</td>
                                     <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ $message->phone }}</td>
                                     <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ $message->subject }}</td>
-                                    <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ \Carbon\Carbon::parse($message->created_at)->format('j/m/Y H:i') }}</td>
+                                    <td onclick="window.location='{{ route('event_home.show_message', $message->id) }}';">{{ \Carbon\Carbon::parse($message->created_at)->format('d/m/Y H:i') }}</td>
                                     {{-- <td>
                                         <div class="d-flex"> --}}
                                             {{--<a class="btn btn-primary btn-sm mr-1"

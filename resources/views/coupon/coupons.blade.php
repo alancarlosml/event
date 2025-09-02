@@ -151,7 +151,7 @@
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer">
-                                <a href="{{ route('event.index')}}" class="btn btn-primary float-left">Voltar</a>
+                                <a href="{{ route('event.index')}}" class="btn btn-secondary float-left">Voltar</a>
                             </div>
                             <!-- /.card-footer-->
                         </div>

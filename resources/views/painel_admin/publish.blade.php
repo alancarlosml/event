@@ -100,11 +100,9 @@
                             <hr>
                             <h4>Organização do evento</h4>
                             <input type="hidden" name="owner_id" value="{{$owner_id}}">
-                            <div class="row mb-3">
-                                <div class="form-group col-md-12">
-                                    <label for="owner_name">Organizador do evento*</label>
-                                    <input type="text" class="form-control" id="owner_name" name="owner_name" placeholder="Organizador" value="{{ $event->owner->name ?? '' }}" required>
-                                </div>
+                            <div class="form-group mb-3">
+                                <label for="owner_name">Organizador do evento*</label>
+                                <input type="text" class="form-control" id="owner_name" name="owner_name" placeholder="Organizador" value="{{ $event->owner->name ?? '' }}" required>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="description">Descrição</label>
@@ -130,7 +128,7 @@
                             </div>
                             <hr>
                             <h4>Publicar o evento</h4>
-                            <div class="form-group">
+                            <div class="form-group py-3">
                                 <div class="form-check form-switch">
                                     <input type="checkbox" @if($event->status == 1) checked="checked" @endif class="form-check-input" name="status" id="status" value="1">
                                     <label class="form-check-label" for="status">Sim</label>
@@ -139,7 +137,7 @@
                         </div>
                         <!-- /.card-body -->
                         <div class="card-footer">
-                            <a href="{{ route('event_home.create.step.three') }}" class="btn btn-primary">Anterior</a>
+                            <a href="{{ route('event_home.create.step.three') }}" class="btn btn-secondary">Anterior</a>
                             <button type="submit" class="btn btn-primary btn-lg float-end" style="margin-top: -5px"><i class="fa-solid fa-circle-check"></i> Salvar evento</button>
                         </div>
                     </form>

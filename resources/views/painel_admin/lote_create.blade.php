@@ -166,7 +166,7 @@
                             </div>
 
                             <div class="card-footer d-flex justify-content-between">
-                                <a href="{{ route('event_home.create.step.two') }}" class="btn btn-primary">Voltar</a>
+                                <a href="{{ route('event_home.create.step.two') }}" class="btn btn-secondary">Voltar</a>
                                 <button type="submit" class="btn btn-primary">Criar lote</button>
                             </div>
                         </form>

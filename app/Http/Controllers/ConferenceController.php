@@ -43,7 +43,8 @@ class ConferenceController extends Controller
 
         if($event) {
             $total_dates = count($event->event_dates);
-            $date_min = EventDate::select('id')->where('date', $event->min_event_dates())->first();
+            // Se há apenas uma data, use a primeira data disponível do evento
+            $date_min = $total_dates == 1 ? $event->event_dates->first() : EventDate::select('id')->where('date', $event->min_event_dates())->first();
  
             return view('site.event', compact('event', 'slug', 'total_dates', 'date_min'));
 
@@ -86,10 +87,10 @@ class ConferenceController extends Controller
 
     public function resume(Request $request, $slug)
     {
+        Log::info('Accessing resume page.', ['slug' => $slug, 'session_data' => $request->session()->all()]);
 
         $coupon = $request->session()->get('coupon');
         $subtotal = $request->session()->get('subtotal');
-        $coupon_subtotal = $request->session()->get('coupon_subtotal');
         $total = $request->session()->get('total');
         $dict_lotes = $request->session()->get('dict_lotes');
         $event_date_result = $request->session()->get('event_date_result');
@@ -97,18 +98,38 @@ class ConferenceController extends Controller
         $event = Event::where('slug', $slug)->first();
         $request->session()->put('event', $event);
         $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
-        
-        // Verificar se event_date_result existe na sessão
+
+        // Verificar se event_date_result existe na sessão; se não, tentar obter do request (GET ou POST)
         if (!$event_date_result) {
-            return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi selecionada.']);
+            Log::info('resume: event_date_result missing from session, trying request param', ['slug' => $slug, 'query_event_date_result' => $request->input('event_date_result')]);
+            $requestEventDateResult = $request->input('event_date_result');
+            if ($requestEventDateResult) {
+                $eventDate = EventDate::where('id', $requestEventDateResult)->first();
+                if ($eventDate) {
+                    $request->session()->put('event_date_result', $requestEventDateResult);
+                    $event_date_result = $requestEventDateResult;
+                    Log::info('resume: event_date_result set from request param', ['event_date_result' => $event_date_result]);
+                } else {
+                    Log::warning('resume: event_date_result from request not found in DB', ['event_date_result' => $requestEventDateResult]);
+                    return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi encontrada.']);
+                }
+            } else {
+                Log::warning('resume: no event_date_result in session nor request');
+                return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi selecionada.']);
+            }
         }
-        
+
         $eventDate = EventDate::where('id', $event_date_result)->first();
-        
-        // Verificar se a data do evento foi encontrada
         if (!$eventDate) {
+            Log::warning('resume: eventDate record not found', ['event_date_result' => $event_date_result]);
             return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi encontrada.']);
         }
+
+        Log::info('resume: proceeding with data check', [
+            'has_dict_lotes' => (bool) $dict_lotes,
+            'dict_lotes' => $dict_lotes,
+            'event_date_result' => $event_date_result,
+        ]);
 
         if($dict_lotes) {
             $array_lotes = [];
@@ -144,7 +165,8 @@ class ConferenceController extends Controller
             $request->session()->put('array_lotes', $array_lotes);
             $request->session()->put('array_lotes_obj', $array_lotes_obj);
 
-            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'array_lotes_obj', 'coupon', 'subtotal', 'coupon_subtotal', 'total', 'eventDate'));
+            Log::info('resume: rendering conference.resume view');
+            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'array_lotes_obj', 'coupon', 'subtotal', 'total', 'eventDate'));
 
         } else {
 
@@ -155,7 +177,7 @@ class ConferenceController extends Controller
             $request->session()->forget('dict_lotes');
             $request->session()->forget('event_date_result');
             $request->session()->forget('event_date');
-
+            Log::warning('resume: dict_lotes missing, redirecting back to conference.index');
             return redirect()->route('conference.index', $event->slug);
         }
     }
@@ -186,9 +208,31 @@ class ConferenceController extends Controller
 
     public function getSubTotal(Request $request)
     {
+        // Add comprehensive validation
+        $request->validate([
+            'dict' => 'required|array|min:1',
+            'dict.*.lote_hash' => 'required|string|exists:lotes,hash',
+            'dict.*.lote_quantity' => 'required|integer|min:0|max:999'
+        ]);
+
+        // Add rate limiting to prevent abuse
+        $key = 'subtotal:' . $request->ip();
+        $cacheEntry = DB::table('cache')->where('key', $key)->first();
+
+        if ($cacheEntry && $cacheEntry->expiration > time()) {
+            return response()->json(['error' => 'Muitas solicitações. Tente novamente em alguns segundos.'], 429);
+        }
+
+        // Armazenar timestamp atual + 1 minuto
+        DB::table('cache')->updateOrInsert(
+            ['key' => $key],
+            [
+                'value' => time(),
+                'expiration' => time() + 60
+            ]
+        );
 
         $data = $request->all();
-
         $dicts = $data['dict'];
 
         $subtotal = 0;
@@ -196,6 +240,8 @@ class ConferenceController extends Controller
         $total = 0;
 
         $request->session()->put('dict_lotes', $dicts);
+
+        Log::info('getSubTotal called', ['dicts' => $dicts, 'subtotal' => $subtotal]);
 
         if($dicts) {
             foreach($dicts as $dict) {
@@ -458,16 +504,22 @@ class ConferenceController extends Controller
     //     }
     // }
 
-    public function payment(Request $request)
+    public function payment(Request $request, $slug)
     {
+        Log::info('=== PAYMENT METHOD START ===', [
+            'slug' => $slug, 
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'headers' => $request->headers->all(),
+            'request_data' => $request->all(),
+            'session_data' => $request->session()->all()
+        ]);
+        
         $input = $request->all();
 
         $event = $request->session()->get('event');
         $coupon = $request->session()->get('coupon');
-        $subtotal = $request->session()->get('subtotal');
-        $coupon_subtotal = $request->session()->get('coupon_subtotal');
         $total = $request->session()->get('total');
-        $dict_lotes = $request->session()->get('dict_lotes');
         $dict_lotes = $request->session()->get('dict_lotes');
         $array_lotes_obj = $request->session()->get('array_lotes_obj');
         $event_date = $request->session()->get('event_date');
@@ -544,7 +596,7 @@ class ConferenceController extends Controller
                 'status' => 1, // concluído/confirmado
                 'gatway_hash' => null,
                 'gatway_reference' => null,
-                'gatway_status' => 'free',
+                'gatway_status' => '1',
                 'gatway_payment_method' => 'free',
                 'event_id' => $event->id,
                 'event_date_id' => $event_date->id,
@@ -618,8 +670,11 @@ class ConferenceController extends Controller
                 Log::warning('Falha ao enviar email de confirmação para pedido gratuito', ['error' => $e->getMessage()]);
             }
 
-            return redirect()->route('conference.resume', $event->slug)
-                ->with('success', 'Inscrição gratuita realizada com sucesso!');
+            // 5. Clear session and redirect
+            $request->session()->forget(['coupon', 'subtotal', 'coupon_subtotal', 'total', 'dict_lotes', 'event_date_result', 'event_date', 'array_lotes', 'array_lotes_obj', 'order_id']);
+
+            return redirect()->route('event_home.my_registrations')
+                ->with('success', 'Inscrição realizada com sucesso!');
         }
 
         $coupon_id = null;
@@ -692,100 +747,6 @@ class ConferenceController extends Controller
         return view('conference.payment', compact('event', 'total'));
     }
 
-    public function store_free_registration(Request $request, $slug)
-    {
-        // 1. Get initial data and validate
-        $event = Event::where('slug', $slug)->first();
-        if (!$event) {
-            return redirect()->route('home')->withErrors(['error' => 'Evento não encontrado.']);
-        }
-
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Você precisa estar logado para se inscrever.');
-        }
-
-        $input = $request->all();
-        $lotes_data = json_decode($input['dict'] ?? '[]', true);
-
-        if (empty($lotes_data)) {
-            return redirect()->back()->withErrors(['error' => 'Nenhum ingresso selecionado.']);
-        }
-
-        $event_date_id = $request->session()->get('event_date_result');
-        if (!$event_date_id) {
-            return redirect()->back()->withErrors(['error' => 'Data do evento não foi selecionada.']);
-        }
-        $event_date = EventDate::find($event_date_id);
-        if (!$event_date) {
-            return redirect()->back()->withErrors(['error' => 'Data do evento inválida.']);
-        }
-
-        // 2. Re-validate lots and calculate total
-        $total = 0;
-        $array_lotes_obj = [];
-
-        foreach ($lotes_data as $dict) {
-            $quantity = $dict['lote_quantity'];
-            $lote = Lote::where('hash', $dict['lote_hash'])->first();
-
-            if (!$lote || $lote->event_id !== $event->id) {
-                return redirect()->back()->withErrors(['error' => 'Um dos lotes selecionados é inválido.']);
-            }
-            
-            $total += $lote->value * $quantity;
-
-            for ($j = 0; $j < $quantity; $j++) {
-                array_push($array_lotes_obj, ['id' => $lote->id, 'value' => $lote->value, 'name' => $lote->name]);
-            }
-        }
-
-        if ($total > 0) {
-            return redirect()->back()->withErrors(['error' => 'Este formulário é apenas para inscrições gratuitas.']);
-        }
-
-        // 3. Create Order and Order Items
-        $order_id = DB::table('orders')->insertGetId([
-            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-            'status' => 1, // 1 = concluído/confirmado
-            'gatway_status' => 'free',
-            'gatway_payment_method' => 'free',
-            'event_id' => $event->id,
-            'event_date_id' => $event_date->id,
-            'participante_id' => Auth::user()->id,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        foreach ($array_lotes_obj as $i => $entry) {
-            DB::table('order_items')->insert([
-                'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-                'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
-                'quantity' => 1,
-                'value' => $entry['value'],
-                'status' => 1, // 1 = confirmado
-                'order_id' => $order_id,
-                'lote_id' => $entry['id'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // 4. Send confirmation email
-        try {
-            $order = Order::find($order_id);
-            if ($order) {
-                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Inscrição realizada com sucesso'));
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Falha ao enviar email de confirmação para inscrição gratuita', ['order_id' => $order_id, 'error' => $e->getMessage()]);
-        }
-        
-        // 5. Clear session and redirect
-        $request->session()->forget(['coupon', 'subtotal', 'coupon_subtotal', 'total', 'dict_lotes', 'event_date_result', 'event_date']);
-
-        return redirect()->route('event_home.my_registrations')
-            ->with('success', 'Inscrição realizada com sucesso!');
-    }
 
     public function thanks(Request $request)
     {

@@ -100,7 +100,7 @@
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer d-flex justify-content-between">
-                                <a href="{{ route('event_home.create.step.three') }}" class="btn btn-primary">Voltar</a>
+                                <a href="{{ route('event_home.create.step.three') }}" class="btn btn-secondary">Voltar</a>
                                 <button type="submit" class="btn btn-primary">Salvar</button>
                             </div>
                         </form>

@@ -82,7 +82,7 @@
                                                         {{ \Carbon\Carbon::parse($event->date_event_max)->format('d/m/Y') }}
                                                     @endif
                                                 </td> --}}
-                                                <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}
+                                                <td>{{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}
                                                 </td>
                                                 <td>
                                                     @if ($event->place_name == '' || $event->participante_name == '' || $event->event_date == '' || $event->lote_name == '')

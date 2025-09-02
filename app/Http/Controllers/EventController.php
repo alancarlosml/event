@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 use App\Models\Category;
@@ -26,53 +27,41 @@ class EventController extends Controller
 {
     public function index()
     {
-
-        $events = DB::table('events')
+        try {
+            // Optimized with eager loading to reduce N+1 queries
+            $events = Event::with([
+                'place.city.state',
+                'event_dates',
+                'lotes',
+                'owner',
+                'participantes' => function($query) {
+                    $query->where('participantes_events.role', 'admin')
+                          ->where('participantes_events.status', 1);
+                }
+            ])
+            ->select([
+                'events.*',
+                DB::raw('MIN(event_dates.date) as date_event_min'),
+                DB::raw('MAX(event_dates.date) as date_event_max')
+            ])
+            ->leftJoin('event_dates', 'event_dates.event_id', '=', 'events.id')
             ->leftJoin('places', 'places.id', '=', 'events.place_id')
             ->leftJoin('participantes_events', 'participantes_events.event_id', '=', 'events.id')
             ->leftJoin('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
-            ->leftJoin('lotes', 'events.id', '=', 'lotes.event_id')
-            // ->join('users', 'users.id', '=', 'events.owner_id')
-            ->leftJoin('event_dates', 'event_dates.event_id', '=', 'events.id')
-            ->leftJoin(DB::raw("(SELECT participantes.name,
-                                    participantes.email, 
-                                    participantes_events.event_id
-                            from participantes
-                            inner join participantes_events on participantes.id = participantes_events.participante_id
-                            where participantes_events.role = 'admin' and participantes_events.status = 1
-                            ) as x"), function ($join) {
-                $join->on('x.event_id', '=', 'events.id');
+            ->where(function($query) {
+                $query->where('participantes_events.role', 'admin')
+                      ->orWhereNull('participantes_events.role');
             })
-            ->select(
-                'events.*',
-                'places.name as place_name',
-                'participantes_events.role',
-                'participantes.name as participante_name',
-                'event_dates.date as event_date',
-                'lotes.name as lote_name',
-                DB::raw('MIN(event_dates.date) as date_event_min'),
-                DB::raw('MAX(event_dates.date) as date_event_max'),
-                'x.name as admin_name',
-                'x.email as admin_email'
-            )
-            // ->where('participantes_events.role', 'admin')
-            // ->select('events.*', 'places.name as place_name', 'users.name as owner_name', DB::raw('MIN(event_dates.date) as date_event_min'), DB::raw('MAX(event_dates.date) as date_event_max'))
             ->orderBy('events.created_at', 'desc')
             ->groupBy('events.id')
             ->get();
 
-        // $events = DB::table('events')
-        // ->join('places', 'places.id', '=', 'events.place_id')
-        // ->join('owners', 'owners.id', '=', 'events.owner_id')
-        // ->join('event_dates', 'event_dates.event_id', '=', 'events.id')
-        // ->select('events.*', 'places.name as place_name', 'owners.name as owner_name', DB::raw('MIN(event_dates.date) as date_event_min'), DB::raw('MAX(event_dates.date) as date_event_max'))
-        // ->orderBy('events.name')
-        // ->groupBy('events.id')
-        // ->get();
+            return view('event.index', compact('events'));
 
-        // dd($events);
-
-        return view('event.index', compact('events'));
+        } catch (\Exception $e) {
+            Log::error('Error loading events index: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao carregar eventos. Tente novamente.');
+        }
     }
 
     public function create()
@@ -542,9 +531,10 @@ class EventController extends Controller
 
     public function reports(Request $request, $id)
     {
-        $event = Event::where('id', $id)->first();
+        try {
+            $event = Event::with(['place.city.state', 'owner'])->findOrFail($id);
 
-        $config = Configuration::findOrFail(1);
+            $config = Configuration::findOrFail(1);
 
         $taxa_juros = $config->tax;
         if($event->config_tax != 0.0) {
@@ -683,15 +673,48 @@ class EventController extends Controller
 
         // dd($situacao_participantes_lotes);
 
+        // Buscar métodos de pagamento incluindo vendas gratuitas
         $payment_methods = Order::orderBy('orders.gatway_payment_method')
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
             ->join('events', 'events.id', '=', 'lotes.event_id')
             ->where('events.id', $id)
-            ->where('lotes.type', 0)
+            ->where(function($query) {
+                $query->where('lotes.type', 0) // Lotes pagos
+                      ->orWhere('lotes.type', 1) // Lotes gratuitos
+                      ->orWhere('order_items.value', 0); // Valor zero (gratuito)
+            })
             ->select('orders.gatway_payment_method', DB::raw('count(*) as payment_methods_total'))
             ->groupBy('orders.gatway_payment_method')
             ->get();
+
+        // Se não há métodos de pagamento mas há vendas, criar entrada para vendas gratuitas
+        if ($payment_methods->isEmpty()) {
+            $total_free_orders = Order::join('order_items', 'orders.id', '=', 'order_items.order_id')
+                ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+                ->join('events', 'events.id', '=', 'lotes.event_id')
+                ->where('events.id', $id)
+                ->where(function($query) {
+                    $query->where('lotes.type', 1) // Lotes gratuitos
+                          ->orWhere('order_items.value', 0); // Valor zero
+                })
+                ->count();
+
+            if ($total_free_orders > 0) {
+                $payment_methods = collect([
+                    (object) [
+                        'gatway_payment_method' => 'free',
+                        'payment_methods_total' => $total_free_orders
+                    ]
+                ]);
+            }
+        }
+
+        // Debug: Log payment methods data
+        Log::info('Payment methods data for event ' . $id, [
+            'count' => $payment_methods->count(),
+            'data' => $payment_methods->toArray()
+        ]);
 
         $situacao_coupons = Coupon::orderBy('coupons.id')
             ->join('orders', 'orders.coupon_id', '=', 'coupons.id')
@@ -721,6 +744,11 @@ class EventController extends Controller
         // dd($payment_methods_json);
 
         return view('event.reports', compact('event', 'lotes', 'resumo', 'all_orders', 'participantes_json', 'config', 'situacao_participantes', 'situacao_participantes_lotes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
+
+        } catch (\Exception $e) {
+            Log::error('Error loading event reports: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao carregar relatórios. Tente novamente.');
+        }
     }
 
     public function participantes_edit($id)

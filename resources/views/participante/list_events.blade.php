@@ -67,21 +67,23 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    {{ \Carbon\Carbon::parse($order->date_used)->format('j/m/Y H:i') }}
+                                                    {{ \Carbon\Carbon::parse($order->date_used)->format('d/m/Y H:i') }}
                                                 </td>
                                                 <td>{{ $order->gatway_reference }}</td>
                                                 <td>
-                                                    @if ($order->gatway_payment_method == 'credit')
+                                                    @if ($order->gatway_payment_method == 'credit_card')
                                                         Crédito
-                                                    @elseif($order->gatway_payment_method == 'boleto')
+                                                    @elseif($order->gatway_payment_method == 'ticket')
                                                         Boleto
-                                                    @elseif($order->gatway_payment_method == 'pix')
+                                                    @elseif($order->gatway_payment_method == 'bank_transfer')
                                                         Pix
+                                                    @elseif($order->gatway_payment_method == 'free')
+                                                        Grátis
                                                     @else
                                                         Não informado
                                                     @endif
                                                 </td>
-                                                <td>{{ \Carbon\Carbon::parse($order->created_at)->format('j/m/Y H:i') }}
+                                                <td>{{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
                                                 <td>
                                                     <a href="{{ route('event.show', $order->event->id) }}">
                                                         <i class="fas fa-eye"></i>
@@ -140,7 +142,7 @@
                                                     <small>{{ $event->get_participante_admin()->email }}</small>
                                                 </td>
                                                 <td>{{ isset($event->place->name) && $event->place->name != '' ? $event->place->name : '-' }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($event->created_at)->format('j/m/Y H:i') }}
+                                                <td>{{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}
                                                 </td>
                                                 <td>
                                                     @if ((isset($event->place->name) && $event->place->name == '') || $event->get_participante_admin()->name == '' || (count($event->event_dates) == 0) || (count($event->lotes) == 0))

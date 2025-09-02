@@ -45,10 +45,11 @@
                     </ul>
                     {{-- {{dd($hash_event)}} --}}
                     <div class="card-body">
-                        <h4>Listagem dos cupons</h4>
-                        <div class="form-group text-right">
-                            <a href="{{route('event_home.create_coupon', $hash_event)}}" class="btn btn-success">Cadastrar novo cupom</a>
-                        </div>
+                        <h4 class="py-3">Listagem dos cupons
+                        {{-- <div class="form-group text-right"> --}}
+                            <a href="{{route('event_home.create_coupon', $hash_event)}}" class="btn btn-success float-end">Cadastrar novo cupom</a>
+                        {{-- </div> --}}
+                        </h4>
                         <table class="table table-head-fixed text-nowrap">
                             <thead>
                                 <tr>
@@ -116,7 +117,7 @@
                         </table>
                     </div>
                     <div class="card-footer d-flex justify-content-between">
-                        <a href="{{ route('event_home.create.step.two') }}" class="btn btn-primary">Anterior</a>
+                        <a href="{{ route('event_home.create.step.two') }}" class="btn btn-secondary">Anterior</a>
                         <a href="{{ route('event_home.create.step.four') }}" class="btn btn-primary">Próximo</a>
                     </div>
                 </div>

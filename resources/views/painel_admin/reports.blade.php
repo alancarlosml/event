@@ -165,60 +165,117 @@
                                         </div>
                                     </div> --}}
                                     <div class="card-body table-responsive p-0">
-                                        <table class="table table-head-fixed text-nowrap display" id="participantes_table">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Hash</th>
-                                                    <th>Comprador</th>
-                                                    <th>Forma pagamento</th>
-                                                    <th>Situação</th>
-                                                    <th>Data da compra</th>
-                                                    <th>Mais detalhes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($all_orders as $order)
-                                                    <tr>
-                                                        <td> {{ $order->order_id }} </td>
-                                                        <td> {{ $order->order_hash }} </td>
-                                                        <td> {{ $order->participante_name }}
-                                                            ({{ $order->participante_cpf }}) <br />
-                                                            {{ $order->participante_email }}
-                                                        </td>
-                                                        <td>
-                                                            @if ($order->gatway_payment_method == 'credit')
+                                        <!-- Mobile Card View -->
+                                        <div class="d-md-none">
+                                            @foreach ($all_orders as $order)
+                                                <div class="card mb-2 border">
+                                                    <div class="card-body p-3">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <strong>ID:</strong> {{ $order->order_id }}
+                                                            </div>
+                                                            <div class="col-6 text-end">
+                                                                @if ($order->situacao == 1)
+                                                                    <span class="badge bg-success">Confirmado</span>
+                                                                @elseif($order->situacao == 2)
+                                                                    <span class="badge bg-warning">Pendente</span>
+                                                                @elseif($order->situacao == 3)
+                                                                    <span class="badge bg-danger">Cancelado</span>
+                                                                @else
+                                                                    <span class="badge bg-secondary">-</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <strong>Comprador:</strong><br>
+                                                            <small>{{ htmlspecialchars($order->participante_name) }}</small><br>
+                                                            <small class="text-muted">{{ htmlspecialchars($order->participante_email) }}</small>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <strong>Pagamento:</strong>
+                                                            @if ($order->gatway_payment_method == 'credit_card')
                                                                 Crédito
-                                                            @elseif($order->gatway_payment_method == 'boleto')
+                                                            @elseif($order->gatway_payment_method == 'ticket')
                                                                 Boleto
-                                                            @elseif($order->gatway_payment_method == 'pix')
+                                                            @elseif($order->gatway_payment_method == 'bank_transfer')
                                                                 Pix
+                                                            @elseif($order->gatway_payment_method == 'free')
+                                                                Grátis
                                                             @else
                                                                 Não informado
                                                             @endif
-                                                        </td>
-                                                        <td>
-                                                            @if ($order->situacao == 1)
-                                                                <span class="badge bg-success">Confirmado</span>
-                                                            @elseif($order->situacao == 2)
-                                                                <span class="badge bg-warning">Pendente</span>
-                                                            @elseif($order->situacao == 2)
-                                                                <span class="badge bg-danger">Cancelado</span>
-                                                            @else
-                                                                -
-                                                            @endif
-                                                        </td>
-                                                        <td> {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
-                                                        </td>
-                                                        <td> 
-                                                            <a class="btn btn-info btn-sm mr-1" href="{{ route('event_home.order.details', $order->order_hash) }}">
-                                                                <i class="fa-solid fa-plus"></i> Info
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <small class="text-muted">{{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}</small>
+                                                        </div>
+                                                        <div class="mt-3">
+                                                            <a class="btn btn-info btn-sm w-100" href="{{ route('event_home.order.details', $order->order_hash) }}" aria-label="Ver detalhes do pedido {{ $order->order_id }}">
+                                                                <i class="fa-solid fa-plus" aria-hidden="true"></i> Ver Detalhes
                                                             </a>
-                                                        </td>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                        <!-- Desktop Table View -->
+                                        <div class="d-none d-md-block">
+                                            <table class="table table-head-fixed text-nowrap display" id="participantes_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Hash</th>
+                                                        <th>Comprador</th>
+                                                        <th>Forma pagamento</th>
+                                                        <th>Situação</th>
+                                                        <th>Data da compra</th>
+                                                        <th>Mais detalhes</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($all_orders as $order)
+                                                        <tr>
+                                                            <td>{{ $order->order_id }}</td>
+                                                            <td>{{ htmlspecialchars($order->order_hash) }}</td>
+                                                            <td>{{ htmlspecialchars($order->participante_name) }}
+                                                                ({{ htmlspecialchars($order->participante_cpf) }}) <br />
+                                                                {{ htmlspecialchars($order->participante_email) }}
+                                                            </td>
+                                                            <td>
+                                                                @if ($order->gatway_payment_method == 'credit_card')
+                                                                    Crédito
+                                                                @elseif($order->gatway_payment_method == 'ticket')
+                                                                    Boleto
+                                                                @elseif($order->gatway_payment_method == 'bank_transfer')
+                                                                    Pix
+                                                                @elseif($order->gatway_payment_method == 'free')
+                                                                    Grátis
+                                                                @else
+                                                                    Não informado
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if ($order->situacao == 1)
+                                                                    <span class="badge bg-success">Confirmado</span>
+                                                                @elseif($order->situacao == 2)
+                                                                    <span class="badge bg-warning">Pendente</span>
+                                                                @elseif($order->situacao == 3)
+                                                                    <span class="badge bg-danger">Cancelado</span>
+                                                                @else
+                                                                    -
+                                                                @endif
+                                                            </td>
+                                                            <td>{{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}</td>
+                                                            <td>
+                                                                <a class="btn btn-info btn-sm mr-1" href="{{ route('event_home.order.details', $order->order_hash) }}" aria-label="Ver detalhes do pedido {{ $order->order_id }}">
+                                                                    <i class="fa-solid fa-plus" aria-hidden="true"></i> Info
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -445,7 +502,7 @@
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
-                    <a href="{{ route('event_home.my_events') }}" class="btn btn-primary">Voltar</a>
+                    <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">Voltar</a>
                 </div>
             </div>
         </section>
@@ -874,47 +931,116 @@
                     ]
                 });
 
-                var methods = new Array();
-                var total_methods = new Array();
-                var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
-                var pieData = {!! json_encode($payment_methods_json) !!}
-                var pieOptions = {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                }
-
-                //Create pie or douhnut chart
-                // You can switch between pie and douhnut using the method below.
-                size_obj_methods = Object.keys(pieData['original']).length;
-                for (var i = 0; i < size_obj_methods; i++) {
-                    total_methods.push(pieData['original'][i].payment_methods_total);
-                    if (pieData['original'][i].gatway_payment_method == 'credit') {
-                        methods.push('Cartão de crédito');
-                    } else if (pieData['original'][i].gatway_payment_method == 'boleto') {
-                        methods.push('Boleto');
+                $(document).ready(function() {
+                    // Verificar se o canvas existe
+                    if ($('#pieChart').length === 0) {
+                        console.error('Canvas #pieChart não encontrado');
+                        return;
                     }
-                }
 
-                new Chart(pieChartCanvas, {
-                    type: 'pie',
-                    data: {
-                        labels: methods,
-                        datasets: [{
-                            label: 'Vendas por meio de pagamento',
-                            data: total_methods,
-                            backgroundColor: ['#f56954', '#3c8dbc'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        pieOptions,
-                        plugins: {
-                            labels: {
-                                render: 'percentage',
-                                fontColor: ['white', 'white'],
-                                precision: 2
+                    var methods = [];
+                    var total_methods = [];
+                    var backgroundColors = ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'];
+
+                    // Dados passados do PHP
+                    var paymentData = @json($payment_methods);
+
+                    console.log('Dados de pagamento recebidos:', paymentData);
+
+                    // Verificar se há dados - sempre tentar criar gráfico mesmo com dados vazios
+                    console.log('Verificando dados de pagamento:', paymentData);
+
+                    // Se não há dados, criar entrada padrão para vendas gratuitas
+                    if (!paymentData || paymentData.length === 0) {
+                        console.warn('Nenhum dado de pagamento encontrado, criando entrada padrão');
+                        paymentData = [{
+                            gatway_payment_method: 'free',
+                            payment_methods_total: 0
+                        }];
+                    }
+
+                    // Processar dados
+                    for (var i = 0; i < paymentData.length; i++) {
+                        var method = paymentData[i].gatway_payment_method;
+                        var total = parseInt(paymentData[i].payment_methods_total) || 0;
+
+                        total_methods.push(total);
+
+                        // Mapear métodos de pagamento para labels legíveis
+                        switch(method) {
+                            case 'credit':
+                            case 'credit_card':
+                                methods.push('Cartão de Crédito');
+                                break;
+                            case 'boleto':
+                            case 'ticket':
+                                methods.push('Boleto');
+                                break;
+                            case 'pix':
+                            case 'bank_transfer':
+                                methods.push('PIX');
+                                break;
+                            case 'free':
+                                methods.push('Grátis');
+                                break;
+                            default:
+                                methods.push(method || 'Outro');
+                        }
+                    }
+
+                    console.log('Labels processados:', methods);
+                    console.log('Dados processados:', total_methods);
+
+                    var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
+
+                    try {
+                        new Chart(pieChartCanvas, {
+                            type: 'pie',
+                            data: {
+                                labels: methods,
+                                datasets: [{
+                                    label: 'Vendas por meio de pagamento',
+                                    data: total_methods,
+                                    backgroundColor: backgroundColors.slice(0, methods.length),
+                                    borderColor: backgroundColors.slice(0, methods.length).map(color => color + '80'),
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 20,
+                                            usePointStyle: true
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                var label = context.label || '';
+                                                var value = context.parsed || 0;
+                                                var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                var percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                                return label + ': ' + value + ' (' + percentage + '%)';
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                        },
+                        });
+
+                        console.log('Gráfico criado com sucesso');
+                    } catch (error) {
+                        console.error('Erro ao criar gráfico:', error);
+                        // Fallback: mostrar mensagem de erro no canvas
+                        var ctx = pieChartCanvas;
+                        ctx.font = '14px Arial';
+                        ctx.fillStyle = '#dc3545';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Erro ao carregar gráfico', $('#pieChart').width() / 2, $('#pieChart').height() / 2);
                     }
                 });
             });

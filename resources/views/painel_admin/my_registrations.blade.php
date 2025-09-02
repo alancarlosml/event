@@ -71,7 +71,7 @@
                                         <div class="d-flex">
                                             <div class="btn-group" role="group">
                                                 <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm mr-1 dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i class="fa-solid fa-gear"></i> Configurações
+                                                    <i class="fa-solid fa-gear"></i> Ações
                                                 </button>
                                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop">
                                                     @if($order->gatway_status == 1)

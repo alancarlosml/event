@@ -55,7 +55,7 @@
                                                 <td>{{ $owner->id }}</td>
                                                 <td>{{ $owner->name }}</td>
                                                 <td>{{ $owner->email }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($owner->created_at)->format('j/m/Y H:i') }}
+                                                <td>{{ \Carbon\Carbon::parse($owner->created_at)->format('d/m/Y H:i') }}
                                                 </td>
                                                 <td>
                                                     @if ($owner->status == 1)

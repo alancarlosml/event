@@ -44,10 +44,11 @@
                         <li id="confirm"><strong>Publicar</strong></li>
                     </ul>
                     <div class="card-body" id="lote_field">
-                        <h4>Listagem dos lotes</h4>
-                        <div class="form-group text-right">
-                            <a href="{{route('event_home.lote_create')}}" class="btn btn-success">Cadastrar novo lote</a>
-                        </div>
+                        <h4 class="py-3">Listagem dos lotes
+                        {{-- <div class="form-group text-right"> --}}
+                            <a href="{{route('event_home.lote_create')}}" class="btn btn-success float-end">Cadastrar novo lote</a>
+                        {{-- </div> --}}
+                        </h4>
                         <table class="table table-head-fixed text-nowrap" id="table_lotes">
                             <thead>
                                 <tr>
@@ -139,7 +140,7 @@
                                 @endforeach
                             @endif
                             <div class="card-footer d-flex justify-content-between">
-                                <a href="{{ route('event_home.create.step.one') }}" class="btn btn-primary">Anterior</a>
+                                <a href="{{ route('event_home.create.step.one') }}" class="btn btn-secondary">Anterior</a>
                                 <button type="submit" class="btn btn-primary">Próximo</button>
                             </div>
                         </form>

@@ -53,7 +53,7 @@
                                             <tr>
                                                 <td>{{ $category->id }}</td>
                                                 <td>{{ $category->description }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($category->created_at)->format('j/m/Y H:i') }}
+                                                <td>{{ \Carbon\Carbon::parse($category->created_at)->format('d/m/Y H:i') }}
                                                 </td>
                                                 <td>
                                                     @if ($category->status == 1)

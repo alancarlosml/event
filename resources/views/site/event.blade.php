@@ -1,6 +1,6 @@
 <x-event-layout>
     <div class="hero-image" id="home">
-        <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ $event->name }}" class="img-fluid" loading="lazy">
+        <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="img-fluid" loading="lazy">
     </div>
     <section id="information-bar">
         <div class="container">
@@ -66,7 +66,7 @@
                             <div class="about-text">
                                 <h2>Sobre o evento</h2>
                             </div>
-                            {!! $event->description !!}
+                            {!! \Illuminate\Support\Str::limit(strip_tags($event->description), 500) !!}
                         </div>
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                             @endforeach
                         </ul>
                     @endif
-                    <input type="hidden" name="event_date_result" id="event_date_result" value="@if ($total_dates == 1) {{ $date_min->id }} @endif">
+                    <input type="hidden" name="event_date_result" id="event_date_result" value="@if ($total_dates == 1) {{$date_min->id}} @endif">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <tbody>
@@ -111,7 +111,7 @@
                                     </th>
                                 </thead>
                                 @foreach ($event->lotesAtivosHoje() as $lote)
-                                    <tr class="border-bottom" lote_hash="{{ $lote->hash }}">
+                                    <tr class="border-bottom" lote_hash="{{ $lote->hash }}" data-value="{{ $lote->value }}" data-type="{{ $lote->type }}">
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="ps-3 d-flex flex-column">
@@ -185,6 +185,10 @@
                                         <p id="subtotal">R$ 0,00</p>
                                     @endif
                                 </div>
+                                <div class="d-flex justify-content-between pb-3" id="free_tickets_field" style="display: none;">
+                                    <strong>Ingressos gratuitos</strong>
+                                    <p id="free_tickets_count">0</p>
+                                </div>
                                 @if (isset($coupon))
                                     <div id="cupom_field" class="d-flex justify-content-between pb-3">
                                         <strong>Cupom ({{ $coupon[0]['code'] }}) <a href="javascript:;"
@@ -205,7 +209,10 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-column b-bottom mt-4">
-                                <form id="registration-form" action="{{ route('conference.resume', $event->slug) }}" method="GET" style="display: none;"></form>
+                                <form id="registration-form" action="{{ route('conference.resume', $event->slug) }}" method="POST" style="display: none;">
+                                    @csrf
+                                    <input type="hidden" name="event_date_result" value="">
+                                </form>
 
                                 <button onclick="validSubmition(event)" class="btn btn-common">Continuar</button>
                             </div>
@@ -243,37 +250,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <div class="container">
-            <div class="row contact-wrapper">
-
-                {{-- <div class="col-lg-4 col-md-5 col-xs-12">
-                    <ul>
-                        <li>
-                            <i class="lni-home"></i>
-                        </li>
-                        <li><span>Cesare Rosaroll, 118 80139 Eventine</span></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4 col-md-3 col-xs-12">
-                    <ul>
-                        <li>
-                            <i class="lni-phone"></i>
-                        </li>
-                        <li><span>+789 123 456 79</span></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4 col-md-3 col-xs-12">
-                    <ul>
-                        <li>
-                            <i class="lni-envelope"></i>
-                        </li>
-                        <li><span>Support@example.com</span></li>
-                    </ul>
-                </div> --}}
             </div>
         </div>
     </section>
@@ -573,8 +549,23 @@
 
                 $('#msg_phone').mask('(00) 00000-0000');
 
-                $('.event_date_nav').click(function() {
+                // Utility function for debouncing
+                function debounce(func, wait) {
+                    let timeout;
+                    return function executedFunction(...args) {
+                        const later = () => {
+                            clearTimeout(timeout);
+                            func(...args);
+                        };
+                        clearTimeout(timeout);
+                        timeout = setTimeout(later, wait);
+                    };
+                }
 
+                // Initialize free tickets display on page load (without AJAX call)
+                initializeFreeTicketsDisplay();
+
+                $('.event_date_nav').click(debounce(function() {
                     $('.event_date_nav').removeClass('active');
                     $(this).addClass('active');
                     $('#event_date_result').val($(this).attr('data-tab'));
@@ -583,9 +574,8 @@
                     let _token = '{{ csrf_token() }}';
 
                     $.ajax({
-                        // url: "/getSubTotal",
-                        url: "{{ route('conference.setEventDate') }}",
-                        type: "POST",
+                        url: '{{ route("conference.setEventDate") }}',
+                        type: 'POST',
                         data: {
                             event_date_result: event_date_result,
                             _token: _token
@@ -593,15 +583,14 @@
                         success: function(response) {
                             if (response.success) {
                                 console.log(response);
-                                // $('.success').text(response.success);
                             }
-
                             if (response.error) {
                                 location.reload();
                             }
-                        },
+                        }
                     });
-                });
+                }));
+
 
                 $(".inp-number").inputSpinner({
                     buttonsOnly: true,
@@ -647,14 +636,28 @@
                     }
                     
                     setSubTotal();
-                    // alert(lote_hash);
-                    // $('.inp-number').each(function() {
-                    //     // sum += parseInt($(this).val());
-                    //     e.preventDefault();
-                    //     alert($(this).val());
-                    // });
                 });
             });
+
+            function initializeFreeTicketsDisplay() {
+                // Initialize free tickets display without making AJAX call
+                let freeTicketsCount = 0;
+                $("input[type=number].inp-number").each(function() {
+                    let quantity = parseInt($(this).val()) || 0;
+                    let loteValue = parseFloat($(this).parents('tr').attr('data-value')) || 0;
+
+                    if (loteValue === 0 && quantity > 0) {
+                        freeTicketsCount += quantity;
+                    }
+                });
+
+                if (freeTicketsCount > 0) {
+                    $('#free_tickets_count').text(freeTicketsCount);
+                    $('#free_tickets_field').show();
+                } else {
+                    $('#free_tickets_field').hide();
+                }
+            }
 
             function setSubTotal() {
 
@@ -687,6 +690,24 @@
                             $('#subtotal').html(response.subtotal);
                             $('#coupon_subtotal').html(response.coupon_subtotal);
                             $('#total').html(response.total);
+
+                            // Handle free tickets display
+                            let freeTicketsCount = 0;
+                            $("input[type=number].inp-number").each(function() {
+                                let quantity = parseInt($(this).val()) || 0;
+                                let loteValue = parseFloat($(this).parents('tr').attr('data-value')) || 0;
+
+                                if (loteValue === 0 && quantity > 0) {
+                                    freeTicketsCount += quantity;
+                                }
+                            });
+
+                            if (freeTicketsCount > 0) {
+                                $('#free_tickets_count').text(freeTicketsCount);
+                                $('#free_tickets_field').show();
+                            } else {
+                                $('#free_tickets_field').hide();
+                            }
                         }
 
                         if (response.error) {
@@ -709,6 +730,13 @@
                             $('#subtotal').html('R$ 0,00');
                             $('#coupon_subtotal').html('R$ 0,00');
                             $('#total').html('R$ 0,00');
+
+                            // Hide free tickets field on error
+                            $('#free_tickets_field').hide();
+
+                            console.log('Updating subtotal with dict:', dict);  // Before AJAX
+                            console.log('AJAX success:', response);
+                            console.log('AJAX error:', xhr.responseText);
                         }
                     },
                     error: function(xhr, status, error) {
@@ -858,17 +886,13 @@
             function validSubmition(event) {
                 event.preventDefault(); // Prevenir o comportamento padrão do botão
 
-                // let customSelect = $('.custom-select').val();
-
                 var count = 0;
                 $(".inp-number").each(function() {
-                    if ($(this).val() !== '0') {
-                        count++
-                    }
+                    var value = parseInt($(this).val()) || 0;
+                    count += value; // Soma as quantidades em vez de contar campos
                 });
 
                 if (count === 0) {
-
                     $('#cupomModal').modal('show');
                     $('#cupomModal').css('padding-right', '0');
                     $('body').css('padding-right', '0');
@@ -878,59 +902,56 @@
                     return false;
                 }
 
-                var event_date_result = $('#event_date_result').val();
-                if (event_date_result === "") {
-
+                // Garantir que o valor seja um número válido
+                var event_date_result = parseInt($('#event_date_result').val()) || 0;
+                if (event_date_result === 0) {
                     $('#cupomModal').modal('show');
                     $('#cupomModal').css('padding-right', '0');
                     $('body').css('padding-right', '0');
                     $('.navbar').css('padding-right', '0');
                     $('#modal_txt').text('Por favor, selecione ao menos uma data válida.');
                     $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
-                    return;
+                    return false;
                 }
-
-                const totalText = $('#total').text().trim();
-                const totalValue = parseFloat(totalText.replace('R$', '').replace('.', '').replace(',', '.').trim());
 
                 const form = $('#registration-form');
 
-                if (totalValue === 0) {
-                    // Inscrição gratuita
-                    form.attr('action', '{{ route('conference.store_free_registration', $event->slug) }}');
-                    form.attr('method', 'POST');
+                // Usar POST em vez de GET para evitar problemas de URL encoding
+                form.attr('method', 'POST');
+                form.find('input[name="event_date_result"]').val(event_date_result);
 
-                    // Adicionar CSRF token
-                    if (!form.find('input[name="_token"]').length) {
-                        form.append('<input type="hidden" name="_token" value="{{ csrf_token() }}">');
+                console.log('Valid submission called. Count:', count, 'Date:', event_date_result);
+                console.log('Form method set to POST, action:', form.attr('action'));
+
+                // Bloquear duplo clique
+                const submitBtn = $('#btn-submit, button[type="submit"]');
+                submitBtn.prop('disabled', true);
+
+                // Garantir que a data está salva na sessão antes de submeter
+                $.ajax({
+                    url: "{{ route('conference.setEventDate') }}",
+                    type: "POST",
+                    data: {
+                        event_date_result: event_date_result,
+                        _token: $('meta[name="csrf-token"]').attr('content') || $('input[name="_token"]').val()
+                    },
+                    success: function(response) {
+                        console.log('Event date set successfully in session:', response);
+                        console.log('Submitting form via POST...');
+                        form.submit();
+                    },
+                    error: function(xhr) {
+                        console.error('Failed to set event date in session', xhr);
+                        $('#cupomModal').modal('show');
+                        $('#cupomModal').css('padding-right', '0');
+                        $('body').css('padding-right', '0');
+                        $('.navbar').css('padding-right', '0');
+                        const msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Falha ao selecionar a data do evento.';
+                        $('#modal_txt').text(msg);
+                        $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                        submitBtn.prop('disabled', false);
                     }
-
-                    // Adicionar dados dos lotes
-                    let dict = [];
-                    $("input[type=number].inp-number").each(function() {
-                        if ($(this).val() > 0) {
-                            dict.push({
-                                lote_hash: $(this).parents('tr').attr('lote_hash'),
-                                lote_quantity: $(this).val()
-                            });
-                        }
-                    });
-
-                    if (!form.find('input[name="dict"]').length) {
-                        form.append(`<input type="hidden" name="dict" value='${JSON.stringify(dict)}'>`);
-                    } else {
-                        form.find('input[name="dict"]').val(JSON.stringify(dict));
-                    }
-
-                } else {
-                    // Inscrição paga, continuar para o resumo
-                    form.attr('action', '{{ route('conference.resume', $event->slug) }}');
-                    form.attr('method', 'GET');
-                    form.find('input[name="_token"]').remove();
-                    form.find('input[name="dict"]').remove();
-                }
-
-                form.submit();
+                });
             }
         </script>
     @endpush

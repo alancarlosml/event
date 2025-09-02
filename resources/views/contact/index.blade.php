@@ -51,7 +51,7 @@
                                                 <td>{{ $contact->email }}</td>
                                                 <td>{{ $contact->phone }}</td>
                                                 <td>{{ $contact->text }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($contact->created_at)->format('j/m/Y H:i') }}
+                                                <td>{{ \Carbon\Carbon::parse($contact->created_at)->format('d/m/Y H:i') }}
                                                 </td>
                                                 <td>
                                                     <div class="d-flex">

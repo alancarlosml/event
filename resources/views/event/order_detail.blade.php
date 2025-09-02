@@ -159,12 +159,14 @@
                                                 <label for="slug">Forma pagamento</label>
                                                 <p class="text-muted" style="font-size: 18px">
                                                     @if (isset($order->gatway_payment_method))
-                                                        @if ($order->gatway_payment_method == 'credit')
+                                                        @if ($order->gatway_payment_method == 'credit_card')
                                                             Crédito
-                                                        @elseif($order->gatway_payment_method == 'boleto')
+                                                        @elseif($order->gatway_payment_method == 'ticket')
                                                             Boleto
-                                                        @elseif($order->gatway_payment_method == 'pix')
+                                                        @elseif($order->gatway_payment_method == 'bank_transfer')
                                                             Pix
+                                                        @elseif($order->gatway_payment_method == 'free')
+                                                            Grátis
                                                         @else
                                                             Não informado
                                                         @endif

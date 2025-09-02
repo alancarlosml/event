@@ -443,8 +443,8 @@ class MercadoPagoController extends Controller
                 'payment_methods' => [
                     'excluded_payment_methods' => [
                         ['id' => 'credit_card'],
-                        ['id' => 'debit_card'],
-                        ['id' => 'pix']
+                        ['id' => 'ticket'],
+                        ['id' => 'bank_transfer']
                     ],
                     'installments' => 1
                 ]
