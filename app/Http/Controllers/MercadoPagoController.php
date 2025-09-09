@@ -481,7 +481,7 @@ class MercadoPagoController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Error generating new boleto: ' . $e->getMessage());
+            Log::error('Error generating new boleto: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao gerar nova cobrança: ' . $e->getMessage()

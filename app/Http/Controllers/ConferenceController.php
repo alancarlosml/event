@@ -24,7 +24,11 @@ use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use MercadoPago;
+
+use MercadoPago\SDK;
+use MercadoPago\Payment;
+use MercadoPago\Payer; 
+
 
 class ConferenceController extends Controller
 {
@@ -774,7 +778,7 @@ class ConferenceController extends Controller
             return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
         }
 
-        MercadoPago\SDK::setAccessToken($accessToken);
+        SDK::setAccessToken($accessToken);
 
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
@@ -801,7 +805,7 @@ class ConferenceController extends Controller
 
             if($input->paymentType == 'credit_card') {
 
-                $payment = new MercadoPago\Payment();
+                $payment = new Payment();
                 $payment->transaction_amount = (float) $total;
                 $payment->token = $input->formData->token;
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
@@ -812,7 +816,7 @@ class ConferenceController extends Controller
                 $payment->application_fee = $application_fee;
                 // $payment->notification_url = 'http://requestbin.fullcontact.com/1ogudgk1';
 
-                $payer = new MercadoPago\Payer();
+                $payer = new Payer();
                 $payer->email = $input->formData->payer->email;
                 $payer->first_name = $first_name;
                 $payer->last_name = $last_name;
@@ -825,7 +829,7 @@ class ConferenceController extends Controller
 
             } elseif($input->paymentType == 'bank_transfer') {
 
-                $payment = new MercadoPago\Payment();
+                $payment = new Payment();
                 $payment->transaction_amount = (float) $total;
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
@@ -854,7 +858,7 @@ class ConferenceController extends Controller
 
             } elseif($input->paymentType == 'ticket') { // Boleto
 
-                $payment = new MercadoPago\Payment();
+                $payment = new Payment();
                 $payment->transaction_amount = (float) $total;
                 $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
                 $payment->payment_method_id = $input->formData->payment_method_id;
