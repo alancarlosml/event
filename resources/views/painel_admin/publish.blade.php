@@ -50,23 +50,23 @@
                             <h4>Aparência do site do evento</h4>
                             <label for="thems">Tema*</label><br/> 
                             <div class="btn-group btn-group-toggle" data-bs-toggle="buttons">
-                                <label class="btn btn-default text-center">
+                                <label class="btn btn-light text-center">
                                     <input type="radio" name="color_option" id="color_option_a1" autocomplete="off" value="green" @if($event->theme == 'green') checked @endif>
                                     <i class="fas fa-circle fa-2x text-green"></i>
                                 </label>
-                                <label class="btn btn-default text-center">
+                                <label class="btn btn-light text-center">
                                     <input type="radio" name="color_option" id="color_option_a2" autocomplete="off" value="blue" @if($event->theme == 'blue') checked @endif>
                                     <i class="fas fa-circle fa-2x text-blue"></i>
                                 </label>
-                                <label class="btn btn-default text-center">
+                                <label class="btn btn-light text-center">
                                     <input type="radio" name="color_option" id="color_option_a3" autocomplete="off" value="purple" @if($event->theme == 'purple') checked @endif>
                                     <i class="fas fa-circle fa-2x text-purple"></i>
                                 </label>
-                                <label class="btn btn-default text-center">
+                                <label class="btn btn-light text-center">
                                     <input type="radio" name="color_option" id="color_option_a4" autocomplete="off" value="red" @if($event->theme == 'red') checked @endif>
                                     <i class="fas fa-circle fa-2x text-red"></i>
                                 </label>
-                                <label class="btn btn-default text-center">
+                                <label class="btn btn-light text-center">
                                     <input type="radio" name="color_option" id="color_option_a5" autocomplete="off" value="orange" @if($event->theme == 'orange') checked @endif>
                                     <i class="fas fa-circle fa-2x text-orange"></i>
                                 </label>
@@ -74,7 +74,7 @@
                             <input type="hidden" name="theme" id="theme"  value="{{ $event->theme ?? '' }}">
                             <br/>
                             <br/>
-                            <div class="form-group">
+                            <div class="form-group pb-3">
                                 <label>Banner do evento*</label><br/>
                                 <div class="form-group">
                                     <div class="form-check form-check-inline">
@@ -97,7 +97,6 @@
                                     @endif
                                 </div>
                             </div>
-                            <hr>
                             <h4>Organização do evento</h4>
                             <input type="hidden" name="owner_id" value="{{$owner_id}}">
                             <div class="form-group mb-3">

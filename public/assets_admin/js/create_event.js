@@ -290,20 +290,40 @@ $(document).ready(function() {
 
     // Initialize dynamic fields
     function initDynamicFields() {
+        console.log('Dynamic fields initialized')
         let fieldCount = $('input.new_field').length;
 
+        $('#div_new_options').hide();
+        $('#div_new_number').hide();
+
         function updateFieldNumbers() {
-            // Only renumber labels inside the dynamic fields container
+            // Update numbering for ALL fields (both static and dynamic)
             const $container = $('#card-new-field');
-            $container.children('.row.mb-3').each(function(index) {
-                const fieldNumber = index + 1;
+            let fieldIndex = 0;
+
+            // First, update static fields (in .mb-3 containers)
+            $container.children('.mb-3').each(function() {
+                fieldIndex++;
                 const $label = $(this).find('.form-label').first();
                 const original = $label.text();
-                // Only adjust labels that start with "Campo"
-                const updated = original.replace(/^Campo\s+\d+/, `Campo ${fieldNumber}`);
+                const updated = original.replace(/^Campo\s+\d+/, `Campo ${fieldIndex}`);
                 $label.text(updated);
-                $(this).find('.up').toggle(index > 0);
-                $(this).find('.down').toggle(index < $container.children('.row.mb-3').length - 1);
+            });
+
+            // Then, update dynamic fields (in .row.mb-3 containers)
+            $container.children('.row.mb-3').each(function(index) {
+                fieldIndex++;
+                const $label = $(this).find('.form-label').first();
+                const original = $label.text();
+                const updated = original.replace(/^Campo\s+\d+/, `Campo ${fieldIndex}`);
+                $label.text(updated);
+
+                // Update button visibility based on position among ALL fields
+                const totalFields = $container.children('.mb-3, .row.mb-3').length;
+                const currentPosition = index + $container.children('.mb-3').length;
+
+                $(this).find('.up').toggle(currentPosition > 0);
+                $(this).find('.down').toggle(currentPosition < totalFields - 1);
             });
         }
 
@@ -349,12 +369,15 @@ $(document).ready(function() {
 
             const config = fieldConfig[option] || {};
             const fieldText = `${field}; ${config.text}${config.options || ''}${required ? '; Obrigatório' : ''}${unique ? '; Único' : ''}`;
-            fieldCount++;
+
+            // Calculate the next field number based on total existing fields
+            const totalFields = $('#card-new-field').children('.mb-3, .row.mb-3').length;
+            const nextFieldNumber = totalFields + 1;
 
             $('#card-new-field').append(`
                 <div class="row mb-3">
                     <div class="col-9">
-                        <label class="form-label">Campo ${fieldCount}${required ? '*' : ''}</label>
+                        <label class="form-label">Campo ${nextFieldNumber}${required ? '*' : ''}</label>
                         <input type="text" class="form-control new_field" name="new_field[]" value="${fieldText}" readonly>
                         <input type="hidden" name="new_field_id[]" value="">
                     </div>
@@ -380,20 +403,27 @@ $(document).ready(function() {
 
         $(document).on('click', '.btn-remove-field', function() {
             $(this).closest('.row.mb-3').remove();
-            fieldCount--;
             updateFieldNumbers();
         });
 
         $(document).on('click', '.up', function() {
-            const $row = $(this).closest('.row.mb-3');
-            $row.insertBefore($row.prev());
-            updateFieldNumbers();
+            const $currentField = $(this).closest('.row.mb-3, .mb-3');
+            const $prevField = $currentField.prev('.row.mb-3, .mb-3');
+
+            if ($prevField.length > 0) {
+                $currentField.insertBefore($prevField);
+                updateFieldNumbers();
+            }
         });
 
         $(document).on('click', '.down', function() {
-            const $row = $(this).closest('.row.mb-3');
-            $row.insertAfter($row.next());
-            updateFieldNumbers();
+            const $currentField = $(this).closest('.row.mb-3, .mb-3');
+            const $nextField = $currentField.next('.row.mb-3, .mb-3');
+
+            if ($nextField.length > 0) {
+                $currentField.insertAfter($nextField);
+                updateFieldNumbers();
+            }
         });
 
         updateFieldNumbers();

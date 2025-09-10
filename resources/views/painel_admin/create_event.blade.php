@@ -346,11 +346,11 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-12 d-none" id="div_new_options">
+                                            <div class="col-md-12" id="div_new_options">
                                                 <label for="new_options" class="form-label">Preencha as opções separadas por vírgula</label>
                                                 <input type="text" class="form-control" name="new_options" id="new_options" placeholder="XXX, YYY, ZZZ">
                                             </div>
-                                            <div class="col-md-12 d-none" id="div_new_number">
+                                            <div class="col-md-12" id="div_new_number">
                                                 <div class="row">
                                                     <div class="col-6">
                                                         <label for="val_min" class="form-label">Mínimo</label>
@@ -422,8 +422,8 @@
                                         <label for="email_new_field" class="form-label">Campo 2*</label>
                                         <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
                                         <input type="hidden" name="new_field_id[]" value="">
-                                        </div>
-                                    @endif
+                                    </div>
+                                @endif
                                 </div>
                             </div>
                             <hr>
