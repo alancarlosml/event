@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
-use MercadoPago\SDK;
+use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Payment;
 use MercadoPago\Payer; 
 
@@ -778,11 +778,11 @@ class ConferenceController extends Controller
             return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
         }
 
-        SDK::setAccessToken($accessToken);
+        MercadoPagoConfig::setAccessToken($accessToken);
 
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
-        $total = $request->session()->get('total');
+        $total = $request->session()->get('total'); 
 
         $order = Order::findOrFail($order_id);
 
