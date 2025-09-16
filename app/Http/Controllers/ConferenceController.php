@@ -232,7 +232,7 @@ class ConferenceController extends Controller
             ['key' => $key],
             [
                 'value' => time(),
-                'expiration' => time() + 60
+                'expiration' => time() + 120
             ]
         );
 
@@ -708,7 +708,7 @@ class ConferenceController extends Controller
         cache()->put($cacheKey, $attempts + 1, now()->addMinutes(5));
 
         // Validar se as credenciais do Mercado Pago estão configuradas
-        $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN', '');
+        $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN', 'APP_USR-5198507811366797-070210-65a9d5b969881e63a60b563a8e3fb8b5-618667986');
         if (empty($accessToken)) {
             Log::error('Mercado Pago Access Token not configured');
             return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);

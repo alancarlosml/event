@@ -27,7 +27,7 @@ class MercadoPagoController extends Controller
         $this->client = new Client();
         $this->clientId = env('MERCADO_PAGO_CLIENT_ID');
         $this->clientSecret = env('MERCADO_PAGO_CLIENT_SECRET');
-        $this->accessToken = env('MERCADO_PAGO_ACCESS_TOKEN');
+        $this->accessToken = env('MERCADO_PAGO_ACCESS_TOKEN', 'APP_USR-5198507811366797-070210-65a9d5b969881e63a60b563a8e3fb8b5-618667986');
         $this->redirectUri = env('MERCADO_PAGO_REDIRECT_URI');
         $this->state = rand(100000, 999999);
     }
@@ -163,7 +163,7 @@ class MercadoPagoController extends Controller
                     "picture_url" => $img
                 ]
             ],
-            "marketplace" => env('MERCADO_PAGO_ACCESS_TOKEN'),
+            "marketplace" => env('MERCADO_PAGO_ACCESS_TOKEN', 'APP_USR-5198507811366797-070210-65a9d5b969881e63a60b563a8e3fb8b5-618667986'),
             "marketplace_fee" => $fee,
             "back_urls" => [
                 "success" => env('APP_URL') . "/" . $slug . "/obrigado",
@@ -433,7 +433,7 @@ class MercadoPagoController extends Controller
                 'notification_url' => env('APP_URL') . "/webhooks/mercado-pago/notification",
                 'external_reference' => $order->id,
                 'items' => $items,
-                'marketplace' => env('MERCADO_PAGO_ACCESS_TOKEN'),
+                'marketplace' => env('MERCADO_PAGO_ACCESS_TOKEN', 'APP_USR-5198507811366797-070210-65a9d5b969881e63a60b563a8e3fb8b5-618667986'),
                 'marketplace_fee' => $fee,
                 'back_urls' => [
                     'success' => env('APP_URL') . "/{$event->slug}/obrigado",
