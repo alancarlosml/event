@@ -805,7 +805,7 @@ class ConferenceController extends Controller
                         "transaction_amount" => (float) $total,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
-                        "application_fee" => (float) $application_fee,
+                        //"application_fee" => (float) $application_fee,
                         "payer" => [
                             "email" => $user->email,
                             "first_name" => $first_name,
@@ -838,7 +838,7 @@ class ConferenceController extends Controller
                         "transaction_amount" => (float) $total,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
-                        "application_fee" => (float) $application_fee,
+                        //"application_fee" => (float) $application_fee,
                         "payer" => [
                             "email" => $input['formData']['payer']['email'],
                             "first_name" => $input['formData']['payer']['first_name'],
