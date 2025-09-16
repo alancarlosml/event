@@ -26,8 +26,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 use MercadoPago\MercadoPagoConfig;
-use MercadoPago\Payment;
-use MercadoPago\Payer; 
+use MercadoPago\Client\Payment\PaymentClient;
+use MercadoPago\Exceptions\MPApiException;
 
 
 class ConferenceController extends Controller
@@ -450,77 +450,17 @@ class ConferenceController extends Controller
         return response()->json(['success' => 'Cupom removido com sucesso.', 'subtotal' => $subtotal]);
     }
 
-    // public function payment(Request $request)
-    // {
-    //     $coupon = $request->session()->get('coupon');
-
-    //     $order = Order::create([
-    //         'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-    //         'status' => 2,
-    //         'event_date_id' => $request->session()->get('event_date')->id,
-    //         'participante_id' => Auth::user()->id,
-    //         'coupon_id' => $coupon ? $coupon->id : null,
-    //     ]);
-
-    //     $request->session()->put('order_id', $order->id);
-
-    //     $this->createOrderItems($order, $request->all());
-
-    //     return redirect()->route('conference.payment', $request->session()->get('event')->slug);
-    // }
-
-    // private function createOrderItems(Order $order, array $input)
-    // {
-    //     $dict_lotes = session('dict_lotes');
-
-    //     foreach($dict_lotes as $i => $dict) {
-    //         $lote = Lote::where('hash', $dict['lote_hash'])->first();
-
-    //         $orderItem = $order->items()->create([
-    //             'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-    //             'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
-    //             'quantity' => 1,
-    //             'value' => $lote->value,
-    //             'status' => 2,
-    //             'lote_id' => $lote->id,
-    //         ]);
-
-    //         $this->createOptionAnswers($orderItem, $input);
-    //     }
-    // }
-
-    // private function createOptionAnswers(OrderItem $orderItem, array $input)
-    // {
-    //     foreach(array_keys($input) as $field) {
-    //         if(!str_contains($field, 'newfield_')) continue;
-
-    //         list(, $k, $id) = explode('_', $field);
-    //         $question = Question::find($id);
-    //         $answer = $input['newfield_' . $k . '_' . $id];
-
-    //         if ($answer) {
-    //             OptionAnswer::create([
-    //                 'answer' => $answer,
-    //                 'question_id' => $question->id,
-    //                 'order_item_id' => $orderItem->id,
-    //             ]);
-    //         }
-    //     }
-    // }
-
     public function payment(Request $request, $slug)
     {
         Log::info('=== PAYMENT METHOD START ===', [
             'slug' => $slug, 
             'method' => $request->method(),
-            'url' => $request->fullUrl(),
-            'headers' => $request->headers->all(),
-            'request_data' => $request->all(),
             'session_data' => $request->session()->all()
         ]);
         
         $input = $request->all();
 
+        // Validar dados da sessão
         $event = $request->session()->get('event');
         $coupon = $request->session()->get('coupon');
         $total = $request->session()->get('total');
@@ -528,171 +468,77 @@ class ConferenceController extends Controller
         $array_lotes_obj = $request->session()->get('array_lotes_obj');
         $event_date = $request->session()->get('event_date');
 
-        // Debug: Log para verificar o estado da sessão
-        Log::info('Payment method - Session data:', [
-            'event_date' => $event_date,
-            'event_date_result' => $request->session()->get('event_date_result'),
-            'dict_lotes' => $request->session()->get('dict_lotes'),
-            'event' => $request->session()->get('event')
-        ]);
-
-        // Verificar se a data do evento foi selecionada
+        // Validações obrigatórias
         if (!$event_date) {
-            return redirect()->back()->withErrors(['error' => 'Data do evento não foi selecionada. Por favor, selecione uma data válida.']);
+            return redirect()->back()->withErrors(['error' => 'Data do evento não foi selecionada.']);
+        }
+
+        if (!$dict_lotes || empty($dict_lotes)) {
+            return redirect()->back()->withErrors(['error' => 'Nenhum ingresso foi selecionado.']);
+        }
+
+        if (!$total || $total < 0) {
+            return redirect()->back()->withErrors(['error' => 'Valor total inválido.']);
         }
 
         // FINAL VALIDATION: Re-validate all lots before payment
-        if ($dict_lotes) {
-            foreach ($dict_lotes as $dict) {
-                $quantity = $dict['lote_quantity'];
-                $lote = Lote::where('hash', $dict['lote_hash'])->first();
+        foreach ($dict_lotes as $dict) {
+            $quantity = $dict['lote_quantity'];
+            $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
-                // Check if lot exists
-                if (!$lote) {
-                    return redirect()->back()->withErrors(['error' => 'Lote não encontrado.']);
-                }
+            if (!$lote) {
+                return redirect()->back()->withErrors(['error' => 'Lote não encontrado.']);
+            }
 
-                // Check sales period
-                $now = now();
-                if ($lote->datetime_begin > $now || $lote->datetime_end < $now) {
-                    return redirect()->back()->withErrors(['error' => 'Este lote não está disponível para venda no momento.']);
-                }
+            // Verificar período de vendas
+            $now = now();
+            if ($lote->datetime_begin > $now || $lote->datetime_end < $now) {
+                return redirect()->back()->withErrors(['error' => 'Este lote não está disponível para venda no momento.']);
+            }
 
-                // Check quantity limits
-                if ($quantity < $lote->limit_min || $quantity > $lote->limit_max) {
-                    return redirect()->back()->withErrors(['error' => "Quantidade deve ser entre {$lote->limit_min} e {$lote->limit_max} ingressos."]);
-                }
+            // Verificar limites de quantidade
+            if ($quantity < $lote->limit_min || $quantity > $lote->limit_max) {
+                return redirect()->back()->withErrors(['error' => "Quantidade deve ser entre {$lote->limit_min} e {$lote->limit_max} ingressos."]);
+            }
 
-                // Check available tickets
-                $soldTickets = DB::table('order_items')
+            // Verificar disponibilidade
+            $soldTickets = DB::table('order_items')
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->where('order_items.lote_id', $lote->id)
+                ->where('orders.status', '!=', 3)
+                ->sum('order_items.quantity');
+            
+            $availableTickets = $lote->quantity - $soldTickets;
+            if ($quantity > $availableTickets) {
+                return redirect()->back()->withErrors(['error' => "Apenas {$availableTickets} ingressos disponíveis neste lote."]);
+            }
+
+            // Verificar limite por usuário
+            if (Auth::check()) {
+                $userPurchases = DB::table('order_items')
                     ->join('orders', 'order_items.order_id', '=', 'orders.id')
                     ->where('order_items.lote_id', $lote->id)
+                    ->where('orders.participante_id', Auth::user()->id)
                     ->where('orders.status', '!=', 3)
                     ->sum('order_items.quantity');
                 
-                $availableTickets = $lote->quantity - $soldTickets;
-                if ($quantity > $availableTickets) {
-                    return redirect()->back()->withErrors(['error' => "Apenas {$availableTickets} ingressos disponíveis neste lote."]);
-                }
-
-                // Check user purchase limits
-                if (Auth::check()) {
-                    $userPurchases = DB::table('order_items')
-                        ->join('orders', 'order_items.order_id', '=', 'orders.id')
-                        ->where('order_items.lote_id', $lote->id)
-                        ->where('orders.participante_id', Auth::user()->id)
-                        ->where('orders.status', '!=', 3)
-                        ->sum('order_items.quantity');
-                    
-                    if (($userPurchases + $quantity) > $lote->limit_max) {
-                        return redirect()->back()->withErrors(['error' => "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}."]);
-                    }
+                if (($userPurchases + $quantity) > $lote->limit_max) {
+                    return redirect()->back()->withErrors(['error' => "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}."]);
                 }
             }
         }
 
-        // Bypass de pagamento para eventos/lotes gratuitos (total <= 0)
-        if (!$total || (float) $total <= 0) {
-            $coupon_id = $coupon ? $coupon->id ?? (is_array($coupon) && isset($coupon[0]['id']) ? $coupon[0]['id'] : null) : null;
-
-            $order_id = DB::table('orders')->insertGetId([
-                'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-                'status' => 1, // concluído/confirmado
-                'gatway_hash' => null,
-                'gatway_reference' => null,
-                'gatway_status' => '1',
-                'gatway_payment_method' => 'free',
-                'event_id' => $event->id,
-                'event_date_id' => $event_date->id,
-                'participante_id' => Auth::user()->id,
-                'coupon_id' => $coupon_id,
-                'created_at' => now(),
-            ]);
-
-            $request->session()->put('order_id', $order_id);
-
-            // Criar itens da ordem para cada ingresso selecionado
-            if ($array_lotes_obj && is_array($array_lotes_obj)) {
-                $kIndex = 1; // index dos participantes/ingressos para mapear respostas
-                foreach ($array_lotes_obj as $i => $entry) {
-                    // Recupera o lote pelo ID presente no array
-                    $lote = Lote::where('id', $entry['id'])->first();
-                    if (!$lote) {
-                        // Se algum lote não existir mais, ignore este item
-                        continue;
-                    }
-
-                    $order_item_id = DB::table('order_items')->insertGetId([
-                        'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-                        'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
-                        'quantity' => 1,
-                        'value' => $entry['value'] ?? $lote->value,
-                        'date_use' => null,
-                        'status' => 1,
-                        'order_id' => $order_id,
-                        'lote_id' => $lote->id,
-                        'created_at' => now(),
-                    ]);
-
-                    // Salvar respostas dos campos personalizados para este ingresso (kIndex)
-                    foreach (array_keys($input) as $field) {
-                        if (!str_contains($field, 'newfield_')) continue;
-
-                        $parts = explode('_', $field);
-                        if (count($parts) !== 3) continue;
-
-                        // newfield_{k}_{id}
-                        $kField = (int) $parts[1];
-                        $questionId = (int) $parts[2];
-                        if ($kField !== $kIndex) continue;
-
-                        $answer = $input[$field];
-                        if ($answer === null || $answer === '') continue;
-
-                        $question = Question::find($questionId);
-                        if (!$question) continue;
-
-                        DB::table('option_answers')->insert([
-                            'answer' => $answer,
-                            'question_id' => $question->id,
-                            'order_item_id' => $order_item_id,
-                            'created_at' => now(),
-                        ]);
-                    }
-
-                    $kIndex++;
-                }
-            }
-
-            // Enviar confirmação por email (inscrição gratuita)
-            try {
-                $order = Order::find($order_id);
-                if ($order) {
-                    Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Inscrição gratuita realizada com sucesso'));
-                }
-            } catch (\Throwable $e) {
-                Log::warning('Falha ao enviar email de confirmação para pedido gratuito', ['error' => $e->getMessage()]);
-            }
-
-            // 5. Clear session and redirect
-            $request->session()->forget(['coupon', 'subtotal', 'coupon_subtotal', 'total', 'dict_lotes', 'event_date_result', 'event_date', 'array_lotes', 'array_lotes_obj', 'order_id']);
-
-            return redirect()->route('event_home.my_registrations')
-                ->with('success', 'Inscrição realizada com sucesso!');
+        // Bypass para eventos gratuitos
+        if ((float) $total <= 0) {
+            return $this->processFreeTicker($request, $event, $event_date, $coupon, $input);
         }
 
-        $coupon_id = null;
-        if($coupon) {
-            $coupon_id = $coupon->id;
-        }
+        // Criar pedido para pagamento
+        $coupon_id = $coupon ? ($coupon->id ?? (is_array($coupon) && isset($coupon[0]['id']) ? $coupon[0]['id'] : null)) : null;
 
         $order_id = DB::table('orders')->insertGetId([
             'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-            'status' => 2,
-            'gatway_hash' => null,
-            'gatway_reference' => null,
-            'gatway_status' => null,
-            'gatway_payment_method' => null,
+            'status' => 2, // pendente
             'event_id' => $event->id,
             'event_date_id' => $event_date->id,
             'participante_id' => Auth::user()->id,
@@ -702,46 +548,99 @@ class ConferenceController extends Controller
 
         $request->session()->put('order_id', $order_id);
 
-        // foreach($dict_lotes as $i => $dict) {
+        // Criar order_items corretamente
+        $this->createOrderItems($order_id, $request);
 
-        //     $lote = Lote::where('hash', $dict['lote_hash'])->first();
-
-        //     $order_item_id = DB::table('order_items')->insertGetId([
-        //         'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-        //         'number' => intval(crc32(md5(time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')), 36),
-        //         'quantity' => 1,
-        //         'value' => $lote->value,
-        //         'date_use' => null,
-        //         'status' => 2,
-        //         'order_id' => $order_id,
-        //         'lote_id' => $lote->id,
-        //         'created_at' => now(),
-        //     ]);
-
-        //     foreach(array_keys($input) as $field) {
-
-        //         if(str_contains($field, 'newfield_')) {
-        //             $id = explode('_', $field);
-        //             $k = $id[1];
-        //             $id = $id[2];
-
-        //             $question = Question::where('id', $id)->first();
-
-        //             if($input['newfield_'. $k . '_'. $id] != '') {
-
-        //                 $option_answer_id = DB::table('option_answers')->insertGetId([
-        //                     'answer' => $input['newfield_'. $k . '_'. $id],
-        //                     'question_id' => $question->id,
-        //                     'order_item_id' => $order_item_id,
-        //                     'created_at' => now(),
-        //                 ]);
-        //             }
-        //         }
-        //     }
-        // }
-
-        return redirect()->route('conference.payment', $event->slug);
+        return redirect()->route('conference.paymentView', $event->slug);
     }
+
+    private function processFreeTicker($request, $event, $event_date, $coupon, $input)
+    {
+        $coupon_id = $coupon ? ($coupon->id ?? (is_array($coupon) && isset($coupon[0]['id']) ? $coupon[0]['id'] : null)) : null;
+
+        $order_id = DB::table('orders')->insertGetId([
+            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+            'status' => 1, // concluído
+            'gatway_payment_method' => 'free',
+            'gatway_status' => '1',
+            'event_id' => $event->id,
+            'event_date_id' => $event_date->id,
+            'participante_id' => Auth::user()->id,
+            'coupon_id' => $coupon_id,
+            'created_at' => now(),
+        ]);
+
+        $this->createOrderItems($order_id, $request);
+
+        try {
+            $order = Order::find($order_id);
+            if ($order) {
+                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Inscrição gratuita realizada com sucesso'));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Falha ao enviar email de confirmação', ['error' => $e->getMessage()]);
+        }
+
+        // Limpar sessão
+        $request->session()->forget(['coupon', 'subtotal', 'coupon_subtotal', 'total', 'dict_lotes', 'event_date_result', 'event_date', 'array_lotes', 'array_lotes_obj', 'order_id']);
+
+        return redirect()->route('event_home.my_registrations')
+            ->with('success', 'Inscrição realizada com sucesso!');
+    }
+
+    private function createOrderItems($order_id, $request)
+    {
+        $array_lotes_obj = $request->session()->get('array_lotes_obj');
+        $input = $request->all();
+
+        if ($array_lotes_obj && is_array($array_lotes_obj)) {
+            $kIndex = 1;
+            
+            foreach ($array_lotes_obj as $i => $entry) {
+                $lote = Lote::find($entry['id']);
+                if (!$lote) continue;
+
+                $order_item_id = DB::table('order_items')->insertGetId([
+                    'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+                    'number' => abs(crc32(md5(time() . uniqid() . $i))),
+                    'quantity' => 1,
+                    'value' => $entry['value'] ?? $lote->value,
+                    'status' => 2, // pendente
+                    'order_id' => $order_id,
+                    'lote_id' => $lote->id,
+                    'created_at' => now(),
+                ]);
+
+                // Salvar respostas dos campos personalizados
+                foreach (array_keys($input) as $field) {
+                    if (!str_contains($field, 'newfield_')) continue;
+
+                    $parts = explode('_', $field);
+                    if (count($parts) !== 3) continue;
+
+                    $kField = (int) $parts[1];
+                    $questionId = (int) $parts[2];
+                    
+                    if ($kField !== $kIndex) continue;
+
+                    $answer = $input[$field];
+                    if ($answer === null || $answer === '') continue;
+
+                    $question = Question::find($questionId);
+                    if (!$question) continue;
+
+                    DB::table('option_answers')->insert([
+                        'answer' => $answer,
+                        'question_id' => $question->id,
+                        'order_item_id' => $order_item_id,
+                        'created_at' => now(),
+                    ]);
+                }
+
+                $kIndex++;
+            }
+        }
+}
 
     public function paymentView(Request $request)
     {
@@ -751,7 +650,6 @@ class ConferenceController extends Controller
         return view('conference.payment', compact('event', 'total'));
     }
 
-
     public function thanks(Request $request)
     {
         // Validar se o usuário está autenticado
@@ -759,17 +657,41 @@ class ConferenceController extends Controller
             return response()->json(['error' => 'Usuário não autenticado'], 401);
         }
 
+        // Validar CSRF token
+        if (!$request->hasValidSignature() && !$request->header('X-CSRF-TOKEN')) {
+            // Para requests AJAX, verificar CSRF token no header
+            $token = $request->header('X-CSRF-TOKEN');
+            if (!$token || !hash_equals(csrf_token(), $token)) {
+                return response()->json(['error' => 'Token CSRF inválido'], 403);
+            }
+        }
+
         // Validar se há dados de pagamento
         if (!$request->getContent()) {
             return response()->json(['error' => 'Dados de pagamento não fornecidos'], 400);
         }
 
-        $input = json_decode($request->getContent());
-        
+        try {
+            $input = json_decode($request->getContent(), true);
+        } catch (\JsonException $e) {
+            return response()->json(['error' => 'Formato JSON inválido'], 400);
+        }
+
         // Validar estrutura dos dados
-        if (!$input || !isset($input->paymentType) || !isset($input->formData)) {
+        if (!$input || !isset($input['paymentType']) || !isset($input['formData'])) {
             return response()->json(['error' => 'Dados de pagamento inválidos'], 400);
         }
+
+        // Rate limiting por usuário
+        $userId = Auth::id();
+        $cacheKey = "payment_attempt:{$userId}";
+        $attempts = cache()->get($cacheKey, 0);
+        
+        if ($attempts >= 3) {
+            return response()->json(['error' => 'Muitas tentativas de pagamento. Tente novamente em 5 minutos.'], 429);
+        }
+
+        cache()->put($cacheKey, $attempts + 1, now()->addMinutes(5));
 
         // Validar se as credenciais do Mercado Pago estão configuradas
         $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN', '');
@@ -778,229 +700,271 @@ class ConferenceController extends Controller
             return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
         }
 
-        MercadoPagoConfig::setAccessToken($accessToken);
-
+        // Validar dados da sessão
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
-        $total = $request->session()->get('total'); 
+        $total = $request->session()->get('total');
 
-        $order = Order::findOrFail($order_id);
+        if (!$order_id || !$event || !$total) {
+            return response()->json(['error' => 'Sessão expirada. Reinicie o processo de compra.'], 400);
+        }
+
+        // Validar se a ordem existe e pertence ao usuário
+        $order = Order::where('id', $order_id)
+                    ->where('participante_id', Auth::id())
+                    ->where('status', 2) // apenas ordens pendentes
+                    ->first();
+
+        if (!$order) {
+            return response()->json(['error' => 'Ordem não encontrada ou já processada'], 400);
+        }
+
+        MercadoPagoConfig::setAccessToken($accessToken);
 
         $first_name = Str::of(Auth::user()->name)->explode(' ')[0];
         $tmp_explode = Str::of(Auth::user()->name)->explode(' ');
-        $last_name = end($tmp_explode);
+        $last_name = count($tmp_explode) > 1 ? end($tmp_explode) : $first_name;
 
         $config = Configuration::findOrFail(1);
+        $taxa_juros = $event->config_tax != 0.0 ? $event->config_tax : $config->tax;
+        $application_fee = ($total * $taxa_juros);
+        // $application_fee = ($total * $taxa_juros) / 100;
 
-        $taxa_juros = $config->tax;
+        #dd($taxa_juros);
 
-        if($event->config_tax != 0.0) {
-            $taxa_juros = $event->config_tax;
-        }
+        $client = new PaymentClient();
+        $paymentRequest = [];
 
-        // Calcular a taxa como porcentagem do valor total
-        $application_fee = ($total * $taxa_juros) / 100;
-
-        try {
-
-            if($input->paymentType == 'credit_card') {
-
-                $payment = new Payment();
-                $payment->transaction_amount = (float) $total;
-                $payment->token = $input->formData->token;
-                $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
-                $payment->installments = (int) $input->formData->installments;
-                $payment->payment_method_id = $input->formData->payment_method_id;
-                $payment->issuer_id = (int) $input->formData->issuer_id;
-                $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
-                $payment->application_fee = $application_fee;
-                // $payment->notification_url = 'http://requestbin.fullcontact.com/1ogudgk1';
-
-                $payer = new Payer();
-                $payer->email = $input->formData->payer->email;
-                $payer->first_name = $first_name;
-                $payer->last_name = $last_name;
-                $payer->identification = [
-                    'type' => $input->formData->payer->identification->type,
-                    'number' => $input->formData->payer->identification->number,
-                ];
-
-                $payment->payer = $payer;
-
-            } elseif($input->paymentType == 'bank_transfer') {
-
-                $payment = new Payment();
-                $payment->transaction_amount = (float) $total;
-                $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
-                $payment->payment_method_id = $input->formData->payment_method_id;
-                $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
-                $payment->application_fee = $application_fee;
-                $payment->payer = [
-                    'email' => $input->formData->payer->email,
-                    'first_name' => $first_name,
-                    'last_name' => $last_name,
-                    'identification' => [
-                        'type' => 'CPF',
-                        'number' => Auth::user()->cpf,
-                    ],
-                    // "address"=>  array(
-                    //     "zip_code" => "06233200",
-                    //     "street_name" => "Av. das Nações Unidas",
-                    //     "street_number" => "3003",
-                    //     "neighborhood" => "Bonfim",
-                    //     "city" => "Osasco",
-                    //     "federal_unit" => "SP"
-                    // )
-                ];
-
-                // var_dump($payment);
-                // dd($payment);
-
-            } elseif($input->paymentType == 'ticket') { // Boleto
-
-                $payment = new Payment();
-                $payment->transaction_amount = (float) $total;
-                $payment->description = 'Ingresso Ticket DZ6: ' . $event->name;
-                $payment->payment_method_id = $input->formData->payment_method_id;
-                $payment->marketplace = env('MERCADO_PAGO_ACCESS_TOKEN', '');
-                $payment->application_fee = $application_fee;
-                $payment->payer = [
-                    'email' => $input->formData->payer->email,
-                    'first_name' => $input->formData->payer->first_name,
-                    'last_name' => $input->formData->payer->last_name,
-                    'identification' => [
-                        'type' => $input->formData->payer->identification->type,
-                        'number' => $input->formData->payer->identification->number,
-                    ],
-                    'address' => [
-                        'zip_code' => $input->formData->payer->address->zip_code,
-                        'street_name' => $input->formData->payer->address->street_name,
-                        'street_number' => $input->formData->payer->address->street_number,
-                        'neighborhood' => $input->formData->payer->address->neighborhood,
-                        'city' => $input->formData->payer->address->city,
-                        'federal_unit' => $input->formData->payer->address->federal_unit,
-                    ],
-                ];
-            }
-
-            if ($payment->save()) {
-                // Sucesso
-
-                $responseArray = $payment->toArray();
-                $result = json_encode($responseArray);
-
-                $output = json_decode($result);
-
-                // var_dump($output);
-                // dd($output);
-
-                DB::table('orders')
-                    ->where('id', $order_id)
-                    ->update([
-                        'status' => 1,
-                        'gatway_hash' => $output->id,
-                        'gatway_status' => $output->status,
-                        'gatway_payment_method' => $output->payment_type_id,
-                        'gatway_date_status' => $output->date_created,
-                    ]);
-
-                if($input->paymentType == 'credit_card') {
-
-                    $total_amount_tax = 0;
-
-                    $total_amount_tax = $total_amount_tax + ((float) $output->transaction_details->total_paid_amount - (float) $output->transaction_details->net_received_amount);
-
-                    // SALVAR INFORMACOES DA TABELA CREDIT_CARD_DETAILS
-                    $credit_detail_id = DB::table('credit_details')->insertGetId([
-                        'token' => $output->token,
-                        'installments' => $output->installments,
-                        'value' => $output->transaction_details->total_paid_amount,
-                        'installment_amount' => $output->transaction_details->installment_amount,
-                        'total_paid_amount' => $output->transaction_details->total_paid_amount,
-                        'net_received_amount' => $output->transaction_details->net_received_amount,
-                        'total_amount_tax' => $total_amount_tax,
-                        'payment_method_id' => $output->payment_method_id,
-                        'order_id' => $order_id,
-                        'created_at' => now(),
-                    ]);
-                    // MANDAR EMAIL COM COMPRA REALIZADA COM SUCESSO
-                    Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
-
-                } elseif($input->paymentType == 'bank_transfer') {
-
-                    // SALVAR INFORMACOES DA TABELA PIX_DETAILS
-                    $pix_detail_id = DB::table('pix_details')->insertGetId([
-                        'value' => $output->transaction_details->total_paid_amount,
-                        'qr_code' => $output->point_of_interaction->transaction_data->qr_code,
-                        'qr_code_base64' => $output->point_of_interaction->transaction_data->qr_code_base64,
-                        'ticket_url' => $output->point_of_interaction->transaction_data->ticket_url,
-                        'expiration_date' => $output->date_of_expiration,
-                        'order_id' => $order_id,
-                        'created_at' => now(),
-                    ]);
-                    // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DA CHAVE PIX
-                    $pixDetails = DB::table('pix_details')->where('id', $pix_detail_id)->first();
-                    Mail::to(Auth::user()->email)->send(new \App\Mail\PixPendingMail($order, $pixDetails));
-
-                } elseif($input->paymentType == 'ticket') {
-
-                    // SALVAR INFORMACOES DA TABELA BOLETO_DETAILS
-                    $boleto_detail_id = DB::table('boleto_details')->insertGetId([
-                        'value' => $output->transaction_details->total_paid_amount,
-                        'href' => $output->transaction_details->external_resource_url,
-                        'line_code' => $output->barcode->content,
-                        'expiration_date' => $output->date_of_expiration,
-                        'order_id' => $order_id,
-                        'created_at' => now(),
-                    ]);
-                    // MANDAR EMAIL COM INFORMAÇÕES DA COMPRA PENDENTE E DETALHES DO BOLETO
-                    $boletoDetails = DB::table('boleto_details')->where('id', $boleto_detail_id)->first();
-                    Mail::to(Auth::user()->email)->send(new \App\Mail\BoletoPendingMail($order, $boletoDetails));
-
+        // Preparar request baseado no tipo de pagamento
+        switch ($input['paymentType']) {
+            case 'credit_card':
+                if (!isset($input['formData']['token']) || !isset($input['formData']['installments'])) {
+                    return response()->json(['error' => 'Dados do cartão incompletos'], 400);
                 }
 
-                return $output;
+                $paymentRequest = [
+                    "transaction_amount" => (float) $total,
+                    "token" => $input['formData']['token'],
+                    "description" => 'Ingresso ' . $event->name,
+                    "installments" => (int) $input['formData']['installments'],
+                    "payment_method_id" => $input['formData']['payment_method_id'],
+                    "issuer_id" => (int) $input['formData']['issuer_id'],
+                    "application_fee" => (float) $application_fee,
+                    "payer" => [
+                        "email" => $input['formData']['payer']['email'],
+                        "first_name" => $first_name,
+                        "last_name" => $last_name,
+                        "identification" => [
+                            "type" => $input['formData']['payer']['identification']['type'],
+                            "number" => $input['formData']['payer']['identification']['number'],
+                        ]
+                    ]
+                ];
+                break;
 
-            } else {
-                //Falha
-                $errorArray = (array) $payment->error;
-                $result = json_encode($errorArray);
+            case 'bank_transfer':
+                $paymentRequest = [
+                    "transaction_amount" => (float) $total,
+                    "description" => 'Ingresso ' . $event->name,
+                    "payment_method_id" => $input['formData']['payment_method_id'],
+                    "application_fee" => (float) $application_fee,
+                    "payer" => [
+                        "email" => Auth::user()->email,
+                        "first_name" => $first_name,
+                        "last_name" => $last_name,
+                        "identification" => [
+                            "type" => "CPF",
+                            "number" => Auth::user()->cpf
+                        ],
+                    ]
+                ];
+                break;
 
-                $output = json_decode($result);
+            case 'ticket':
+                if (!isset($input['formData']['payer']['address'])) {
+                    return response()->json(['error' => 'Endereço obrigatório para boleto'], 400);
+                }
 
-                date_default_timezone_set('America/Fortaleza');
-                $curr_date = date('Y-m-d H:i:s');
+                $paymentRequest = [
+                    "transaction_amount" => (float) $total,
+                    "description" => 'Ingresso ' . $event->name,
+                    "payment_method_id" => $input['formData']['payment_method_id'],
+                    "application_fee" => (float) $application_fee,
+                    "payer" => [
+                        "email" => $input['formData']['payer']['email'],
+                        "first_name" => $input['formData']['payer']['first_name'],
+                        "last_name" => $input['formData']['payer']['last_name'],
+                        "identification" => [
+                            "type" => $input['formData']['payer']['identification']['type'],
+                            "number" => $input['formData']['payer']['identification']['number'],
+                        ],
+                        "address" => [
+                            "zip_code" => $input['formData']['payer']['address']['zip_code'],
+                            "street_name" => $input['formData']['payer']['address']['street_name'],
+                            "street_number" => $input['formData']['payer']['address']['street_number'],
+                            "neighborhood" => $input['formData']['payer']['address']['neighborhood'],
+                            "city" => $input['formData']['payer']['address']['city'],
+                            "federal_unit" => $input['formData']['payer']['address']['federal_unit'],
+                        ],
+                    ]
+                ];
+                break;
 
-                // Atualizar status do pedido para rejeitado
-                DB::table('orders')
-                    ->where('id', $order_id)
-                    ->update([
-                        'status' => 3, // Rejeitado
-                        'gatway_status' => $output->status ?? 'rejected',
-                        'gatway_payment_method' => $input->paymentType,
-                        'gatway_date_status' => $curr_date,
-                        'gatway_description' => $output->message ?? 'Payment failed',
-                        'updated_at' => now()
-                    ]);
-
-                // Log do erro para debugging
-                Log::error('Mercado Pago Payment Failed', [
-                    'order_id' => $order_id,
-                    'payment_type' => $input->paymentType,
-                    'error' => $output
-                ]);
-
-                // MANDAR EMAIL COM COMPRA NÃO REALIZADA
-                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Falha no pagamento'));
-            }
-
-            return $result;
-
-        } catch(Exception $exception) {
-            Log::error('Mercado Pago Exception: ' . $exception->getMessage());
-            return response()->json(['error' => 'Internal server error'], 500);
+            default:
+                return response()->json(['error' => 'Tipo de pagamento não suportado'], 400);
         }
 
+        try {
+            $payment = $client->create($paymentRequest);
+
+            // Atualizar ordem com dados do pagamento
+            DB::table('orders')
+                ->where('id', $order_id)
+                ->update([
+                    'status' => $payment->status === 'approved' ? 1 : 2,
+                    'gatway_hash' => $payment->id,
+                    'gatway_status' => $payment->status,
+                    'gatway_payment_method' => $payment->payment_type_id ?? $payment->payment_method_id,
+                    'gatway_date_status' => $payment->date_created ?? now(),
+                    'updated_at' => now(),
+                ]);
+
+            // Processar baseado no tipo de pagamento
+            if ($input['paymentType'] == 'credit_card') {
+                $this->processCreditCardPayment($payment, $order_id, $total);
+                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
+            } elseif ($input['paymentType'] == 'bank_transfer') {
+                $this->processPixPayment($payment, $order_id, $total);
+                $pixDetails = DB::table('pix_details')->where('order_id', $order_id)->first();
+                Mail::to(Auth::user()->email)->send(new \App\Mail\PixPendingMail($order, $pixDetails));
+            } elseif ($input['paymentType'] == 'ticket') {
+                $this->processBoletoPayment($payment, $order_id, $total);
+                $boletoDetails = DB::table('boleto_details')->where('order_id', $order_id)->first();
+                Mail::to(Auth::user()->email)->send(new \App\Mail\BoletoPendingMail($order, $boletoDetails));
+            }
+
+            // Limpar cache de tentativas em caso de sucesso
+            cache()->forget($cacheKey);
+
+            // Atualizar status dos order_items se pagamento aprovado
+            if ($payment->status === 'approved') {
+                DB::table('order_items')
+                    ->where('order_id', $order_id)
+                    ->update(['status' => 1, 'updated_at' => now()]);
+            }
+
+            return response()->json([
+                'id' => $payment->id,
+                'status' => $payment->status,
+                'detail' => $payment->status_detail ?? null
+            ]);
+
+        } catch (MPApiException $e) {
+            $apiResponse = $e->getApiResponse();
+            $statusCode = $apiResponse->getStatusCode();
+            $content = $apiResponse->getContent();
+
+            Log::error('Mercado Pago API Error', [
+                'order_id' => $order_id,
+                'user_id' => Auth::id(),
+                'payment_type' => $input['paymentType'],
+                'status_code' => $statusCode,
+                'content' => $content
+            ]);
+
+            DB::table('orders')
+                ->where('id', $order_id)
+                ->update([
+                    'status' => 3, // cancelado
+                    'gatway_status' => 'rejected',
+                    'gatway_payment_method' => $input['paymentType'],
+                    'gatway_date_status' => now(),
+                    'gatway_description' => $content['message'] ?? 'API Error',
+                    'updated_at' => now()
+                ]);
+
+            // Enviar email de falha
+            try {
+                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Falha no pagamento'));
+            } catch (\Throwable $mailError) {
+                Log::warning('Falha ao enviar email de erro de pagamento', ['error' => $mailError->getMessage()]);
+            }
+
+            return response()->json(['error' => $content['message'] ?? 'Falha no processamento do pagamento'], 400);
+
+        } catch (Exception $e) {
+            Log::error('Payment Exception', [
+                'order_id' => $order_id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            DB::table('orders')
+                ->where('id', $order_id)
+                ->update([
+                    'status' => 3,
+                    'gatway_status' => 'error',
+                    'gatway_payment_method' => $input['paymentType'],
+                    'gatway_date_status' => now(),
+                    'gatway_description' => $e->getMessage(),
+                    'updated_at' => now()
+                ]);
+
+            try {
+                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Falha no pagamento'));
+            } catch (\Throwable $mailError) {
+                Log::warning('Falha ao enviar email de erro de pagamento', ['error' => $mailError->getMessage()]);
+            }
+
+            return response()->json(['error' => 'Erro interno do servidor'], 500);
+        }
+    }
+
+    private function processCreditCardPayment($payment, $order_id, $total)
+    {
+        $total_amount_tax = 0;
+        if (isset($payment->transaction_details)) {
+            $total_amount_tax = (float) $payment->transaction_details->total_paid_amount - (float) $payment->transaction_details->net_received_amount;
+        }
+
+        DB::table('credit_details')->insert([
+            'token' => $payment->token ?? null,
+            'installments' => $payment->installments ?? null,
+            'value' => $payment->transaction_details->total_paid_amount ?? $total,
+            'installment_amount' => $payment->transaction_details->installment_amount ?? null,
+            'total_paid_amount' => $payment->transaction_details->total_paid_amount ?? $total,
+            'net_received_amount' => $payment->transaction_details->net_received_amount ?? $total,
+            'total_amount_tax' => $total_amount_tax,
+            'payment_method_id' => $payment->payment_method_id,
+            'order_id' => $order_id,
+            'created_at' => now(),
+        ]);
+    }
+
+    private function processPixPayment($payment, $order_id, $total)
+    {
+        DB::table('pix_details')->insert([
+            'value' => $payment->transaction_details->total_paid_amount ?? $total,
+            'qr_code' => $payment->point_of_interaction->transaction_data->qr_code ?? null,
+            'qr_code_base64' => $payment->point_of_interaction->transaction_data->qr_code_base64 ?? null,
+            'ticket_url' => $payment->point_of_interaction->transaction_data->ticket_url ?? null,
+            'expiration_date' => $payment->date_of_expiration ?? null,
+            'order_id' => $order_id,
+            'created_at' => now(),
+        ]);
+    }
+
+    private function processBoletoPayment($payment, $order_id, $total)
+    {
+        DB::table('boleto_details')->insert([
+            'value' => $payment->transaction_details->total_paid_amount ?? $total,
+            'href' => $payment->transaction_details->external_resource_url ?? null,
+            'line_code' => $payment->barcode->content ?? null,
+            'expiration_date' => $payment->date_of_expiration ?? null,
+            'order_id' => $order_id,
+            'created_at' => now(),
+        ]);
     }
 
     public function oauth(Request $request){

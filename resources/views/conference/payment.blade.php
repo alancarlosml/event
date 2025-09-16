@@ -1,43 +1,77 @@
-<x-guestsite-layout>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Finalizar Compra - {{ $event->name }}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Theme CSS -->
+    @if ($event->theme == 'red')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">
+    @elseif ($event->theme == 'blue')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/blue.css') }}" type="text/css">
+    @elseif ($event->theme == 'green')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/green.css') }}" type="text/css">
+    @elseif ($event->theme == 'purple')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/purple.css') }}" type="text/css">
+    @elseif ($event->theme == 'orange')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/orange.css') }}" type="text/css">
+    @endif
+</head>
+<body>
     <section class="ftco-section">
         <div class="container">
-            <div class="row justify-content-center gy-4"> <!-- gy-4 para responsividade -->
+            <div class="row justify-content-center gy-4">
                 <div class="logo text-center mb-5 mt-5">
                     <a href="/">
                         <img src="{{ asset('assets/img/logo_principal.png') }}" alt="Logo Ticket DZ6" loading="lazy">
                     </a>
                 </div>
             </div>
+            
             <section id="checkout" class="section-bg">
                 <div class="container pb-5">
                     <div class="py-5 text-center">
                         <div class="section-header">
                             <h2>Finalizar compra</h2>
+                            <p class="text-muted">Total: R$ {{ number_format($total, 2, ',', '.') }}</p>
                         </div>
                     </div>
+                    
                     <div class="row justify-content-center">
-                        <div class="col-8">
+                        <div class="col-lg-8 col-md-10">
+                            <!-- Loading indicator -->
+                            <div id="loading_indicator" class="text-center mb-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2">Carregando opções de pagamento...</p>
+                            </div>
+                            
+                            <!-- Error container -->
+                            <div id="error_container" class="alert alert-danger d-none" role="alert">
+                                <strong>Erro:</strong> <span id="error_message"></span>
+                            </div>
+                            
+                            <!-- Payment brick container -->
                             <div class="mb-4 mt-5">
                                 <div id="cardPaymentBrick_container"></div>
                                 <div id="statusScreenBrick_container"></div>
                             </div>
-                            <div id="result_operation" class="flex d-none">
-                                <p class="text-center">
-                                    Verifique a situação dos seus ingressos em <a href="{{ route('event_home.my_registrations') }}" class="alert-link text-decoration-none">Minhas inscrições</a>
+                            
+                            <!-- Success message -->
+                            <div id="result_operation" class="alert alert-success d-none text-center">
+                                <h4 class="alert-heading">Pagamento processado!</h4>
+                                <p class="mb-0">
+                                    Verifique a situação dos seus ingressos em 
+                                    <a href="{{ route('event_home.my_registrations') }}" class="alert-link text-decoration-none">
+                                        Minhas inscrições
+                                    </a>
                                 </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Modal com ARIA -->
-                <div class="modal fade mt-5" id="cupomModal" tabindex="-1" aria-labelledby="cupomModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <strong class="modal-title" id="cupomModalLabel"><img id="modal_icon" src="/assets_conference/imgs/success.png" style="max-height: 48px" alt="Ícone do modal"> <span id="modal_txt">Cupom adicionado com sucesso!</span></strong>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" id="modal_close" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Fechar">Ok</button>
                             </div>
                         </div>
                     </div>
@@ -46,55 +80,59 @@
         </div>
     </section>
 
-    @push('theme')
-        @if ($event->theme == 'red')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">
-        @elseif ($event->theme == 'blue')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/blue.css') }}" type="text/css">
-        @elseif ($event->theme == 'green')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/green.css') }}" type="text/css">
-        @elseif ($event->theme == 'purple')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/purple.css') }}" type="text/css">
-        @elseif ($event->theme == 'orange')
-            <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/orange.css') }}" type="text/css">
-        @endif
-    @endpush
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Mercado Pago SDK -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    
+    <script>
+        $(document).ready(function() {
+            
+            // Obter public key do backend (recomendado)
+            const publicKey = "{{ env('MERCADO_PAGO_PUBLIC_KEY', 'APP_USR-2ce7dc9f-38e6-4745-92cc-f251947d3c04') }}";
+            
+            const mp = new MercadoPago(publicKey, {
+                locale: 'pt-BR'
+            });
 
-    @push('head')
-    @endpush
+            const bricksBuilder = mp.bricks();
 
-    @push('footer')
-        <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
-        <script src="https://sdk.mercadopago.com/js/v2"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
-        <script>
-            $(document).ready(function() {
+            let maxDate = "{{ $event->max_event_dates() }} 00:00:00";
+            let maxDateObj = new Date(maxDate);
+            let now = new Date();
+            now.setDate(now.getDate() + 3);
 
-                const mp = new MercadoPago('{{ env('MERCADO_PAGO_PUBLIC_KEY', '') }}', {
-                    locale: 'pt-BR'
-                });
+            // Definir métodos de pagamento baseado na data
+            let paymentMethods = {
+                creditCard: 'all',
+                bankTransfer: ['pix']
+            };
 
-                const bricksBuilder = mp.bricks();
+            if (now < maxDateObj) {
+                paymentMethods.ticket = ['bolbradesco'];
+            }
 
-                let maxDate = "{{$event->max_event_dates()}} 00:00:00";
+            // Função para mostrar erro
+            function showError(message) {
+                $('#error_message').text(message);
+                $('#error_container').removeClass('d-none');
+                $('#loading_indicator').addClass('d-none');
+                $('html, body').animate({
+                    scrollTop: $("#error_container").offset().top - 100
+                }, 500);
+            }
 
-                let maxDateObj = new Date(maxDate);
+            // Função para ocultar loading
+            function hideLoading() {
+                $('#loading_indicator').addClass('d-none');
+            }
 
-                let now = new Date();
-
-                now.setDate(now.getDate() + 3);
-
-                let paymentMethods = {
-                    creditCard: 'all',
-                    bankTransfer: ['pix']
-                };
-
-                if(now < maxDateObj) {
-                    paymentMethods.ticket = ['bolbradesco'];
-                }
-
-                const renderCardPaymentBrick = async (bricksBuilder) => {
+            const renderCardPaymentBrick = async (bricksBuilder) => {
+                try {
                     const settings = {
                         initialization: {
                             amount: {{ $total }},
@@ -111,90 +149,127 @@
                         },
                         callbacks: {
                             onReady: () => {
-                                /*
-                                Callback chamado quando o Brick estiver pronto.
-                                Aqui você pode ocultar loadings do seu site, por exemplo.
-                                */
+                                hideLoading();
+                                console.log('Payment Brick carregado com sucesso');
                             },
                             onSubmit: (cardFormData) => {
-                                // callback chamado o usuário clicar no botão de submissão dos dados
+                                // Mostrar loading durante processamento
+                                const submitButton = document.querySelector('[data-cy="submit-button"]');
+                                if (submitButton) {
+                                    submitButton.disabled = true;
+                                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
+                                }
 
-                                // ejemplo de envío de los datos recolectados por el Brick a su servidor
                                 return new Promise((resolve, reject) => {
+                                    // Adicionar CSRF token
+                                    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+                                    
                                     fetch("{{ route('conference.thanks', $event->slug) }}", {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                            },
-                                            body: JSON.stringify(cardFormData)
-                                        }).then(response => {
-                                            document.getElementById(
-                                                    'cardPaymentBrick_container').style
-                                                .display = 'none';
-                                            return response.json();
-                                        })
-                                        .then((result) => {
-                                            const renderStausScreenBrick = async (
-                                                bricksBuilder) => {
-                                                const settings = {
-                                                    initialization: {
-                                                        paymentId: result
-                                                            .id, // id de pagamento gerado pelo Mercado Pago
-                                                    },
-                                                    callbacks: {
-                                                        onReady: () => {
-                                                            // callback chamado quando o Brick estiver pronto
-                                                        },
-                                                        onError: (error) => {
-                                                            // callback chamado para todos os casos de erro do Brick
-                                                        },
-                                                    },
-                                                };
-                                                window.statusBrickController =
-                                                    await bricksBuilder.create(
-                                                        'statusScreen',
-                                                        'statusScreenBrick_container',
-                                                        settings
-                                                    );
-                                                document.getElementById(
-                                                    'result_operation').classList.remove('d-none');
-                                            };
-                                            renderStausScreenBrick(bricksBuilder);
-                                            // receber o resultado do pagamento
-                                            resolve();
-                                        })
-                                        .catch((error) => {
-                                            console.error(error);
-                                            reject();
-                                        })
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            "X-CSRF-TOKEN": csrfToken
+                                        },
+                                        body: JSON.stringify(cardFormData)
+                                    })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error(`HTTP error! status: ${response.status}`);
+                                        }
+                                        return response.json();
+                                    })
+                                    .then((result) => {
+                                        // Ocultar o formulário de pagamento
+                                        document.getElementById('cardPaymentBrick_container').style.display = 'none';
+                                        
+                                        // Renderizar tela de status
+                                        renderStatusScreenBrick(bricksBuilder, result.id);
+                                        
+                                        resolve();
+                                    })
+                                    .catch((error) => {
+                                        console.error('Erro no pagamento:', error);
+                                        
+                                        // Reabilitar botão
+                                        if (submitButton) {
+                                            submitButton.disabled = false;
+                                            submitButton.innerHTML = 'Pagar';
+                                        }
+                                        
+                                        // Mostrar erro
+                                        if (error.message.includes('400')) {
+                                            showError('Dados de pagamento inválidos. Verifique as informações e tente novamente.');
+                                        } else if (error.message.includes('500')) {
+                                            showError('Erro interno do servidor. Tente novamente em alguns minutos.');
+                                        } else {
+                                            showError('Erro ao processar pagamento. Tente novamente.');
+                                        }
+                                        
+                                        reject(error);
+                                    });
                                 });
                             },
                             onError: (error) => {
-                                // callback chamado para todos os casos de erro do Brick
-                                console.error(error);
+                                console.error('Erro no Brick:', error);
+                                hideLoading();
+                                showError('Erro ao carregar as opções de pagamento. Recarregue a página e tente novamente.');
                             },
                         },
                     };
-                    const cardPaymentBrickController = await bricksBuilder.create('payment',
-                        'cardPaymentBrick_container', settings);
 
-                };
-                renderCardPaymentBrick(bricksBuilder);
-
-            });
-
-
-            $(document).on('submit', '#checkout_submit', function() {
-
-                if ($(".form-check-input").is(":checked")) {
-                    $('#finalizar_comprar').attr('disabled', 'disabled');
-                } else {
-                    $('#modal_txt').text('Por favor, selecione ao menos uma forma de pagamento.');
-                    $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
-                    $('#cupomModal').modal('show');
+                    const cardPaymentBrickController = await bricksBuilder.create(
+                        'payment',
+                        'cardPaymentBrick_container', 
+                        settings
+                    );
+                    
+                } catch (error) {
+                    console.error('Erro ao criar Payment Brick:', error);
+                    hideLoading();
+                    showError('Erro ao inicializar o sistema de pagamento. Recarregue a página e tente novamente.');
                 }
-            });
-        </script>
-    @endpush
+            };
 
-</x-guestsite-layout>
+            const renderStatusScreenBrick = async (bricksBuilder, paymentId) => {
+                try {
+                    const settings = {
+                        initialization: {
+                            paymentId: paymentId,
+                        },
+                        callbacks: {
+                            onReady: () => {
+                                document.getElementById('result_operation').classList.remove('d-none');
+                                $('html, body').animate({
+                                    scrollTop: $("#statusScreenBrick_container").offset().top - 100
+                                }, 500);
+                            },
+                            onError: (error) => {
+                                console.error('Erro no Status Screen Brick:', error);
+                                showError('Erro ao exibir status do pagamento.');
+                            },
+                        },
+                    };
+                    
+                    await bricksBuilder.create(
+                        'statusScreen',
+                        'statusScreenBrick_container',
+                        settings
+                    );
+                } catch (error) {
+                    console.error('Erro ao criar Status Screen Brick:', error);
+                    showError('Erro ao exibir status do pagamento.');
+                }
+            };
+
+            // Inicializar o Payment Brick
+            renderCardPaymentBrick(bricksBuilder);
+
+            // Verificar se há erros de sessão do Laravel
+            @if ($errors->any())
+                hideLoading();
+                showError('{{ $errors->first() }}');
+            @endif
+        });
+    </script>
+</body>
+</html>

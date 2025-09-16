@@ -68,7 +68,7 @@ Route::get('painel/eventos/vendas/detalhes/{order_hash}', 'App\Http\Controllers\
 Route::get('painel/eventos/vendas/voucher/{order_hash}', 'App\Http\Controllers\EventAdminController@print_voucher')->middleware(['auth:participante', 'verified'])->name('event_home.order.print_voucher');
 
 Route::get('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@createStepThree')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.three');
-Route::post('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@postCreateStepThree')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.three');
+// Route::post('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@postCreateStepThree')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.three');
 Route::get('painel/eventos/{hash}/criar-cupom', 'App\Http\Controllers\EventAdminController@createCoupon')->middleware(['auth:participante', 'verified'])->name('event_home.create_coupon');
 Route::post('painel/eventos/{hash}/criar-cupom', 'App\Http\Controllers\EventAdminController@storeCoupon')->middleware(['auth:participante', 'verified'])->name('event_home.store_coupon');
 Route::get('painel/eventos/cupom/{hash}/editar', 'App\Http\Controllers\EventAdminController@editCoupon')->middleware(['auth:participante', 'verified'])->name('event_home.coupon_edit');
@@ -83,9 +83,9 @@ Route::get('painel/eventos/organizador/{id}/delete_file_icon', 'App\Http\Control
 Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->name('conference.index');
 Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->name('contact_event');
 Route::match(['GET', 'POST'], '{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
-Route::get('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.payment');
+Route::get('{slug}/pagamento-view', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.paymentView');
 Route::post('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@payment')->middleware(['auth:participante', 'verified'])->name('conference.payment');
-// Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
+//Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
 Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');
 Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');
 Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');

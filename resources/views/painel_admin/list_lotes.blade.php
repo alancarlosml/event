@@ -30,9 +30,7 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
-                            <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                 </div>
@@ -111,9 +109,7 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de evento</h5>
-                                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                            </button>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             Deseja realmente remover esse lote?

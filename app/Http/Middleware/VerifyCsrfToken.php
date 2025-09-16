@@ -14,6 +14,10 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
+        // Adicione aqui a exceção para sua rota de pagamento
+        '*/obrigado',  // Isso cobre qualquer /algo/obrigado (o * representa o {slug})
 
+        // Outras exceções que você já possa ter, como webhooks
+        'webhooks/mercado-pago/notification',  // Exemplo para webhook do Mercado Pago, se você tiver
     ];
 }
