@@ -24,7 +24,7 @@ use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Schema;
 use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Payment\PaymentClient;
 use MercadoPago\Exceptions\MPApiException;
@@ -652,33 +652,46 @@ class ConferenceController extends Controller
 
     public function thanks(Request $request)
     {
+        // Log request details for debugging
+        Log::info('Payment request received', [
+            'method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'has_content' => !empty($request->getContent()),
+            'user_id' => Auth::check() ? Auth::id() : null
+        ]);
+
         // Validar se o usuário está autenticado
         if (!Auth::check()) {
+            Log::warning('Unauthenticated payment attempt');
             return response()->json(['error' => 'Usuário não autenticado'], 401);
         }
 
-        // Validar CSRF token
-        if (!$request->hasValidSignature() && !$request->header('X-CSRF-TOKEN')) {
-            // Para requests AJAX, verificar CSRF token no header
-            $token = $request->header('X-CSRF-TOKEN');
-            if (!$token || !hash_equals(csrf_token(), $token)) {
-                return response()->json(['error' => 'Token CSRF inválido'], 403);
-            }
+        // Validar CSRF token para requests web
+        if ($request->expectsJson() && !$request->header('X-CSRF-TOKEN')) {
+            Log::warning('Missing CSRF token in payment request');
+            return response()->json(['error' => 'Token CSRF obrigatório'], 403);
         }
 
         // Validar se há dados de pagamento
-        if (!$request->getContent()) {
+        $content = $request->getContent();
+        if (empty($content)) {
+            Log::warning('Empty payment request content');
             return response()->json(['error' => 'Dados de pagamento não fornecidos'], 400);
         }
 
         try {
-            $input = json_decode($request->getContent(), true);
+            $input = json_decode($content, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \JsonException('Invalid JSON: ' . json_last_error_msg());
+            }
         } catch (\JsonException $e) {
+            Log::error('JSON decode error', ['error' => $e->getMessage(), 'content' => $content]);
             return response()->json(['error' => 'Formato JSON inválido'], 400);
         }
 
         // Validar estrutura dos dados
         if (!$input || !isset($input['paymentType']) || !isset($input['formData'])) {
+            Log::warning('Invalid payment data structure', ['input' => $input]);
             return response()->json(['error' => 'Dados de pagamento inválidos'], 400);
         }
 
@@ -688,6 +701,7 @@ class ConferenceController extends Controller
         $attempts = cache()->get($cacheKey, 0);
         
         if ($attempts >= 3) {
+            Log::warning('Rate limit exceeded for user', ['user_id' => $userId, 'attempts' => $attempts]);
             return response()->json(['error' => 'Muitas tentativas de pagamento. Tente novamente em 5 minutos.'], 429);
         }
 
@@ -696,7 +710,7 @@ class ConferenceController extends Controller
         // Validar se as credenciais do Mercado Pago estão configuradas
         $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN', '');
         if (empty($accessToken)) {
-            Log::error('Mercado Pago Access Token não configurado');
+            Log::error('Mercado Pago Access Token not configured');
             return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
         }
 
@@ -706,6 +720,12 @@ class ConferenceController extends Controller
         $total = $request->session()->get('total');
 
         if (!$order_id || !$event || !$total) {
+            Log::warning('Missing session data', [
+                'has_order_id' => (bool) $order_id,
+                'has_event' => (bool) $event,
+                'has_total' => (bool) $total,
+                'user_id' => $userId
+            ]);
             return response()->json(['error' => 'Sessão expirada. Reinicie o processo de compra.'], 400);
         }
 
@@ -716,106 +736,147 @@ class ConferenceController extends Controller
                     ->first();
 
         if (!$order) {
+            Log::warning('Order not found or already processed', [
+                'order_id' => $order_id,
+                'user_id' => $userId
+            ]);
             return response()->json(['error' => 'Ordem não encontrada ou já processada'], 400);
         }
 
-        MercadoPagoConfig::setAccessToken($accessToken);
+        // Configurar Mercado Pago
+        try {
+            MercadoPagoConfig::setAccessToken($accessToken);
+        } catch (\Exception $e) {
+            Log::error('Failed to set MercadoPago access token', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Erro na configuração do pagamento'], 500);
+        }
 
-        $first_name = Str::of(Auth::user()->name)->explode(' ')[0];
-        $tmp_explode = Str::of(Auth::user()->name)->explode(' ');
+        // Preparar dados do pagador
+        $user = Auth::user();
+        $first_name = Str::of($user->name)->explode(' ')[0];
+        $tmp_explode = Str::of($user->name)->explode(' ');
         $last_name = count($tmp_explode) > 1 ? end($tmp_explode) : $first_name;
 
+        // Calcular taxa
         $config = Configuration::findOrFail(1);
         $taxa_juros = $event->config_tax != 0.0 ? $event->config_tax : $config->tax;
         $application_fee = ($total * $taxa_juros);
-        // $application_fee = ($total * $taxa_juros) / 100;
 
-        #dd($taxa_juros);
+        Log::info('Processing payment', [
+            'payment_type' => $input['paymentType'],
+            'order_id' => $order_id,
+            'total' => $total,
+            'user_id' => $userId
+        ]);
 
         $client = new PaymentClient();
         $paymentRequest = [];
 
         // Preparar request baseado no tipo de pagamento
-        switch ($input['paymentType']) {
-            case 'credit_card':
-                if (!isset($input['formData']['token']) || !isset($input['formData']['installments'])) {
-                    return response()->json(['error' => 'Dados do cartão incompletos'], 400);
-                }
-
-                $paymentRequest = [
-                    "transaction_amount" => (float) $total,
-                    "token" => $input['formData']['token'],
-                    "description" => 'Ingresso ' . $event->name,
-                    "installments" => (int) $input['formData']['installments'],
-                    "payment_method_id" => $input['formData']['payment_method_id'],
-                    "issuer_id" => (int) $input['formData']['issuer_id'],
-                    "application_fee" => (float) $application_fee,
-                    "payer" => [
-                        "email" => $input['formData']['payer']['email'],
-                        "first_name" => $first_name,
-                        "last_name" => $last_name,
-                        "identification" => [
-                            "type" => $input['formData']['payer']['identification']['type'],
-                            "number" => $input['formData']['payer']['identification']['number'],
-                        ]
-                    ]
-                ];
-                break;
-
-            case 'bank_transfer':
-                $paymentRequest = [
-                    "transaction_amount" => (float) $total,
-                    "description" => 'Ingresso ' . $event->name,
-                    "payment_method_id" => $input['formData']['payment_method_id'],
-                    "application_fee" => (float) $application_fee,
-                    "payer" => [
-                        "email" => Auth::user()->email,
-                        "first_name" => $first_name,
-                        "last_name" => $last_name,
-                        "identification" => [
-                            "type" => "CPF",
-                            "number" => Auth::user()->cpf
-                        ],
-                    ]
-                ];
-                break;
-
-            case 'ticket':
-                if (!isset($input['formData']['payer']['address'])) {
-                    return response()->json(['error' => 'Endereço obrigatório para boleto'], 400);
-                }
-
-                $paymentRequest = [
-                    "transaction_amount" => (float) $total,
-                    "description" => 'Ingresso ' . $event->name,
-                    "payment_method_id" => $input['formData']['payment_method_id'],
-                    "application_fee" => (float) $application_fee,
-                    "payer" => [
-                        "email" => $input['formData']['payer']['email'],
-                        "first_name" => $input['formData']['payer']['first_name'],
-                        "last_name" => $input['formData']['payer']['last_name'],
-                        "identification" => [
-                            "type" => $input['formData']['payer']['identification']['type'],
-                            "number" => $input['formData']['payer']['identification']['number'],
-                        ],
-                        "address" => [
-                            "zip_code" => $input['formData']['payer']['address']['zip_code'],
-                            "street_name" => $input['formData']['payer']['address']['street_name'],
-                            "street_number" => $input['formData']['payer']['address']['street_number'],
-                            "neighborhood" => $input['formData']['payer']['address']['neighborhood'],
-                            "city" => $input['formData']['payer']['address']['city'],
-                            "federal_unit" => $input['formData']['payer']['address']['federal_unit'],
-                        ],
-                    ]
-                ];
-                break;
-
-            default:
-                return response()->json(['error' => 'Tipo de pagamento não suportado'], 400);
-        }
-
         try {
+            switch ($input['paymentType']) {
+                case 'credit_card':
+                    if (!isset($input['formData']['token']) || !isset($input['formData']['installments'])) {
+                        return response()->json(['error' => 'Dados do cartão incompletos'], 400);
+                    }
+
+                    $paymentRequest = [
+                        "transaction_amount" => (float) $total,
+                        "token" => $input['formData']['token'],
+                        "description" => 'Ingresso ' . $event->name,
+                        "installments" => (int) $input['formData']['installments'],
+                        "payment_method_id" => $input['formData']['payment_method_id'],
+                        "issuer_id" => (int) $input['formData']['issuer_id'],
+                        "application_fee" => (float) $application_fee,
+                        "payer" => [
+                            "email" => $input['formData']['payer']['email'],
+                            "first_name" => $first_name,
+                            "last_name" => $last_name,
+                            "identification" => [
+                                "type" => $input['formData']['payer']['identification']['type'],
+                                "number" => $input['formData']['payer']['identification']['number'],
+                            ]
+                        ]
+                    ];
+                    break;
+
+                case 'bank_transfer':
+                    $paymentRequest = [
+                        "transaction_amount" => (float) $total,
+                        "description" => 'Ingresso ' . $event->name,
+                        "payment_method_id" => $input['formData']['payment_method_id'],
+                        "application_fee" => (float) $application_fee,
+                        "payer" => [
+                            "email" => $user->email,
+                            "first_name" => $first_name,
+                            "last_name" => $last_name,
+                            "identification" => [
+                                "type" => "CPF",
+                                "number" => $user->cpf
+                            ],
+                        ]
+                    ];
+                    break;
+
+                case 'ticket':
+                    // Validar dados específicos do boleto
+                    if (!isset($input['formData']['payer']['address'])) {
+                        return response()->json(['error' => 'Endereço obrigatório para boleto'], 400);
+                    }
+
+                    $address = $input['formData']['payer']['address'];
+                    $requiredAddressFields = ['zip_code', 'street_name', 'street_number', 'neighborhood', 'city', 'federal_unit'];
+                    
+                    foreach ($requiredAddressFields as $field) {
+                        if (!isset($address[$field]) || empty($address[$field])) {
+                            Log::warning('Missing address field for boleto', ['field' => $field, 'address' => $address]);
+                            return response()->json(['error' => "Campo obrigatório para boleto: {$field}"], 400);
+                        }
+                    }
+
+                    $paymentRequest = [
+                        "transaction_amount" => (float) $total,
+                        "description" => 'Ingresso ' . $event->name,
+                        "payment_method_id" => $input['formData']['payment_method_id'],
+                        "application_fee" => (float) $application_fee,
+                        "payer" => [
+                            "email" => $input['formData']['payer']['email'],
+                            "first_name" => $input['formData']['payer']['first_name'],
+                            "last_name" => $input['formData']['payer']['last_name'],
+                            "identification" => [
+                                "type" => $input['formData']['payer']['identification']['type'],
+                                "number" => $input['formData']['payer']['identification']['number'],
+                            ],
+                            "address" => [
+                                "zip_code" => $address['zip_code'],
+                                "street_name" => $address['street_name'],
+                                "street_number" => $address['street_number'],
+                                "neighborhood" => $address['neighborhood'],
+                                "city" => $address['city'],
+                                "federal_unit" => $address['federal_unit'],
+                            ],
+                        ]
+                    ];
+                    break;
+
+                default:
+                    Log::warning('Unsupported payment type', ['payment_type' => $input['paymentType']]);
+                    return response()->json(['error' => 'Tipo de pagamento não suportado'], 400);
+            }
+
+            Log::info('Payment request prepared', [
+                'payment_method' => $input['formData']['payment_method_id'] ?? 'unknown',
+                'amount' => $total
+            ]);
+
+            // Processar pagamento
             $payment = $client->create($paymentRequest);
+
+            Log::info('Payment response received', [
+                'payment_id' => $payment->id,
+                'status' => $payment->status,
+                'payment_method' => $payment->payment_method_id ?? $payment->payment_type_id
+            ]);
 
             // Atualizar ordem com dados do pagamento
             DB::table('orders')
@@ -830,17 +891,50 @@ class ConferenceController extends Controller
                 ]);
 
             // Processar baseado no tipo de pagamento
-            if ($input['paymentType'] == 'credit_card') {
-                $this->processCreditCardPayment($payment, $order_id, $total);
-                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
-            } elseif ($input['paymentType'] == 'bank_transfer') {
-                $this->processPixPayment($payment, $order_id, $total);
-                $pixDetails = DB::table('pix_details')->where('order_id', $order_id)->first();
-                Mail::to(Auth::user()->email)->send(new \App\Mail\PixPendingMail($order, $pixDetails));
-            } elseif ($input['paymentType'] == 'ticket') {
-                $this->processBoletoPayment($payment, $order_id, $total);
-                $boletoDetails = DB::table('boleto_details')->where('order_id', $order_id)->first();
-                Mail::to(Auth::user()->email)->send(new \App\Mail\BoletoPendingMail($order, $boletoDetails));
+            try {
+                if ($input['paymentType'] == 'credit_card') {
+                    $this->processCreditCardPayment($payment, $order_id, $total);
+                    
+                    // Enviar email de confirmação
+                    try {
+                        Mail::to($user->email)->send(new OrderMail($order, 'Compra realizada com sucesso'));
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to send confirmation email', ['error' => $e->getMessage()]);
+                    }
+                    
+                } elseif ($input['paymentType'] == 'bank_transfer') {
+                    $this->processPixPayment($payment, $order_id, $total);
+                    
+                    // Enviar email com dados do PIX
+                    try {
+                        $pixDetails = DB::table('pix_details')->where('order_id', $order_id)->first();
+                        if ($pixDetails && class_exists('\App\Mail\PixPendingMail')) {
+                            Mail::to($user->email)->send(new \App\Mail\PixPendingMail($order, $pixDetails));
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to send PIX email', ['error' => $e->getMessage()]);
+                    }
+                    
+                } elseif ($input['paymentType'] == 'ticket') {
+                    $this->processBoletoPayment($payment, $order_id, $total);
+                    
+                    // Enviar email com dados do boleto
+                    try {
+                        $boletoDetails = DB::table('boleto_details')->where('order_id', $order_id)->first();
+                        if ($boletoDetails && class_exists('\App\Mail\BoletoPendingMail')) {
+                            Mail::to($user->email)->send(new \App\Mail\BoletoPendingMail($order, $boletoDetails));
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to send boleto email', ['error' => $e->getMessage()]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::error('Error processing payment details', [
+                    'payment_type' => $input['paymentType'],
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Continuar mesmo com erro no processamento dos detalhes
             }
 
             // Limpar cache de tentativas em caso de sucesso
@@ -852,6 +946,12 @@ class ConferenceController extends Controller
                     ->where('order_id', $order_id)
                     ->update(['status' => 1, 'updated_at' => now()]);
             }
+
+            Log::info('Payment processed successfully', [
+                'payment_id' => $payment->id,
+                'order_id' => $order_id,
+                'status' => $payment->status
+            ]);
 
             return response()->json([
                 'id' => $payment->id,
@@ -869,9 +969,11 @@ class ConferenceController extends Controller
                 'user_id' => Auth::id(),
                 'payment_type' => $input['paymentType'],
                 'status_code' => $statusCode,
-                'content' => $content
+                'content' => $content,
+                'payment_request' => $paymentRequest
             ]);
 
+            // Atualizar ordem com erro
             DB::table('orders')
                 ->where('id', $order_id)
                 ->update([
@@ -879,42 +981,46 @@ class ConferenceController extends Controller
                     'gatway_status' => 'rejected',
                     'gatway_payment_method' => $input['paymentType'],
                     'gatway_date_status' => now(),
-                    'gatway_description' => $content['message'] ?? 'API Error',
+                    'gatway_description' => is_array($content) ? ($content['message'] ?? 'API Error') : 'API Error',
                     'updated_at' => now()
                 ]);
 
-            // Enviar email de falha
-            try {
-                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Falha no pagamento'));
-            } catch (\Throwable $mailError) {
-                Log::warning('Falha ao enviar email de erro de pagamento', ['error' => $mailError->getMessage()]);
+            // Determinar erro específico baseado no status code
+            $errorMessage = 'Falha no processamento do pagamento';
+            if ($statusCode >= 400 && $statusCode < 500) {
+                $errorMessage = is_array($content) && isset($content['message']) ? 
+                    $content['message'] : 'Dados de pagamento inválidos';
+            } elseif ($statusCode >= 500) {
+                $errorMessage = 'Serviço temporariamente indisponível. Tente novamente.';
             }
 
-            return response()->json(['error' => $content['message'] ?? 'Falha no processamento do pagamento'], 400);
+            return response()->json(['error' => $errorMessage], $statusCode >= 500 ? 503 : 400);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Payment Exception', [
                 'order_id' => $order_id,
                 'user_id' => Auth::id(),
+                'payment_type' => $input['paymentType'],
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
 
-            DB::table('orders')
-                ->where('id', $order_id)
-                ->update([
-                    'status' => 3,
-                    'gatway_status' => 'error',
-                    'gatway_payment_method' => $input['paymentType'],
-                    'gatway_date_status' => now(),
-                    'gatway_description' => $e->getMessage(),
-                    'updated_at' => now()
-                ]);
-
+            // Atualizar ordem com erro
             try {
-                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Falha no pagamento'));
-            } catch (\Throwable $mailError) {
-                Log::warning('Falha ao enviar email de erro de pagamento', ['error' => $mailError->getMessage()]);
+                DB::table('orders')
+                    ->where('id', $order_id)
+                    ->update([
+                        'status' => 3,
+                        'gatway_status' => 'error',
+                        'gatway_payment_method' => $input['paymentType'],
+                        'gatway_date_status' => now(),
+                        'gatway_description' => $e->getMessage(),
+                        'updated_at' => now()
+                    ]);
+            } catch (\Throwable $dbError) {
+                Log::error('Failed to update order with error status', ['error' => $dbError->getMessage()]);
             }
 
             return response()->json(['error' => 'Erro interno do servidor'], 500);
@@ -957,14 +1063,36 @@ class ConferenceController extends Controller
 
     private function processBoletoPayment($payment, $order_id, $total)
     {
-        DB::table('boleto_details')->insert([
-            'value' => $payment->transaction_details->total_paid_amount ?? $total,
-            'href' => $payment->transaction_details->external_resource_url ?? null,
-            'line_code' => $payment->barcode->content ?? null,
-            'expiration_date' => $payment->date_of_expiration ?? null,
-            'order_id' => $order_id,
-            'created_at' => now(),
-        ]);
+        try {
+            // Verificar se a tabela boleto_details existe
+            if (!Schema::hasTable('boleto_details')) {
+                Log::error('Table boleto_details does not exist');
+                throw new \Exception('Tabela de detalhes do boleto não encontrada');
+            }
+
+            $boletoData = [
+                'value' => $payment->transaction_details->total_paid_amount ?? $total,
+                'href' => $payment->transaction_details->external_resource_url ?? null,
+                'line_code' => $payment->barcode->content ?? null,
+                'expiration_date' => $payment->date_of_expiration ?? null,
+                'order_id' => $order_id,
+                'created_at' => now(),
+            ];
+
+            Log::info('Saving boleto details', ['data' => $boletoData]);
+
+            DB::table('boleto_details')->insert($boletoData);
+
+            Log::info('Boleto details saved successfully', ['order_id' => $order_id]);
+
+        } catch (\Throwable $e) {
+            Log::error('Error processing boleto payment', [
+                'order_id' => $order_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
     }
 
     public function oauth(Request $request){
