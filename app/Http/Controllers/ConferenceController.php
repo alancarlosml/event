@@ -18,6 +18,7 @@ use App\Models\EventDate;
 use App\Models\Lote;
 use App\Models\Question;
 use App\Models\Message;
+use App\Models\MpAccount;
 use App\Models\OptionAnswer;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -297,8 +298,10 @@ class ConferenceController extends Controller
 
                 if($lote->type == 0) {
 
+                    $config = Configuration::findOrFail(1);
+
                     if($lote->tax_service == 0) {
-                        $valor_calculado = ($lote->value + $lote->value * 0.1) * $quantity;
+                        $valor_calculado = ($lote->value + $lote->value * $config->tax) * $quantity;
                         $subtotal += $valor_calculado;
                     } else {
                         $valor_calculado = $lote->value * $quantity;
@@ -708,16 +711,18 @@ class ConferenceController extends Controller
         cache()->put($cacheKey, $attempts + 1, now()->addMinutes(5));
 
         // Validar se as credenciais do Mercado Pago estão configuradas
-        $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN', 'APP_USR-5198507811366797-070210-65a9d5b969881e63a60b563a8e3fb8b5-618667986');
-        if (empty($accessToken)) {
-            Log::error('Mercado Pago Access Token not configured');
-            return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
-        }
-
         // Validar dados da sessão
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
         $total = $request->session()->get('total');
+        
+        // $mpAccount = MpAccount::where('participante_id', $event->user_id)->first();
+        // $accessToken = $mpAccount->access_token;
+        $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN');
+        if (empty($accessToken)) {
+            Log::error('Mercado Pago Access Token not configured');
+            return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
+        }
 
         if (!$order_id || !$event || !$total) {
             Log::warning('Missing session data', [
@@ -805,7 +810,7 @@ class ConferenceController extends Controller
                         "transaction_amount" => (float) $total,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
-                        //"application_fee" => (float) $application_fee,
+                        "application_fee" => (float) $application_fee,
                         "payer" => [
                             "email" => $user->email,
                             "first_name" => $first_name,
@@ -838,7 +843,7 @@ class ConferenceController extends Controller
                         "transaction_amount" => (float) $total,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
-                        //"application_fee" => (float) $application_fee,
+                        "application_fee" => (float) $application_fee,
                         "payer" => [
                             "email" => $input['formData']['payer']['email'],
                             "first_name" => $input['formData']['payer']['first_name'],
