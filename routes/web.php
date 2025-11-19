@@ -67,6 +67,10 @@ Route::post('painel/eventos/{event_id}/save_lotes', 'App\Http\Controllers\EventA
 Route::get('painel/eventos/vendas/detalhes/{order_hash}', 'App\Http\Controllers\EventAdminController@order_details')->middleware(['auth:participante', 'verified'])->name('event_home.order.details');
 Route::get('painel/eventos/vendas/voucher/{order_hash}', 'App\Http\Controllers\EventAdminController@print_voucher')->middleware(['auth:participante', 'verified'])->name('event_home.order.print_voucher');
 
+// Check-in Routes
+Route::get('checkin/{purchase_hash}', 'App\Http\Controllers\CheckInController@viewTicket')->name('checkin.view');
+Route::post('api/checkin/{purchase_hash}', 'App\Http\Controllers\CheckInController@validateCheckIn')->name('checkin.validate');
+
 Route::get('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@createStepThree')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.three');
 // Route::post('painel/eventos/terceiro-passo', 'App\Http\Controllers\EventAdminController@postCreateStepThree')->middleware(['auth:participante', 'verified'])->name('event_home.create.step.three');
 Route::get('painel/eventos/{hash}/criar-cupom', 'App\Http\Controllers\EventAdminController@createCoupon')->middleware(['auth:participante', 'verified'])->name('event_home.create_coupon');
@@ -112,6 +116,7 @@ Route::post('admin/login', 'App\Http\Controllers\Admin\Auth\AuthenticatedSession
 Route::post('admin/logout', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@destroy')->name('admin.logout');
 
 Route::get('admin/dashboard', 'App\Http\Controllers\DashboardController@dashboard')->middleware(['auth:web'])->name('dashboard');
+Route::get('admin/dashboard/chart-data', 'App\Http\Controllers\DashboardController@getChartData')->middleware(['auth:web'])->name('dashboard.chart-data');
 
 Route::get('admin/users/list', 'App\Http\Controllers\UserController@index')->middleware(['auth:web'])->name('user.index');
 Route::get('admin/users/show/{id}', 'App\Http\Controllers\UserController@show')->middleware(['auth:web'])->name('user.show');
@@ -214,5 +219,8 @@ Route::post('admin/events/{id}/questions/create', 'App\Http\Controllers\EventCon
 // Mercado Pago Webhooks
 Route::post('/webhooks/mercado-pago/notification', 'App\Http\Controllers\MercadoPagoController@notification');
 Route::get('/webhooks/mercado-pago/check-linked-account', 'App\Http\Controllers\MercadoPagoController@checkLinkedAccount')->middleware(['auth:participante', 'verified']);
+
+// Mercado Pago OAuth Callback
+Route::get('/mercado-pago/link-account', 'App\Http\Controllers\MercadoPagoController@linkAccount')->middleware(['auth:participante', 'verified'])->name('mercado-pago.link-account');
 
 require __DIR__.'/auth.php';

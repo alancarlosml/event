@@ -16,10 +16,34 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            // UserSeeder::class,
-            // ParticipanteSeeder::class,
-            // OptionSeeder::class,
-            // ConfigurationSeeder::class,
+            // Seeders básicos (sem dependências)
+            UserSeeder::class,
+            ConfigurationSeeder::class,
+            OptionSeeder::class,
+            StateSeeder::class,
+            
+            // Seeders que dependem de States
+            CitySeeder::class,
+            
+            // Seeders que dependem de Categories
+            CategorySeeder::class,
+            AreaSeeder::class,
+            
+            // Seeders independentes
+            OwnerSeeder::class,
+            
+            // Seeders que dependem de Cities
+            PlaceSeeder::class,
+            
+            // Seeders que dependem de Events, Areas, Owners, Places
+            EventSeeder::class,
+            
+            // Seeders que dependem de Events
+            LoteSeeder::class,
+            CouponSeeder::class,
+            
+            // Seeders independentes
+            ParticipanteSeeder::class,
         ]);
     }
 }

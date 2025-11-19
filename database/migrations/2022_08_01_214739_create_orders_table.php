@@ -20,31 +20,32 @@ return new class () extends Migration {
             $table->increments('id');
             $table->string('hash')->unique();
             $table->integer('status');  // 1 - confirmado / 2 - pendente / 3 - cancelado
-            $table->string('gatway_hash');
-            $table->string('gatway_reference');
-            $table->string('gatway_status');
-            $table->string('gatway_payment_method');
-            $table->string('gatway_description');
-            $table->timestamp('gatway_date_status');
+            $table->timestamp('date_used')->nullable()->useCurrent()->useCurrentOnUpdate();
+            $table->string('gatway_hash')->nullable();
+            $table->string('gatway_reference')->nullable();
+            $table->string('gatway_status')->nullable();
+            $table->string('gatway_payment_method')->nullable();
+            $table->string('gatway_description')->nullable();
+            $table->timestamp('gatway_date_status')->nullable();
             $table->integer('event_id')->index()->unsigned();
             $table->foreign('event_id')
                 ->references('id')
                 ->on('events')
                 ->onDelete('cascade');
-            // $table->integer('event_date_id')->index()->unsigned();
-            // $table->foreign('event_date_id')
-            //     ->references('id')
-            //     ->on('event_dates')
-            //     ->onDelete('cascade');
+            $table->integer('event_date_id')->index()->unsigned();
+            $table->foreign('event_date_id')
+                ->references('id')
+                ->on('event_dates')
+                ->onDelete('cascade');
             $table->integer('participante_id')->index()->unsigned();
             $table->foreign('participante_id')
                 ->references('id')
                 ->on('participantes')
                 ->onDelete('cascade');
-            $table->integer('coupon_id')->index()->unsigned();
+            $table->integer('coupon_id')->index()->nullable()->unsigned();
             $table->foreign('coupon_id')
                 ->references('id')
-                ->on('coupons')->onDelete('cascade');
+                ->on('coupons')->onDelete('set null');
             $table->timestamps();
         });
     }

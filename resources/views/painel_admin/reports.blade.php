@@ -9,7 +9,7 @@
                     <li><a href="/">Home</a></li>
                     <li><a href="/painel/meus-eventos">Meus eventos</a></li>
                 </ol>
-                <h2>Relatórios financeiros: {{ $event->name }}</h2>
+                <h2>Relatórios do Evento: {{ $event->name }}</h2>
 
             </div>
         </section><!-- End Breadcrumbs -->
@@ -18,14 +18,17 @@
             <div class="container">
                 <div class="mb-3 ps-3 pe-3">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
                             <strong>Erros encontrados:</strong>
-                            <ul>
+                            <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -34,79 +37,225 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-12 col-md-12 col-lg-12 pe-3">
-                            <h4 class="d-flex justify-content-between">
-                                Resumo financeiro
-                                <a href="#" class="button-print" onclick="window.print();"><img src="{{ asset('assets/img/print-pdf.jpg') }}" alt="Imprimir" width="36px"></a>
-                            </h4>
-                            <div class="row">
-                                <div class="col-12 col-sm-4">
-                                    <div class="info-box bg-light justify-content-center">
-                                        <div class="info-box-content">
-                                            <span class="info-box-text text-center text-muted">Total confirmado</span>
-                                            <span class="info-box-number text-center text-success mb-0 h5">@money($resumo->total_confirmado)</span>
-                                            <small class="text-center mb-0">{{ $resumo->confirmado }} participantes</small>
-                                        </div>
+
+                <!-- Informações do Evento -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações do Evento</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-calendar-alt me-2 text-primary"></i>Data(s) do Evento:</strong><br>
+                                @if($event_dates && $event_dates->count() > 0)
+                                    @foreach($event_dates as $date)
+                                        <span class="badge bg-info me-1">
+                                            {{ \Carbon\Carbon::parse($date->date)->format('d/m/Y') }} 
+                                            @if($date->time_begin)
+                                                às {{ \Carbon\Carbon::parse($date->time_begin)->format('H:i') }}
+                                            @endif
+                                        </span>
+                                    @endforeach
+                                @else
+                                    <span class="text-muted">Não informado</span>
+                                @endif
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-map-marker-alt me-2 text-danger"></i>Local:</strong><br>
+                                @if($place)
+                                    {{ $place->name }}
+                                    @if($place->get_city)
+                                        - {{ $place->get_city->name }}/{{ $place->get_city->uf }}
+                                    @endif
+                                @else
+                                    <span class="text-muted">Não informado</span>
+                                @endif
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-ticket-alt me-2 text-success"></i>Status:</strong><br>
+                                @if($event->status == 1)
+                                    <span class="badge bg-success">Publicado</span>
+                                @else
+                                    <span class="badge bg-secondary">Rascunho</span>
+                                @endif
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-users me-2 text-warning"></i>Capacidade:</strong><br>
+                                <span class="badge bg-primary">{{ number_format($capacidade_total, 0, ',', '.') }} ingressos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPIs Principais -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4 class="d-flex justify-content-between mb-3">
+                            <span><i class="fas fa-chart-line me-2"></i>Indicadores Principais</span>
+                            <a href="#" class="button-print" onclick="window.print();" title="Imprimir relatório">
+                                <img src="{{ asset('assets/img/print-pdf.jpg') }}" alt="Imprimir" width="36px">
+                            </a>
+                        </h4>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 mb-3">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Ingressos Vendidos</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($ingressos_vendidos, 0, ',', '.') }}</div>
+                                        <small class="text-muted">de {{ number_format($capacidade_total, 0, ',', '.') }} disponíveis</small>
                                     </div>
-                                </div>
-                                <div class="col-12 col-sm-4">
-                                    <div class="info-box bg-light justify-content-center">
-                                        <div class="info-box-content">
-                                            <span class="info-box-text text-center text-muted">Total pendente</span>
-                                            <span class="info-box-number text-center text-danger mb-0 h5">@money($resumo->total_pendente)</span>
-                                            <small class="text-center mb-0">{{ $resumo->pendente }} participantes</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-4">
-                                    <div class="info-box bg-light justify-content-center">
-                                        <div class="info-box-content">
-                                            <span class="info-box-text text-center text-muted">Total geral</span>
-                                            <span class="info-box-number text-center text-primary mb-0 h5">@money($resumo->total_confirmado + $resumo->total_pendente)</span>
-                                            <small class="text-center mb-0">{{ $resumo->geral }} participantes</small>
-                                        </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-ticket-alt fa-2x text-gray-300"></i>
                                     </div>
                                 </div>
                             </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-6 border-end">
-                                    <h4>Valor total</h4>
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <tr>
-                                                <th style="width:50%">Confirmado:</th>
-                                                <td class="text-right">@money($resumo->total_confirmado)</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Total da taxa ({{ number_format($config->tax * 100, 2, ',') }}%)</th>
-                                                <td class="text-right">- @money($resumo->total_taxa)</td>
-                                            </tr>
-                                            <tr style="border-top: solid 2px #666">
-                                                <th>Líquido:</th>
-                                                <td class="text-right"> @money($resumo->total_liquido)</td>
-                                            </tr>
-                                        </table>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 mb-3">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Taxa de Ocupação</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($taxa_ocupacao, 1, ',', '.') }}%</div>
+                                        <small class="text-muted">do evento preenchido</small>
                                     </div>
-                                </div>
-                                <div class="col-6">
-                                    <h4 class="text-center">Vendas por meio de pagamento</h4>
-                                    <div class="table-responsive">
-                                        {{-- <table class="table">
-                                            @foreach ($payment_methods as $payment_method)
-                                                <tr>
-                                                    <th style="width:50%">{{$payment_method->gatway_payment_method}}</th>
-                                                    <td class="text-right">{{$payment_method->payment_methods_total}}</td>
-                                                </tr>
-                                            @endforeach
-                                        </table> --}}
-                                        <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                    <div class="col-auto">
+                                        <i class="fas fa-percentage fa-2x text-gray-300"></i>
                                     </div>
                                 </div>
                             </div>
-                            <hr />
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 mb-3">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Ticket Médio</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@money($ticket_medio ?? 0)</div>
+                                        <small class="text-muted">por participante confirmado</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-md-3 mb-3">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Check-in Realizado</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            {{ $checkin_stats->total_checkin ?? 0 }}
+                                        </div>
+                                        <small class="text-muted">de {{ $checkin_stats->total_confirmados ?? 0 }} confirmados</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Financeiro -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Resumo Financeiro</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-sm-4 mb-3">
+                                <div class="info-box bg-light justify-content-center">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-center text-muted">Total Confirmado</span>
+                                        <span class="info-box-number text-center text-success mb-0 h5">@money($resumo->total_confirmado ?? 0)</span>
+                                        <small class="text-center mb-0">{{ $resumo->confirmado ?? 0 }} participantes</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-4 mb-3">
+                                <div class="info-box bg-light justify-content-center">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-center text-muted">Total Pendente</span>
+                                        <span class="info-box-number text-center text-danger mb-0 h5">@money($resumo->total_pendente ?? 0)</span>
+                                        <small class="text-center mb-0">{{ $resumo->pendente ?? 0 }} participantes</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-4 mb-3">
+                                <div class="info-box bg-light justify-content-center">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-center text-muted">Total Geral</span>
+                                        <span class="info-box-number text-center text-primary mb-0 h5">@money(($resumo->total_confirmado ?? 0) + ($resumo->total_pendente ?? 0))</span>
+                                        <small class="text-center mb-0">{{ $resumo->geral ?? 0 }} participantes</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h5><i class="fas fa-calculator me-2"></i>Detalhamento Financeiro</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width:60%">Total Confirmado:</th>
+                                            <td class="text-end fw-bold text-success">@money($resumo->total_confirmado ?? 0)</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Taxa de Serviço ({{ number_format(($config->tax ?? 0) * 100, 2, ',', '.') }}%):</th>
+                                            <td class="text-end text-danger">- @money($resumo->total_taxa ?? 0)</td>
+                                        </tr>
+                                        <tr class="table-success" style="border-top: solid 2px #28a745">
+                                            <th class="fw-bold">Valor Líquido a Receber:</th>
+                                            <td class="text-end fw-bold h5 mb-0">@money($resumo->total_liquido ?? 0)</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h5 class="text-center"><i class="fas fa-credit-card me-2"></i>Vendas por Meio de Pagamento</h5>
+                                <div class="table-responsive">
+                                    <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Vendas ao Longo do Tempo -->
+                @if($vendas_por_periodo && $vendas_por_periodo->count() > 0)
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>Evolução de Vendas</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="salesChart" style="min-height: 300px; height: 300px; max-height: 300px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Gráfico de Vendas por Lote -->
+                @if($vendas_por_lote && $vendas_por_lote->count() > 0)
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Vendas por Lote</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="lotesChart" style="min-height: 300px; height: 300px; max-height: 300px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                <hr />
                             <div class="row pt-3">
                                 <div class="col-12">
                                     <h4 class="mb-3">Listagem de vendas realizadas ({{ count($all_orders) }})</h4>
@@ -513,6 +662,7 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="{{ asset('assets/css/print.css') }}" media="print" type="text/css"/>
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/painel-admin-improvements.css') }}" type="text/css">
     @endpush
 
     @push('footer')
@@ -1042,6 +1192,131 @@
                         ctx.textAlign = 'center';
                         ctx.fillText('Erro ao carregar gráfico', $('#pieChart').width() / 2, $('#pieChart').height() / 2);
                     }
+
+                    // Gráfico de Vendas ao Longo do Tempo
+                    @if($vendas_por_periodo && $vendas_por_periodo->count() > 0)
+                    if ($('#salesChart').length > 0) {
+                        var salesData = @json($vendas_por_periodo);
+                        var salesLabels = [];
+                        var salesValues = [];
+
+                        salesData.forEach(function(item) {
+                            var date = new Date(item.data);
+                            salesLabels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+                            salesValues.push(parseInt(item.total_vendas) || 0);
+                        });
+
+                        var salesChartCanvas = $('#salesChart').get(0).getContext('2d');
+                        new Chart(salesChartCanvas, {
+                            type: 'line',
+                            data: {
+                                labels: salesLabels,
+                                datasets: [{
+                                    label: 'Vendas por Dia',
+                                    data: salesValues,
+                                    borderColor: '#17a2b8',
+                                    backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true,
+                                    tension: 0.4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return 'Vendas: ' + context.parsed.y;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    @endif
+
+                    // Gráfico de Vendas por Lote
+                    @if($vendas_por_lote && $vendas_por_lote->count() > 0)
+                    if ($('#lotesChart').length > 0) {
+                        var lotesData = @json($vendas_por_lote);
+                        var lotesLabels = [];
+                        var lotesValues = [];
+
+                        lotesData.forEach(function(item) {
+                            lotesLabels.push(item.name || 'Lote #' + item.id);
+                            lotesValues.push(parseInt(item.vendidos) || 0);
+                        });
+
+                        var lotesChartCanvas = $('#lotesChart').get(0).getContext('2d');
+                        new Chart(lotesChartCanvas, {
+                            type: 'bar',
+                            data: {
+                                labels: lotesLabels,
+                                datasets: [{
+                                    label: 'Ingressos Vendidos',
+                                    data: lotesValues,
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.6)',
+                                        'rgba(54, 162, 235, 0.6)',
+                                        'rgba(255, 206, 86, 0.6)',
+                                        'rgba(75, 192, 192, 0.6)',
+                                        'rgba(153, 102, 255, 0.6)',
+                                        'rgba(255, 159, 64, 0.6)'
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return 'Vendidos: ' + context.parsed.y;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    @endif
                 });
             });
         </script>

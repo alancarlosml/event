@@ -120,7 +120,7 @@ class Event extends Model
         );
     }
 
-    public static function getEvents($event_val, $category_val, $area_val, $state_val, $period_val)
+    public static function getEvents($event_val, $category_val, $area_val, $state_val, $period_val, $sort_val = 'date_asc')
     {
         $events = Event::join('areas', 'areas.id', '=', 'events.area_id')
             ->join('categories', 'categories.id', '=', 'areas.category_id')
@@ -194,9 +194,23 @@ class Event extends Model
             }
         }
 
-        // Log final para debug
-        Log::info('Query final SQL: ' . $events->toSql());
-        Log::info('Bindings: ' . json_encode($events->getBindings()));
+        // Aplicar ordenação
+        switch ($sort_val) {
+            case 'date_asc':
+                $events->orderBy(DB::raw("(SELECT MIN(date) FROM event_dates WHERE event_dates.event_id = events.id)"), 'asc');
+                break;
+            case 'date_desc':
+                $events->orderBy(DB::raw("(SELECT MIN(date) FROM event_dates WHERE event_dates.event_id = events.id)"), 'desc');
+                break;
+            case 'name_asc':
+                $events->orderBy('events.name', 'asc');
+                break;
+            case 'name_desc':
+                $events->orderBy('events.name', 'desc');
+                break;
+            default:
+                $events->orderBy(DB::raw("(SELECT MIN(date) FROM event_dates WHERE event_dates.event_id = events.id)"), 'asc');
+        }
 
         return $events->paginate(10);
     }

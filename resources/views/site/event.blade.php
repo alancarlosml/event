@@ -1,21 +1,52 @@
 <x-event-layout>
     <div class="hero-image" id="home">
         <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="img-fluid" loading="lazy">
+        @if ($event->max_event_dates() >= \Carbon\Carbon::now())
+            <div class="hero-content">
+                <h1>{{ $event->name }}</h1>
+                <p>{{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m/Y') }} às {{ \Carbon\Carbon::parse($event->min_event_time())->format('H:i') }}h</p>
+            </div>
+        @endif
     </div>
+    @if ($event->max_event_dates() >= \Carbon\Carbon::now())
+        <div class="container">
+            <div class="countdown-container" id="countdownContainer">
+                <h3>O evento começa em:</h3>
+                <div class="countdown" id="countdown" data-date="{{ $event->min_event_dates() }} {{ $event->min_event_time() }}">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="days">00</span>
+                        <span class="countdown-label">Dias</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="hours">00</span>
+                        <span class="countdown-label">Horas</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="minutes">00</span>
+                        <span class="countdown-label">Minutos</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="seconds">00</span>
+                        <span class="countdown-label">Segundos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
     <section id="information-bar">
         <div class="container">
-            <div class="row inforation-wrapper">
-                <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
+            <div class="inforation-wrapper">
+                <div class="info-card">
                     <ul role="list" aria-label="Informações de localização do evento">
-                        <li>
+                        <li style="display: flex; align-items: center; justify-content: center;">
                             <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                         </li>
                         <li><span><b>Local</b> {{ $event->place->name }}, {{ optional($event->place->get_city)->name }}-{{ optional($event->place->get_city)->uf }}</span></li>
                     </ul>
                 </div>
-                <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
+                <div class="info-card">
                     <ul role="list" aria-label="Data e hora do evento">
-                        <li>
+                        <li style="display: flex; align-items: center; justify-content: center;">
                             <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
                         </li>
                         <li><span><b>Data &amp; Hora</b>
@@ -28,17 +59,17 @@
                         </span></li>
                     </ul>
                 </div>
-                <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
+                <div class="info-card">
                     <ul role="list" aria-label="Categoria do evento">
-                        <li>
+                        <li style="display: flex; align-items: center; justify-content: center;">
                             <i class="fa-solid fa-list-check" aria-hidden="true"></i>
                         </li>
                         <li><span><b>Categoria</b> {{ $event->area->category->description }}</span></li>
                     </ul>
                 </div>
-                <div class="col-sm-6 col-lg-3 col-md-6 col-xs-12">
+                <div class="info-card">
                     <ul role="list" aria-label="Total de vagas do evento">
-                        <li>
+                        <li style="display: flex; align-items: center; justify-content: center;">
                             <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
                         </li>
                         <li><span><b>Total de vagas</b> {{ $event->max_tickets }}</span></li>
@@ -66,7 +97,187 @@
                             <div class="about-text">
                                 <h2>Sobre o evento</h2>
                             </div>
-                            {!! \Illuminate\Support\Str::limit(strip_tags($event->description), 500) !!}
+                            
+                            <!-- Galeria de Imagens -->
+                            @if($event->banner)
+                                <div class="event-gallery mb-4">
+                                    <div class="gallery-main">
+                                        <a href="{{ asset('storage/' . $event->banner) }}" data-lightbox="event-gallery" data-glightbox="title: {{ htmlspecialchars($event->name) }}">
+                                            <img src="{{ asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="gallery-main-image" loading="lazy">
+                                            <div class="gallery-overlay">
+                                                <i class="fas fa-search-plus"></i>
+                                                <span>Clique para ampliar</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    
+                                    @php
+                                        // Extrair imagens da descrição HTML
+                                        $description = $event->description ?? '';
+                                        preg_match_all('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $description, $matches);
+                                        $galleryImages = [];
+                                        
+                                        // Processar URLs das imagens encontradas
+                                        if (!empty($matches[1])) {
+                                            foreach ($matches[1] as $imgSrc) {
+                                                // Se for URL relativa, converter para asset
+                                                if (strpos($imgSrc, 'http') !== 0 && strpos($imgSrc, '//') !== 0) {
+                                                    if (strpos($imgSrc, 'storage/') === 0) {
+                                                        $galleryImages[] = asset($imgSrc);
+                                                    } else {
+                                                        $galleryImages[] = asset('storage/' . $imgSrc);
+                                                    }
+                                                } else {
+                                                    $galleryImages[] = $imgSrc;
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Adicionar banner como primeira imagem
+                                        $bannerUrl = asset('storage/' . $event->banner);
+                                        $allImages = array_merge([$bannerUrl], array_unique($galleryImages));
+                                        $hasMultipleImages = count($allImages) > 1;
+                                    @endphp
+                                    
+                                    @if($hasMultipleImages)
+                                        <div class="gallery-thumbnails">
+                                            @foreach($allImages as $index => $image)
+                                                <a href="{{ $image }}" data-lightbox="event-gallery" data-glightbox="title: {{ htmlspecialchars($event->name) }} - Imagem {{ $index + 1 }}" class="gallery-thumb {{ $index === 0 ? 'active' : '' }}">
+                                                    <img src="{{ $image }}" alt="Galeria - {{ $index + 1 }}" loading="lazy">
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                            
+                            @php
+                                $fullDescription = $event->description;
+                                // Remover tags img da descrição para exibição
+                                $descriptionWithoutImages = preg_replace('/<img[^>]+>/i', '', $fullDescription);
+                                $shortDescription = \Illuminate\Support\Str::limit(strip_tags($descriptionWithoutImages), 500);
+                                $isLong = strlen(strip_tags($descriptionWithoutImages)) > 500;
+                            @endphp
+                            <div class="about-text-expandable {{ !$isLong ? 'expanded' : '' }}" id="aboutText" data-full-text="{{ htmlspecialchars($descriptionWithoutImages) }}">
+                                {!! $isLong ? $shortDescription : $descriptionWithoutImages !!}
+                            </div>
+                            @if ($isLong)
+                                <div class="about-text-fade" id="aboutFade"></div>
+                                <button class="btn-read-more" onclick="toggleAboutText()" id="readMoreBtn">
+                                    Leia mais
+                                </button>
+                            @endif
+                            
+                            <!-- Compartilhamento Social -->
+                            <div class="social-share">
+                                <span class="social-share-label">
+                                    <i class="fas fa-share-alt"></i> Compartilhar:
+                                </span>
+                                @php
+                                    $eventUrl = url()->current();
+                                    $eventTitle = urlencode($event->name);
+                                    $eventDescription = urlencode(strip_tags(\Illuminate\Support\Str::limit($event->description, 150)));
+                                @endphp
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($eventUrl) }}" 
+                                   target="_blank" 
+                                   class="social-share-btn facebook" 
+                                   title="Compartilhar no Facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="https://twitter.com/intent/tweet?url={{ urlencode($eventUrl) }}&text={{ $eventTitle }}" 
+                                   target="_blank" 
+                                   class="social-share-btn twitter" 
+                                   title="Compartilhar no Twitter">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="https://api.whatsapp.com/send?text={{ $eventTitle }}%20{{ urlencode($eventUrl) }}" 
+                                   target="_blank" 
+                                   class="social-share-btn whatsapp" 
+                                   title="Compartilhar no WhatsApp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($eventUrl) }}" 
+                                   target="_blank" 
+                                   class="social-share-btn linkedin" 
+                                   title="Compartilhar no LinkedIn">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="mailto:?subject={{ $eventTitle }}&body={{ $eventDescription }}%20{{ urlencode($eventUrl) }}" 
+                                   class="social-share-btn email" 
+                                   title="Enviar por e-mail">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                                <a href="#" 
+                                   onclick="copyToClipboard('{{ $eventUrl }}'); return false;" 
+                                   class="social-share-btn copy-link" 
+                                   title="Copiar link">
+                                    <i class="fas fa-link"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <div class="container">
+                <h2 class="faq-title">Perguntas Frequentes</h2>
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Como faço para me inscrever no evento?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Para se inscrever, selecione a data do evento, escolha o lote desejado, informe a quantidade de ingressos e clique em "Continuar". Preencha os dados solicitados e finalize o pagamento.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Quais são as formas de pagamento aceitas?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Aceitamos pagamento via cartão de crédito, débito, boleto bancário e PIX através do Mercado Pago. O pagamento é 100% seguro e criptografado.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Posso cancelar minha inscrição?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                O cancelamento e reembolso seguem a política de cancelamento do evento. Entre em contato através do formulário de contato ou e-mail informado na página do evento para mais informações.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Como recebo meu ingresso?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Após a confirmação do pagamento, você receberá o ingresso por e-mail. Você também pode acessar "Minhas Inscrições" no painel do participante para visualizar e imprimir seu ingresso.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>O evento oferece certificado?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                A disponibilidade de certificado depende do tipo de evento. Entre em contato com os organizadores através do formulário de contato para mais informações sobre certificados.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -88,81 +299,121 @@
                         <ul class="nav nav-tabs" role="tablist">
                             @foreach ($event->event_dates as $event_date)
                                 <li class="nav-item">
-                                    <a class="nav-link event_date_nav @if ($total_dates == 1) active @endif" href="javascript:;" data-tab="{{ $event_date->id }}">{{ \Carbon\Carbon::parse($event_date->date)->format('d/m') }}</a>
+                                    <a class="nav-link event_date_nav @if ($total_dates == 1) active @endif" href="javascript:;" data-tab="{{ $event_date->id }}">
+                                        <i class="fa-solid fa-calendar-days me-2"></i>
+                                        <span>{{ \Carbon\Carbon::parse($event_date->date)->format('d/m') }}</span>
+                                    </a>
                                 </li>
                             @endforeach
                         </ul>
                     @endif
                     <input type="hidden" name="event_date_result" id="event_date_result" value="@if ($total_dates == 1) {{$date_min->id}} @endif">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <tbody>
-                                <thead>
-                                    <th>Lote</th>
-                                    <th>
-                                        @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                                            Valor
+                    <div class="lotes-container">
+                        @foreach ($event->lotesAtivosHoje() as $lote)
+                            @php
+                                // Calcular progresso de vendas (se disponível)
+                                // Tentar obter vendas do lote, se não existir, usar 0
+                                $sold = 0;
+                                if (method_exists($lote, 'getSoldAttribute') || isset($lote->sold)) {
+                                    $sold = $lote->sold ?? 0;
+                                } elseif (method_exists($lote, 'orders') || isset($lote->orders)) {
+                                    // Tentar contar através de relacionamento
+                                    try {
+                                        $sold = $lote->orders()->where('status', 'approved')->sum('quantity') ?? 0;
+                                    } catch (\Exception $e) {
+                                        $sold = 0;
+                                    }
+                                }
+                                $remaining = max(0, $lote->limit_max - $sold);
+                                $progressPercent = $lote->limit_max > 0 ? min(100, ($sold / $lote->limit_max) * 100) : 0;
+                                $isSoldOut = $lote->limit_max > 0 && $remaining <= 0;
+                                $isLowStock = $lote->limit_max > 0 && $remaining > 0 && $remaining <= 10;
+                                $isPopular = $lote->limit_max > 0 && $sold > ($lote->limit_max * 0.5); // Mais de 50% vendido
+                            @endphp
+                            <div class="lote-card {{ $isPopular ? 'popular' : '' }} {{ $isSoldOut ? 'sold-out' : '' }}" 
+                                 lote_hash="{{ $lote->hash }}" 
+                                 data-value="{{ $lote->value }}" 
+                                 data-type="{{ $lote->type }}"
+                                 data-original-sold="{{ $sold }}">
+                                @if ($isPopular || $isLowStock || $isSoldOut)
+                                    <div class="lote-badge">
+                                        @if($isPopular && !$isSoldOut)
+                                            <span class="badge badge-popular">⭐ Popular</span>
                                         @endif
-                                    </th>
-                                    <th class="text-center">
-                                        @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                                            Quantidade
+                                        @if($isLowStock && !$isSoldOut)
+                                            <span class="badge badge-warning-lote">⚠️ Últimas {{ $remaining }} vagas</span>
                                         @endif
-                                    </th>
-                                </thead>
-                                @foreach ($event->lotesAtivosHoje() as $lote)
-                                    <tr class="border-bottom" lote_hash="{{ $lote->hash }}" data-value="{{ $lote->value }}" data-type="{{ $lote->type }}">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="ps-3 d-flex flex-column">
-                                                    <p class="fw-bold text-uppercase"> <b>{{ $lote->name }} </b></p>
-                                                    @if ($lote->description)
-                                                        <p class="fw-bold"> {{ $lote->description }} </p>
-                                                    @endif
-                                                    <em>
-                                                        @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                                                            Disponível até
-                                                        @else
-                                                            Finalizado em
-                                                        @endif
-                                                        {{ \Carbon\Carbon::parse($lote->datetime_end)->format('d/m/y \à\s h:i') }}
-                                                    </em>
-                                                </div>
+                                        @if($isSoldOut)
+                                            <span class="badge badge-danger-lote">Esgotado</span>
+                                        @endif
+                                    </div>
+                                @endif
+                                
+                                <div class="lote-header">
+                                    <h3 class="lote-name">{{ $lote->name }}</h3>
+                                    @if ($lote->description)
+                                        <p class="lote-description">{{ $lote->description }}</p>
+                                    @endif
+                                </div>
+                                
+                                @if ($event->max_event_dates() >= \Carbon\Carbon::now() && !$isSoldOut)
+                                    <div class="lote-pricing">
+                                        <div class="price-main">
+                                            <span class="currency">R$</span>
+                                            <span class="amount">{{ number_format($lote->value, 2, ',', '.') }}</span>
+                                        </div>
+                                        @if ($lote->type == 0 && $lote->tax_service == 0)
+                                            <small class="tax-info">+ taxa de R$ {{ number_format($lote->tax ?? 0, 2, ',', '.') }}</small>
+                                        @endif
+                                    </div>
+                                    
+                                    @if ($lote->limit_max > 0)
+                                        <div class="lote-progress" id="progress-{{ $lote->hash }}">
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" id="progress-fill-{{ $lote->hash }}" style="width: {{ $progressPercent }}%"></div>
                                             </div>
-                                        </td>
-                                        <td>
-                                            @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                                                <div class="d-flex">
-                                                    <p class="pe-3">
-                                                        <span class="red">@money($lote->value)</span><br />
-                                                        @if ($lote->type == 0)
-                                                            <small>+ taxa de @money($lote->value * 0.1)</small>
-                                                        @endif
-                                                    </p>
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center justify-content-center">
-                                                @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                                                    <span class="pe-3 ml-2">
-                                                        <input class="inp-number" name="inp-number" type="number"
-                                                               style="min-width: 1.5rem"
-                                                               value="{{ old('inp-number', 0) }}" min="0"
-                                                               max="{{ $lote->limit_max }}" 
-                                                               data-min="{{ $lote->limit_min }}" 
-                                                               data-max="{{ $lote->limit_max }}" />
-                                                        {{-- <input class="ps-2" type="number" value="{{$lote->limit_min}}" min="{{$lote->limit_min}}" max="{{$lote->limit_max}}"> --}}
-                                                    </span>
-                                                @else
-                                                    Encerrado
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                            <small class="progress-text" id="progress-text-{{ $lote->hash }}">{{ $sold }} de {{ $lote->limit_max }} vendidos</small>
+                                        </div>
+                                    @endif
+                                    
+                                    <div class="lote-quantity">
+                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Quantidade:</label>
+                                        <div class="quantity-selector">
+                                            <button class="qty-btn minus" type="button" onclick="decreaseQty('{{ $lote->hash }}')" disabled>-</button>
+                                            <input type="number" 
+                                                   class="qty-input inp-number" 
+                                                   id="qty-{{ $lote->hash }}"
+                                                   name="inp-number"
+                                                   value="0" 
+                                                   min="0" 
+                                                   max="{{ $lote->limit_max }}"
+                                                   data-lote-hash="{{ $lote->hash }}"
+                                                   data-min="{{ $lote->limit_min }}"
+                                                   data-max="{{ $lote->limit_max }}"
+                                                   data-value="{{ $lote->value }}">
+                                            <button class="qty-btn plus" type="button" onclick="increaseQty('{{ $lote->hash }}')">+</button>
+                                        </div>
+                                        <div class="quick-select">
+                                            <button class="quick-btn" type="button" onclick="setQuickQty('{{ $lote->hash }}', 1)">1</button>
+                                            <button class="quick-btn" type="button" onclick="setQuickQty('{{ $lote->hash }}', 2)">2</button>
+                                            <button class="quick-btn" type="button" onclick="setQuickQty('{{ $lote->hash }}', 3)">3</button>
+                                            <button class="quick-btn" type="button" onclick="setQuickQty('{{ $lote->hash }}', 4)">4+</button>
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <div class="lote-footer">
+                                    <small class="lote-deadline">
+                                        @if ($event->max_event_dates() >= \Carbon\Carbon::now())
+                                            Disponível até
+                                        @else
+                                            Finalizado em
+                                        @endif
+                                        {{ \Carbon\Carbon::parse($lote->datetime_end)->format('d/m/y \à\s H:i') }}
+                                    </small>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
                 <div class="col-lg-4 col-sm-12 payment-summary">
@@ -241,6 +492,15 @@
             </div>
             <div class="row">
                 <div class="col-12" id="map_canvas" style="height: 450px; width: 100%; position: relative;">
+                    <div class="map-actions">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($event->place->address . ', ' . $event->place->number . ', ' . $event->place->district . ', ' . $event->place->get_city()->name . '-' . $event->place->get_city()->uf) }}" 
+                           target="_blank" 
+                           class="map-action-btn"
+                           title="Abrir no Google Maps">
+                            <i class="fas fa-directions"></i>
+                            <span>Como chegar</span>
+                        </a>
+                    </div>
                     <div id="map-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <div class="text-center">
                             <div class="spinner-border text-primary" role="status">
@@ -394,6 +654,24 @@
             </div>
         </div>
     </section>
+    
+    <!-- Sticky CTA -->
+    @if ($event->max_event_dates() >= \Carbon\Carbon::now())
+        @php
+            $minPrice = $event->lotesAtivosHoje()->min('value') ?? 0;
+        @endphp
+        <div class="sticky-cta" id="stickyCTA">
+            <div class="sticky-cta-content">
+                <div class="sticky-cta-info">
+                    <span class="sticky-cta-label">A partir de</span>
+                    <span class="sticky-cta-price">R$ {{ number_format($minPrice, 2, ',', '.') }}</span>
+                </div>
+                <button class="btn btn-primary btn-lg" onclick="scrollToInscricoes()">
+                    Inscreva-se Agora
+                </button>
+            </div>
+        </div>
+    @endif
 
     @push('event_name')
         {{ $event->name }}
@@ -417,9 +695,19 @@
     @endpush
 
     @push('head')
+        <!-- UX Improvements CSS -->
+        <link rel="stylesheet" href="{{ asset('assets_conference/css/ux-improvements.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_conference/css/additional-improvements.css') }}" type="text/css">
+        <!-- GLightbox CSS -->
+        <link rel="stylesheet" href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" type="text/css">
     @endpush
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
 
     @push('footer')
+        <!-- GLightbox JS -->
+        <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
         <script src="{{ asset('assets_conference/js/bootstrap-input-spinner.js') }}"></script>
         <script src="{{ asset('assets_conference/js/custom-editors.js') }}"></script>
         <script src="{{ asset('assets_conference/js/validate.js') }}"></script>
@@ -431,7 +719,523 @@
 
         <script>
 
+            // ===== Contador Regressivo =====
+            function initCountdown() {
+                const countdownEl = document.getElementById('countdown');
+                if (!countdownEl) return;
+                
+                const eventDateStr = countdownEl.dataset.date;
+                if (!eventDateStr) return;
+                
+                // Parse da data no formato brasileiro
+                const [datePart, timePart] = eventDateStr.split(' ');
+                const [day, month, year] = datePart.split('-');
+                const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
+                
+                const eventDate = new Date(year, month - 1, day, hour, minute, 0).getTime();
+                
+                const timer = setInterval(function() {
+                    const now = new Date().getTime();
+                    const distance = eventDate - now;
+                    
+                    if (distance < 0) {
+                        clearInterval(timer);
+                        const container = document.getElementById('countdownContainer');
+                        if (container) {
+                            container.innerHTML = '<div class="countdown-expired">O evento já começou!</div>';
+                        }
+                        return;
+                    }
+                    
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    
+                    const daysEl = document.getElementById('days');
+                    const hoursEl = document.getElementById('hours');
+                    const minutesEl = document.getElementById('minutes');
+                    const secondsEl = document.getElementById('seconds');
+                    
+                    if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+                    if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+                    if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+                    if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+                }, 1000);
+            }
+
+            // ===== Sticky CTA =====
+            function initStickyCTA() {
+                const stickyCTA = document.getElementById('stickyCTA');
+                const inscricoesSection = document.getElementById('inscricoes');
+                
+                if (!stickyCTA || !inscricoesSection) return;
+                
+                window.addEventListener('scroll', function() {
+                    const inscricoesTop = inscricoesSection.offsetTop;
+                    const scrollPosition = window.scrollY + window.innerHeight;
+                    
+                    if (scrollPosition > inscricoesTop + 100) {
+                        stickyCTA.classList.add('visible');
+                    } else {
+                        stickyCTA.classList.remove('visible');
+                    }
+                });
+            }
+
+            function scrollToInscricoes() {
+                const inscricoesSection = document.getElementById('inscricoes');
+                if (inscricoesSection) {
+                    inscricoesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            // ===== Funções para quantidade de lotes =====
+            function increaseQty(loteHash) {
+                const input = document.getElementById('qty-' + loteHash);
+                if (!input) return;
+                
+                const currentValue = parseInt(input.value) || 0;
+                const maxValue = parseInt(input.getAttribute('data-max')) || 999;
+                
+                if (currentValue < maxValue) {
+                    input.value = currentValue + 1;
+                    updateQtyButtons(input);
+                    $(input).trigger('change');
+                }
+            }
+
+            function decreaseQty(loteHash) {
+                const input = document.getElementById('qty-' + loteHash);
+                if (!input) return;
+                
+                const currentValue = parseInt(input.value) || 0;
+                
+                if (currentValue > 0) {
+                    input.value = currentValue - 1;
+                    updateQtyButtons(input);
+                    $(input).trigger('change');
+                }
+            }
+
+            function setQuickQty(loteHash, qty) {
+                const input = document.getElementById('qty-' + loteHash);
+                if (!input) return;
+                
+                const maxValue = parseInt(input.getAttribute('data-max')) || 999;
+                const finalQty = qty === 4 ? Math.min(4, maxValue) : Math.min(qty, maxValue);
+                
+                input.value = finalQty;
+                updateQtyButtons(input);
+                $(input).trigger('change');
+            }
+
+            function updateQtyButtons(input) {
+                const currentValue = parseInt(input.value) || 0;
+                const minValue = parseInt(input.getAttribute('data-min')) || 0;
+                const maxValue = parseInt(input.getAttribute('data-max')) || 999;
+                
+                const card = input.closest('.lote-card');
+                if (card) {
+                    const minusBtn = card.querySelector('.qty-btn.minus');
+                    const plusBtn = card.querySelector('.qty-btn.plus');
+                    
+                    if (minusBtn) {
+                        minusBtn.disabled = currentValue <= minValue;
+                    }
+                    if (plusBtn) {
+                        plusBtn.disabled = currentValue >= maxValue;
+                    }
+                    
+                    // Atualizar barra de progresso
+                    updateProgressBar(input);
+                }
+            }
+            
+            function updateProgressBar(input) {
+                const loteHash = input.getAttribute('data-lote-hash');
+                const currentQty = parseInt(input.value) || 0;
+                const maxValue = parseInt(input.getAttribute('data-max')) || 999;
+                
+                if (!loteHash || maxValue <= 0) return;
+                
+                const progressFill = document.getElementById('progress-fill-' + loteHash);
+                const progressText = document.getElementById('progress-text-' + loteHash);
+                
+                if (progressFill && progressText) {
+                    // Obter vendas originais do elemento (armazenado em data attribute)
+                    const card = input.closest('.lote-card');
+                    let originalSold = 0;
+                    if (card) {
+                        const soldAttr = card.getAttribute('data-original-sold');
+                        originalSold = soldAttr ? parseInt(soldAttr) : 0;
+                    }
+                    
+                    // Calcular novo total vendido (original + quantidade selecionada)
+                    const newSold = originalSold + currentQty;
+                    const newProgressPercent = Math.min(100, (newSold / maxValue) * 100);
+                    
+                    // Atualizar visualmente
+                    progressFill.style.width = newProgressPercent + '%';
+                    progressText.textContent = newSold + ' de ' + maxValue + ' vendidos';
+                }
+            }
+
+            // ===== Expandir/Colapsar texto sobre =====
+            function toggleAboutText() {
+                const textEl = document.getElementById('aboutText');
+                const fadeEl = document.getElementById('aboutFade');
+                const btnEl = document.getElementById('readMoreBtn');
+                
+                if (!textEl || !btnEl) return;
+                
+                const isExpanded = textEl.classList.contains('expanded');
+                const fullText = textEl.getAttribute('data-full-text');
+                
+                if (isExpanded) {
+                    // Colapsar
+                    const shortText = '{{ \Illuminate\Support\Str::limit(strip_tags($event->description), 500) }}';
+                    textEl.innerHTML = shortText;
+                    textEl.classList.remove('expanded');
+                    btnEl.textContent = 'Leia mais';
+                    if (fadeEl) fadeEl.style.opacity = '1';
+                } else {
+                    // Expandir - carregar texto completo
+                    if (fullText) {
+                        textEl.innerHTML = fullText;
+                    }
+                    textEl.classList.add('expanded');
+                    btnEl.textContent = 'Leia menos';
+                    if (fadeEl) fadeEl.style.opacity = '0';
+                }
+            }
+
+            // ===== FAQ Toggle =====
+            function toggleFAQ(element) {
+                const faqItem = element.closest('.faq-item');
+                const isActive = faqItem.classList.contains('active');
+                
+                // Fechar todos os outros
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    if (item !== faqItem) {
+                        item.classList.remove('active');
+                    }
+                });
+                
+                // Toggle do item atual
+                faqItem.classList.toggle('active', !isActive);
+            }
+            
+            // ===== Copiar Link =====
+            function copyToClipboard(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showToast('Link copiado para a área de transferência!', 'success');
+                    }).catch(() => {
+                        fallbackCopyToClipboard(text);
+                    });
+                } else {
+                    fallbackCopyToClipboard(text);
+                }
+            }
+            
+            function fallbackCopyToClipboard(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Link copiado para a área de transferência!', 'success');
+                } catch (err) {
+                    showToast('Erro ao copiar link', 'error');
+                }
+                document.body.removeChild(textArea);
+            }
+            
+            // ===== Toast Notifications =====
+            function showToast(message, type = 'info', duration = 3000) {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type] || icons.info}"></i>
+                    </div>
+                    <div class="toast-message">${message}</div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 10);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+
+            // ===== Inicializar Galeria =====
+            let eventGalleryLightbox = null;
+            
+            function initGallery() {
+                // Inicializar GLightbox uma única vez
+                if (typeof GLightbox !== 'undefined') {
+                    eventGalleryLightbox = GLightbox({
+                        selector: 'a[data-lightbox="event-gallery"]',
+                        touchNavigation: true,
+                        loop: true,
+                        autoplayVideos: false,
+                        openEffect: 'fade',
+                        closeEffect: 'fade'
+                    });
+                }
+                
+                // Adicionar interatividade aos thumbnails
+                $('.gallery-thumb').on('click', function(e) {
+                    e.preventDefault();
+                    $('.gallery-thumb').removeClass('active');
+                    $(this).addClass('active');
+                    
+                    // Atualizar imagem principal
+                    const newSrc = $(this).attr('href');
+                    const newImgSrc = $(this).find('img').attr('src');
+                    $('.gallery-main-image').attr('src', newImgSrc);
+                    $('.gallery-main a').attr('href', newSrc);
+                    
+                    // Abrir lightbox no índice correto
+                    if (eventGalleryLightbox) {
+                        const index = $('.gallery-thumb').index(this);
+                        eventGalleryLightbox.openAt(index);
+                    }
+                });
+            }
+
+            // Função para fazer a requisição AJAX do subtotal (sem debounce)
+            // Definida fora do document.ready para estar disponível globalmente
+            function setSubTotalAjax() {
+                let subtotal = "0,00";
+                let _token = '{{ csrf_token() }}';
+
+                let dict = [];
+                $("input[type=number].inp-number").each(function() {
+                    let $input = $(this);
+                    let $card = $input.closest('.lote-card');
+                    
+                    // Tentar pegar o hash de várias formas (prioridade: input > card)
+                    let lote_hash = $input.attr('data-lote-hash') || 
+                                   $input.data('lote-hash') ||
+                                   $card.attr('lote_hash');
+                    
+                    let lote_quantity = parseInt($input.val()) || 0;
+                    
+                    console.log('Processando input:', {
+                        input_id: $input.attr('id'),
+                        lote_hash: lote_hash,
+                        lote_quantity: lote_quantity,
+                        card_exists: $card.length > 0
+                    });
+
+                    // Só adicionar ao dict se a quantidade for maior que 0 e hash existir
+                    if (lote_quantity > 0) {
+                        if (!lote_hash) {
+                            console.error('Lote hash não encontrado para input:', $input.attr('id'));
+                            return; // Pular este input
+                        }
+                        dict.push({
+                            lote_hash: lote_hash,
+                            lote_quantity: lote_quantity
+                        });
+                    }
+                });
+                
+                // Se não houver nenhum lote com quantidade > 0, enviar array vazio
+                // mas ainda fazer a requisição para limpar os valores
+                console.log('Enviando dict para getSubTotal:', dict);
+                console.log('Quantidade de lotes no dict:', dict.length);
+                
+                // Log detalhado de cada lote
+                dict.forEach((item, index) => {
+                    console.log(`Lote ${index}:`, {
+                        hash: item.lote_hash,
+                        quantity: item.lote_quantity
+                    });
+                });
+
+                $.ajax({
+                    // url: "/getSubTotal",
+                    url: "{{ route('conference.getSubTotal') }}",
+                    type: "POST",
+                    data: {
+                        dict: dict,
+                        _token: _token
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Resposta completa do getSubTotal:', response);
+                        console.log('Subtotal recebido:', response.subtotal);
+                        console.log('Total recebido:', response.total);
+                        
+                        if (response.success) {
+                            console.log('Atualizando valores no resumo...');
+                            
+                            // Verificar se os elementos existem
+                            const $subtotal = $('#subtotal');
+                            const $coupon_subtotal = $('#coupon_subtotal');
+                            const $total = $('#total');
+                            
+                            console.log('Elementos encontrados:', {
+                                subtotal_exists: $subtotal.length > 0,
+                                coupon_subtotal_exists: $coupon_subtotal.length > 0,
+                                total_exists: $total.length > 0
+                            });
+                            
+                            if ($subtotal.length > 0) {
+                                $subtotal.html(response.subtotal || 'R$ 0,00');
+                                console.log('Subtotal atualizado para:', $subtotal.html());
+                            } else {
+                                console.error('Elemento #subtotal não encontrado!');
+                            }
+                            
+                            if ($coupon_subtotal.length > 0) {
+                                $coupon_subtotal.html(response.coupon_subtotal || 'R$ 0,00');
+                            }
+                            
+                            if ($total.length > 0) {
+                                $total.html(response.total || 'R$ 0,00');
+                                console.log('Total atualizado para:', $total.html());
+                            } else {
+                                console.error('Elemento #total não encontrado!');
+                            }
+                            
+                            console.log('Valores finais no DOM:', {
+                                subtotal: $('#subtotal').html(),
+                                total: $('#total').html()
+                            });
+
+                            // Handle free tickets display
+                            let freeTicketsCount = 0;
+                            $("input[type=number].inp-number").each(function() {
+                                let quantity = parseInt($(this).val()) || 0;
+                                let loteValue = parseFloat($(this).closest('.lote-card').attr('data-value')) || parseFloat($(this).attr('data-value')) || 0;
+
+                                if (loteValue === 0 && quantity > 0) {
+                                    freeTicketsCount += quantity;
+                                }
+                            });
+
+                            if (freeTicketsCount > 0) {
+                                $('#free_tickets_count').text(freeTicketsCount);
+                                $('#free_tickets_field').show();
+                            } else {
+                                $('#free_tickets_field').hide();
+                            }
+                        }
+
+                        if (response.error) {
+                            console.error('Erro na resposta do getSubTotal:', response.error);
+                            // Mostrar erro para o usuário em vez de apenas recarregar
+                            $('#modal_txt').text(response.error);
+                            $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                            $('#cupomModal').modal('show');
+                            $('#cupomModal').css('padding-right', '0');
+                            $('body').css('padding-right', '0');
+                            $('.navbar').css('padding-right', '0');
+                            
+                            // Resetar valores para 0 em caso de erro
+                            $("input[type=number].inp-number").each(function() {
+                                if ($(this).val() > 0) {
+                                    $(this).val(0);
+                                }
+                            });
+                            
+                            // Atualizar subtotal para 0
+                            $('#subtotal').html('R$ 0,00');
+                            $('#coupon_subtotal').html('R$ 0,00');
+                            $('#total').html('R$ 0,00');
+
+                            // Hide free tickets field on error
+                            $('#free_tickets_field').hide();
+                        } else if (response.success) {
+                            // Se não há erro mas também não há success, verificar se os valores estão zerados
+                            if (response.subtotal === 'R$ 0,00' && dict.length > 0) {
+                                console.warn('⚠️ AVISO: Subtotal retornou R$ 0,00 mesmo com lotes selecionados!', {
+                                    dict: dict,
+                                    response: response
+                                });
+                                console.warn('Verifique os logs do Laravel para mais detalhes');
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Tratar erros de rede ou servidor
+                        let errorMessage = 'Erro ao processar solicitação. Tente novamente.';
+                        
+                        if (xhr.status === 429) {
+                            // Rate limit - mostrar mensagem mais amigável
+                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                errorMessage = xhr.responseJSON.error;
+                            } else {
+                                errorMessage = 'Você está fazendo muitas alterações muito rapidamente. Por favor, aguarde alguns segundos e tente novamente.';
+                            }
+                            // Não resetar valores em caso de rate limit
+                        } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMessage = xhr.responseJSON.error;
+                            // Resetar valores apenas se não for rate limit
+                            $("input[type=number].inp-number").each(function() {
+                                if ($(this).val() > 0) {
+                                    $(this).val(0);
+                                }
+                            });
+                            $('#subtotal').html('R$ 0,00');
+                            $('#coupon_subtotal').html('R$ 0,00');
+                            $('#total').html('R$ 0,00');
+                            $('#free_tickets_field').hide();
+                        }
+                        
+                        $('#modal_txt').text(errorMessage);
+                        $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
+                        $('#cupomModal').modal('show');
+                        $('#cupomModal').css('padding-right', '0');
+                        $('body').css('padding-right', '0');
+                        $('.navbar').css('padding-right', '0');
+                        
+                        console.log('Erro na requisição:', xhr.responseText);
+                    }
+                });
+            }
+
             $(document).ready(function() {
+                // Inicializar funcionalidades
+                initCountdown();
+                initStickyCTA();
+                initGallery();
+                
+                // Atualizar botões de quantidade ao carregar
+                $('.qty-input').each(function() {
+                    updateQtyButtons(this);
+                });
+                
+                // Inicializar barras de progresso
+                $('.qty-input').each(function() {
+                    updateProgressBar(this);
+                });
+                
                 // Função para criar mapa padrão (fallback)
                 function createDefaultMap() {
                     document.getElementById('map-loading').style.display = 'none';
@@ -565,12 +1369,50 @@
                 // Initialize free tickets display on page load (without AJAX call)
                 initializeFreeTicketsDisplay();
 
-                $('.event_date_nav').click(debounce(function() {
+                // Criar versão com debounce da função setSubTotal (500ms de delay)
+                const setSubTotalDebounced = debounce(function() {
+                    setSubTotalAjax();
+                }, 500);
+                
+                // Substituir setSubTotal para usar a versão com debounce
+                window.setSubTotal = setSubTotalDebounced;
+
+                $('.event_date_nav').click(debounce(function(e) {
+                    e.preventDefault();
                     $('.event_date_nav').removeClass('active');
                     $(this).addClass('active');
-                    $('#event_date_result').val($(this).attr('data-tab'));
-
-                    let event_date_result = $('#event_date_result').val();
+                    
+                    // Tentar obter data-tab do elemento clicado ou do target
+                    let clickedElement = $(this);
+                    let dataTab = clickedElement.attr('data-tab');
+                    
+                    // Se não encontrou, tentar no target do evento
+                    if (!dataTab && e.target) {
+                        dataTab = $(e.target).closest('.event_date_nav').attr('data-tab');
+                    }
+                    
+                    console.log('Elemento clicado:', clickedElement, 'data-tab:', dataTab);
+                    
+                    if (!dataTab) {
+                        console.error('data-tab não encontrado no elemento. Elemento:', clickedElement);
+                        console.error('HTML do elemento:', clickedElement[0]?.outerHTML);
+                        return;
+                    }
+                    
+                    const eventDateInput = $('#event_date_result');
+                    if (eventDateInput.length === 0) {
+                        console.error('Input #event_date_result não encontrado');
+                        return;
+                    }
+                    
+                    eventDateInput.val(dataTab);
+                    let event_date_result = eventDateInput.val();
+                    
+                    if (!event_date_result) {
+                        console.error('event_date_result está vazio');
+                        return;
+                    }
+                    
                     let _token = '{{ csrf_token() }}';
 
                     $.ajax({
@@ -582,28 +1424,37 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                console.log(response);
+                                console.log('Data do evento selecionada:', response);
                             }
                             if (response.error) {
+                                console.error('Erro ao selecionar data:', response.error);
                                 location.reload();
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Erro na requisição setEventDate:', xhr.responseText);
+                            if (xhr.status === 400) {
+                                const errorMsg = xhr.responseJSON?.error || 'Erro ao selecionar data do evento';
+                                alert(errorMsg);
                             }
                         }
                     });
                 }));
 
 
-                $(".inp-number").inputSpinner({
-                    buttonsOnly: true,
-                    autoInterval: undefined
-                });
+                // Desabilitado para evitar botões duplicados - usando botões manuais
+                // $(".inp-number").inputSpinner({
+                //     buttonsOnly: true,
+                //     autoInterval: undefined
+                // });
 
                 $("input[type=number].inp-number").change(function(e) {
-                    // let lote_hash = $(this).parents('tr').attr('lote_hash');
-                    // let lote_quantity = $(this).val();
+                    // Atualizar botões de quantidade
+                    updateQtyButtons(this);
                     
                     // Validação client-side antes de chamar setSubTotal
                     let quantity = parseInt($(this).val()) || 0;
-                    let loteHash = $(this).parents('tr').attr('lote_hash');
+                    let loteHash = $(this).closest('.lote-card').attr('lote_hash') || $(this).attr('data-lote-hash');
                     let limitMin = parseInt($(this).attr('data-min')) || 0;
                     let limitMax = parseInt($(this).attr('data-max')) || 999;
                     
@@ -644,7 +1495,7 @@
                 let freeTicketsCount = 0;
                 $("input[type=number].inp-number").each(function() {
                     let quantity = parseInt($(this).val()) || 0;
-                    let loteValue = parseFloat($(this).parents('tr').attr('data-value')) || 0;
+                    let loteValue = parseFloat($(this).closest('.lote-card').attr('data-value')) || parseFloat($(this).attr('data-value')) || 0;
 
                     if (loteValue === 0 && quantity > 0) {
                         freeTicketsCount += quantity;
@@ -659,105 +1510,6 @@
                 }
             }
 
-            function setSubTotal() {
-
-                let subtotal = "0,00";
-                let _token = '{{ csrf_token() }}';
-
-                let dict = [];
-                $("input[type=number].inp-number").each(function() {
-                    let lote_hash = $(this).parents('tr').attr('lote_hash');
-                    let lote_quantity = $(this).val();
-
-                    dict.push({
-                        lote_hash: lote_hash,
-                        lote_quantity: lote_quantity
-                    });
-                });
-
-                $.ajax({
-                    // url: "/getSubTotal",
-                    url: "{{ route('conference.getSubTotal') }}",
-                    type: "POST",
-                    data: {
-                        dict: dict,
-                        _token: _token
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            console.log(response);
-                            // $('.success').text(response.success);
-                            $('#subtotal').html(response.subtotal);
-                            $('#coupon_subtotal').html(response.coupon_subtotal);
-                            $('#total').html(response.total);
-
-                            // Handle free tickets display
-                            let freeTicketsCount = 0;
-                            $("input[type=number].inp-number").each(function() {
-                                let quantity = parseInt($(this).val()) || 0;
-                                let loteValue = parseFloat($(this).parents('tr').attr('data-value')) || 0;
-
-                                if (loteValue === 0 && quantity > 0) {
-                                    freeTicketsCount += quantity;
-                                }
-                            });
-
-                            if (freeTicketsCount > 0) {
-                                $('#free_tickets_count').text(freeTicketsCount);
-                                $('#free_tickets_field').show();
-                            } else {
-                                $('#free_tickets_field').hide();
-                            }
-                        }
-
-                        if (response.error) {
-                            // Mostrar erro para o usuário em vez de apenas recarregar
-                            $('#modal_txt').text(response.error);
-                            $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
-                            $('#cupomModal').modal('show');
-                            $('#cupomModal').css('padding-right', '0');
-                            $('body').css('padding-right', '0');
-                            $('.navbar').css('padding-right', '0');
-                            
-                            // Resetar valores para 0 em caso de erro
-                            $("input[type=number].inp-number").each(function() {
-                                if ($(this).val() > 0) {
-                                    $(this).val(0);
-                                }
-                            });
-                            
-                            // Atualizar subtotal para 0
-                            $('#subtotal').html('R$ 0,00');
-                            $('#coupon_subtotal').html('R$ 0,00');
-                            $('#total').html('R$ 0,00');
-
-                            // Hide free tickets field on error
-                            $('#free_tickets_field').hide();
-
-                            console.log('Updating subtotal with dict:', dict);  // Before AJAX
-                            console.log('AJAX success:', response);
-                            console.log('AJAX error:', xhr.responseText);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        // Tratar erros de rede ou servidor
-                        let errorMessage = 'Erro ao processar solicitação. Tente novamente.';
-                        
-                        if (xhr.responseJSON && xhr.responseJSON.error) {
-                            errorMessage = xhr.responseJSON.error;
-                        }
-                        
-                        $('#modal_txt').text(errorMessage);
-                        $('#modal_icon').attr('src', '/assets_conference/imgs/error.png');
-                        $('#cupomModal').modal('show');
-                        $('#cupomModal').css('padding-right', '0');
-                        $('body').css('padding-right', '0');
-                        $('.navbar').css('padding-right', '0');
-                        
-                        console.log('Erro na requisição:', xhr.responseText);
-                    }
-                });
-            }
 
             function setCoupon(hash) {
 

@@ -29,11 +29,9 @@ return new class () extends Migration {
             $table->string('max_tickets');
             $table->string('theme');
             $table->string('contact');
+            $table->integer('paid');
             $table->integer('status');
-            // $table->foreignId('owner_id')->nullable()
-            //     ->constrained('owners')
-            //     ->onDelete('set null');
-
+            $table->string('mercadopago_link');
             $table->integer('owner_id')->index()->nullable()->unsigned();
             $table->foreign('owner_id')
                 ->references('id')

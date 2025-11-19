@@ -52,19 +52,11 @@ class EventHomeController extends Controller
         $area_val = $request->area_val;
         $state_val = $request->state_val;
         $period_val = $request->period_val;
-
-        // Log para debug
-        Log::info('Parâmetros de busca:', [
-            'event_val' => $event_val,
-            'category_val' => $category_val,
-            'area_val' => $area_val,
-            'state_val' => $state_val,
-            'period_val' => $period_val
-        ]);
+        $sort_val = $request->sort_val ?? 'date_asc';
 
         if($request->ajax()) {
             try {
-                $events = Event::getEvents($event_val, $category_val, $area_val, $state_val, $period_val);
+                $events = Event::getEvents($event_val, $category_val, $area_val, $state_val, $period_val, $sort_val);
                 
                 // Log para debug
                 Log::info('Quantidade de eventos encontrados: ' . $events->count());

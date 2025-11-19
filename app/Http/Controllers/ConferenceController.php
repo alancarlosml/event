@@ -22,6 +22,7 @@ use App\Models\MpAccount;
 use App\Models\OptionAnswer;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\State;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -146,7 +147,9 @@ class ConferenceController extends Controller
 
                 if($quantity > 0) {
                     if($lote->tax_service == 0) {
-                        $array = ['id' => $lote->id, 'quantity' => $quantity, 'value' => ($lote->value + $lote->value * 0.1), 'name' => $lote->name];
+                        // Usar o valor fixo da taxa do lote (já calculado na criação)
+                        $taxa_fixa = $lote->tax ?? 0;
+                        $array = ['id' => $lote->id, 'quantity' => $quantity, 'value' => ($lote->value + $taxa_fixa), 'name' => $lote->name];
                     } else {
                         $array = ['id' => $lote->id, 'quantity' => $quantity,  'value' => $lote->value, 'name' => $lote->name];
                     }
@@ -157,7 +160,9 @@ class ConferenceController extends Controller
                 if($quantity > 0) {
                     for($j = 0; $j < $quantity; $j++) {
                         if($lote->tax_service == 0) {
-                            $array_obj = ['id' => $lote->id, 'quantity' => 1, 'value' => ($lote->value + $lote->value * 0.1), 'name' => $lote->name];
+                            // Usar o valor fixo da taxa do lote (já calculado na criação)
+                            $taxa_fixa = $lote->tax ?? 0;
+                            $array_obj = ['id' => $lote->id, 'quantity' => 1, 'value' => ($lote->value + $taxa_fixa), 'name' => $lote->name];
                         } else {
                             $array_obj = ['id' => $lote->id, 'quantity' => 1,  'value' => $lote->value, 'name' => $lote->name];
                         }
@@ -170,8 +175,11 @@ class ConferenceController extends Controller
             $request->session()->put('array_lotes', $array_lotes);
             $request->session()->put('array_lotes_obj', $array_lotes_obj);
 
+            // Carregar estados para campos do tipo Estados (BRA)
+            $states = State::orderBy('name')->get();
+
             Log::info('resume: rendering conference.resume view');
-            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'array_lotes_obj', 'coupon', 'subtotal', 'total', 'eventDate'));
+            return view('conference.resume', compact('event', 'questions', 'array_lotes', 'array_lotes_obj', 'coupon', 'subtotal', 'total', 'eventDate', 'states'));
 
         } else {
 
@@ -213,32 +221,40 @@ class ConferenceController extends Controller
 
     public function getSubTotal(Request $request)
     {
-        // Add comprehensive validation
+        // Validação mais flexível - permite array vazio para limpar valores
         $request->validate([
-            'dict' => 'required|array|min:1',
-            'dict.*.lote_hash' => 'required|string|exists:lotes,hash',
-            'dict.*.lote_quantity' => 'required|integer|min:0|max:999'
+            'dict' => 'required|array',
+            'dict.*.lote_hash' => 'required_with:dict.*|string|exists:lotes,hash',
+            'dict.*.lote_quantity' => 'required_with:dict.*|integer|min:0|max:999'
         ]);
 
-        // Add rate limiting to prevent abuse
+        // Add rate limiting to prevent abuse - permite 15 requisições por 10 segundos
         $key = 'subtotal:' . $request->ip();
-        $cacheEntry = DB::table('cache')->where('key', $key)->first();
+        $cacheKey = $key . ':count';
+        $cacheExpirationKey = $key . ':expiration';
+        
+        $count = cache()->get($cacheKey, 0);
+        $expiration = cache()->get($cacheExpirationKey, 0);
 
-        if ($cacheEntry && $cacheEntry->expiration > time()) {
-            return response()->json(['error' => 'Muitas solicitações. Tente novamente em alguns segundos.'], 429);
+        // Se o período de 10 segundos ainda não expirou
+        if ($expiration > time()) {
+            // Se já fez 15 requisições ou mais, bloquear
+            if ($count >= 15) {
+                $remainingSeconds = $expiration - time();
+                return response()->json([
+                    'error' => "Muitas solicitações. Tente novamente em {$remainingSeconds} segundo(s)."
+                ], 429);
+        }
+            // Incrementar contador
+            cache()->put($cacheKey, $count + 1, now()->addSeconds(10));
+        } else {
+            // Iniciar novo período de 10 segundos
+            cache()->put($cacheKey, 1, now()->addSeconds(10));
+            cache()->put($cacheExpirationKey, time() + 10, now()->addSeconds(10));
         }
 
-        // Armazenar timestamp atual + 1 minuto
-        DB::table('cache')->updateOrInsert(
-            ['key' => $key],
-            [
-                'value' => time(),
-                'expiration' => time() + 120
-            ]
-        );
-
         $data = $request->all();
-        $dicts = $data['dict'];
+        $dicts = $data['dict'] ?? [];
 
         $subtotal = 0;
         $coupon_subtotal = 0;
@@ -246,40 +262,100 @@ class ConferenceController extends Controller
 
         $request->session()->put('dict_lotes', $dicts);
 
-        Log::info('getSubTotal called', ['dicts' => $dicts, 'subtotal' => $subtotal]);
+        Log::info('getSubTotal called', ['dicts' => $dicts, 'count' => count($dicts ?? [])]);
 
-        if($dicts) {
-            foreach($dicts as $dict) {
-
-                $quantity = $dict['lote_quantity'];
-                $lote = Lote::where('hash', $dict['lote_hash'])->first();
+        // Processar apenas lotes com quantidade > 0
+        if($dicts && is_array($dicts) && count($dicts) > 0) {
+            foreach($dicts as $index => $dict) {
+                // Converter quantidade para inteiro
+                $quantity = (int)($dict['lote_quantity'] ?? 0);
+                $loteHash = $dict['lote_hash'] ?? null;
+                
+                Log::info("Processando lote {$index}", [
+                    'lote_hash' => $loteHash,
+                    'quantity' => $quantity
+                ]);
+                
+                // Pular se quantidade for 0 ou negativa
+                if ($quantity <= 0) {
+                    Log::info("Lote {$index} pulado - quantidade <= 0", ['quantity' => $quantity]);
+                    continue;
+                }
+                
+                if (!$loteHash) {
+                    Log::warning("Lote {$index} sem hash");
+                    continue;
+                }
+                
+                $lote = Lote::where('hash', $loteHash)->first();
 
                 // VALIDATION 1: Check if lot exists
                 if (!$lote) {
-                    return response()->json(['error' => 'Lote não encontrado.'], 400);
+                    Log::error("Lote não encontrado", [
+                        'hash' => $loteHash,
+                        'tentativa_busca' => 'Lote::where("hash", $loteHash)->first()'
+                    ]);
+                    // Tentar buscar de outra forma para debug
+                    $loteAlternativo = Lote::where('hash', 'like', '%' . $loteHash . '%')->first();
+                    if ($loteAlternativo) {
+                        Log::warning("Lote encontrado com busca alternativa", [
+                            'hash_buscado' => $loteHash,
+                            'hash_encontrado' => $loteAlternativo->hash
+                        ]);
+                    }
+                    return response()->json(['error' => "Lote não encontrado (hash: {$loteHash})."], 400);
                 }
+                
+                Log::info("Lote encontrado", [
+                    'lote_id' => $lote->id,
+                    'lote_name' => $lote->name,
+                    'lote_type' => $lote->type,
+                    'lote_value' => $lote->value,
+                    'lote_tax_service' => $lote->tax_service ?? 'null',
+                    'quantity' => $quantity,
+                    'hash_buscado' => $loteHash,
+                    'hash_encontrado' => $lote->hash
+                ]);
 
                 // VALIDATION 2: Check if lot is currently available for sale
                 $now = now();
-                if ($lote->datetime_begin > $now || $lote->datetime_end < $now) {
-                    return response()->json(['error' => 'Este lote não está disponível para venda no momento.'], 400);
+                if ($lote->datetime_begin && $lote->datetime_end) {
+                    if ($lote->datetime_begin > $now || $lote->datetime_end < $now) {
+                        Log::warning("Lote fora do período de venda", [
+                            'lote_id' => $lote->id,
+                            'datetime_begin' => $lote->datetime_begin,
+                            'datetime_end' => $lote->datetime_end,
+                            'now' => $now
+                        ]);
+                        // Não retornar erro aqui, apenas logar - permitir cálculo mesmo fora do período
+                        // return response()->json(['error' => 'Este lote não está disponível para venda no momento.'], 400);
+                    }
                 }
 
-                // VALIDATION 3: Check quantity limits per user
-                if ($quantity < $lote->limit_min || $quantity > $lote->limit_max) {
-                    return response()->json(['error' => "Quantidade deve ser entre {$lote->limit_min} e {$lote->limit_max} ingressos."], 400);
+                // VALIDATION 3: Check quantity limits per user (apenas se houver limites definidos)
+                if ($lote->limit_min > 0 && $quantity < $lote->limit_min) {
+                    return response()->json(['error' => "Quantidade mínima para este lote é {$lote->limit_min} ingressos."], 400);
+                }
+                if ($lote->limit_max > 0 && $quantity > $lote->limit_max) {
+                    return response()->json(['error' => "Quantidade máxima para este lote é {$lote->limit_max} ingressos."], 400);
                 }
 
-                // VALIDATION 4: Check if lot has enough available tickets
-                $soldTickets = DB::table('order_items')
-                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
-                    ->where('order_items.lote_id', $lote->id)
-                    ->where('orders.status', '!=', 3) // Exclude cancelled orders
-                    ->sum('order_items.quantity');
-                
-                $availableTickets = $lote->quantity - $soldTickets;
-                if ($quantity > $availableTickets) {
-                    return response()->json(['error' => "Apenas {$availableTickets} ingressos disponíveis neste lote."], 400);
+                // VALIDATION 4: Check if lot has enough available tickets (apenas se houver limite)
+                if ($lote->quantity > 0) {
+                    $soldTickets = DB::table('order_items')
+                        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                        ->where('order_items.lote_id', $lote->id)
+                        ->where('orders.status', '!=', 3) // Exclude cancelled orders
+                        ->sum('order_items.quantity');
+                    
+                    $availableTickets = $lote->quantity - $soldTickets;
+                    if ($quantity > $availableTickets) {
+                        Log::warning("Quantidade solicitada excede disponibilidade", [
+                            'quantity' => $quantity,
+                            'available' => $availableTickets
+                        ]);
+                        return response()->json(['error' => "Apenas {$availableTickets} ingressos disponíveis neste lote."], 400);
+                    }
                 }
 
                 // VALIDATION 5: Check if user already purchased tickets for this lot
@@ -296,61 +372,134 @@ class ConferenceController extends Controller
                     }
                 }
 
-                if($lote->type == 0) {
-
-                    $config = Configuration::findOrFail(1);
-
-                    if($lote->tax_service == 0) {
-                        $valor_calculado = ($lote->value + $lote->value * $config->tax) * $quantity;
-                        $subtotal += $valor_calculado;
-                    } else {
-                        $valor_calculado = $lote->value * $quantity;
-                        $subtotal += $valor_calculado;
+                // Calcular subtotal se o lote tiver valor > 0 (independente do tipo)
+                // Isso resolve casos onde lotes estão marcados incorretamente como tipo 1 mas têm valor
+                if($lote->value && $lote->value > 0) {
+                    try {
+                        // Aplicar taxa apenas para lotes do tipo 0 (pagos) e se tax_service for 0
+                        if($lote->type == 0 && $lote->tax_service == 0) {
+                            // Usar o valor fixo da taxa do lote (já calculado na criação)
+                            // Se não houver taxa no lote, calcular usando a taxa global como fallback
+                            $taxa_fixa = $lote->tax ?? 0;
+                            if($taxa_fixa == 0) {
+                                // Fallback: calcular taxa usando configuração global
+                                $config = Configuration::findOrFail(1);
+                                $taxRate = $config->tax ?? 0;
+                                $taxa_fixa = $lote->value * $taxRate;
+                            }
+                            $valor_calculado = ($lote->value + $taxa_fixa) * $quantity;
+                            $subtotal += $valor_calculado;
+                            Log::info("Subtotal calculado (com taxa)", [
+                                'lote_type' => $lote->type,
+                                'valor_unitario' => $lote->value,
+                                'taxa_fixa' => $taxa_fixa,
+                                'quantidade' => $quantity,
+                                'valor_calculado' => $valor_calculado,
+                                'subtotal_acumulado' => $subtotal
+                            ]);
+                        } else {
+                            // Lotes tipo 1 (gratuitos) com valor ou lotes tipo 0 sem taxa
+                            $valor_calculado = $lote->value * $quantity;
+                            $subtotal += $valor_calculado;
+                            Log::info("Subtotal calculado (sem taxa ou lote tipo 1 com valor)", [
+                                'lote_type' => $lote->type,
+                                'valor_unitario' => $lote->value,
+                                'quantidade' => $quantity,
+                                'valor_calculado' => $valor_calculado,
+                                'subtotal_acumulado' => $subtotal
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Erro ao calcular subtotal", [
+                            'lote_id' => $lote->id,
+                            'error' => $e->getMessage()
+                        ]);
                     }
-
-                    $coupon = $request->session()->get('coupon');
-
-                    if($coupon) {
-                        $couponBelongs = false;
+                } else {
+                    Log::info("Lote sem valor - não adiciona ao subtotal", [
+                        'lote_type' => $lote->type,
+                        'lote_id' => $lote->id,
+                        'lote_value' => $lote->value
+                    ]);
+                }
+                // Lotes gratuitos (type == 1) não adicionam ao subtotal, mas são processados normalmente
+            }
+            
+            Log::info("Subtotal final calculado", [
+                'subtotal' => $subtotal,
+                'coupon_subtotal' => $coupon_subtotal,
+                'total' => $total,
+                'lotes_processados' => count($dicts),
+                'dicts' => $dicts
+            ]);
+            
+            // Aplicar cupom de desconto se existir (após calcular todos os subtotais)
+            $coupon = $request->session()->get('coupon');
+            if($coupon && $subtotal > 0) {
+                // Verificar se o cupom se aplica a algum dos lotes selecionados
+                $couponBelongs = false;
+                foreach($dicts as $dict) {
+                    $quantity = (int)($dict['lote_quantity'] ?? 0);
+                    if ($quantity <= 0) continue;
+                    
+                    $lote = Lote::where('hash', $dict['lote_hash'])->first();
+                    if ($lote) {
                         foreach($lote->coupons as $lote_cupom) {
                             if($coupon[0]['code'] == $lote_cupom->code) {
                                 $couponBelongs = true;
+                                break 2; // Sair dos dois loops
                             }
                         }
-
-                        if($couponBelongs) {
-
-                            $coupon_code = $coupon[0]['code'];
-                            $coupon_type = $coupon[0]['type'];
-                            $coupon_value = $coupon[0]['value'];
-
-                            if($coupon_type == 0) {
-                                $coupon_subtotal = $subtotal * $coupon_value;
-                            } elseif($coupon_type == 1) {
-                                $coupon_subtotal = $coupon_value;
-                            }
-
-                            $total = $subtotal - $coupon_subtotal;
-                        }
-
-                    } else {
-                        $total = $subtotal;
                     }
                 }
+
+                if($couponBelongs) {
+                    $coupon_code = $coupon[0]['code'];
+                    $coupon_type = $coupon[0]['type'];
+                    $coupon_value = $coupon[0]['value'];
+
+                    if($coupon_type == 0) {
+                        $coupon_subtotal = $subtotal * $coupon_value;
+                    } elseif($coupon_type == 1) {
+                        $coupon_subtotal = $coupon_value;
+                    }
+
+                    $total = $subtotal - $coupon_subtotal;
+                } else {
+                    $total = $subtotal;
+                }
+            } else {
+                $total = $subtotal;
             }
 
             $request->session()->put('subtotal', $subtotal);
             $request->session()->put('coupon_subtotal', $coupon_subtotal);
             $request->session()->put('total', $total);
 
-            return response()->json(['success' => 'Ajax request submitted successfully', 'subtotal' => 'R$ '.number_format($subtotal, 2, ',', '.'), 'coupon_subtotal' => 'R$ '.number_format($coupon_subtotal, 2, ',', '.'), 'total' => 'R$ '.number_format($total, 2, ',', '.')]);
+            $responseData = [
+                'success' => 'Ajax request submitted successfully', 
+                'subtotal' => 'R$ '.number_format($subtotal, 2, ',', '.'), 
+                'coupon_subtotal' => 'R$ '.number_format($coupon_subtotal, 2, ',', '.'), 
+                'total' => 'R$ '.number_format($total, 2, ',', '.')
+            ];
+            
+            Log::info("Resposta final do getSubTotal", [
+                'subtotal_raw' => $subtotal,
+                'subtotal_formatted' => $responseData['subtotal'],
+                'total_raw' => $total,
+                'total_formatted' => $responseData['total'],
+                'dicts_count' => count($dicts)
+            ]);
 
+            return response()->json($responseData);
         } else {
+            // Se não houver lotes selecionados, retornar valores zerados
+            $request->session()->put('subtotal', 0);
+            $request->session()->put('coupon_subtotal', 0);
+            $request->session()->put('total', 0);
 
-            return redirect()->back();
+            return response()->json(['success' => 'Ajax request submitted successfully', 'subtotal' => 'R$ 0,00', 'coupon_subtotal' => 'R$ 0,00', 'total' => 'R$ 0,00']);
         }
-
-        return redirect()->back();
     }
 
     public function getCoupon(Request $request)
@@ -482,6 +631,64 @@ class ConferenceController extends Controller
 
         if (!$total || $total < 0) {
             return redirect()->back()->withErrors(['error' => 'Valor total inválido.']);
+        }
+
+        // VALIDATION: Validate form fields
+        $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
+        
+        if ($questions->count() > 0 && $array_lotes_obj) {
+            $errors = [];
+            
+            foreach ($array_lotes_obj as $k => $lote_obj) {
+                foreach ($questions as $question) {
+                    $fieldName = "newfield_" . ($k + 1) . "_" . $question->id;
+                    $fieldValue = $input[$fieldName] ?? null;
+                    
+                    // Validar campos obrigatórios
+                    if ($question->required == 1) {
+                        if (empty($fieldValue) || $fieldValue === '0' || $fieldValue === '') {
+                            $errors[] = "O campo '{$question->question}' é obrigatório para o participante #" . ($k + 1) . ".";
+                        }
+                    }
+                    
+                    // Validações específicas por tipo
+                    if (!empty($fieldValue) && $fieldValue !== '0') {
+                        switch ($question->option_id) {
+                            case 13: // E-mail
+                                if (!filter_var($fieldValue, FILTER_VALIDATE_EMAIL)) {
+                                    $errors[] = "O campo '{$question->question}' deve ser um e-mail válido para o participante #" . ($k + 1) . ".";
+                                }
+                                break;
+                            case 5: // CPF
+                                $cpf = preg_replace('/[^0-9]/', '', $fieldValue);
+                                if (strlen($cpf) != 11) {
+                                    $errors[] = "O campo '{$question->question}' deve ser um CPF válido para o participante #" . ($k + 1) . ".";
+                                }
+                                break;
+                            case 6: // CNPJ
+                                $cnpj = preg_replace('/[^0-9]/', '', $fieldValue);
+                                if (strlen($cnpj) != 14) {
+                                    $errors[] = "O campo '{$question->question}' deve ser um CNPJ válido para o participante #" . ($k + 1) . ".";
+                                }
+                                break;
+                            case 9: // Número inteiro
+                                if (!is_numeric($fieldValue) || (int)$fieldValue != $fieldValue) {
+                                    $errors[] = "O campo '{$question->question}' deve ser um número inteiro para o participante #" . ($k + 1) . ".";
+                                }
+                                break;
+                            case 10: // Número decimal
+                                if (!is_numeric($fieldValue)) {
+                                    $errors[] = "O campo '{$question->question}' deve ser um número para o participante #" . ($k + 1) . ".";
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+            
+            if (!empty($errors)) {
+                return redirect()->back()->withErrors(['form_errors' => $errors])->withInput();
+            }
         }
 
         // FINAL VALIDATION: Re-validate all lots before payment
@@ -710,19 +917,34 @@ class ConferenceController extends Controller
 
         cache()->put($cacheKey, $attempts + 1, now()->addMinutes(5));
 
-        // Validar se as credenciais do Mercado Pago estão configuradas
         // Validar dados da sessão
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
         $total = $request->session()->get('total');
         
-        // $mpAccount = MpAccount::where('participante_id', $event->user_id)->first();
-        // $accessToken = $mpAccount->access_token;
-        $accessToken = env('MERCADO_PAGO_ACCESS_TOKEN');
-        if (empty($accessToken)) {
-            Log::error('Mercado Pago Access Token not configured');
-            return response()->json(['error' => 'Configuração de pagamento não encontrada'], 500);
+        // Buscar o organizador do evento
+        $organizerParticipant = DB::table('participantes_events')
+            ->where('event_id', $event->id)
+            ->where('role', 'admin')
+            ->first(['participante_id']);
+        
+        if (!$organizerParticipant) {
+            Log::error('Event organizer not found', ['event_id' => $event->id]);
+            return response()->json(['error' => 'Organizador do evento não encontrado'], 500);
         }
+        
+        // Buscar a conta do Mercado Pago vinculada ao organizador
+        $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
+        
+        if (!$mpAccount || empty($mpAccount->access_token)) {
+            Log::error('Mercado Pago account not linked for organizer', [
+                'event_id' => $event->id,
+                'organizer_id' => $organizerParticipant->participante_id
+            ]);
+            return response()->json(['error' => 'Conta do Mercado Pago não vinculada ao organizador. Entre em contato com o organizador do evento.'], 500);
+        }
+        
+        $accessToken = $mpAccount->access_token;
 
         if (!$order_id || !$event || !$total) {
             Log::warning('Missing session data', [
@@ -945,11 +1167,25 @@ class ConferenceController extends Controller
             // Limpar cache de tentativas em caso de sucesso
             cache()->forget($cacheKey);
 
-            // Atualizar status dos order_items se pagamento aprovado
+            // Atualizar status dos order_items e gerar purchase_hash se pagamento aprovado
             if ($payment->status === 'approved') {
-                DB::table('order_items')
-                    ->where('order_id', $order_id)
-                    ->update(['status' => 1, 'updated_at' => now()]);
+                $order = DB::table('orders')->where('id', $order_id)->first();
+                $orderItems = DB::table('order_items')->where('order_id', $order_id)->get();
+                
+                foreach ($orderItems as $item) {
+                    // Gerar purchase_hash para cada order_item (usado no QR Code)
+                    // Usar created_at formatado como string para garantir consistência
+                    $createdAtStr = is_string($item->created_at) ? $item->created_at : (is_object($item->created_at) ? $item->created_at->format('Y-m-d H:i:s') : $item->created_at);
+                    $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5("7bc05eb02415fe73101eeea0180e258d45e8ba2b"));
+                    
+                    DB::table('order_items')
+                        ->where('id', $item->id)
+                        ->update([
+                            'status' => 1,
+                            'purchase_hash' => $purchaseHash,
+                            'updated_at' => now()
+                        ]);
+                }
             }
 
             Log::info('Payment processed successfully', [

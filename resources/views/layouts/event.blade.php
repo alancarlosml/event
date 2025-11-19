@@ -20,6 +20,7 @@
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     {!! RecaptchaV3::initJs() !!}
     @stack('head')
+    <link rel="stylesheet" href="{{ asset('assets_conference/css/additional-improvements.css') }}" type="text/css">
 </head>
 
 <body data-bs-spy="scroll" data-bs-target="#navbarCollapse" data-bs-offset="100">
@@ -235,21 +236,49 @@
             </div>
         </div>
     </footer>
-    <a href="#" class="back-to-top" style="display: block;">
+    <a href="#" class="back-to-top" id="backToTop" title="Voltar ao topo">
         <i class="fa-solid fa-arrow-up"></i>
     </a>
+    
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle" title="Modo escuro/claro">
+        <i class="fas fa-moon" id="darkModeIcon"></i>
+    </button>
 </body>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.2/js/OverlayScrollbars.min.js" integrity="sha512-5UqQ4jRiUk3pxl9wZxAtep5wCxqcoo6Yu4FI5ufygoOMV2I2/lOtH1YjKdt3FcQ9uhcKFJapG0HAQ0oTC5LnOw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-    $('.back-to-top').on('click', function(event) {
+    // Botão Voltar ao Topo Melhorado
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 300) {
+            $('#backToTop').addClass('show');
+        } else {
+            $('#backToTop').removeClass('show');
+        }
+    });
+    
+    $('#backToTop').on('click', function(event) {
         event.preventDefault();
         $('html, body').animate({
             scrollTop: 0
         }, 600);
         return false;
+    });
+    
+    // Modo Escuro
+    const darkMode = localStorage.getItem('darkMode');
+    if (darkMode === 'enabled') {
+        document.body.classList.add('dark-mode');
+        $('#darkModeIcon').removeClass('fa-moon').addClass('fa-sun');
+    }
+    
+    $('#darkModeToggle').on('click', function() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+        $('#darkModeIcon').toggleClass('fa-moon fa-sun');
     });
     $('.slicknav_btn').on('click', function(event) {
         event.preventDefault();
@@ -260,11 +289,22 @@
         "use strict";
 
         const select = (el, all = false) => {
-            el = el.trim()
-            if (all) {
-                return [...document.querySelectorAll(el)]
-            } else {
-                return document.querySelector(el)
+            if (!el || typeof el !== 'string') {
+                return all ? [] : null;
+            }
+            el = el.trim();
+            if (!el) {
+                return all ? [] : null;
+            }
+            try {
+                if (all) {
+                    return [...document.querySelectorAll(el)]
+                } else {
+                    return document.querySelector(el)
+                }
+            } catch (e) {
+                console.error('Erro no querySelector:', e, 'Seletor:', el);
+                return all ? [] : null;
             }
         }
 

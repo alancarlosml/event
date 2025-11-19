@@ -1,0 +1,377 @@
+/* ============================================
+   Melhorias Adicionais UX/UI
+   ============================================ */
+
+/* ===== Botão Voltar ao Topo Melhorado ===== */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999;
+    text-decoration: none;
+    border: 3px solid white;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.back-to-top i {
+    font-size: 1.25rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-5px);
+    }
+    60% {
+        transform: translateY(-3px);
+    }
+}
+
+/* ===== Compartilhamento Social ===== */
+.social-share {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e9ecef;
+}
+
+.social-share-label {
+    font-weight: 600;
+    color: #333;
+    margin-right: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.social-share-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-size: 1.1rem;
+}
+
+.social-share-btn:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    color: white;
+}
+
+.social-share-btn.facebook {
+    background: #1877f2;
+}
+
+.social-share-btn.twitter {
+    background: #1da1f2;
+}
+
+.social-share-btn.whatsapp {
+    background: #25d366;
+}
+
+.social-share-btn.linkedin {
+    background: #0077b5;
+}
+
+.social-share-btn.email {
+    background: #666;
+}
+
+.social-share-btn.copy-link {
+    background: #6c757d;
+}
+
+/* ===== FAQ Inline ===== */
+.faq-section {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 2px solid #e9ecef;
+}
+
+.faq-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.faq-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-color: #007bff;
+}
+
+.faq-question {
+    padding: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.faq-question:hover {
+    color: #007bff;
+}
+
+.faq-question i {
+    color: #007bff;
+    transition: transform 0.3s ease;
+    font-size: 1.25rem;
+}
+
+.faq-item.active .faq-question i {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 1.5rem;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.faq-answer-content {
+    color: #666;
+    line-height: 1.8;
+    padding-top: 1rem;
+}
+
+/* ===== QR Code para Check-in ===== */
+.qr-code-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.qr-code-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.qr-code-container {
+    display: inline-block;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.qr-code-container img {
+    max-width: 200px;
+    height: auto;
+}
+
+.qr-code-info {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 1rem;
+}
+
+.qr-code-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.qr-code-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+}
+
+.qr-code-btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.qr-code-btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    color: white;
+}
+
+.qr-code-btn-secondary {
+    background: white;
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.qr-code-btn-secondary:hover {
+    background: #007bff;
+    color: white;
+}
+
+/* ===== Modo Escuro (Dark Mode) ===== */
+.dark-mode-toggle {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: #333;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 9998;
+    border: 3px solid white;
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+    background: #555;
+}
+
+.dark-mode-toggle i {
+    font-size: 1.25rem;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .event-card,
+body.dark-mode .lote-card,
+body.dark-mode .checkout-summary,
+body.dark-mode .checkout-form-container,
+body.dark-mode .registration-card,
+body.dark-mode .faq-item {
+    background: #2d2d2d;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+body.dark-mode .event-card-title,
+body.dark-mode .registration-event-name,
+body.dark-mode .faq-question {
+    color: #fff;
+}
+
+body.dark-mode .event-card-info-item,
+body.dark-mode .registration-info-item {
+    color: #b0b0b0;
+}
+
+body.dark-mode .filter-tab,
+body.dark-mode .btn-filter-clear {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .filter-tab.active {
+    background: #007bff;
+    color: white;
+}
+
+/* ===== Responsividade ===== */
+@media (max-width: 768px) {
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+    }
+    
+    .dark-mode-toggle {
+        bottom: 80px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+    }
+    
+    .social-share {
+        justify-content: center;
+    }
+    
+    .qr-code-actions {
+        flex-direction: column;
+    }
+    
+    .qr-code-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+

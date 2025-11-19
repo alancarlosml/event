@@ -24,6 +24,7 @@ use App\Models\Event;
 use App\Models\EventDate;
 use App\Models\Lote;
 use App\Models\Message;
+use App\Models\MpAccount;
 use App\Models\Participante;
 use App\Models\ParticipanteEvent;
 use App\Models\Place;
@@ -43,13 +44,10 @@ class EventAdminController extends Controller
 {
     public function myRegistrations()
     {
-
         $orders = Order::orderBy('orders.created_at', 'desc')
             ->leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
             ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
-            // ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
             ->join('participantes', 'participantes.id', '=', 'orders.participante_id')
-            // ->join('participantes_events', 'participantes.id', '=', 'participantes_events.participante_id')
             ->join('events', 'event_dates.event_id', '=', 'events.id')
             ->join('places', 'places.id', '=', 'events.place_id')
             ->select(
@@ -65,6 +63,21 @@ class EventAdminController extends Controller
             ->where('orders.participante_id', Auth::user()->id)
             ->groupBy('orders.id')
             ->get();
+
+        // Buscar order_items com purchase_hash para cada order
+        foreach ($orders as $order) {
+            $order->order_items = \App\Models\OrderItem::where('order_id', $order->order_id)
+                ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+                ->select(
+                    'order_items.id',
+                    'order_items.number',
+                    'order_items.purchase_hash',
+                    'order_items.checkin_status',
+                    'order_items.checkin_at',
+                    'lotes.name as lote_name'
+                )
+                ->get();
+        }
 
         return view('painel_admin.my_registrations', compact('orders'));
     }
@@ -273,9 +286,12 @@ class EventAdminController extends Controller
             }
         }
 
-        $questions = '';
+        $questions = collect([]);
         if($event) {
-            $questions = $request->session()->get('questions');
+            $sessionQuestions = $request->session()->get('questions');
+            if($sessionQuestions) {
+                $questions = $sessionQuestions;
+            }
         }
 
         // Adicionei uma verificação para saber se o usuário já tem uma conta vinculada ao Mercado Pago
@@ -372,6 +388,16 @@ class EventAdminController extends Controller
             ]);
 
             // dd($validatedDataEvent);
+
+            // Validar se evento é pago e se tem conta Mercado Pago vinculada
+            if ($validatedDataEvent['paid'] == 1) {
+                $mpAccount = MpAccount::where('participante_id', $validatedDataEvent['admin_id'])->first();
+                if (!$mpAccount || empty($mpAccount->access_token)) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['paid' => 'Para criar um evento pago, é necessário vincular sua conta do Mercado Pago primeiro. Clique em "Vincular conta" na seção "Carteira de pagamento".']);
+                }
+            }
 
             $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
@@ -1725,14 +1751,82 @@ class EventAdminController extends Controller
             ->havingRaw('confirmado > 0 OR pendente > 0')
             ->get();
 
-        // dd($payment_methods);
+        // Estatísticas de check-in
+        $checkin_stats = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->where('event_dates.event_id', $event->id)
+            ->where('orders.status', 1) // Apenas pedidos confirmados
+            ->selectRaw('COUNT(*) as total_confirmados')
+            ->selectRaw('COUNT(CASE WHEN order_items.checkin_status = 1 THEN 1 END) as total_checkin')
+            ->selectRaw('COUNT(CASE WHEN order_items.checkin_status = 0 THEN 1 END) as total_sem_checkin')
+            ->first();
+
+        // Vendas por período (últimos 30 dias ou desde o início)
+        $vendas_por_periodo = Order::join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->where('event_dates.event_id', $event->id)
+            ->whereIn('orders.status', [1, 2])
+            ->selectRaw('DATE(orders.created_at) as data')
+            ->selectRaw('COUNT(*) as total_vendas')
+            ->groupBy('data')
+            ->orderBy('data', 'asc')
+            ->get();
+
+        // Informações do evento
+        $event_dates = $event->event_dates()->orderBy('date')->get();
+        $place = $event->place;
+        
+        // Calcular capacidade total e vendida
+        $capacidade_total = Lote::where('event_id', $event->id)
+            ->where('type', 0) // Apenas lotes pagos
+            ->sum('quantity');
+        
+        $ingressos_vendidos = $resumo->geral ?? 0;
+        $taxa_ocupacao = $capacidade_total > 0 ? ($ingressos_vendidos / $capacidade_total) * 100 : 0;
+
+        // Ticket médio
+        $ticket_medio = ($resumo->confirmado ?? 0) > 0 
+            ? ($resumo->total_confirmado ?? 0) / ($resumo->confirmado ?? 1) 
+            : 0;
+
+        // Vendas por lote (para gráfico)
+        $vendas_por_lote = Lote::where('lotes.event_id', $event->id)
+            ->leftJoin('order_items', 'lotes.id', '=', 'order_items.lote_id')
+            ->leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where(function($query) {
+                $query->whereNull('orders.id')
+                      ->orWhereIn('orders.status', [1, 2]);
+            })
+            ->select('lotes.id', 'lotes.name')
+            ->selectRaw('COUNT(CASE WHEN orders.status IN (1,2) THEN 1 END) as vendidos')
+            ->groupBy('lotes.id', 'lotes.name')
+            ->get();
 
         $participantes_json = response()->json($all_orders);
         $payment_methods_json = response()->json($payment_methods);
 
-        // dd($payment_methods_json);
-
-        return view('painel_admin.reports', compact('event', 'lotes', 'resumo', 'all_orders', 'participantes_json', 'config', 'situacao_participantes', 'situacao_participantes_lotes', 'payment_methods', 'payment_methods_json', 'situacao_coupons'));
+        return view('painel_admin.reports', compact(
+            'event', 
+            'lotes', 
+            'resumo', 
+            'all_orders', 
+            'participantes_json', 
+            'config', 
+            'situacao_participantes', 
+            'situacao_participantes_lotes', 
+            'payment_methods', 
+            'payment_methods_json', 
+            'situacao_coupons',
+            'checkin_stats',
+            'vendas_por_periodo',
+            'event_dates',
+            'place',
+            'capacidade_total',
+            'ingressos_vendidos',
+            'taxa_ocupacao',
+            'ticket_medio',
+            'vendas_por_lote'
+        ));
     }
 
     public function order_details(Request $request, $hash)

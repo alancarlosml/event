@@ -8,7 +8,7 @@
                     <li class="breadcrumb-item"><a href="/painel/meus-eventos">Meus eventos</a></li>
                     <li class="breadcrumb-item"></li>
                 </ol>
-                                <h2>@if(isset($event) && $event->id) Editar @else Criar @endif {{ isset($event) ? htmlspecialchars($event->name) : 'Novo' }} evento</h2>
+                <h2>@if(isset($event) && $event->id) Editar @else Criar @endif {{ isset($event) ? htmlspecialchars($event->name) : 'Novo' }} evento</h2>
             </div>
         </section><!-- End Breadcrumbs -->
 
@@ -33,19 +33,47 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body table-responsive p-0">
-                    <ul id="progressbar" class="nav nav-pills">
-                        <li class="nav-item active" id="account"><strong>Informações</strong></li>
-                        <li class="nav-item" id="personal"><strong>Inscrições</strong></li>
-                        <li class="nav-item" id="payment"><strong>Cupons</strong></li>
-                        <li class="nav-item" id="confirm"><strong>Publicar</strong></li>
-                    </ul>
+                <div class="wizard-container">
+                    @php
+                        $currentStep = 1; // Step atual baseado na rota ou sessão
+                        if (request()->routeIs('event_home.create.step.two')) {
+                            $currentStep = 2;
+                        } elseif (request()->routeIs('event_home.create.step.three') || request()->routeIs('event_home.create.step.four')) {
+                            $currentStep = request()->routeIs('event_home.create.step.four') ? 4 : 3;
+                        }
+                        $progress = ($currentStep / 4) * 100;
+                    @endphp
+                    
+                    <div class="wizard-progress">
+                        <div class="wizard-progress-bar" style="width: {{ $progress }}%"></div>
+                    </div>
+                    
+                    <div class="wizard-steps">
+                        <div class="step {{ $currentStep >= 1 ? 'active' : '' }} {{ $currentStep > 1 ? 'completed' : '' }}">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Informações</div>
+                        </div>
+                        <div class="step {{ $currentStep >= 2 ? 'active' : '' }} {{ $currentStep > 2 ? 'completed' : '' }}">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Inscrições</div>
+                        </div>
+                        <div class="step {{ $currentStep >= 3 ? 'active' : '' }} {{ $currentStep > 3 ? 'completed' : '' }}">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Cupons</div>
+                        </div>
+                        <div class="step {{ $currentStep >= 4 ? 'active' : '' }}">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Publicar</div>
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-content">
                     @php
                         $isEdit = isset($event) && $event->id;
                         $formAction = $isEdit ? route('event_home.my_events_edit.update', $event->hash) : route('event_home.create.step.one');
                         $formMethod = $isEdit ? 'PUT' : 'POST';
                     @endphp
-                    <form method="POST" action="{{ $formAction }}" class="needs-validation" novalidate>
+                    <form method="POST" action="{{ $formAction }}" id="event-form" class="needs-validation" novalidate>
                         @if($isEdit)
                             @method('PUT')
                         @endif
@@ -370,48 +398,35 @@
                                 </div>
                             </div>
                             <div id="card-new-field">
-                                @if($questions != "")
-                                    @if(isset($questions))
-                                        @foreach ($questions as $id => $question)
-                                            @if($id < 2)
-                                                <div class="mb-3">
-                                                    <label for="new_field_{{ $id }}" class="form-label">Campo {{ $id + 1 }}{{ $question->required == 1 ? '*' : '' }}</label>
+                                @if(isset($questions) && count($questions) > 0)
+                                    @foreach ($questions as $id => $question)
+                                        @if($id < 2)
+                                            <div class="mb-3">
+                                                <label for="new_field_{{ $id }}" class="form-label">Campo {{ $id + 1 }}{{ $question->required == 1 ? '*' : '' }}</label>
+                                                <input type="text" class="form-control new_field" name="new_field[]" value="{{ $question->formatted_options }}" readonly>
+                                                <input type="hidden" name="new_field_id[]" value="{{ $question->id }}">
+                                            </div>
+                                        @else
+                                            <div class="row mb-3">
+                                                <div class="col-9">
+                                                    <label for="new_field_{{ $id }}" class="form-label">Campo {{ $id + 1 }}{{ $question->required ? '*' : '' }}</label>
                                                     <input type="text" class="form-control new_field" name="new_field[]" value="{{ $question->formatted_options }}" readonly>
                                                     <input type="hidden" name="new_field_id[]" value="{{ $question->id }}">
                                                 </div>
-                                            @else
-                                                <div class="row mb-3">
-                                                    <div class="col-9">
-                                                        <label for="new_field_{{ $id }}" class="form-label">Campo {{ $id + 1 }}{{ $question->required ? '*' : '' }}</label>
-                                                        <input type="text" class="form-control new_field" name="new_field[]" value="{{ $question->formatted_options }}" readonly>
-                                                        <input type="hidden" name="new_field_id[]" value="{{ $question->id }}">
-                                                    </div>
-                                                    <div class="col-3" style="margin-top: 35px;">
-                                                        <button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">
-                                                            <i class="fa-solid fa-trash"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-secondary btn-sm up me-1" title="Mover para cima">
-                                                            <i class="fas fa-arrow-up"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
-                                                            <i class="fas fa-arrow-down"></i>
-                                                        </button>
-                                                    </div>
+                                                <div class="col-3" style="margin-top: 35px;">
+                                                    <button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary btn-sm up me-1" title="Mover para cima">
+                                                        <i class="fas fa-arrow-up"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary btn-sm down" title="Mover para baixo">
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </button>
                                                 </div>
-                                            @endif
-                                        @endforeach
-                                    @else
-                                        <div class="mb-3">
-                                            <label for="name_new_field" class="form-label">Campo 1*</label>
-                                            <input type="text" class="form-control new_field" name="new_field[]" id="name_new_field" value="Nome; (Tipo: Texto (Até 200 caracteres)); Obrigatório" readonly>
-                                            <input type="hidden" name="new_field_id[]" value="">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="email_new_field" class="form-label">Campo 2*</label>
-                                            <input type="text" class="form-control new_field" name="new_field[]" id="email_new_field" value="E-mail; (Tipo: E-mail); Obrigatório; Único" readonly>
-                                            <input type="hidden" name="new_field_id[]" value="">
-                                        </div>
-                                    @endif
+                                            </div>
+                                        @endif
+                                    @endforeach
                                 @else
                                     <div class="mb-3">
                                         <label for="name_new_field" class="form-label">Campo 1*</label>
@@ -424,7 +439,6 @@
                                         <input type="hidden" name="new_field_id[]" value="">
                                     </div>
                                 @endif
-                                </div>
                             </div>
                             <hr>
 
@@ -445,13 +459,13 @@
                                     <div class="mb-3 d-none" id="form_mercadopago">
                                         <label for="contact" id="linked-acc-label" class="form-label">ID da Conta Vinculada: {{ $mercadoPagoLinked['id'] }}</label>
                                         <br>
-                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri=" target="_blank" id="link-acc-button" data-linked="true" class="btn btn-secondary">Vincular outra conta</a>
+                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_CLIENT_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ urlencode(route('mercado-pago.link-account')) }}" target="_blank" id="link-acc-button" data-linked="true" class="btn btn-secondary">Vincular outra conta</a>
                                     </div>
                                 @else
                                     <div class="mb-3 d-none" id="form_mercadopago">
                                         <label for="contact" id="linked-acc-label" class="form-label">Vincular conta Mercado Pago</label>
                                         <br>
-                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_APP_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ env('MERCADO_PAGO_REDIRECT_URI', '') }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success">Vincular conta</a>
+                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_CLIENT_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ urlencode(route('mercado-pago.link-account')) }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success">Vincular conta</a>
                                     </div>
                                 @endif
                                 <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
@@ -466,13 +480,33 @@
                                     <div class="progress-text" id="progress-text">Salvando...</div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary" id="submit-btn">
-                                    <span class="btn-text">Próximo</span>
-                                    <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
-                                </button>
+                                    {{-- <button type="submit" class="btn btn-primary" id="submit-btn">
+                                        <span class="btn-text">Próximo</span>
+                                        <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                                    </button> --}}
                             </div>
                         </div>
                     </form>
+                    </div>
+                    <!-- Wizard Actions -->
+                    <div class="wizard-actions">
+                        @if($currentStep > 1)
+                            <a href="{{ route('event_home.create_event') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Anterior
+                            </a>
+                        @else
+                            <div></div>
+                        @endif
+                        @if($currentStep < 4)
+                            <button type="submit" form="event-form" class="btn btn-primary">
+                                Próximo <i class="fas fa-arrow-right"></i>
+                            </button>
+                        @else
+                            <button type="submit" form="event-form" class="btn btn-success">
+                                <i class="fas fa-check"></i> Publicar Evento
+                            </button>
+                        @endif
+                    </div>
                 </div>
         </section>
     </main><!-- End #main -->
@@ -482,6 +516,8 @@
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
         <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link href="{{ asset('assets_admin/css/mobile-responsive.css') }}" rel="stylesheet">
+        <!-- Dashboard Improvements CSS (includes wizard styles) -->
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/dashboard-improvements.css') }}" type="text/css">
     @endpush
 
     @push('footer')

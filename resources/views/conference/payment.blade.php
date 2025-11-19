@@ -92,8 +92,13 @@
     <script>
         $(document).ready(function() {
             
-            // Obter public key do backend (recomendado)
-            const publicKey = "{{ env('MERCADO_PAGO_PUBLIC_KEY', 'APP_USR-2ce7dc9f-38e6-4745-92cc-f251947d3c04') }}";
+            // Obter public key do backend
+            const publicKey = "{{ env('MERCADO_PAGO_PUBLIC_KEY') }}";
+            if (!publicKey) {
+                console.error('MERCADO_PAGO_PUBLIC_KEY não configurada');
+                showError('Configuração de pagamento inválida. Entre em contato com o suporte.');
+                return;
+            }
             
             const mp = new MercadoPago(publicKey, {
                 locale: 'pt-BR'

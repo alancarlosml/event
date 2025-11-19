@@ -18,7 +18,8 @@ return new class () extends Migration {
 
         Schema::create('order_items', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('number')->unique();
+            $table->string('hash', 200);
+            $table->string('number', 200)->unique();
             $table->integer('quantity');
             $table->double('value');
             $table->timestamp('date_use')->nullable();
@@ -34,11 +35,6 @@ return new class () extends Migration {
                 ->references('id')
                 ->on('lotes')
                 ->onDelete('cascade');
-            $table->integer('event_date_id')->index()->unsigned();
-                $table->foreign('event_date_id')
-                    ->references('id')
-                    ->on('event_dates')
-                    ->onDelete('cascade');
             $table->timestamps();
         });
 

@@ -69,12 +69,20 @@
                                             </div>
                                         </div>
                                         <div class="row mt-3">
-                                            <div class="col-12">
-                                                <div class="mb-3">
-                                                    <div class="input-group">
-                                                        <input type="search" class="form-control" id="event_name_search" placeholder="Nome do evento" aria-label="Buscar por nome do evento">
-                                                    </div>
+                                            <div class="col-12 col-md-8 mb-3">
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                                    <input type="search" class="form-control" id="event_name_search" placeholder="Nome do evento" aria-label="Buscar por nome do evento">
                                                 </div>
+                                            </div>
+                                            <div class="col-12 col-md-4 mb-3">
+                                                <label for="sort_events"><b>Ordenar por</b></label>
+                                                <select name="sort_events" id="sort_events" class="form-select">
+                                                    <option value="date_asc">Data: Mais próximo</option>
+                                                    <option value="date_desc">Data: Mais distante</option>
+                                                    <option value="name_asc">Nome: A-Z</option>
+                                                    <option value="name_desc">Nome: Z-A</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -100,6 +108,10 @@
 
     </main><!-- End #main -->
 
+    @push('head')
+        <link rel="stylesheet" href="{{ asset('assets/css/events-list-improvements.css') }}" type="text/css">
+    @endpush
+    
     @push('footer')
         <script>
 
@@ -111,6 +123,7 @@
                     var area_val = '0';
                     var state_val = '0';
                     var period_val = '0';
+                    var sort_val = 'date_asc';
                     
                     if ($('#event_name_search').length > 0) {
                         event_val = $('#event_name_search').val() || '';
@@ -126,6 +139,9 @@
                     }
                     if ($("#period option:selected").length > 0) {
                         period_val = $("#period option:selected").val() || '0';
+                    }
+                    if ($("#sort_events option:selected").length > 0) {
+                        sort_val = $("#sort_events option:selected").val() || 'date_asc';
                     }
                     
                     console.log('Valores para busca:', {
@@ -143,13 +159,18 @@
                         'category_val': category_val,
                         'area_val': area_val,
                         'state_val': state_val,
-                        'period_val': period_val
+                        'period_val': period_val,
+                        'sort_val': sort_val
                     },
                     url: "{{ route('event_home.get-more-events') }}" + "?page=" + page,
                     beforeSend: function() {
                         $('#event_data').html(
-                            '<div class="d-flex justify-content-center" style="padding: 100px 0"><div class="spinner-border text-danger" role="status"><span class="sr-only">Loading...</span></div></div>'
-                            );
+                            '<div class="events-loading">' +
+                            '<div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">' +
+                            '<span class="sr-only">Carregando...</span></div>' +
+                            '<p class="mt-3">Buscando eventos...</p>' +
+                            '</div>'
+                        );
                     },
                     success: function(data) {
                         if (data && data.events_list) {
@@ -245,6 +266,10 @@
             });
 
             $('#period').on('change', function(e) {
+                getMoreEvents(1);
+            });
+            
+            $('#sort_events').on('change', function(e) {
                 getMoreEvents(1);
             });
 

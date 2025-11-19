@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Event;
@@ -112,6 +113,160 @@ class DashboardController extends Controller
             )
             ->first();
 
-        return view('dashboard', compact('event_count', 'ingressos_confirmados', 'ingressos_cancelados', 'ingressos_pendentes', 'total_confirmado', 'total_pendente'));
+        // Dados para gráficos de vendas (últimos 30 dias)
+        $salesData = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+            ->where('lotes.type', 0)
+            ->where('orders.created_at', '>=', now()->subDays(30))
+            ->selectRaw('DATE(orders.created_at) as date')
+            ->selectRaw('SUM(CASE 
+                WHEN coupons.discount_type = 0 AND coupons.code <> "" THEN order_items.value - (coupons.discount_value * order_items.value)
+                WHEN coupons.discount_type = 1 AND coupons.code <> "" THEN order_items.value - coupons.discount_value 
+                WHEN coupons.discount_type IS NULL AND coupons.code IS NULL THEN order_items.value
+                END) as total')
+            ->selectRaw('COUNT(DISTINCT orders.id) as count')
+            ->selectRaw('orders.status')
+            ->groupBy('date', 'orders.status')
+            ->orderBy('date')
+            ->get();
+
+        // Preparar dados para o gráfico
+        $chartLabels = [];
+        $chartConfirmed = [];
+        $chartPending = [];
+        
+        $last30Days = collect(range(29, 0))->map(function ($days) {
+            return now()->subDays($days)->format('Y-m-d');
+        });
+
+        foreach ($last30Days as $date) {
+            $chartLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
+            $confirmed = $salesData->where('date', $date)->where('status', 1)->sum('total') ?? 0;
+            $pending = $salesData->where('date', $date)->where('status', 2)->sum('total') ?? 0;
+            $chartConfirmed[] = (float) $confirmed;
+            $chartPending[] = (float) $pending;
+        }
+
+        // Dados para comparação com período anterior (últimos 30 dias vs 30 dias anteriores)
+        $previousPeriodData = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+            ->where('lotes.type', 0)
+            ->where('orders.created_at', '>=', now()->subDays(60))
+            ->where('orders.created_at', '<', now()->subDays(30))
+            ->selectRaw('SUM(CASE 
+                WHEN coupons.discount_type = 0 AND coupons.code <> "" THEN order_items.value - (coupons.discount_value * order_items.value)
+                WHEN coupons.discount_type = 1 AND coupons.code <> "" THEN order_items.value - coupons.discount_value 
+                WHEN coupons.discount_type IS NULL AND coupons.code IS NULL THEN order_items.value
+                END) as total')
+            ->selectRaw('orders.status')
+            ->groupBy('orders.status')
+            ->get();
+
+        $previousConfirmed = (float) ($previousPeriodData->where('status', 1)->sum('total') ?? 0);
+        $previousPending = (float) ($previousPeriodData->where('status', 2)->sum('total') ?? 0);
+        $currentConfirmed = (float) ($total_confirmado->total_confirmado ?? 0);
+        $currentPending = (float) ($total_pendente->total_pendente ?? 0);
+        
+        // Calcular variação percentual
+        $confirmedChange = $previousConfirmed > 0 
+            ? (($currentConfirmed - $previousConfirmed) / $previousConfirmed) * 100 
+            : ($currentConfirmed > 0 ? 100 : 0);
+        $pendingChange = $previousPending > 0 
+            ? (($currentPending - $previousPending) / $previousPending) * 100 
+            : ($currentPending > 0 ? 100 : 0);
+        
+        $confirmedCountChange = 0;
+        $pendingCountChange = 0;
+        
+        // Comparação de quantidade de ingressos
+        $previousConfirmedCount = DB::table('orders')
+            ->where('status', 1)
+            ->where('created_at', '>=', now()->subDays(60))
+            ->where('created_at', '<', now()->subDays(30))
+            ->count();
+        
+        $previousPendingCount = DB::table('orders')
+            ->where('status', 2)
+            ->where('created_at', '>=', now()->subDays(60))
+            ->where('created_at', '<', now()->subDays(30))
+            ->count();
+        
+        if ($previousConfirmedCount > 0) {
+            $confirmedCountChange = ((count($ingressos_confirmados) - $previousConfirmedCount) / $previousConfirmedCount) * 100;
+        } elseif (count($ingressos_confirmados) > 0) {
+            $confirmedCountChange = 100;
+        }
+        
+        if ($previousPendingCount > 0) {
+            $pendingCountChange = ((count($ingressos_pendentes) - $previousPendingCount) / $previousPendingCount) * 100;
+        } elseif (count($ingressos_pendentes) > 0) {
+            $pendingCountChange = 100;
+        }
+
+        return view('dashboard', compact(
+            'event_count', 
+            'ingressos_confirmados', 
+            'ingressos_cancelados', 
+            'ingressos_pendentes', 
+            'total_confirmado', 
+            'total_pendente',
+            'chartLabels',
+            'chartConfirmed',
+            'chartPending',
+            'confirmedChange',
+            'pendingChange',
+            'confirmedCountChange',
+            'pendingCountChange'
+        ));
+    }
+
+    public function getChartData(Request $request)
+    {
+        $period = $request->input('period', 30); // 7, 30, 90 dias
+        
+        $salesData = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+            ->where('lotes.type', 0)
+            ->where('orders.created_at', '>=', now()->subDays($period))
+            ->selectRaw('DATE(orders.created_at) as date')
+            ->selectRaw('SUM(CASE 
+                WHEN coupons.discount_type = 0 AND coupons.code <> "" THEN order_items.value - (coupons.discount_value * order_items.value)
+                WHEN coupons.discount_type = 1 AND coupons.code <> "" THEN order_items.value - coupons.discount_value 
+                WHEN coupons.discount_type IS NULL AND coupons.code IS NULL THEN order_items.value
+                END) as total')
+            ->selectRaw('COUNT(DISTINCT orders.id) as count')
+            ->selectRaw('orders.status')
+            ->groupBy('date', 'orders.status')
+            ->orderBy('date')
+            ->get();
+
+        // Preparar dados para o gráfico
+        $chartLabels = [];
+        $chartConfirmed = [];
+        $chartPending = [];
+        
+        $days = collect(range($period - 1, 0))->map(function ($days) {
+            return now()->subDays($days)->format('Y-m-d');
+        });
+
+        foreach ($days as $date) {
+            $chartLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
+            $confirmed = $salesData->where('date', $date)->where('status', 1)->sum('total') ?? 0;
+            $pending = $salesData->where('date', $date)->where('status', 2)->sum('total') ?? 0;
+            $chartConfirmed[] = (float) $confirmed;
+            $chartPending[] = (float) $pending;
+        }
+
+        return response()->json([
+            'labels' => $chartLabels,
+            'confirmed' => $chartConfirmed,
+            'pending' => $chartPending
+        ]);
     }
 }

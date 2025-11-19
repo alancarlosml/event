@@ -17,54 +17,85 @@ class ParticipanteSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('participantes')->insert([
-            'name' => 'Participante 1',
-            'email' => 'participante1@gmail.com',
-            'password' => Hash::make('password'),
-            'cpf' => '02587763520',
-            'phone' => '8955554544',
-            'status' => 1,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        $participantes = [
+            [
+                'name' => 'João Silva',
+                'email' => 'joao.silva@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '12345678901',
+                'phone' => '(11) 98765-4321',
+                'status' => 1,
+            ],
+            [
+                'name' => 'Maria Santos',
+                'email' => 'maria.santos@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '23456789012',
+                'phone' => '(21) 98765-4321',
+                'status' => 1,
+            ],
+            [
+                'name' => 'Pedro Oliveira',
+                'email' => 'pedro.oliveira@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '34567890123',
+                'phone' => '(31) 98765-4321',
+                'status' => 1,
+            ],
+            [
+                'name' => 'Ana Costa',
+                'email' => 'ana.costa@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '45678901234',
+                'phone' => '(41) 98765-4321',
+                'status' => 1,
+            ],
+            [
+                'name' => 'Carlos Ferreira',
+                'email' => 'carlos.ferreira@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '56789012345',
+                'phone' => '(51) 98765-4321',
+                'status' => 1,
+            ],
+            [
+                'name' => 'Juliana Alves',
+                'email' => 'juliana.alves@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '67890123456',
+                'phone' => '(11) 97654-3210',
+                'status' => 1,
+            ],
+            [
+                'name' => 'Roberto Lima',
+                'email' => 'roberto.lima@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '78901234567',
+                'phone' => '(21) 97654-3210',
+                'status' => 1,
+            ],
+            [
+                'name' => 'Fernanda Rocha',
+                'email' => 'fernanda.rocha@example.com',
+                'password' => Hash::make('12345678'),
+                'cpf' => '89012345678',
+                'phone' => '(31) 97654-3210',
+                'status' => 1,
+            ],
+        ];
 
-        DB::table('participantes')->insert([
-            'name' => 'Participante 2',
-            'email' => 'participante2@gmail.com',
-            'password' => Hash::make('password'),
-            'cpf' => '02587763520',
-            'phone' => '8955554544',
-            'status' => 1,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        DB::table('participantes')->insert([
-            'name' => 'Participante 3',
-            'email' => 'participante3@gmail.com',
-            'password' => Hash::make('password'),
-            'cpf' => '02587763520',
-            'phone' => '8955554544',
-            'status' => 1,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        DB::table('participantes')->insert([
-            'name' => 'Participante 4',
-            'email' => 'participante4@gmail.com',
-            'password' => Hash::make('password'),
-            'cpf' => '02587763520',
-            'phone' => '8955554544',
-            'status' => 0,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-
-        DB::table('participantes')->insert([
-            'name' => 'Participante 5',
-            'email' => 'participante5@gmail.com',
-            'password' => Hash::make('password'),
-            'cpf' => '02587763520',
-            'phone' => '8955554544',
-            'status' => 0,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        foreach ($participantes as $participante) {
+            DB::table('participantes')->insert([
+                'name' => $participante['name'],
+                'email' => $participante['email'],
+                'password' => $participante['password'],
+                'cpf' => $participante['cpf'],
+                'phone' => $participante['phone'],
+                'status' => $participante['status'],
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }

@@ -6,10 +6,11 @@
           <div class="container">
     
             <ol>
-              <li><a href="index.html">Home</a></li>
-              <li>Eventos</li>
+              <li><a href="/">Home</a></li>
+              <li><a href="/painel/meus-eventos">Meus eventos</a></li>
+              <li>Adicionar usuário</li>
             </ol>
-            <h2>Gerenciar usuários convidados</h2>
+            <h2>Adicionar usuário convidado</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
@@ -18,14 +19,17 @@
             <div class="container">
                 <div class="form-group pl-3 pr-3">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
                             <strong>Erros encontrados:</strong>
-                            <ul>
+                            <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -80,6 +84,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.css" integrity="sha512-rBi1cGvEdd3NmSAQhPWId5Nd6QxE8To4ADjM2a6n0BrqQdisZ/RPUlm0YycDzvNL1HHAh1nKZqI0kSbif+5upQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/painel-admin-improvements.css') }}" type="text/css">
       @endpush
 
       @push('footer')

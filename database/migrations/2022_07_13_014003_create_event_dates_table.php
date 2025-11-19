@@ -19,8 +19,8 @@ return new class () extends Migration {
         Schema::create('event_dates', function (Blueprint $table) {
             $table->increments('id');
             $table->date('date');
-            $table->time('time_begin', $precision = 0);
-            $table->time('time_end', $precision = 0);
+            $table->time('time_begin', $precision = 0)->nullable();
+            $table->time('time_end', $precision = 0)->nullable();
             $table->integer('status');
             $table->integer('event_id')->index()->nullable()->unsigned();
             $table->foreign('event_id')

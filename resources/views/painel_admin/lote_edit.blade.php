@@ -1,31 +1,32 @@
 <x-site-layout>
     <main id="main">
-
         <!-- ======= Breadcrumbs ======= -->
         <section class="breadcrumbs">
-          <div class="container">
-    
-            <ol>
-                <li><a href="/">Home</a></li>
-                <li><a href="/painel/meus-eventos">Meus eventos</a></li>
-            </ol>
-            <h2>Editar lote: {{$lote->name}}</h2>
-    
-          </div>
+            <div class="container">
+                <ol>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/painel/meus-eventos">Meus eventos</a></li>
+                    <li>Editar lote</li>
+                </ol>
+                <h2>Editar lote: {{ htmlspecialchars($lote->name) }}</h2>
+            </div>
         </section><!-- End Breadcrumbs -->
-    
+
         <section class="inner-page" id="create-event-form">
             <div class="container">
-                <div class="form-group pl-3 pr-3">
+                <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
                             <strong>Erros encontrados:</strong>
-                            <ul>
+                            <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -34,66 +35,121 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body table-responsive p-0">
-                    <ul id="progressbar">
-                        <li class="active" id="account"><strong>Informações</strong></li>
-                        <li class="active" id="personal"><strong>Inscrições</strong></li>
-                        <li id="payment"><strong>Cupons</strong></li>
-                        <li id="confirm"><strong>Publicar</strong></li>
-                    </ul>
+                
+                <div class="card">
                     <div class="card-body">
-                        <form method="POST" action="{{route('event_home.lote_update', $lote->hash)}}">
+                        <form method="POST" action="{{ route('event_home.lote_update', $lote->hash) }}" id="lote-form" class="needs-validation" novalidate>
                             @csrf
-                            <input type="hidden" name="event_id" value="{{$lote->event_id}}">
+                            <input type="hidden" name="event_id" value="{{ $lote->event_id }}">
+                            
                             <div class="card-body">
-                                <div class="form-group mb-3">
-                                    <label for="type">Tipo do lote*</label>
-                                    <select id="type" class="form-control col-md-3" id="type" name="type">
-                                    <option selected>Selecione</option>
-                                    <option value="0" @if($lote->type == 0) selected @endif>Pago</option>
-                                    <option value="1" @if($lote->type == 1) selected @endif>Grátis</option>
+                                <h4>Informações do lote</h4>
+                                
+                                <div class="mb-3">
+                                    <label for="type" class="form-label">
+                                        Tipo do lote
+                                        <span class="text-danger" aria-label="obrigatório">*</span>
+                                    </label>
+                                    <select id="type" class="form-select" name="type" required>
+                                        <option value="">Selecione</option>
+                                        <option value="0" @if($lote->type == 0) selected @endif>Pago</option>
+                                        <option value="1" @if($lote->type == 1) selected @endif>Grátis</option>
                                     </select>
-                                    <input type="hidden" name="type_hidden" id="type_hidden" value="{{$lote->type}}">
+                                    <input type="hidden" name="type_hidden" id="type_hidden" value="{{ $lote->type }}">
+                                    <div class="invalid-feedback">Selecione o tipo do lote.</div>
                                 </div>
-                                <div class="row card-body mb-3 mb-2" style="border: solid 1px #ddd; border-radius: 0.25rem;" id="value_div">
-                                    <div class="form-group col-md-3">
-                                        <label for="tax_parcelamento">Juros do parcelamento*<a href="javascript:;" data-toggle="tooltip" data-placement="right" title="Tooltip on right"><i class="fa-solid fa-circle-question"></i></a></label>
-                                        <select id="tax_parcelamento" class="form-control" id="tax_parcelamento" name="tax_parcelamento">
-                                            <option selected>Selecione</option>
-                                            <option value="0" @if($lote->tax_parcelamento == 0) selected @endif>Pago pelo participante</option>
-                                            <option value="1" @if($lote->tax_parcelamento == 1) selected @endif>Pago pelo organizador</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="tax_service">Taxa de serviço ({{number_format($taxa_juros*100, 2, ',')}}%)*</label>
-                                        <select id="tax_service" class="form-control" id="tax_service" name="tax_service">
-                                            <option selected>Selecione</option>
-                                            <option value="0" @if($lote->tax_service == 0) selected @endif>Pago pelo participante</option>
-                                            <option value="1" @if($lote->tax_service == 1) selected @endif>Pago pelo organizador</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="value">Valor do ingresso*</label>
-                                        <input type="text" class="form-control" id="value" name="value" placeholder="00,00" value="{{$lote->value ?? old('value')}}">
-                                    </div>
-                                    <div class="form-group col-md-12">
-                                        <label for="value">Forma de pagamento</label> <br/>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="form_pagamento[]" value="1" @if(strpos($lote->form_pagamento, '1') !== false) checked @endif>
-                                            <label class="form-check-label" for="inlineCheckbox1">Cartão de crédito</label>
+                                
+                                <div class="card p-3 mb-3" id="value_div" style="border: 1px solid #dee2e6; border-radius: 8px; background-color: #f8f9fa;">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="tax_parcelamento" class="form-label">
+                                                Juros do parcelamento
+                                                <span class="text-danger">*</span>
+                                                <a href="javascript:;" data-bs-toggle="tooltip" data-bs-placement="right" title="Define quem paga os juros do parcelamento">
+                                                    <i class="fa-solid fa-circle-question text-muted"></i>
+                                                </a>
+                                            </label>
+                                            <select id="tax_parcelamento" class="form-select" name="tax_parcelamento" required>
+                                                <option value="">Selecione</option>
+                                                <option value="0" @if($lote->tax_parcelamento == 0) selected @endif>Pago pelo participante</option>
+                                                <option value="1" @if($lote->tax_parcelamento == 1) selected @endif>Pago pelo organizador</option>
+                                            </select>
+                                            <div class="invalid-feedback">Selecione uma opção.</div>
                                         </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="form_pagamento[]" value="2" @if(strpos($lote->form_pagamento, '2') !== false) checked @endif>
-                                            <label class="form-check-label" for="inlineCheckbox2">Boleto bancário <a href="javascript:;" data-toggle="tooltip" data-placement="right" title="Tooltip on right"><i class="fa-solid fa-circle-question"></i></a></label>
+                                        
+                                        <div class="col-md-4">
+                                            <label for="tax_service" class="form-label">
+                                                Taxa de serviço ({{ number_format($taxa_juros * 100, 2, ',', '.') }}%)
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <select id="tax_service" class="form-select" name="tax_service" required>
+                                                <option value="">Selecione</option>
+                                                <option value="0" @if($lote->tax_service == 0) selected @endif>Pago pelo participante</option>
+                                                <option value="1" @if($lote->tax_service == 1) selected @endif>Pago pelo organizador</option>
+                                            </select>
+                                            <div class="invalid-feedback">Selecione uma opção.</div>
                                         </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="form_pagamento[]" value="3" @if(strpos($lote->form_pagamento, '3') !== false) checked @endif>
-                                            <label class="form-check-label" for="inlineCheckbox3">PIX <a href="javascript:;" data-toggle="tooltip" data-placement="right" title="Tooltip on right"><i class="fa-solid fa-circle-question"></i></a></label>
+                                        
+                                        <div class="col-md-4">
+                                            <label for="value" class="form-label">
+                                                Valor do ingresso
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            @php
+                                                // Formatar valor: converter de decimal (299.00) para formato brasileiro (299,00)
+                                                $formattedValue = '';
+                                                if ($lote->value) {
+                                                    // Remove formatação existente e converte para número
+                                                    $numericValue = is_numeric($lote->value) ? $lote->value : str_replace(',', '.', str_replace('.', '', $lote->value));
+                                                    // Formata com 2 casas decimais, vírgula como separador decimal
+                                                    $formattedValue = number_format((float)$numericValue, 2, ',', '');
+                                                }
+                                            @endphp
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                id="value" 
+                                                name="value" 
+                                                placeholder="00,00" 
+                                                value="{{ $formattedValue ?: old('value') }}"
+                                                required
+                                            >
+                                            <div class="invalid-feedback">Insira um valor válido.</div>
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <label class="form-label">
+                                                Forma de pagamento
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="form_pagamento[]" value="1" @if(strpos($lote->form_pagamento ?? '', '1') !== false) checked @endif>
+                                                <label class="form-check-label" for="inlineCheckbox1">Cartão de crédito</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="form_pagamento[]" value="2" @if(strpos($lote->form_pagamento ?? '', '2') !== false) checked @endif>
+                                                <label class="form-check-label" for="inlineCheckbox2">
+                                                    Boleto bancário
+                                                    <a href="javascript:;" data-bs-toggle="tooltip" data-bs-placement="right" title="Informações sobre boleto">
+                                                        <i class="fa-solid fa-circle-question text-muted"></i>
+                                                    </a>
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="form_pagamento[]" value="3" @if(strpos($lote->form_pagamento ?? '', '3') !== false) checked @endif>
+                                                <label class="form-check-label" for="inlineCheckbox3">
+                                                    PIX
+                                                    <a href="javascript:;" data-bs-toggle="tooltip" data-bs-placement="right" title="Informações sobre PIX">
+                                                        <i class="fa-solid fa-circle-question text-muted"></i>
+                                                    </a>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <div class="row mb-3 g-3">
-                                    <div class="col-12 col-md-8">
+                                    <div class="col-md-8">
                                         <label for="name" class="form-label">
                                             Nome do lote
                                             <span class="text-danger" aria-label="obrigatório">*</span>
@@ -103,8 +159,8 @@
                                             class="form-control"
                                             id="name"
                                             name="name"
-                                            placeholder="Nome"
-                                            value="{{ $lote->name ?? old('name') }}"
+                                            placeholder="Nome do lote"
+                                            value="{{ htmlspecialchars($lote->name ?? old('name')) }}"
                                             required
                                             aria-describedby="name-help"
                                             minlength="2"
@@ -113,8 +169,9 @@
                                         <div id="name-help" class="form-text">
                                             Mínimo 2 caracteres, máximo 255
                                         </div>
+                                        <div class="invalid-feedback">Insira um nome válido.</div>
                                     </div>
-                                    <div class="col-12 col-md-4">
+                                    <div class="col-md-4">
                                         <label for="quantity" class="form-label">
                                             Quantidade
                                             <span class="text-danger" aria-label="obrigatório">*</span>
@@ -134,56 +191,126 @@
                                         <div id="quantity-help" class="form-text">
                                             Número de ingressos disponíveis
                                         </div>
+                                        <div class="invalid-feedback">Insira uma quantidade válida.</div>
                                     </div>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label for="description">Descrição</label>
-                                    <input type="text" class="form-control" id="description" name="description" placeholder="Descrição" value="{{$lote->description ?? old('description')}}">
+                                
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Descrição</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="description" 
+                                        name="description" 
+                                        placeholder="Descrição do lote (opcional)" 
+                                        value="{{ htmlspecialchars($lote->description ?? old('description')) }}"
+                                        maxlength="255"
+                                    >
                                 </div>
-                                <div class="row mb-3">
-                                    <label class="col-md-12">Limite por compra*</label>
-                                    <div class="form-group col-md-3">
-                                    Mínimo
-                                    <input type="number" class="form-control" id="limit_min" name="limit_min" placeholder="0" value="{{old('limit_min', $lote->limit_min)}}" min="0">
+                                
+                                <div class="row mb-3 g-3">
+                                    <div class="col-md-6">
+                                        <label for="limit_min" class="form-label">
+                                            Limite mínimo por compra
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            class="form-control" 
+                                            id="limit_min" 
+                                            name="limit_min" 
+                                            placeholder="0" 
+                                            value="{{ old('limit_min', $lote->limit_min ?? 0) }}" 
+                                            min="0"
+                                            required
+                                        >
+                                        <div class="invalid-feedback">Insira um valor válido.</div>
                                     </div>
-                                    <div class="form-group col-md-3">
-                                    Máximo
-                                    <input type="number" class="form-control" id="limit_max" name="limit_max" placeholder="0" value="{{old('limit_max', $lote->limit_max)}}" min="0">
+                                    <div class="col-md-6">
+                                        <label for="limit_max" class="form-label">
+                                            Limite máximo por compra
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            class="form-control" 
+                                            id="limit_max" 
+                                            name="limit_max" 
+                                            placeholder="0" 
+                                            value="{{ old('limit_max', $lote->limit_max ?? 0) }}" 
+                                            min="0"
+                                            required
+                                        >
+                                        <div class="invalid-feedback">Insira um valor válido.</div>
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <label class="col-md-12">Período de vendas*</label>
-                                    <div class="form-group col-md-3">
-                                        <label for="number">Início</label>
-                                        <div class="input-group date" id="datetimepicker_day_begin" data-target-input="nearest">
-                                            <input class="form-control datetimepicker-input datetimepicker_day" id="input_datetimepicker_day_begin" data-target="#datetimepicker_day_begin" name="datetime_begin" autocomplete="off" value="{{ \Carbon\Carbon::parse($lote->datetime_begin)->format('d/m/Y H:i') }}"/>
-                                            <div class="input-group-append" data-target="#datetimepicker_day_begin" data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
+                                
+                                <div class="row mb-3 g-3">
+                                    <div class="col-md-6">
+                                        <label for="datetime_begin" class="form-label">
+                                            Data e hora de início
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group date" id="datetimepicker_day_begin" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input 
+                                                type="text" 
+                                                class="form-control datetimepicker-input datetimepicker_day" 
+                                                id="input_datetimepicker_day_begin"
+                                                name="datetime_begin" 
+                                                autocomplete="off" 
+                                                value="{{ \Carbon\Carbon::parse($lote->datetime_begin)->format('d/m/Y H:i') }}"
+                                                required
+                                            >
+                                            <span class="input-group-text">
+                                                <i class="fas fa-calendar"></i>
+                                            </span>
                                         </div>
+                                        <div class="invalid-feedback">Selecione uma data e hora válidas.</div>
                                     </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="number">Fim</label>
-                                        <div class="input-group date" id="datetimepicker_day_end" data-target-input="nearest">
-                                            <input class="form-control datetimepicker-input datetimepicker_day" id="input_datetimepicker_day_end" data-target="#datetimepicker_day_end" name="datetime_end" autocomplete="off" value="{{ \Carbon\Carbon::parse($lote->datetime_end)->format('d/m/Y H:i') }}"/>
-                                            <div class="input-group-append" data-target="#datetimepicker_day_end" data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                            </div>
+                                    <div class="col-md-6">
+                                        <label for="datetime_end" class="form-label">
+                                            Data e hora de fim
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group date" id="datetimepicker_day_end" data-td-target="datetimepicker" data-td-toggle="datetimepicker">
+                                            <input 
+                                                type="text" 
+                                                class="form-control datetimepicker-input datetimepicker_day" 
+                                                id="input_datetimepicker_day_end"
+                                                name="datetime_end" 
+                                                autocomplete="off" 
+                                                value="{{ \Carbon\Carbon::parse($lote->datetime_end)->format('d/m/Y H:i') }}"
+                                                required
+                                            >
+                                            <span class="input-group-text">
+                                                <i class="fas fa-calendar"></i>
+                                            </span>
                                         </div>
+                                        <div class="invalid-feedback">Selecione uma data e hora válidas.</div>
                                     </div>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label for="visibility">Visibilidade*</label>
-                                    <select id="visibility" class="form-control col-md-3" name="visibility">
-                                    <option selected>Selecione</option>
-                                    <option value="0" @if($lote->visibility == 0) selected @endif>Público</option>
-                                    <option value="1" @if($lote->visibility == 1) selected @endif>Privado</option>
+                                
+                                <div class="mb-3">
+                                    <label for="visibility" class="form-label">
+                                        Visibilidade
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="visibility" class="form-select" name="visibility" required>
+                                        <option value="">Selecione</option>
+                                        <option value="0" @if($lote->visibility == 0) selected @endif>Público</option>
+                                        <option value="1" @if($lote->visibility == 1) selected @endif>Privado</option>
                                     </select>
+                                    <div class="invalid-feedback">Selecione uma opção.</div>
                                 </div>
                             </div>
+                            
                             <div class="card-footer d-flex justify-content-between">
-                                <a href="{{ route('event_home.create.step.two') }}" class="btn btn-secondary">Voltar</a>
-                                <button type="submit" class="btn btn-primary">Salvar</button>
+                                <a href="{{ route('event_home.create.step.two') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="submit-btn">
+                                    <i class="fas fa-save me-2"></i>Salvar alterações
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -191,61 +318,135 @@
             </div>
         </section>
     
-      </main><!-- End #main -->
+    </main><!-- End #main -->
 
-      @push('head')
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
-            integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @push('head')
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.css">
-        {{-- <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet"> --}}
-      @endpush
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/painel-admin-improvements.css') }}" type="text/css">
+        <style>
+            /* Corrigir overflow horizontal */
+            body {
+                overflow-x: hidden;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            
+            .row > * {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            
+            /* Garantir que selects tenham setinha */
+            .form-select {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+                background-repeat: no-repeat;
+                background-position: right 0.75rem center;
+                background-size: 16px 12px;
+                padding-right: 2.5rem;
+            }
+            
+            /* Ícone do calendário maior e padronizado */
+            .input-group-text {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .input-group-text i.fas.fa-calendar {
+                font-size: 1rem;
+                color: #6c757d;
+            }
+            
+            /* Remover larguras fixas problemáticas */
+            .form-control.col-md-3,
+            .form-select.col-md-3 {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            /* Invalid feedback deve estar oculto por padrão */
+            .invalid-feedback {
+                display: none;
+            }
+            
+            /* Só mostrar quando o campo for inválido */
+            .was-validated .form-control:invalid ~ .invalid-feedback,
+            .was-validated .form-select:invalid ~ .invalid-feedback,
+            .form-control.is-invalid ~ .invalid-feedback,
+            .form-select.is-invalid ~ .invalid-feedback {
+                display: block;
+            }
+        </style>
+    @endpush
 
-      @push('footer')
-      
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
-            integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @push('footer')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-        {{-- <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script> --}}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script type="text/javascript" src="{{ asset('assets_conference/js/jquery.mask.js') }}"></script>
-        {{-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js">
-        <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.js"></script> --}}
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.js"></script>
 
-        </script>
-
         <script>
         $(document).ready(function() {
-
-            $('#value').mask("#.##0,00", {
+            // Máscara para valor monetário - formatar após carregar o valor
+            var valueInput = $('#value');
+            var currentValue = valueInput.val();
+            
+            // Se o valor já está formatado, manter; senão, formatar
+            if (currentValue && !currentValue.includes(',')) {
+                // Converter de formato decimal (299.00) para brasileiro (299,00)
+                var numericValue = parseFloat(currentValue.replace(/\./g, '').replace(',', '.'));
+                if (!isNaN(numericValue)) {
+                    valueInput.val(numericValue.toFixed(2).replace('.', ','));
+                }
+            }
+            
+            // Aplicar máscara
+            valueInput.mask("#.##0,00", {
                 reverse: true
             });
             
-            $('[data-toggle="tooltip"]').tooltip({
-                placement : 'right'
+            // Tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            type_hidden_val = $('#type_hidden').val();
-
+            // Controlar exibição do bloco de valor
+            var type_hidden_val = $('#type_hidden').val();
             $('#type option[value="' + type_hidden_val + '"]').prop("selected", true);
-            if(type_hidden_val == 1){
+            
+            if(type_hidden_val == 1) {
                 $('#value_div').hide();
-            }else{
+            } else {
                 $('#value_div').show();
             }
 
-            $('#type').change(function(){
-                id_type = $(this).val();
-                if(id_type == 1){
+            $('#type').change(function() {
+                var id_type = $(this).val();
+                if(id_type == 1) {
                     $('#value_div').hide();
-                }else{
+                    // Remover required dos campos quando oculto
+                    $('#value_div select, #value_div input').removeAttr('required');
+                } else {
                     $('#value_div').show();
+                    // Adicionar required quando visível
+                    $('#tax_parcelamento, #tax_service, #value').attr('required', 'required');
                 }
             });
 
+            // Configuração do datepicker
             const localePt_Br = {
                 days: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
                 daysShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
@@ -254,37 +455,72 @@
                 monthsShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
                 today: 'Hoje',
                 clear: 'Cancelar',
-                onlyTimepicker: true,
                 dateFormat: 'dd/MM/yyyy',
                 timeFormat: 'HH:mm',
                 firstDay: 1
-            }
+            };
 
-            dpMin = new AirDatepicker('#input_datetimepicker_day_begin', {
+            var dpMin = new AirDatepicker('#input_datetimepicker_day_begin', {
                 timepicker: true,
-                minDate: new Date(),
                 locale: localePt_Br,
                 onSelect({date}) {
-                    dpMax.update({
-                        minDate: date
-                    })
+                    if (dpMax) {
+                        dpMax.update({
+                            minDate: date
+                        });
+                    }
                 }
-            })
+            });
 
-            dpMax = new AirDatepicker('#input_datetimepicker_day_end', {
+            var dpMax = new AirDatepicker('#input_datetimepicker_day_end', {
                 timepicker: true,
-                minDate: new Date(),
                 locale: localePt_Br,
                 onSelect({date}) {
-                    dpMin.update({
-                        maxDate: date
-                    })
+                    if (dpMin) {
+                        dpMin.update({
+                            maxDate: date
+                        });
+                    }
                 }
-            })
+            });
+            
+            // Validação do formulário - só adicionar was-validated no submit
+            (function() {
+                'use strict';
+                var form = document.getElementById('lote-form');
+                if (form) {
+                    // Remover was-validated se existir (caso tenha sido adicionado antes)
+                    form.classList.remove('was-validated');
+                    
+                    // Validar no submit
+                    form.addEventListener('submit', function(event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        // Só adicionar was-validated quando o formulário for submetido
+                        form.classList.add('was-validated');
+                    }, false);
+                    
+                    // Validar campos individualmente ao sair (blur)
+                    var inputs = form.querySelectorAll('input, select, textarea');
+                    inputs.forEach(function(input) {
+                        input.addEventListener('blur', function() {
+                            if (form.classList.contains('was-validated')) {
+                                if (this.checkValidity()) {
+                                    this.classList.remove('is-invalid');
+                                    this.classList.add('is-valid');
+                                } else {
+                                    this.classList.remove('is-valid');
+                                    this.classList.add('is-invalid');
+                                }
+                            }
+                        });
+                    });
+                }
+            })();
         });
-    
-    </script>
-      
+        </script>
     @endpush
 
 </x-site-layout>

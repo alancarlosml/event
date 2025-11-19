@@ -8,6 +8,7 @@
             <ol>
                 <li><a href="/">Home</a></li>
                 <li><a href="/painel/meus-eventos">Meus eventos</a></li>
+                <li>Usuários convidados</li>
             </ol>
             <h2>Gerenciar usuários convidados</h2>
     
@@ -18,19 +19,24 @@
             <div class="container">
                 <div class="form-group pl-3 pr-3">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($message = Session::get('error'))
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2" aria-hidden="true"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
                             <strong>Erros encontrados:</strong>
-                            <ul>
+                            <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach

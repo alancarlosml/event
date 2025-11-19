@@ -1,4 +1,14 @@
 <x-app-layout>
+    @push('head')
+        <!-- Dashboard Improvements CSS -->
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/dashboard-improvements.css') }}" type="text/css">
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    @endpush
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+    
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
@@ -43,8 +53,10 @@
                                         <div class="small-box bg-info">
                                             <div class="inner">
                                                 <h3>{{ count($event_count) }}</h3>
-
                                                 <p>Eventos ativos</p>
+                                            </div>
+                                            <div class="icon">
+                                                <i class="fas fa-calendar-check"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -54,6 +66,9 @@
                                                 <h3>{{ count($ingressos_cancelados) }}</h3>
                                                 <p>Ingressos cancelados</p>
                                             </div>
+                                            <div class="icon">
+                                                <i class="fas fa-times-circle"></i>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-2 col-6">
@@ -62,31 +77,70 @@
                                                 <h3>{{ count($ingressos_pendentes) }}</h3>
                                                 <p>Ingressos pendentes</p>
                                             </div>
+                                            <div class="icon">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-2 col-6">
-                                        <div class="small-box bg-success">
+                                        <div class="small-box bg-success" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                             title="Total de ingressos com pagamento confirmado">
                                             <div class="inner">
                                                 <h3>{{ count($ingressos_confirmados) }}</h3>
                                                 <p>Ingressos confirmados</p>
+                                                @if(isset($confirmedCountChange))
+                                                    <small class="stat-change {{ $confirmedCountChange >= 0 ? 'positive' : 'negative' }}">
+                                                        @if($confirmedCountChange >= 0)
+                                                            <i class="fas fa-arrow-up"></i>
+                                                        @else
+                                                            <i class="fas fa-arrow-down"></i>
+                                                        @endif
+                                                        {{ number_format(abs($confirmedCountChange), 1) }}% vs período anterior
+                                                    </small>
+                                                @endif
+                                            </div>
+                                            <div class="icon">
+                                                <i class="fas fa-check-circle"></i>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-2 col-6">
                                         <div class="small-box bg-warning">
                                             <div class="inner">
-                                                <h3>@money($total_pendente->total_pendente)</h3>
+                                                <h3>@money($total_pendente->total_pendente ?? 0)</h3>
                                                 <p>Valor total pendente</p>
+                                            </div>
+                                            <div class="icon">
+                                                <i class="fas fa-money-bill-wave"></i>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-2 col-6">
                                         <div class="small-box bg-success">
                                             <div class="inner">
-                                                <h3>@money($total_confirmado->total_confirmado)</h3>
-
+                                                <h3>@money($total_confirmado->total_confirmado ?? 0)</h3>
                                                 <p>Valor total confirmado</p>
                                             </div>
+                                            <div class="icon">
+                                                <i class="fas fa-dollar-sign"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Gráfico de Vendas -->
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="chart-container">
+                                            <div class="chart-header">
+                                                <h3 class="chart-title">Vendas nos Últimos 30 Dias</h3>
+                                                <div class="chart-filters">
+                                                    <button class="chart-filter-btn active" data-period="30">30 dias</button>
+                                                    <button class="chart-filter-btn" data-period="7">7 dias</button>
+                                                    <button class="chart-filter-btn" data-period="90">90 dias</button>
+                                                </div>
+                                            </div>
+                                            <canvas id="salesChart"></canvas>
                                         </div>
                                     </div>
                                 </div>
@@ -326,6 +380,195 @@
     @endpush
 
 	@push('footer')
+        <!-- Toast Notifications JS -->
+        <script>
+            function showToast(message, type = 'info', duration = 3000) {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle',
+                    info: 'fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type] || icons.info}"></i>
+                    </div>
+                    <div class="toast-message">${message}</div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 10);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+        </script>
+        
+        <!-- Chart.js Configuration -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const ctx = document.getElementById('salesChart');
+                if (!ctx) return;
+                
+                const chartLabels = @json($chartLabels ?? []);
+                const chartConfirmed = @json($chartConfirmed ?? []);
+                const chartPending = @json($chartPending ?? []);
+                
+                const salesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Vendas Confirmadas',
+                            data: chartConfirmed,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }, {
+                            label: 'Vendas Pendentes',
+                            data: chartPending,
+                            borderColor: '#ffc107',
+                            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    font: {
+                                        size: 12,
+                                        weight: '600'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 14,
+                                    weight: '600'
+                                },
+                                bodyFont: {
+                                    size: 12
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': R$ ' + context.parsed.y.toLocaleString('pt-BR', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toLocaleString('pt-BR', {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0
+                                        });
+                                    },
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+                
+                // Filtros de período (para implementação futura)
+                document.querySelectorAll('.chart-filter-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const period = this.dataset.period;
+                        updateChart(period);
+                    });
+                });
+                
+                function updateChart(period) {
+                    // Mostrar loading
+                    ctx.style.opacity = '0.5';
+                    
+                    fetch(`{{ route('dashboard.chart-data') }}?period=${period}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Atualizar dados do gráfico
+                        salesChart.data.labels = data.labels;
+                        salesChart.data.datasets[0].data = data.confirmed;
+                        salesChart.data.datasets[1].data = data.pending;
+                        salesChart.update();
+                        
+                        ctx.style.opacity = '1';
+                        showToast(`Gráfico atualizado: ${period} dias`, 'success');
+                    })
+                    .catch(error => {
+                        console.error('Erro ao atualizar gráfico:', error);
+                        ctx.style.opacity = '1';
+                        showToast('Erro ao atualizar gráfico', 'error');
+                    });
+                }
+            });
+        </script>
+        
         <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>

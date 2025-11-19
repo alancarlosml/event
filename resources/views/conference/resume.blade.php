@@ -1,97 +1,129 @@
 <x-event-layout>
+    @push('head')
+        <link rel="stylesheet" href="{{ asset('assets_conference/css/checkout-improvements.css') }}" type="text/css">
+    @endpush
+    
     <section id="checkout" class="section-bg" style="margin-top: 120px">
         <div class="container pb-5">
-            <div class="py-5 text-center">
-                <div class="section-header">
-                    <h2>Finalizar compra</h2>
-                </div>
-            </div>
-            <div class="card mb-5 pt-3 pb-3">
-                <div class="container">
-                    <div class="row gy-3"> <!-- gy-3 para responsividade -->
-                        <div class="col-4">
-                            <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ $event->name }}" class="img-fluid" loading="lazy">
-                        </div>
-                        <div class="col-8">
-                            <h3 style="font-size: 24px">{{ $event->name }}</h3>
-                            <span><b>Data:</b> </span><br>
-                            {{-- <span><b>Data:</b> {{ \Carbon\Carbon::parse($eventDate->date)->format('d/m/y') }}</span><br> --}}
-                            <span><b>Local:</b> {{ $event->place->name }}</span><br>
-                            <span><b>Lote(s) selecionado(s):</b> </span>
-                            <ul class="list-style" role="list" aria-label="Lotes selecionados">
-                                @foreach ($array_lotes as $array_lote)
-                                    <li class="ml-4" style="list-style-type: circle">{{ $array_lote['quantity'] }} x {{ $array_lote['name'] }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+            <!-- Progresso do Checkout -->
+            <div class="checkout-progress">
+                <div class="checkout-progress-steps">
+                    <div class="checkout-step completed">
+                        <div class="checkout-step-number">1</div>
+                        <div class="checkout-step-label">Selecionar Ingressos</div>
+                    </div>
+                    <div class="checkout-step active">
+                        <div class="checkout-step-number">2</div>
+                        <div class="checkout-step-label">Dados da Inscrição</div>
+                    </div>
+                    <div class="checkout-step">
+                        <div class="checkout-step-number">3</div>
+                        <div class="checkout-step-label">Pagamento</div>
+                    </div>
+                    <div class="checkout-step">
+                        <div class="checkout-step-number">4</div>
+                        <div class="checkout-step-label">Confirmação</div>
                     </div>
                 </div>
             </div>
-            <div class="row gy-4"> <!-- gy-4 para espaçamento -->
+            
+            <div class="row gy-4">
+                <!-- Resumo da Compra (Sticky) -->
                 <div class="col-md-4 order-md-2 mb-4">
-                    <div class="section-title-header text-center">
-                        <h2 class="section-title wow fadeInUp animated">Resumo da compra</h2>
-                    </div>
-                    <ul class="list-group mb-3" role="list" aria-label="Resumo da compra">
-                        @foreach ($array_lotes as $array_lote)
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <div>{{ $array_lote['quantity'] }} @if ($array_lote['quantity'] == 1) ingresso @else ingressos @endif</div>
-                                    @if ($array_lote['value'] == 0)
-                                        <div class="text-muted">Grátis</div>
-                                    @else
-                                        <div class="text-muted">@money($array_lote['value'])</div>
-                                    @endif
+                    <div class="checkout-summary">
+                        <h3 class="checkout-summary-title">
+                            <i class="fas fa-shopping-cart"></i> Resumo da compra
+                        </h3>
+                        
+                        <!-- Card do Evento -->
+                        <div class="checkout-event-card">
+                            <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ $event->name }}" class="checkout-event-image" loading="lazy">
+                            <div class="checkout-event-info">
+                                <div class="checkout-event-name">{{ $event->name }}</div>
+                                <div class="checkout-event-details">
+                                    <div><i class="fas fa-map-marker-alt"></i> {{ $event->place->name }}</div>
+                                    <div><i class="fas fa-calendar"></i> {{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m/Y') }}</div>
                                 </div>
-                            </li>
-                        @endforeach
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Subtotal</span>
-                            <span class="text-muted">@money($subtotal)</span>
-                        </li>
-                        @if ($coupon)
-                            <li class="list-group-item d-flex justify-content-between bg-light">
-                                <div class="text-success">
-                                    <h6 class="my-0">Cupom ({{ $coupon[0]['code'] }})</h6>
+                            </div>
+                        </div>
+                        
+                        <!-- Itens -->
+                        <div class="checkout-items-list">
+                            @foreach ($array_lotes as $array_lote)
+                                <div class="checkout-item">
+                                    <div class="checkout-item-name">
+                                        <strong>{{ $array_lote['name'] }}</strong>
+                                    </div>
+                                    <div class="checkout-item-quantity">
+                                        {{ $array_lote['quantity'] }}x
+                                    </div>
+                                    <div class="checkout-item-price {{ $array_lote['value'] == 0 ? 'checkout-item-free' : '' }}">
+                                        @if ($array_lote['value'] == 0)
+                                            Grátis
+                                        @else
+                                            @money($array_lote['value'] * $array_lote['quantity'])
+                                        @endif
+                                    </div>
                                 </div>
-                                <span class="text-success">
-                                    -
-                                    @if ($coupon[0]['type'] == 0)
-                                        @money(($subtotal * $coupon[0]['value']) / 100)
-                                    @else
-                                        @money($coupon[0]['value'])
-                                    @endif
-                                </span>
-                            </li>
-                        @endif
-                        <li class="list-group-item d-flex justify-content-between" style="border-top: solid 1px #999">
-                            <strong>Total</strong>
-                            <strong>@money($total)</strong>
-                        </li>
-                    </ul>
-                    <div class="mb-3">
-                        <div class="row">
-                            <div class="col-12 d-flex justify-content-between">
-                                <strong>Compra 100% segura!&nbsp;&nbsp;&nbsp;</strong>
-                                <img src="/assets_conference/imgs/mercado-pago-logo.png" alt="Mercado Pago" height="30px" loading="lazy" />
+                            @endforeach
+                        </div>
+                        
+                        <!-- Totais -->
+                        <div class="checkout-totals">
+                            <div class="checkout-total-row subtotal">
+                                <span>Subtotal</span>
+                                <span>@money($subtotal)</span>
+                            </div>
+                            @if ($coupon)
+                                <div class="checkout-total-row coupon">
+                                    <span>
+                                        <i class="fas fa-tag"></i> Cupom ({{ $coupon[0]['code'] }})
+                                    </span>
+                                    <span>
+                                        -
+                                        @if ($coupon[0]['type'] == 0)
+                                            @money(($subtotal * $coupon[0]['value']) / 100)
+                                        @else
+                                            @money($coupon[0]['value'])
+                                        @endif
+                                    </span>
+                                </div>
+                            @endif
+                            <div class="checkout-total-row final">
+                                <span>Total</span>
+                                <span>@money($total)</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Segurança -->
+                        <div class="checkout-security">
+                            <div class="checkout-security-title">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Compra 100% segura</span>
+                            </div>
+                            <div class="checkout-security-logo">
+                                <img src="{{ asset('assets_conference/imgs/mercado-pago-logo.png') }}" alt="Mercado Pago" height="30px" loading="lazy" />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-8 order-md-1">
-                    <div class="form-group p-3">
+                    <div class="checkout-form-container">
                         @if ($message = Session::get('success'))
-                            <div class="alert alert-success">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <strong>{{ $message }}</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endif
                         @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <strong>Erros encontrados:</strong>
+                                <ul class="mb-0">
                                     @foreach ($errors->all() as $error)
                                         <li>{{ $error }}</li>
                                     @endforeach
                                 </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endif
 
@@ -100,41 +132,56 @@
                             <strong>Por favor, corrija os seguintes erros:</strong>
                             <ul></ul>
                         </div>
-                    </div>
-                    <form method="POST" id="checkout_submit" action="{{ route('conference.payment', $event->slug) }}">
-                        @csrf
-                        <div class="mb-3">
-                            <div class="section-title-header text-center mb-4">
-                                <h2 class="section-title wow fadeInUp animated">Dados da inscrição</h2>
-                            </div>
-                            @foreach ($array_lotes_obj as $k => $lote_obj)
-                                <strong class="d-block mb-3"><u>Informações do participante #{{ $k + 1 }} ({{ $lote_obj['name'] }})</u></strong>
+                        
+                        <form method="POST" id="checkout_submit" action="{{ route('conference.payment', $event->slug) }}">
+                            @csrf
+                            <div class="checkout-form-section">
+                                <h3 class="checkout-form-section-title">
+                                    <i class="fas fa-user-edit"></i>
+                                    Dados da inscrição
+                                </h3>
+                                
+                                @foreach ($array_lotes_obj as $k => $lote_obj)
+                                    <div class="participant-card">
+                                        <div class="participant-card-header">
+                                            <div class="participant-card-number">{{ $k + 1 }}</div>
+                                            <h4 class="participant-card-title">Participante #{{ $k + 1 }}</h4>
+                                            <span class="participant-card-lote">{{ $lote_obj['name'] }}</span>
+                                        </div>
                                 @foreach ($questions as $id => $question)
                                     @switch($question->option_id)
                                         @case(1)
                                             {{-- Campo texto --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="text" class="form-control new_field"
+                                                <input type="text" 
+                                                    class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    placeholder="Digite {{ strtolower($question->question) }}"
                                                     @if ($question->required) required="required" title="Este campo é obrigatório" @endif>
                                             </div>
                                         @break
 
                                         @case(2)
                                             {{-- Campo seleção --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <select class="form-control new_field"
+                                                <select class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
-                                                    <option value="0">Selecione</option>
+                                                    <option value="0">Selecione uma opção</option>
                                                     @foreach ($question->value() as $value)
                                                         <option>{{ $value->value }}</option>
                                                     @endforeach
@@ -295,18 +342,46 @@
 
                                         @case(14)
                                             {{-- Campo estados --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <select class="form-control new_field"
+                                                <select class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                                     <option value="0">Selecione</option>
-                                                    @foreach ($question->value() as $value)
-                                                        <option>{{ $value->value }}</option>
-                                                    @endforeach
+                                                    @if(isset($states))
+                                                        @foreach ($states as $state)
+                                                            <option value="{{ $state->id }}">{{ $state->name }}</option>
+                                                        @endforeach
+                                                    @else
+                                                        {{-- Fallback: usar valores da option se estados não estiverem disponíveis --}}
+                                                        @php
+                                                            $option = $question->option;
+                                                            if($option && $option->value) {
+                                                                $stateCodes = explode(',', $option->value);
+                                                                $stateNames = [
+                                                                    'AC' => 'Acre', 'AL' => 'Alagoas', 'AP' => 'Amapá', 'AM' => 'Amazonas',
+                                                                    'BA' => 'Bahia', 'CE' => 'Ceará', 'DF' => 'Distrito Federal', 'ES' => 'Espírito Santo',
+                                                                    'GO' => 'Goiás', 'MA' => 'Maranhão', 'MT' => 'Mato Grosso', 'MS' => 'Mato Grosso do Sul',
+                                                                    'MG' => 'Minas Gerais', 'PA' => 'Pará', 'PB' => 'Paraíba', 'PR' => 'Paraná',
+                                                                    'PE' => 'Pernambuco', 'PI' => 'Piauí', 'RJ' => 'Rio de Janeiro', 'RN' => 'Rio Grande do Norte',
+                                                                    'RS' => 'Rio Grande do Sul', 'RO' => 'Rondônia', 'RR' => 'Roraima', 'SC' => 'Santa Catarina',
+                                                                    'SP' => 'São Paulo', 'SE' => 'Sergipe', 'TO' => 'Tocantins'
+                                                                ];
+                                                                foreach($stateCodes as $code) {
+                                                                    $code = trim($code);
+                                                                    if(isset($stateNames[$code])) {
+                                                                        echo "<option value=\"{$code}\">{$stateNames[$code]}</option>";
+                                                                    }
+                                                                }
+                                                            }
+                                                        @endphp
+                                                    @endif
                                                 </select>
                                             </div>
                                         @break
@@ -314,15 +389,19 @@
                                         @default
                                     @endswitch
                                 @endforeach
-                                @if (!$loop->last)
-                                    <hr>
-                                @endif
-                            @endforeach
-                        </div>
-
-                        <button type="submit" class="btn btn-common sub-btn float-right"
-                            id="finalizar_comprar">Continuar para pagamento</button>
-                    </form>
+                                    </div>
+                                    @if (!$loop->last)
+                                        <hr style="margin: 2rem 0; border-color: #e9ecef;">
+                                    @endif
+                                @endforeach
+                            </div>
+                            
+                            <button type="submit" class="checkout-submit-btn" id="finalizar_comprar">
+                                <i class="fas fa-credit-card"></i>
+                                Continuar para pagamento
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

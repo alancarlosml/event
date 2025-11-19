@@ -17,14 +17,17 @@
             <div class="container">
                 <div class="mb-3 ps-3 pe-3">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
                             <strong>Erros encontrados:</strong>
-                            <ul>
+                            <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -89,18 +92,6 @@
                                     </td>
                                     <td>
                                         <div class="d-flex">
-                                            {{-- <a class="btn btn-success btn-sm mr-1" href="{{route('event.reports', $event->id)}}">
-                                                <i class="fa-solid fa-chart-pie"></i>
-                                                Relatórios
-                                            </a> --}}
-                                            {{-- <a class="btn btn-secondary btn-sm mr-1" href="{{route('event.lotes', $event->id)}}">
-                                                <i class="fa-solid fa-tags"></i>
-                                                Lotes
-                                            </a>
-                                            <a class="btn btn-warning btn-sm mr-1" href="{{route('event.coupons', $event->id)}}">
-                                                <i class="fa-solid fa-percent"></i>
-                                                Cupons
-                                            </a> --}}
                                             <div class="btn-group" role="group">
                                                 <button id="btnGroupDrop" type="button" class="btn btn-primary btn-sm me-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="fa-solid fa-gear"></i> Ações
@@ -184,6 +175,13 @@
         <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/painel-admin-improvements.css') }}" type="text/css">
+        <style>
+            /* Corrigir dropdown cortado - apenas z-index */
+            #list_events .dropdown-menu {
+                z-index: 1050 !important;
+            }
+        </style>
       @endpush
 
       @push('footer')
@@ -275,7 +273,7 @@
                 });
             });
 
-            $('#list_events').DataTable({
+            var table = $('#list_events').DataTable({
                 order: [[0, 'desc']],
                 language: {
                     "decimal":        "",
@@ -302,6 +300,8 @@
                     }
                 },
                 dom: 'Bfrtip',
+                scrollX: false,
+                autoWidth: false,
                 buttons: [
                     {
                         extend: 'csv',
@@ -367,6 +367,55 @@
                         }
                     }
                 ]
+            });
+            
+            // Corrigir dropdown cortado - mostrar acima quando está na última linha
+            $(document).on('show.bs.dropdown', '#list_events .dropdown', function(e) {
+                var $dropdown = $(this);
+                var $menu = $dropdown.find('.dropdown-menu');
+                var $row = $dropdown.closest('tr');
+                
+                // Verificar se é uma das últimas linhas
+                var $tbody = $row.closest('tbody');
+                var totalRows = $tbody.find('tr').length;
+                var rowIndex = $row.index();
+                var isLastRows = rowIndex >= totalRows - 3; // Últimas 3 linhas
+                
+                if (isLastRows) {
+                    // Verificar se há espaço abaixo
+                    var dropdownBottom = $dropdown.offset().top + $dropdown.outerHeight();
+                    var menuHeight = $menu.outerHeight() || 200; // Altura estimada
+                    var windowBottom = $(window).scrollTop() + $(window).height();
+                    var tableBottom = $dropdown.closest('table').offset().top + $dropdown.closest('table').outerHeight();
+                    
+                    // Se não há espaço suficiente abaixo, mostrar acima
+                    if (dropdownBottom + menuHeight > Math.min(windowBottom, tableBottom + 50)) {
+                        $menu.addClass('dropup');
+                        $menu.css({
+                            'top': 'auto',
+                            'bottom': '100%',
+                            'margin-bottom': '0.125rem',
+                            'margin-top': '0'
+                        });
+                    } else {
+                        $menu.removeClass('dropup');
+                        $menu.css({
+                            'top': '',
+                            'bottom': '',
+                            'margin-bottom': '',
+                            'margin-top': ''
+                        });
+                    }
+                } else {
+                    // Resetar estilos se não for última linha
+                    $menu.removeClass('dropup');
+                    $menu.css({
+                        'top': '',
+                        'bottom': '',
+                        'margin-bottom': '',
+                        'margin-top': ''
+                    });
+                }
             });
         });
     

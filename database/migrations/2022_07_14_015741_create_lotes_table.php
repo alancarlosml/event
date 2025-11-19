@@ -18,7 +18,7 @@ return new class () extends Migration {
 
         Schema::create('lotes', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('hash');
+            $table->string('hash', 200);
             $table->string('name');
             $table->string('description');
             $table->double('value');
