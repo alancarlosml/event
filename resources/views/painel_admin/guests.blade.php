@@ -17,7 +17,7 @@
     
         <section class="inner-page" id="create-event-form">
             <div class="container">
-                <div class="form-group pl-3 pr-3">
+                <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -45,116 +45,126 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body table-responsive p-0">
+                
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                        <h4 class="mb-0">Lista de Usuários</h4>
+                        <a href="{{route('event_home.guest_add', $event->hash)}}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Cadastrar novo usuário
+                        </a>
+                    </div>
                     <div class="card-body">
-                        {{-- <h4>Listar todos</h4> --}}
-                        <div class="form-group text-right">
-                            <a href="{{route('event_home.guest_add', $event->hash)}}" class="btn btn-success">Cadastrar novo usuário</a>
-                        </div>
-                        <table class="table table-head-fixed text-nowrap" id="table_lotes">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Email</th>
-                                    <th>Papel</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($usuarios as $usuario)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="table_guests">
+                                <thead class="table-light">
                                     <tr>
-                                        <td>{{$usuario->id}}</td>
-                                        <td>{{$usuario->name}}</td>
-                                        <td>{{$usuario->email}}</td>
-                                        <td>@if($usuario->role == 'admin') Admin @else Convidado @endif</td>
-                                        <td>@if($usuario->status == 1) <span class="badge bg-success">Ativo</span> @else <span class="badge bg-danger">Não ativo</span> @endif</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <a class="btn btn-info btn-sm mr-1" href="{{route('event_home.guest_edit', $usuario->id)}}">
-                                                    <i class="fas fa-pencil-alt">
-                                                    </i>
-                                                    Editar
-                                                </a>
-                                                @if($usuario->role != 'admin')
-                                                    <form action="{{ route('event_home.destroy_guest', $usuario->id) }}" method="POST">
-                                                        <input type="hidden" name="_method" value="DELETE">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                        <a class="btn btn-danger btn-sm mr-1"  href="javascript:;" onclick="removeData({{$usuario->id}})">
-                                                            <i class="fas fa-trash">
-                                                            </i>
-                                                            Remover
-                                                        </a>
-                                                        <button class="d-none" id="btn-remove-hidden-{{$usuario->id}}">Remover</button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$usuario->id}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de Usuário Convidado</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        Deseja realmente remover esse usuário?
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$usuario->id}}" onclick="removeSucc({{$usuario->id}})">Sim</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Papel</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach($usuarios as $usuario)
+                                        <tr data-guest-id="{{$usuario->id}}">
+                                            <td>{{$usuario->id}}</td>
+                                            <td>{{$usuario->name}}</td>
+                                            <td>{{$usuario->email}}</td>
+                                            <td>
+                                                @if($usuario->role == 'admin') 
+                                                    <span class="badge bg-primary">Admin</span>
+                                                @elseif($usuario->role == 'monitor')
+                                                    <span class="badge bg-info text-dark">Monitor</span>
+                                                @elseif($usuario->role == 'vendedor')
+                                                    <span class="badge bg-warning text-dark">Vendedor</span>
+                                                @else 
+                                                    <span class="badge bg-secondary">Convidado</span> 
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($usuario->status == 1) 
+                                                    <span class="badge bg-success">Ativo</span> 
+                                                @else 
+                                                    <span class="badge bg-danger">Inativo</span> 
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <a class="btn btn-sm btn-outline-info" href="{{route('event_home.guest_edit', $usuario->id)}}" data-bs-toggle="tooltip" title="Editar">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </a>
+                                                    @if($usuario->role != 'admin')
+                                                        <button class="btn btn-sm btn-outline-danger" onclick="removeData({{$usuario->id}})" data-bs-toggle="tooltip" title="Remover">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                        
+                                                        <form action="{{ route('event_home.destroy_guest', $usuario->id) }}" method="POST" id="form-remove-{{$usuario->id}}" class="d-none">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
+        
+        <!-- Modal de Remoção -->
+        <div class="modal fade" id="modalMsgRemove" tabindex="-1" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de Usuário Convidado</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        Deseja realmente remover esse usuário?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger" id="btn-confirm-remove">Sim, remover</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     
       </main><!-- End #main -->
 
-      @push('footer')
+      @push('head')
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+      @endpush
 
+      @push('footer')
         <script>
+            let guestIdToRemove = null;
 
             function removeData(id){
-                $('#modalMsgRemove-' + id).modal('show');
+                guestIdToRemove = id;
+                var modal = new bootstrap.Modal(document.getElementById('modalMsgRemove'));
+                modal.show();
             }
 
-            function removeSucc(id){
-                const button = $('#btn-remove-ok-' + id);
-                
-                // Mostra loading no botão
-                setButtonLoading(button[0], 'Excluindo...');
-                
-                // Executa a remoção
-                $('#btn-remove-hidden-' + id).click();
-                
-                // Fecha o modal
-                $('#modalMsgRemove-' + id).modal('hide');
-                
-                // Mostra notificação de sucesso
-                showToast('Usuário removido com sucesso!', 'success');
-                
-                // Remove a linha da tabela após um pequeno delay
-                setTimeout(() => {
-                    const row = $(`tr[data-guest-id="${id}"]`);
-                    if (row.length) {
-                        row.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                    }
-                }, 500);
-            }
-
+            document.getElementById('btn-confirm-remove').addEventListener('click', function() {
+                if (guestIdToRemove) {
+                    document.getElementById('form-remove-' + guestIdToRemove).submit();
+                }
+            });
+            
+            $(document).ready(function() {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                });
+            });
         </script>
-      
-    @endpush
+      @endpush
 
 </x-site-layout>

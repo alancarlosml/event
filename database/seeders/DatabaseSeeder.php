@@ -42,6 +42,9 @@ class DatabaseSeeder extends Seeder
             LoteSeeder::class,
             CouponSeeder::class,
             
+            // Roles devem ser criadas antes dos participantes
+            RoleSeeder::class,
+            
             // Seeders independentes
             ParticipanteSeeder::class,
         ]);

@@ -7,6 +7,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Participante;
+use Spatie\Permission\Models\Role;
 
 class ParticipanteSeeder extends Seeder
 {
@@ -17,6 +19,30 @@ class ParticipanteSeeder extends Seeder
      */
     public function run()
     {
+        // Criar super admin primeiro
+        $superAdmin = Participante::firstOrCreate(
+            ['email' => 'admin@ticketdz6.com'],
+            [
+                'name' => 'Super Administrador',
+                'email' => 'admin@ticketdz6.com',
+                'password' => Hash::make('admin123456'),
+                'cpf' => '00000000000',
+                'phone' => '(00) 00000-0000',
+                'status' => 1,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Atribuir role super_admin se ainda não tiver
+        $superAdminRole = Role::where('name', 'super_admin')
+            ->where('guard_name', 'participante')
+            ->first();
+        
+        if ($superAdminRole && !$superAdmin->hasRole('super_admin')) {
+            $superAdmin->assignRole('super_admin');
+            $this->command->info('Super admin criado e role atribuída!');
+        }
+
         $participantes = [
             [
                 'name' => 'João Silva',
@@ -85,17 +111,18 @@ class ParticipanteSeeder extends Seeder
         ];
 
         foreach ($participantes as $participante) {
-            DB::table('participantes')->insert([
-                'name' => $participante['name'],
-                'email' => $participante['email'],
-                'password' => $participante['password'],
-                'cpf' => $participante['cpf'],
-                'phone' => $participante['phone'],
-                'status' => $participante['status'],
-                'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            Participante::firstOrCreate(
+                ['email' => $participante['email']],
+                [
+                    'name' => $participante['name'],
+                    'email' => $participante['email'],
+                    'password' => $participante['password'],
+                    'cpf' => $participante['cpf'],
+                    'phone' => $participante['phone'],
+                    'status' => $participante['status'],
+                    'email_verified_at' => now(),
+                ]
+            );
         }
     }
 }

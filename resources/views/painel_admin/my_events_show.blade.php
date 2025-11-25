@@ -212,7 +212,7 @@
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
         <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link rel="stylesheet" href="{{ asset('assets/css/print.css') }}" media="print" type="text/css"/>
-        <link rel="stylesheet" href="{{ asset('assets_admin/css/painel-admin-improvements.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
       @endpush
 
       @push('footer')

@@ -69,13 +69,14 @@
                                             </div>
                                         </div>
                                         <div class="row mt-3">
-                                            <div class="col-12 col-md-8 mb-3">
+                                            <div class="col-12 col-md-8 mb-3 text-start">
+                                                <label for="sort_events"><b>Nome do Evento</b></label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                                                     <input type="search" class="form-control" id="event_name_search" placeholder="Nome do evento" aria-label="Buscar por nome do evento">
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-4 mb-3">
+                                            <div class="col-12 col-md-4 mb-3 text-start">
                                                 <label for="sort_events"><b>Ordenar por</b></label>
                                                 <select name="sort_events" id="sort_events" class="form-select">
                                                     <option value="date_asc">Data: Mais próximo</option>

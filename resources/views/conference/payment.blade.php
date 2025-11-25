@@ -12,75 +12,7 @@
     <!-- Theme CSS -->
     @if ($event->theme == 'red')
         <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">
-    @elseif ($event->theme == 'blue')
-        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/blue.css') }}" type="text/css">
-    @elseif ($event->theme == 'green')
-        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/green.css') }}" type="text/css">
-    @elseif ($event->theme == 'purple')
-        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/purple.css') }}" type="text/css">
-    @elseif ($event->theme == 'orange')
-        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/orange.css') }}" type="text/css">
-    @endif
-</head>
-<body>
-    <section class="ftco-section">
-        <div class="container">
-            <div class="row justify-content-center gy-4">
                 <div class="logo text-center mb-5 mt-5">
-                    <a href="/">
-                        <img src="{{ asset('assets/img/logo_principal.png') }}" alt="Logo Ticket DZ6" loading="lazy">
-                    </a>
-                </div>
-            </div>
-            
-            <section id="checkout" class="section-bg">
-                <div class="container pb-5">
-                    <div class="py-5 text-center">
-                        <div class="section-header">
-                            <h2>Finalizar compra</h2>
-                            <p class="text-muted">Total: R$ {{ number_format($total, 2, ',', '.') }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8 col-md-10">
-                            <!-- Loading indicator -->
-                            <div id="loading_indicator" class="text-center mb-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                                <p class="mt-2">Carregando opções de pagamento...</p>
-                            </div>
-                            
-                            <!-- Error container -->
-                            <div id="error_container" class="alert alert-danger d-none" role="alert">
-                                <strong>Erro:</strong> <span id="error_message"></span>
-                            </div>
-                            
-                            <!-- Payment brick container -->
-                            <div class="mb-4 mt-5">
-                                <div id="cardPaymentBrick_container"></div>
-                                <div id="statusScreenBrick_container"></div>
-                            </div>
-                            
-                            <!-- Success message -->
-                            <div id="result_operation" class="alert alert-success d-none text-center">
-                                <h4 class="alert-heading">Pagamento processado!</h4>
-                                <p class="mb-0">
-                                    Verifique a situação dos seus ingressos em 
-                                    <a href="{{ route('event_home.my_registrations') }}" class="alert-link text-decoration-none">
-                                        Minhas inscrições
-                                    </a>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </section>
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- jQuery -->

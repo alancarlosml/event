@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -42,6 +43,27 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class EventAdminController extends Controller
 {
+    /**
+     * Verifica se o usuário tem acesso ao evento
+     * Retorna true se for super admin ou se for admin do evento
+     */
+    private function hasAccessToEvent($eventId)
+    {
+        $user = Auth::guard('participante')->user();
+        
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        $participanteEvent = ParticipanteEvent::where('event_id', $eventId)
+            ->where('participante_id', $user->id)
+            ->where('role', 'admin')
+            ->where('status', 1)
+            ->first();
+
+        return $participanteEvent !== null;
+    }
+
     public function myRegistrations()
     {
         $orders = Order::orderBy('orders.created_at', 'desc')
@@ -84,13 +106,14 @@ class EventAdminController extends Controller
 
     public function myEvents()
     {
+        $user = Auth::guard('participante')->user();
+        $isSuperAdmin = $user->hasRole('super_admin');
 
-        $events = DB::table('events')
+        $query = DB::table('events')
             ->leftJoin('places', 'places.id', '=', 'events.place_id')
             ->leftJoin('participantes_events', 'participantes_events.event_id', '=', 'events.id')
             ->leftJoin('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
             ->leftJoin('lotes', 'events.id', '=', 'lotes.event_id')
-            // ->join('users', 'users.id', '=', 'events.owner_id')
             ->leftJoin('event_dates', 'event_dates.event_id', '=', 'events.id')
             ->leftJoin(DB::raw("(SELECT participantes.name,
                                     participantes.email, 
@@ -112,16 +135,138 @@ class EventAdminController extends Controller
                 DB::raw('MAX(event_dates.date) as date_event_max'),
                 'x.name as admin_name',
                 'x.email as admin_email'
-            )
-            ->where('participantes.id', Auth::user()->id)
-            ->where('participantes_events.status', 1)
-            // ->where('participantes_events.role', 'admin')
-            // ->select('events.*', 'places.name as place_name', 'users.name as owner_name', DB::raw('MIN(event_dates.date) as date_event_min'), DB::raw('MAX(event_dates.date) as date_event_max'))
-            ->orderBy('created_at', 'desc')
+            );
+
+        // Se não for super admin, filtrar apenas eventos do usuário
+        if (!$isSuperAdmin) {
+            $query->where('participantes.id', $user->id)
+                  ->where('participantes_events.status', 1);
+        }
+
+        $events = $query->orderBy('events.created_at', 'desc')
             ->groupBy('events.id')
             ->get();
 
-        return view('painel_admin.my_events', compact('events'));
+        return view('painel_admin.my_events', compact('events', 'isSuperAdmin'));
+    }
+
+    public function dashboard()
+    {
+        $user = Auth::guard('participante')->user();
+        $isSuperAdmin = $user->hasRole('super_admin');
+
+        if (!$isSuperAdmin) {
+            return redirect()->route('event_home.my_events');
+        }
+
+        // Reutilizar lógica do DashboardController
+        $event_count = Event::orderBy('event_dates.date', 'asc')
+            ->leftJoin('lotes', 'lotes.event_id', '=', 'events.id')
+            ->leftJoin('places', 'places.id', '=', 'events.place_id')
+            ->leftJoin('event_dates', 'event_dates.event_id', '=', 'events.id')
+            ->leftJoin(DB::raw("(SELECT participantes.name,
+                                        participantes.email, 
+                                        participantes_events.event_id
+                                from participantes
+                                inner join participantes_events on participantes.id = participantes_events.participante_id
+                                where participantes_events.role = 'admin' and participantes_events.status = 1
+                                ) as x"), function ($join) {
+                    $join->on('x.event_id', '=', 'events.id');
+                })
+            ->where('events.status', '1')
+            ->select(
+                'events.*',
+                'places.name as place_name',
+                'lotes.name as lote_name',
+                'event_dates.date as event_date',
+                'x.name as participante_name',
+                DB::raw('MIN(event_dates.date) as date_event_min'),
+                DB::raw('MAX(event_dates.date) as date_event_max'),
+                'x.name as admin_name',
+                'x.email as admin_email'
+            )
+            ->groupBy('events.id')
+            ->get();
+
+        $ingressos_confirmados = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->join('events', 'events.id', '=', 'lotes.event_id')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+            ->where('orders.status', 1)
+            ->select('orders.id as order_id', 'orders.status as situacao', 'events.name as event_name', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
+            ->orderBy('orders.created_at', 'desc')
+            ->groupBy('orders.id')
+            ->get();
+
+        $ingressos_pendentes = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->join('events', 'events.id', '=', 'lotes.event_id')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+            ->where('orders.status', 2)
+            ->select('orders.id as order_id', 'orders.status as situacao', 'events.name as event_name', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
+            ->orderBy('orders.created_at', 'desc')
+            ->groupBy('orders.id')
+            ->get();
+
+        $ingressos_cancelados = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->join('events', 'events.id', '=', 'lotes.event_id')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
+            ->where('orders.status', 3)
+            ->select('orders.id as order_id', 'orders.status as situacao', 'events.name as event_name', 'orders.hash as order_hash', 'orders.gatway_payment_method as gatway_payment_method', 'orders.created_at as created_at', 'participantes.name as participante_name', 'participantes.email as participante_email', 'participantes.cpf as participante_cpf')
+            ->orderBy('orders.created_at', 'desc')
+            ->groupBy('orders.id')
+            ->get();
+
+        $total_confirmado = DB::table('lotes')
+            ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('events', 'events.id', '=', 'lotes.event_id')
+            ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+            ->where('lotes.type', 0)
+            ->where('orders.status', 1)
+            ->selectRaw(
+                "sum(case 
+                    when coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
+                    when coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
+                    when coupons.discount_type is null and coupons.code is null then order_items.value
+                    end
+                ) as total_confirmado"
+            )
+            ->first();
+
+        $total_pendente = DB::table('lotes')
+            ->join('order_items', 'lotes.id', '=', 'order_items.lote_id')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('events', 'events.id', '=', 'lotes.event_id')
+            ->leftJoin('coupons', 'orders.coupon_id', '=', 'coupons.id')
+            ->where('lotes.type', 0)
+            ->where('orders.status', 2)
+            ->selectRaw(
+                "sum(case 
+                    when coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
+                    when coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
+                    when coupons.discount_type is null and coupons.code is null then order_items.value
+                    end
+                ) as total_pendente"
+            )
+            ->first();
+
+        return view('painel_admin.dashboard', compact(
+            'event_count', 
+            'ingressos_confirmados', 
+            'ingressos_cancelados', 
+            'ingressos_pendentes', 
+            'total_confirmado', 
+            'total_pendente',
+            'isSuperAdmin'
+        ));
     }
 
     public function eventClone(Request $request, $hash)
@@ -157,15 +302,32 @@ class EventAdminController extends Controller
 
     public function myEventsShow($hash)
     {
-
         $event = Event::where('hash', $hash)->first();
 
-        return view('painel_admin.my_events_show', compact('event'));
+        if (!$event) {
+            abort(404, 'Evento não encontrado');
+        }
+
+        if (!$this->hasAccessToEvent($event->id)) {
+            abort(403, 'Você não tem permissão para acessar este evento');
+        }
+
+        $isSuperAdmin = Auth::guard('participante')->user()->hasRole('super_admin');
+
+        return view('painel_admin.my_events_show', compact('event', 'isSuperAdmin'));
     }
 
     public function myEventsEdit(Request $request, $hash)
     {
         $event = Event::where('hash', $hash)->first();
+
+        if (!$event) {
+            abort(404, 'Evento não encontrado');
+        }
+
+        if (!$this->hasAccessToEvent($event->id)) {
+            abort(403, 'Você não tem permissão para editar este evento');
+        }
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
         $options = Option::orderBy('id')->get();
@@ -1831,6 +1993,9 @@ class EventAdminController extends Controller
 
     public function order_details(Request $request, $hash)
     {
+        $user = Auth::guard('participante')->user();
+        $isSuperAdmin = $user->hasRole('super_admin');
+
         $order = Order::orderBy('orders.created_at', 'asc')
             ->join('participantes', 'orders.participante_id', '=', 'participantes.id')
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
@@ -1841,7 +2006,16 @@ class EventAdminController extends Controller
             ->groupBy('order_items.id')
             ->first();
 
-        return view('painel_admin.order_detail', compact('order'));
+        if (!$order) {
+            abort(404, 'Pedido não encontrado');
+        }
+
+        // Se não for super admin, verificar se o usuário tem acesso ao evento
+        if (!$isSuperAdmin && !$this->hasAccessToEvent($order->event_id)) {
+            abort(403, 'Você não tem permissão para acessar este pedido');
+        }
+
+        return view('painel_admin.order_detail', compact('order', 'isSuperAdmin'));
     }
 
     public function print_voucher(Request $request, $hash)
@@ -1881,6 +2055,36 @@ class EventAdminController extends Controller
         
         return view('painel_admin.print_voucher', compact('items'));
 
+    }
+
+    public function profile()
+    {
+        $user = Auth::guard('participante')->user();
+        return view('painel_admin.profile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::guard('participante')->user();
+
+        $this->validate($request, [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:participantes,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'password' => 'nullable|min:8',
+        ]);
+
+        $input = $request->all();
+
+        if(empty($input['password'])) {
+            unset($input['password']);
+        } else {
+            $input['password'] = Hash::make($input['password']);
+        }
+
+        $user->fill($input)->save();
+
+        return redirect()->route('event_home.profile')->with('success', 'Perfil atualizado com sucesso!');
     }
 
 }

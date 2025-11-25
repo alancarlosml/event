@@ -215,51 +215,7 @@
 
     @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="{{ asset('assets_admin/css/painel-admin-improvements.css') }}" type="text/css">
-        <style>
-            /* Corrigir overflow horizontal */
-            body {
-                overflow-x: hidden;
-            }
-            
-            .container {
-                max-width: 100%;
-                padding-left: 15px;
-                padding-right: 15px;
-            }
-            
-            .row {
-                margin-left: 0;
-                margin-right: 0;
-            }
-            
-            .row > * {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-            
-            /* Garantir que selects tenham setinha */
-            .form-select {
-                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-                background-repeat: no-repeat;
-                background-position: right 0.75rem center;
-                background-size: 16px 12px;
-                padding-right: 2.5rem;
-            }
-            
-            /* Invalid feedback deve estar oculto por padrão */
-            .invalid-feedback {
-                display: none;
-            }
-            
-            /* Só mostrar quando o campo for inválido */
-            .was-validated .form-control:invalid ~ .invalid-feedback,
-            .was-validated .form-select:invalid ~ .invalid-feedback,
-            .form-control.is-invalid ~ .invalid-feedback,
-            .form-select.is-invalid ~ .invalid-feedback {
-                display: block;
-            }
-        </style>
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
     @endpush
 
     @push('footer')

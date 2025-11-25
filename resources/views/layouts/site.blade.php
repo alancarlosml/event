@@ -39,10 +39,60 @@
             --shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombras suaves */
             --transition: all 0.3s ease; /* Transições suaves */
         }
-        body { font-family: 'Inter', sans-serif; } /* Tipografia moderna */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            padding-top: 70px; /* Espaço para header fixo */
+        }
         img { loading: lazy; } /* Lazy loading global */
         .card, .info-box { transition: var(--transition); box-shadow: var(--shadow); border-radius: 8px; } /* Moderno cards */
         .card:hover, .info-box:hover { transform: translateY(-5px); }
+        
+        /* Melhorias adicionais para o menu mobile */
+        @media (max-width: 991px) {
+            body {
+                padding-top: 60px;
+            }
+            
+            /* Garante que o header não se mova */
+            .header .container-fluid,
+            .header .container-xl {
+                position: relative;
+                min-height: 60px;
+            }
+            
+            /* Fixa a logo e o botão hambúrguer */
+            .modern-navbar {
+                position: relative;
+                width: 100%;
+            }
+            
+            .modern-navbar .navbar-collapse {
+                max-height: calc(100vh - 100px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Smooth scroll para mobile */
+            .modern-navbar .navbar-collapse::-webkit-scrollbar {
+                width: 4px;
+            }
+            
+            .modern-navbar .navbar-collapse::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            .modern-navbar .navbar-collapse::-webkit-scrollbar-thumb {
+                background: rgba(24, 92, 164, 0.2);
+                border-radius: 2px;
+            }
+        }
+        
+        /* Melhora a acessibilidade do dropdown */
+        .modern-dropdown .dropdown-item:focus {
+            background-color: rgba(24, 92, 164, 0.1);
+            outline: 2px solid rgba(24, 92, 164, 0.3);
+            outline-offset: -2px;
+        }
     </style>
 
     <!-- Async Feedback CSS -->
@@ -55,61 +105,82 @@
 
     <!-- ======= Header ======= -->
     <header id="header" class="header fixed-top" role="banner">
-        <div class="container-fluid container-xl d-flex align-items-center">
+        <div class="container-fluid container-xl">
+            <nav class="navbar navbar-expand-lg navbar-light modern-navbar">
+                <a href="/" class="navbar-brand logo d-flex align-items-center">
+                    <img src="{{ asset('assets/img/logo_principal.png') }}" alt="Ticket DZ6">
+                </a>
 
-            <a href="/" class="logo d-flex align-items-center">
-                <img src="{{ asset('assets/img/logo_principal.png') }}" alt="">
-                {{-- <span>FlexStart</span> --}}
-            </a>
+                <button class="navbar-toggler modern-nav-toggle" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" 
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                    <span class="nav-toggle-text">Menu</span>
+                </button>
 
-            <nav id="navbar" class="navbar navbar-expand-lg navbar-light">
-                {{-- <ul class="d-flex">
-                  <li class="dropdown"><a href="#"><span>Serviços</span> <i class="bi bi-chevron-down"></i></a>
-                    <ul>
-                      <li><a href="#">Drop Down 1</a></li>
-                      <li><a href="#">Drop Down 2</a></li>
-                      <li><a href="#">Drop Down 3</a></li>
-                      <li><a href="#">Drop Down 4</a></li>
-                    </ul>
-                  </li>
-                 <li><a class="nav-link scrollto active" href="/#planos">Planos e Preços</a></li> 
-                <li><a class="nav-link" href="/eventos">Eventos</a></li>
-                <li><a class="nav-link" href="/contato">Contato</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a class="nav-link" href="/cadastro"></a></li>
-                <li><a class="getstarted" href="{{ route('event_home.create_event_link')}}">Criar evento</a></li> 
-              </ul> --}}
-                <div class="d-flex" style="margin-left: auto;">
-                    <ul class="navbar-nav ms-auto align-items-lg-center">
-                        {{-- <li class="dropdown"><a href="#"><span>Serviços</span> <i
-                                    class="bi bi-chevron-down"></i></a>
-                            <ul>
-                                <li><a href="#">Drop Down 1</a></li>
-                                <li><a href="#">Drop Down 2</a></li>
-                                <li><a href="#">Drop Down 3</a></li>
-                                <li><a href="#">Drop Down 4</a></li>
-                            </ul>
-                        </li> --}}
-                        <li><a class="nav-link" href="/eventos">Eventos</a></li>
-                        <li><a class="nav-link" href="/contato">Contato</a></li>
-                        <li><a class="getstarted" href="{{ route('event_home.create_event_link') }}">Criar evento</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/eventos">
+                                <i class="bi bi-calendar-event d-lg-none me-2"></i>
+                                <span>Eventos</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contato">
+                                <i class="bi bi-envelope d-lg-none me-2"></i>
+                                <span>Contato</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-create-event" href="{{ route('event_home.create_event_link') }}">
+                                <i class="bi bi-plus-circle me-1"></i>
+                                <span>Criar evento</span>
+                            </a>
                         </li>
                         @if (!Auth::user())
-                            <li class="nav-item"><a class="nav-link nav-login" href="{{ route('login') }}"><i class="fa-regular fa-circle-user"></i>&nbsp;Entrar</a></li>
+                            <li class="nav-item">
+                                <a class="nav-link btn-login" href="{{ route('login') }}">
+                                    <i class="fa-regular fa-circle-user me-1"></i>
+                                    <span>Entrar</span>
+                                </a>
+                            </li>
                         @else
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                                <a class="nav-link dropdown-toggle user-menu-toggle" href="#" id="userDropdown"
                                     role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-regular fa-circle-user me-1"></i> {{ Auth::user()->name }}
+                                    <i class="fa-regular fa-circle-user me-1"></i>
+                                    <span class="d-none d-lg-inline">{{ Auth::user()->name }}</span>
+                                    <span class="d-lg-none">Minha conta</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                                    <li><a class="dropdown-item" href="{{ route('event_home.my_events') }}">Meus eventos</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('event_home.my_registrations') }}">Minhas inscrições</a></li>
+                                <ul class="dropdown-menu dropdown-menu-end shadow modern-dropdown" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('event_home.my_events') }}">
+                                            <i class="bi bi-calendar-check me-2"></i>Meus eventos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('event_home.my_registrations') }}">
+                                            <i class="bi bi-ticket-perforated me-2"></i>Minhas inscrições
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('event_home.profile') }}">
+                                            <i class="bi bi-person me-2"></i>Perfil
+                                        </a>
+                                    </li>
+                                    @if(Auth::user()->hasRole('super_admin'))
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('event_home.dashboard') }}">
+                                            <i class="bi bi-speedometer2 me-2"></i>Painel de controle
+                                        </a>
+                                    </li>
+                                    @endif
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('logout') }}"
+                                        <a class="dropdown-item text-danger" href="{{ route('logout') }}"
                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                            Sair
+                                            <i class="bi bi-box-arrow-right me-2"></i>Sair
                                         </a>
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                             @csrf
@@ -120,9 +191,7 @@
                         @endif
                     </ul>
                 </div>
-                <i class="bi bi-list mobile-nav-toggle"></i>
-            </nav><!-- .navbar -->
-
+            </nav>
         </div>
     </header><!-- End Header -->
 

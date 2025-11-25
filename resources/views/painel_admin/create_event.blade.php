@@ -516,8 +516,8 @@
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
         <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link href="{{ asset('assets_admin/css/mobile-responsive.css') }}" rel="stylesheet">
-        <!-- Dashboard Improvements CSS (includes wizard styles) -->
-        <link rel="stylesheet" href="{{ asset('assets_admin/css/dashboard-improvements.css') }}" type="text/css">
+        <!-- Modern Admin CSS (includes wizard styles) -->
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
     @endpush
 
     @push('footer')

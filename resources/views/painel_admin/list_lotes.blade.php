@@ -7,7 +7,8 @@
     
             <ol>
               <li><a href="/">Home</a></li>
-              <li>Eventos</li>
+              <li><a href="/painel/meus-eventos">Meus eventos</a></li>
+              <li>Lotes</li>
             </ol>
             <h2>Gerenciar evento</h2>
     
@@ -16,16 +17,19 @@
     
         <section class="inner-page" id="create-event-form">
             <div class="container">
-                <div class="form-group pl-3 pr-3">
+                <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
                             <strong>Erros encontrados:</strong>
-                            <ul>
+                            <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -34,100 +38,114 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body table-responsive p-0">
-                    <ul id="progressbar">
-                        <li class="active" id="account"><strong>Informações</strong></li>
-                        <li class="active" id="personal"><strong>Inscrições</strong></li>
-                        <li id="payment"><strong>Cupons</strong></li>
-                        <li id="confirm"><strong>Publicar</strong></li>
-                    </ul>
-                    <div class="card-body" id="lote_field">
-                        <h4 class="py-3">Listagem dos lotes
-                        {{-- <div class="form-group text-right"> --}}
-                            <a href="{{route('event_home.lote_create')}}" class="btn btn-success float-end">Cadastrar novo lote</a>
-                        {{-- </div> --}}
-                        </h4>
-                        <table class="table table-head-fixed text-nowrap" id="table_lotes">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Valor</th>
-                                    <th>Taxa</th>
-                                    <th>Preço final</th>
-                                    <th>Quantidade</th>
-                                    <th>Visibilidade</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{-- {{dd($lotes)}} --}}
-                                @if(isset($lotes))
-                                    @foreach($lotes as $lote)
-                                        <tr>
-                                            <td>{{$lote->id}}</td>
-                                            <td class="lote_hash" style="display: none;">{{$lote->hash}}</td>
-                                            <td style="display: none;">
-                                                <input type="number" class="order_lote" value="{{$lote->order}}" style="width: 40%" min="1">
-                                            </td>
-                                            <td>
-                                                <b>{{$lote->name}}</b><br/>
-                                                {{$lote->description}}
-                                            </td>
-                                            <td>@money($lote->value)</td>
-                                            <td>@money($lote->tax)</td>
-                                            <td>@money($lote->final_value)</td>
-                                            <td>{{$lote->quantity}}</td>
-                                            <td>@if($lote->visibility == 0) Público @else Privado @endif</td>
-                                            <td>
-                                                <div class="d-flex">
-                                                    <a class="btn btn-info btn-sm" href="{{route('event_home.lote_edit', $lote->hash)}}">
-                                                        <i class="fas fa-pencil-alt">
-                                                        </i>
-                                                        Editar
-                                                    </a>
-                                                    <form action="{{ route('event_home.lote_delete', $lote->hash) }}" method="POST">
-                                                        <input type="hidden" name="_method" value="DELETE">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                        <a class="btn btn-danger btn-sm ms-1" href="javascript:;" onclick="removeData('{{$lote->hash}}')">
-                                                            <i class="fas fa-trash">
-                                                            </i>
-                                                            Remover
+                
+                <div class="wizard-container">
+                    <div class="wizard-progress">
+                        <div class="wizard-progress-bar" style="width: 50%"></div>
+                    </div>
+                    
+                    <div class="wizard-steps">
+                        <div class="step completed">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Informações</div>
+                        </div>
+                        <div class="step active">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Inscrições</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Cupons</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Publicar</div>
+                        </div>
+                    </div>
+                    
+                    <div class="wizard-content" id="lote_field">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4>Listagem dos lotes</h4>
+                            <a href="{{route('event_home.lote_create')}}" class="btn btn-success">
+                                <i class="fas fa-plus me-2"></i>Cadastrar novo lote
+                            </a>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="table_lotes">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Valor</th>
+                                        <th>Taxa</th>
+                                        <th>Preço final</th>
+                                        <th>Quantidade</th>
+                                        <th>Visibilidade</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if(isset($lotes) && count($lotes) > 0)
+                                        @foreach($lotes as $lote)
+                                            <tr data-lote-hash="{{$lote->hash}}">
+                                                <td>{{$lote->id}}</td>
+                                                <td class="lote_hash d-none">{{$lote->hash}}</td>
+                                                <td class="d-none">
+                                                    <input type="number" class="order_lote" value="{{$lote->order}}" style="width: 40%" min="1">
+                                                </td>
+                                                <td>
+                                                    <div class="fw-bold">{{$lote->name}}</div>
+                                                    <small class="text-muted">{{ Str::limit($lote->description, 50) }}</small>
+                                                </td>
+                                                <td>@money($lote->value)</td>
+                                                <td>@money($lote->tax)</td>
+                                                <td><span class="fw-bold text-success">@money($lote->final_value)</span></td>
+                                                <td>{{$lote->quantity}}</td>
+                                                <td>
+                                                    @if($lote->visibility == 0) 
+                                                        <span class="badge bg-primary">Público</span> 
+                                                    @else 
+                                                        <span class="badge bg-secondary">Privado</span> 
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <a class="btn btn-sm btn-outline-info" href="{{route('event_home.lote_edit', $lote->hash)}}" data-bs-toggle="tooltip" title="Editar">
+                                                            <i class="fas fa-pencil-alt"></i>
                                                         </a>
-                                                        <button class="d-none" id="btn-remove-hidden-{{$lote->hash}}">Remover</button>
-                                                    </form>
-                                                    <a class="btn btn-secondary btn-sm ms-1 up" href="javascript:;">
-                                                        <i class="fas fa-arrow-up"></i>
-                                                    </a>
-                                                    <a class="btn btn-secondary btn-sm ms-1 down" href="javascript:;">
-                                                        <i class="fas fa-arrow-down"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                            <div class="modal fade modalMsgRemove" id="modalMsgRemove-{{$lote->hash}}" tabindex="-1" role="dialog" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
-                                                <div class="modal-dialog" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de evento</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Deseja realmente remover esse lote?
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-danger" id="btn-remove-ok-{{$lote->hash}}" onclick="removeSucc('{{$lote->hash}}')">Sim</button>
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
-                                                        </div>
+                                                        
+                                                        <button class="btn btn-sm btn-outline-danger" onclick="removeData('{{$lote->hash}}')" data-bs-toggle="tooltip" title="Remover">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                        
+                                                        <form action="{{ route('event_home.lote_delete', $lote->hash) }}" method="POST" id="form-remove-{{$lote->hash}}" class="d-none">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+                                                        
+                                                        <button class="btn btn-sm btn-outline-secondary up" data-bs-toggle="tooltip" title="Mover para cima">
+                                                            <i class="fas fa-arrow-up"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary down" data-bs-toggle="tooltip" title="Mover para baixo">
+                                                            <i class="fas fa-arrow-down"></i>
+                                                        </button>
                                                     </div>
-                                                </div>
-                                            </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="8" class="text-center py-4 text-muted">
+                                                <i class="fas fa-ticket-alt fa-2x mb-2"></i><br>
+                                                Nenhum lote cadastrado.
+                                            </td>
                                         </tr>
-                                    @endforeach
-                                @else
-                                        <tr><td>Nenhum lote cadastrado.</td></tr>
-                                @endif
-                            </tbody>
-                        </table>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                        
                         <form method="POST" action="{{route('event_home.save_lotes', $event_id)}}">
                             @csrf
                             @if(isset($lotes))
@@ -135,111 +153,137 @@
                                     <input type="hidden" name="order_lote[]" id="lote_{{$lote->hash}}" value="{{$lote->hash}}_{{$lote->order}}">
                                 @endforeach
                             @endif
-                            <div class="card-footer d-flex justify-content-between">
-                                <a href="{{ route('event_home.create.step.one') }}" class="btn btn-secondary">Anterior</a>
-                                <button type="submit" class="btn btn-primary">Próximo</button>
+                            
+                            <div class="wizard-actions">
+                                <a href="{{ route('event_home.create.step.one') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Anterior
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Próximo<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </section>
+        
+        <!-- Modal de Remoção -->
+        <div class="modal fade" id="modalMsgRemove" tabindex="-1" aria-labelledby="modalMsgRemoveLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalMsgRemoveLabel">Remoção de lote</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        Deseja realmente remover esse lote?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger" id="btn-confirm-remove">Sim, remover</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     
       </main><!-- End #main -->
 
-      @push('footer')
+      @push('head')
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+      @endpush
 
+      @push('footer')
         <script>
+            let loteHashToRemove = null;
 
             function removeData(hash){
-                $('#modalMsgRemove-' + hash).modal('show');
+                loteHashToRemove = hash;
+                var modal = new bootstrap.Modal(document.getElementById('modalMsgRemove'));
+                modal.show();
             }
 
-            function removeSucc(hash){
-                const button = $('#btn-remove-ok-' + hash);
-                
-                // Mostra loading no botão
-                setButtonLoading(button[0], 'Excluindo...');
-                
-                // Executa a remoção
-                $('#btn-remove-hidden-' + hash).click();
-                
-                // Fecha o modal
-                $('#modalMsgRemove-' + hash).modal('hide');
-                
-                // Mostra notificação de sucesso
-                showToast('Lote removido com sucesso!', 'success');
-                
-                // Remove a linha da tabela após um pequeno delay
-                setTimeout(() => {
-                    const row = $(`tr[data-lote-hash="${hash}"]`);
-                    if (row.length) {
-                        row.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                    }
-                }, 500);
-            }
+            document.getElementById('btn-confirm-remove').addEventListener('click', function() {
+                if (loteHashToRemove) {
+                    const button = this;
+                    // Mostra loading no botão
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
+                    button.disabled = true;
+                    
+                    document.getElementById('form-remove-' + loteHashToRemove).submit();
+                }
+            });
 
             $(document).ready(function() {
+                // Tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                });
 
-                $("#lote_field .up:first").hide();
-                $("#lote_field .down:last").hide();
+                // Reordering logic
+                function updateArrows() {
+                    $("#lote_field .up").show();
+                    $("#lote_field .down").show();
+                    $("#lote_field tbody tr:first .up").hide();
+                    $("#lote_field tbody tr:last .down").hide();
+                }
+                
+                updateArrows();
 
                 $('.order_lote').change(function(){
-                    id = $(this).attr('id');
-                    value = $(this).val();
-                    console.log(value);
+                    var id = $(this).attr('id');
+                    var value = $(this).val();
                     $('#lote_' + id).val(id + '_' + value);
                 });
 
-                $(".up,.down").click(function () {
+                $(".up, .down").click(function (e) {
+                    e.preventDefault(); // Prevent default button behavior
                     
                     var $element = this;
-                    var row = $($element).parents("tr:first");
+                    var row = $($element).closest("tr");
                 
-                    if($(this).is('.up')){
-                        hash_this = $(this).parents('tr').find('.lote_hash').text();
-                        hash_prev = row.prev().find('.lote_hash').text();
+                    if($(this).hasClass('up')){
+                        var hash_this = row.find('.lote_hash').text();
+                        var prev_row = row.prev();
+                        var hash_prev = prev_row.find('.lote_hash').text();
+                        
                         if(hash_prev != ''){
-                            console.log(hash_prev);
-                                val_this = $('#lote_' + hash_this).val();
-                                val_prev = $('#lote_' + hash_prev).val();
-                                id_this = parseInt(val_this.split('_')[1]) - 1;
-                                id_prev = parseInt(val_prev.split('_')[1]) + 1;
-                                $('#lote_' + hash_this).val(hash_this + '_' + id_this);
-                                $('#lote_' + hash_prev).val(hash_prev + '_' + id_prev);
-                                console.log(id_this);
-                                console.log(id_prev);
-                                row.insertBefore(row.prev());
+                            var val_this = $('#lote_' + hash_this).val();
+                            var val_prev = $('#lote_' + hash_prev).val();
+                            
+                            var id_this = parseInt(val_this.split('_')[1]) - 1;
+                            var id_prev = parseInt(val_prev.split('_')[1]) + 1;
+                            
+                            $('#lote_' + hash_this).val(hash_this + '_' + id_this);
+                            $('#lote_' + hash_prev).val(hash_prev + '_' + id_prev);
+                            
+                            row.insertBefore(prev_row);
                         }
                     }
-                    else{
-                        hash_this = $(this).parents('tr').find('.lote_hash').text();
-                        hash_next = row.next().find('.lote_hash').text();
+                    else {
+                        var hash_this = row.find('.lote_hash').text();
+                        var next_row = row.next();
+                        var hash_next = next_row.find('.lote_hash').text();
+                        
                         if(hash_next != ''){
-                            console.log(hash_next);
-                                val_this = $('#lote_' + hash_this).val();
-                                val_next = $('#lote_' + hash_next).val();
-                                id_this = parseInt(val_this.split('_')[1]) + 1;
-                                id_next = parseInt(val_next.split('_')[1]) - 1;
-                                $('#lote_' + hash_this).val(hash_this + '_' + id_this);
-                                $('#lote_' + hash_next).val(hash_next + '_' + id_next);
-                                console.log(id_this);
-                                console.log(id_next);
-                                row.insertAfter(row.next());
+                            var val_this = $('#lote_' + hash_this).val();
+                            var val_next = $('#lote_' + hash_next).val();
+                            
+                            var id_this = parseInt(val_this.split('_')[1]) + 1;
+                            var id_next = parseInt(val_next.split('_')[1]) - 1;
+                            
+                            $('#lote_' + hash_this).val(hash_this + '_' + id_this);
+                            $('#lote_' + hash_next).val(hash_next + '_' + id_next);
+                            
+                            row.insertAfter(next_row);
                         }
                     }
 
-                    $("#lote_field .up:first").hide();
-                    $("#lote_field .down:last").hide();
-                    $("#lote_field .up:not(:first)").show();
-                    $("#lote_field .down:not(:last)").show();
+                    updateArrows();
+                });
             });
-        });
-        
         </script>
-      
-    @endpush
+      @endpush
 
 </x-site-layout>

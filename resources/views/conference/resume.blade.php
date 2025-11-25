@@ -1,6 +1,6 @@
 <x-event-layout>
     @push('head')
-        <link rel="stylesheet" href="{{ asset('assets_conference/css/checkout-improvements.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_conference/css/modern-conference.css') }}" type="text/css">
     @endpush
     
     <section id="checkout" class="section-bg" style="margin-top: 120px">

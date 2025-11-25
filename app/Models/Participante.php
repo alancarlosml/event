@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 use App\Notifications\ResetPasswordNotification;
 
 class Participante extends Authenticatable implements MustVerifyEmail
@@ -16,8 +17,10 @@ class Participante extends Authenticatable implements MustVerifyEmail
     use HasApiTokens;
     use HasFactory;
     use Notifiable;
+    use HasRoles;
 
     protected $guard = 'participante';
+    protected $guard_name = 'participante';
 
     /**
      * The attributes that are mass assignable.

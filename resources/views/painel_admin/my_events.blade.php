@@ -6,9 +6,9 @@
           <div class="container">
             <ol>
                 <li><a href="/">Home</a></li>
-                <li><a href="/painel/meus-eventos">Meus eventos</a></li>
+                <li><a href="/painel/meus-eventos">{{ $isSuperAdmin ?? false ? 'Todos os eventos' : 'Meus eventos' }}</a></li>
             </ol>
-            <h2>Listar todos</h2>
+            <h2>{{ $isSuperAdmin ?? false ? 'Todos os eventos da plataforma' : 'Listar todos' }}</h2>
     
           </div>
         </section><!-- End Breadcrumbs -->
@@ -111,7 +111,7 @@
                                                         <i class="fas fa-eye"></i>
                                                         Detalhes
                                                     </a>
-                                                    @if($event->role == 'admin')
+                                                    @if($event->role == 'admin' || ($isSuperAdmin ?? false))
                                                         <a class="dropdown-item" href="{{route('event_home.guests', $event->hash)}}">
                                                             <i class="fas fa-person"></i>
                                                             Usuários
@@ -175,7 +175,7 @@
         <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="{{ asset('assets_admin/css/painel-admin-improvements.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
         <style>
             /* Corrigir dropdown cortado - apenas z-index */
             #list_events .dropdown-menu {

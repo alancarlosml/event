@@ -23,10 +23,17 @@
    * Easy event listener function
    */
   const on = (type, el, listener, all = false) => {
+    const selected = select(el, all)
+    if (!selected) return
+    
     if (all) {
-      select(el, all).forEach(e => e.addEventListener(type, listener))
+      if (Array.isArray(selected)) {
+        selected.forEach(e => {
+          if (e) e.addEventListener(type, listener)
+        })
+      }
     } else {
-      select(el, all).addEventListener(type, listener)
+      selected.addEventListener(type, listener)
     }
   }
 
@@ -41,34 +48,39 @@
    * Navbar links active state on scroll
    */
   let navbarlinks = select('#navbar .scrollto', true)
-  const navbarlinksActive = () => {
-    let position = window.scrollY + 200
-    navbarlinks.forEach(navbarlink => {
-      if (!navbarlink.hash) return
-      let section = select(navbarlink.hash)
-      if (!section) return
-      if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
-        navbarlink.classList.add('active')
-      } else {
-        navbarlink.classList.remove('active')
-      }
-    })
+  if (navbarlinks && navbarlinks.length > 0) {
+    const navbarlinksActive = () => {
+      let position = window.scrollY + 200
+      navbarlinks.forEach(navbarlink => {
+        if (!navbarlink || !navbarlink.hash) return
+        let section = select(navbarlink.hash)
+        if (!section) return
+        if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
+          navbarlink.classList.add('active')
+        } else {
+          navbarlink.classList.remove('active')
+        }
+      })
+    }
+    window.addEventListener('load', navbarlinksActive)
+    onscroll(document, navbarlinksActive)
   }
-  window.addEventListener('load', navbarlinksActive)
-  onscroll(document, navbarlinksActive)
 
   /**
    * Scrolls to an element with header offset
    */
   const scrollto = (el) => {
     let header = select('#header')
-    let offset = header.offsetHeight
+    let offset = header ? header.offsetHeight : 0
 
-    if (!header.classList.contains('header-scrolled')) {
+    if (header && !header.classList.contains('header-scrolled')) {
       offset -= 10
     }
 
-    let elementPos = select(el).offsetTop
+    let targetElement = select(el)
+    if (!targetElement) return
+    
+    let elementPos = targetElement.offsetTop
     window.scrollTo({
       top: elementPos - offset,
       behavior: 'smooth'
@@ -120,9 +132,12 @@
    * Mobile nav dropdowns activate
    */
   on('click', '.navbar .dropdown > a', function(e) {
-    if (select('#navbar').classList.contains('navbar-mobile')) {
+    const navbar = select('#navbar')
+    if (navbar && navbar.classList.contains('navbar-mobile')) {
       e.preventDefault()
-      this.nextElementSibling.classList.toggle('dropdown-active')
+      if (this.nextElementSibling) {
+        this.nextElementSibling.classList.toggle('dropdown-active')
+      }
     }
   }, true)
 
@@ -130,15 +145,17 @@
    * Scrool with ofset on links with a class name .scrollto
    */
   on('click', '.scrollto', function(e) {
-    if (select(this.hash)) {
+    if (this.hash && select(this.hash)) {
       e.preventDefault()
 
       let navbar = select('#navbar')
-      if (navbar.classList.contains('navbar-mobile')) {
+      if (navbar && navbar.classList.contains('navbar-mobile')) {
         navbar.classList.remove('navbar-mobile')
         let navbarToggle = select('.mobile-nav-toggle')
-        navbarToggle.classList.toggle('bi-list')
-        navbarToggle.classList.toggle('bi-x')
+        if (navbarToggle) {
+          navbarToggle.classList.toggle('bi-list')
+          navbarToggle.classList.toggle('bi-x')
+        }
       }
       scrollto(this.hash)
     }

@@ -4,28 +4,31 @@
         <!-- ======= Breadcrumbs ======= -->
         <section class="breadcrumbs">
             <div class="container">
-
                 <ol>
                     <li><a href="/">Home</a></li>
                     <li><a href="/painel/meus-eventos">Meus eventos</a></li>
+                    <li><a href="{{ route('event_home.messages', $contact->event->hash) }}">Contatos</a></li>
+                    <li>Mensagem</li>
                 </ol>
-                <h2>Contatos</h2>
-
+                <h2>Detalhes da Mensagem</h2>
             </div>
         </section><!-- End Breadcrumbs -->
 
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page" id="contact-detail">
             <div class="container">
-                <div class="form-group pl-3 pr-3">
+                <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
                             <strong>{{ $message }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                         </div>
                     @endif
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
                             <strong>Erros encontrados:</strong>
-                            <ul>
+                            <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -34,47 +37,74 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body table-responsive p-0">
+
+                <div class="card">
+                    <div class="card-header bg-white py-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-envelope-open-text me-2"></i>
+                            Mensagem de Contato
+                        </h4>
+                    </div>
                     <div class="card-body">
-                        <div class="form-group">
-                            <label for="name">Nome</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ $contact->name }}
-                            </p>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-user me-2 text-primary"></i>Nome
+                                </label>
+                                <p class="text-muted ms-4">{{ $contact->name }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-envelope me-2 text-primary"></i>Email
+                                </label>
+                                <p class="text-muted ms-4">{{ $contact->email }}</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ $contact->email }}
-                            </p>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-phone me-2 text-primary"></i>Telefone
+                                </label>
+                                <p class="text-muted ms-4">{{ $contact->phone }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-calendar me-2 text-primary"></i>Data de Recebimento
+                                </label>
+                                <p class="text-muted ms-4">{{ \Carbon\Carbon::parse($contact->created_at)->format('d/m/Y H:i') }}</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="phone">Telefone</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ $contact->phone }}
-                            </p>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-tag me-2 text-primary"></i>Assunto
+                                </label>
+                                <p class="text-muted ms-4">{{ $contact->subject }}</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="subject">Assunto</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ $contact->subject }}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="text">Texto</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ $contact->text }}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="created_at">Data de criação</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ \Carbon\Carbon::parse($contact->created_at)->format('d/m/Y H:i') }}
-                            </p>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-comment-dots me-2 text-primary"></i>Mensagem
+                                </label>
+                                <div class="ms-4 p-3 bg-light rounded">
+                                    <p class="text-muted mb-0" style="white-space: pre-wrap;">{{ $contact->text }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-between">
-                        <a href="{{ route('event_home.messages', $contact->event->hash) }}" class="btn btn-secondary">Voltar</a>
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+                        <a href="{{ route('event_home.messages', $contact->event->hash) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                        </a>
+                        @if($contact->read == 0)
+                            <span class="badge bg-primary">Não lida</span>
+                        @else
+                            <span class="badge bg-success">Lida</span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -83,132 +113,7 @@
     </main><!-- End #main -->
 
     @push('head')
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
-              integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
-              crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"
-              crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css"
-              crossorigin="anonymous" referrerpolicy="no-referrer" />
-    @endpush
-
-    @push('footer')
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
-                integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
-                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
-
-        <script>
-            $(document).ready(function() {
-
-                $('#list_events').DataTable({
-                    language: {
-                        "decimal": "",
-                        "emptyTable": "Sem dados disponíveis na tabela",
-                        "info": "Exibindo _START_ de _END_ de um total de _TOTAL_ registros",
-                        "infoEmpty": "Exibindo 0 de 0 de um total de 0 registros",
-                        "infoFiltered": "(filtrados do total de _MAX_ registros)",
-                        "infoPostFix": "",
-                        "thousands": ",",
-                        "lengthMenu": "Exibir _MENU_ registros",
-                        "loadingRecords": "Carregando...",
-                        "processing": "",
-                        "search": "Busca: ",
-                        "zeroRecords": "Nenhum registro correspondente encontrado",
-                        "paginate": {
-                            "first": "Primeiro",
-                            "last": "Último",
-                            "next": "Próximo",
-                            "previous": "Anterior"
-                        },
-                        "aria": {
-                            "sortAscending": ": ative para classificar a coluna em ordem crescente",
-                            "sortDescending": ": ativar para ordenar a coluna decrescente"
-                        }
-                    },
-                    dom: 'Bfrtip',
-                    buttons: [{
-                            extend: 'csv',
-                            text: 'CSV',
-                            title: 'Listagem das mensagens recebidas - Evento',
-                            exportOptions: {
-                                modifier: {
-                                    page: 'current'
-                                },
-                                columns: [0, 1, 2, 3, 5],
-                                stripNewlines: false,
-                                format: {
-                                    body: function(data, column, row) {
-                                        if (typeof data === 'string' || data instanceof String) {
-                                            data = data.replace(/<br>/gi, "").replace(/<small>/gi,
-                                                " - ").replace(/<\/small>/gi, "").replace(/<b>/gi,
-                                                "").replace(/<\/b>/gi, "");
-                                        }
-                                        return data;
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            extend: 'excel',
-                            text: 'Excel',
-                            title: 'Listagem das mensagens recebidas - Evento',
-                            exportOptions: {
-                                modifier: {
-                                    page: 'current'
-                                },
-                                columns: [0, 1, 2, 3, 5],
-                                format: {
-                                    body: function(data, column, row) {
-                                        if (typeof data === 'string' || data instanceof String) {
-                                            data = data.replace(/<br>/gi, "").replace(/<small>/gi,
-                                                " - ").replace(/<\/small>/gi, "").replace(/<b>/gi,
-                                                "").replace(/<\/b>/gi, "");
-                                        }
-                                        return data;
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            extend: 'pdf',
-                            text: 'PDF',
-                            title: 'Listagem das mensagens recebidas - Evento',
-                            exportOptions: {
-                                modifier: {
-                                    page: 'current'
-                                },
-                                columns: [0, 1, 2, 3, 5],
-                                stripNewlines: false
-                            }
-                        },
-                        {
-                            extend: 'print',
-                            text: 'Imprimir',
-                            title: 'Listagem das mensagens recebidas - Evento',
-                            exportOptions: {
-                                modifier: {
-                                    page: 'current'
-                                },
-                                columns: [0, 1, 2, 3, 5],
-                                stripHtml: false
-                            }
-                        }
-                    ]
-                });
-            });
-        </script>
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
     @endpush
 
 </x-site-layout>
