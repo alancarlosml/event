@@ -292,7 +292,7 @@ class EventAdminController extends Controller
             'event_id' => $newEvent->id,
         ]);
 
-        $request->session()->put('event', $newEvent);
+        $request->session()->put('event', $newEvent->toArray());
 
         //ENVIAR EMAIL - EVENTO CRIADO
         Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($newEvent, 'Evento criado com sucesso', 'criado'));
@@ -349,11 +349,11 @@ class EventAdminController extends Controller
         $place = $event->place;
         
         // Adicionar dados à sessão para o template unificado
-        $request->session()->put('dates', $dates);
-        $request->session()->put('event', $event);
+        $request->session()->put('dates', $dates->toArray());
+        $request->session()->put('event', $event->toArray());
         $request->session()->put('event_id', $event->id);
-        $request->session()->put('place', $place);
-        $request->session()->put('questions', $questions);
+        $request->session()->put('place', $place ? $place->toArray() : null);
+        $request->session()->put('questions', $questions->toArray());
 
         // Verificar conta do Mercado Pago
         $mercadoPagoResponse = app(MercadoPagoController::class)->checkLinkedAccount($request);
@@ -373,11 +373,17 @@ class EventAdminController extends Controller
 
             // Localiza o evento pelo hash e garante que esteja na sessão
             $event = Event::where('hash', $hash)->firstOrFail();
-            $request->session()->put('event', $event);
+            $request->session()->put('event', $event->toArray());
             $request->session()->put('event_id', $event->id);
 
             // Atualiza dados principais do evento
             $event = $this->saveEvent($request);
+            
+            // Verificar se o retorno é um RedirectResponse (erro de validação)
+            if ($event instanceof \Illuminate\Http\RedirectResponse) {
+                DB::rollBack();
+                return $event;
+            }
 
             // Atualiza/relaciona lugar, datas e perguntas
             $this->savePlace($request, $event);
@@ -429,13 +435,25 @@ class EventAdminController extends Controller
         $options = Option::orderBy('id')->get();
         // $questions = Question::orderBy('order')->get();
 
-        $event = $request->session()->get('event');
-        $place = $request->session()->get('place');
+        $eventSession = $request->session()->get('event');
+        $placeSession = $request->session()->get('place');
         // $eventDate = $request->session()->get('eventDate');
+
+        // Se há evento na sessão, buscar o objeto completo do banco
+        $event = null;
+        $place = null;
+        if(isset($eventSession) && isset($eventSession['id'])) {
+            $event = Event::with('place')->find($eventSession['id']);
+            if($event && $event->place) {
+                $place = $event->place;
+            } elseif(isset($placeSession) && isset($placeSession['id'])) {
+                $place = Place::find($placeSession['id']);
+            }
+        }
 
         $eventDate = null;
         if(isset($event)) {
-            $eventDate = EventDate::where('event_id', $event['id'])
+            $eventDate = EventDate::where('event_id', $event->id)
                 ->selectRaw('id, date, DATE_FORMAT(time_begin, "%H:%i") time_begin, DATE_FORMAT(time_end, "%H:%i") time_end')
                 ->where('status', '1')
                 ->get();
@@ -452,7 +470,7 @@ class EventAdminController extends Controller
         if($event) {
             $sessionQuestions = $request->session()->get('questions');
             if($sessionQuestions) {
-                $questions = $sessionQuestions;
+                $questions = collect($sessionQuestions);
             }
         }
 
@@ -473,10 +491,17 @@ class EventAdminController extends Controller
             DB::beginTransaction();
 
             $event = $this->saveEvent($request);
-            $request->session()->put('event', $event);
+            
+            // Verificar se o retorno é um RedirectResponse (erro de validação)
+            if ($event instanceof \Illuminate\Http\RedirectResponse) {
+                DB::rollback();
+                return $event;
+            }
+            
+            $request->session()->put('event', $event->toArray());
 
             $place = $this->savePlace($request, $event);
-            $request->session()->put('place', $place);
+            $request->session()->put('place', $place ? $place->toArray() : null);
 
             $this->saveEventDates($request, $event);
             $this->saveQuestions($request, $event);
@@ -573,7 +598,7 @@ class EventAdminController extends Controller
             $event->save();
             // dd($event);
             $event_id = $event->id;
-            $request->session()->put('event', $event);
+            $request->session()->put('event', $event->toArray());
             $request->session()->put('event_id', $event_id);
 
             DB::table('participantes_events')->insert([
@@ -632,8 +657,8 @@ class EventAdminController extends Controller
             // }
 
             $event->fill($validatedDataEvent);
-            $request->session()->put('event', $event);
             $event->save();
+            $request->session()->put('event', $event->toArray());
 
             Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
 
@@ -674,7 +699,8 @@ class EventAdminController extends Controller
 
         $event_id = $event->id;
 
-        if($validatedDataPlace['place_id'] != null) {
+        // Verificar se place_id existe (diferente de null e string vazia)
+        if(!empty($validatedDataPlace['place_id'])) {
             $event = Event::where('id', $event_id)->update(['place_id' => $validatedDataPlace['place_id']]);
             $place = Place::findOrFail($validatedDataPlace['place_id']);
             // $request->session()->put('place', $place);
@@ -698,10 +724,10 @@ class EventAdminController extends Controller
     private function saveEventDates(Request $request, Event $event)
     {
         $validatedDataEventDate = $request->validate([
-            'date.*' => 'required',
-            'time_begin.*' => 'required',
-            'time_end.*' => 'required',
-            'date_id.*' => 'nullable',
+            'date.*' => 'required|date_format:d/m/Y',
+            'time_begin.*' => 'required|date_format:H:i',
+            'time_end.*' => 'required|date_format:H:i',
+            'date_id.*' => 'nullable|integer',
         ],[
             'date.*.required' => 'A data do evento é obrigatória.',
             'time_begin.*.required' => 'A hora de início do evento é obrigatória.',
@@ -712,6 +738,14 @@ class EventAdminController extends Controller
         $dates = $validatedDataEventDate['date'];
         $times_begin = $validatedDataEventDate['time_begin'];
         $times_end = $validatedDataEventDate['time_end'];
+        
+        // Validar que time_end > time_begin para cada data
+        foreach ($times_begin as $index => $begin) {
+            if (isset($times_end[$index]) && strtotime($begin) >= strtotime($times_end[$index])) {
+                throw new Exception('A hora de termino deve ser maior que a hora de inicio para a data ' . ($index + 1) . '.');
+            }
+        }
+        
         $event_id = $event->id;
 
         // Verifica se está faltando um id para excluir no banco
@@ -725,6 +759,11 @@ class EventAdminController extends Controller
         foreach($date_ids_db as $date_id_db) {
 
             if( ! in_array($date_id_db['id'], $date_ids)) {
+                // Verificar se existem pedidos vinculados a esta data antes de excluir
+                $ordersCount = Order::where('event_date_id', $date_id_db['id'])->count();
+                if ($ordersCount > 0) {
+                    throw new Exception('Nao e possivel excluir a data pois existem ' . $ordersCount . ' pedido(s) vinculado(s).');
+                }
                 DB::table('event_dates')->where('id', $date_id_db['id'])->delete();
             }
         }
@@ -795,10 +834,10 @@ class EventAdminController extends Controller
             ->only('id')
             ->toArray();
 
-        foreach($questions_ids_db as $questions_ids_db) {
+        foreach($questions_ids_db as $question_id_db) {
 
-            if( ! in_array($questions_ids_db['id'], $field_ids)) {
-                DB::table('questions')->where('id', $questions_ids_db['id'])->delete();
+            if( ! in_array($question_id_db['id'], $field_ids)) {
+                DB::table('questions')->where('id', $question_id_db['id'])->delete();
             }
         }
         //fim
@@ -840,9 +879,17 @@ class EventAdminController extends Controller
                     $unique = 1;
                 }
 
-                $option = Option::where('option', $result_field[0])->first();
+                $option = Option::where('option', $result_field[0] ?? '')->first();
+                
+                if (!$option) {
+                    Log::warning('Tipo de campo não encontrado: ' . ($result_field[0] ?? 'vazio'), [
+                        'event_id' => $event_id,
+                        'field' => $field['question']
+                    ]);
+                    continue; // Pular este campo se o tipo não for encontrado
+                }
+                
                 $question = Question::create([
-                    // DB::table('questions')->insert([
                     'question' => $more_fields[0],
                     'order' => $id + 1,
                     'required' => $required,
@@ -874,7 +921,7 @@ class EventAdminController extends Controller
 
         $questions = Question::orderBy('order')->where('event_id', $event_id)->get();
 
-        $request->session()->put('questions', $questions);
+        $request->session()->put('questions', $questions->toArray());
     }
 
     private function saveUserAdmin(Request $request, Event $event)
@@ -903,12 +950,16 @@ class EventAdminController extends Controller
 
         if($event_id != null) {
 
-            if(empty($request->session()->get('lotes'))) {
+            $lotesSession = $request->session()->get('lotes');
+            if(empty($lotesSession)) {
                 $lotes = Lote::orderBy('order')
                     ->where('event_id', $event_id)
                     ->get();
             } else {
-                $lotes = $request->session()->get('lotes');
+                // Se há lotes na sessão como array, buscar do banco
+                $lotes = Lote::orderBy('order')
+                    ->where('event_id', $event_id)
+                    ->get();
             }
 
             return view('painel_admin.list_lotes', compact('lotes', 'event_id'));
@@ -1022,7 +1073,7 @@ class EventAdminController extends Controller
             ->where('event_id', $event_id)
             ->get();
 
-        $request->session()->put('lotes', $lotes);
+        $request->session()->put('lotes', $lotes->toArray());
         $request->session()->put('lote_id', $lote_id);
 
         return redirect()->route('event_home.create.step.two');

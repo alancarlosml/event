@@ -54,32 +54,103 @@ $(document).ready(function() {
         });
     }
 
-    // Initialize datetimepickers
+    // Air Datepicker locale configuration
+    const localePtBr = {
+        days: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+        daysShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+        daysMin: ['Do', 'Se', 'Te', 'Qu', 'Qu', 'Se', 'Sa'],
+        months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+        monthsShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        today: 'Hoje',
+        clear: 'Limpar',
+        dateFormat: 'dd/MM/yyyy',
+        timeFormat: 'HH:mm',
+        firstDay: 1
+    };
+
+    // Store datepicker instances for cleanup
+    window.airDatepickers = window.airDatepickers || {};
+
+    // Initialize datetimepickers using Air Datepicker
     function initDateTimePickers() {
-        $(document).on('focus', '.datetimepicker_day', function() {
-            $(this).datetimepicker({
-                timepicker: false,
-                format: 'd/m/Y',
-                mask: true,
+        // Initialize date pickers
+        function initDatePicker(element) {
+            if (element.airDatepicker) return; // Already initialized
+            
+            new AirDatepicker(element, {
+                locale: localePtBr,
+                dateFormat: 'dd/MM/yyyy',
                 minDate: new Date(),
-                lang: 'pt-BR'
+                autoClose: true,
+                position: 'bottom center',
+                buttons: ['today', 'clear']
+            });
+        }
+
+        // Initialize time pickers for begin time
+        function initTimePickerBegin(element) {
+            if (element.airDatepicker) return;
+            
+            new AirDatepicker(element, {
+                locale: localePtBr,
+                timepicker: true,
+                onlyTimepicker: true,
+                timeFormat: 'HH:mm',
+                autoClose: true,
+                position: 'bottom center'
+            });
+        }
+
+        // Initialize time pickers for end time
+        function initTimePickerEnd(element) {
+            if (element.airDatepicker) return;
+            
+            new AirDatepicker(element, {
+                locale: localePtBr,
+                timepicker: true,
+                onlyTimepicker: true,
+                timeFormat: 'HH:mm',
+                autoClose: true,
+                position: 'bottom center'
+            });
+        }
+
+        // Initialize existing date pickers
+        document.querySelectorAll('.datetimepicker_day').forEach(initDatePicker);
+        document.querySelectorAll('.datetimepicker_hour_begin').forEach(initTimePickerBegin);
+        document.querySelectorAll('.datetimepicker_hour_end').forEach(initTimePickerEnd);
+
+        // Use MutationObserver for dynamically added fields
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        node.querySelectorAll && node.querySelectorAll('.datetimepicker_day').forEach(initDatePicker);
+                        node.querySelectorAll && node.querySelectorAll('.datetimepicker_hour_begin').forEach(initTimePickerBegin);
+                        node.querySelectorAll && node.querySelectorAll('.datetimepicker_hour_end').forEach(initTimePickerEnd);
+                        
+                        // Check if the node itself is a datepicker input
+                        if (node.classList && node.classList.contains('datetimepicker_day')) initDatePicker(node);
+                        if (node.classList && node.classList.contains('datetimepicker_hour_begin')) initTimePickerBegin(node);
+                        if (node.classList && node.classList.contains('datetimepicker_hour_end')) initTimePickerEnd(node);
+                    }
+                });
             });
         });
 
-        $(document).on('focus', '.datetimepicker_hour_begin', function() {
-            $(this).datetimepicker({
-                datepicker: false,
-                format: 'H:i',
-                mask: true
-            });
-        });
+        const cardDate = document.getElementById('card-date');
+        if (cardDate) {
+            observer.observe(cardDate, { childList: true, subtree: true });
+        }
 
-        $(document).on('focus', '.datetimepicker_hour_end', function() {
-            $(this).datetimepicker({
-                datepicker: false,
-                format: 'H:i',
-                mask: true
-            });
+        // Also handle click on input-group-text icons
+        $(document).on('click', '.input-group-text', function() {
+            const $input = $(this).siblings('input');
+            if ($input.length && $input[0].airDatepicker) {
+                $input[0].airDatepicker.show();
+            } else {
+                $input.focus();
+            }
         });
     }
 
@@ -433,7 +504,7 @@ $(document).ready(function() {
     function initDateAdding() {
         $('#add-date').on('click', function() {
             const index = $('.row.mb-3[data-date-index]').length;
-            $('#card-date').append(`
+            const $newRow = $(`
                 <div class="row mb-3 g-3" data-date-index="${index}">
                     <input type="hidden" name="date_id[]" value="">
                     <div class="col-md-3 pe-3">
@@ -471,6 +542,40 @@ $(document).ready(function() {
                     </div>
                 </div>
             `);
+            
+            $('#card-date').append($newRow);
+            
+            // Initialize Air Datepickers on the new row
+            const dateInput = $newRow.find('.datetimepicker_day')[0];
+            const beginInput = $newRow.find('.datetimepicker_hour_begin')[0];
+            const endInput = $newRow.find('.datetimepicker_hour_end')[0];
+            
+            new AirDatepicker(dateInput, {
+                locale: localePtBr,
+                dateFormat: 'dd/MM/yyyy',
+                minDate: new Date(),
+                autoClose: true,
+                position: 'bottom center',
+                buttons: ['today', 'clear']
+            });
+            
+            new AirDatepicker(beginInput, {
+                locale: localePtBr,
+                timepicker: true,
+                onlyTimepicker: true,
+                timeFormat: 'HH:mm',
+                autoClose: true,
+                position: 'bottom center'
+            });
+            
+            new AirDatepicker(endInput, {
+                locale: localePtBr,
+                timepicker: true,
+                onlyTimepicker: true,
+                timeFormat: 'HH:mm',
+                autoClose: true,
+                position: 'bottom center'
+            });
         });
 
         $(document).on('click', '.remove-date', function() {

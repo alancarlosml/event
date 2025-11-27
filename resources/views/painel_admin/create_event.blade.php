@@ -514,18 +514,33 @@
     @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.css" rel="stylesheet">
-        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.css">
         <link href="{{ asset('assets_admin/css/mobile-responsive.css') }}" rel="stylesheet">
         <!-- Modern Admin CSS (includes wizard styles) -->
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <style>
+            /* Garantir que o dropdown do usuário funcione corretamente */
+            #userDropdown {
+                pointer-events: auto !important;
+            }
+            .navbar .dropdown-menu {
+                z-index: 1050 !important;
+            }
+            /* Air Datepicker customizations */
+            .air-datepicker {
+                z-index: 1060 !important;
+            }
+            .input-group-text {
+                cursor: pointer;
+            }
+        </style>
     @endpush
 
     @push('footer')
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <!-- jQuery UI e plugins específicos da página (jQuery e Bootstrap já carregados no layout) -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote.min.js"></script>
-        <script src="{{ asset('assets_admin/jquery.datetimepicker.full.min.js') }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.9/jquery.inputmask.min.js" integrity="sha512-F5Ul1uuyFlGnIT1dk2c4kB4DBdi5wnBJjVhL7gQlGh46Xn0VhvD8kgxLtjdZ5YN83gybk/aASUAlpdoWUjRR3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         <!-- Create Event JavaScript Variables -->
@@ -542,5 +557,21 @@
 
         <!-- Create Event JavaScript -->
         <script src="{{ asset('assets_admin/js/create_event.js') }}"></script>
+        
+        <!-- Garantir que o dropdown do usuário funcione corretamente -->
+        <script>
+            $(document).ready(function() {
+                // Garantir que o Bootstrap dropdown seja inicializado corretamente
+                var dropdownElementList = [].slice.call(document.querySelectorAll('#userDropdown'));
+                var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                    return new bootstrap.Dropdown(dropdownToggleEl);
+                });
+                
+                // Prevenir que outros event listeners bloqueiem o dropdown
+                $('#userDropdown').on('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+        </script>
     @endpush
 </x-site-layout>
