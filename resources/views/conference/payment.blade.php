@@ -73,7 +73,8 @@
                     const settings = {
                         initialization: {
                             amount: {{ $total }},
-                            locale: 'pt-BR'
+                            locale: 'pt-BR',
+                            marketplace: true  // 👈 HABILITA SPLIT PAYMENT PARA MARKETPLACE
                         },
                         customization: {
                             paymentMethods: paymentMethods,
