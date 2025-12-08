@@ -12,7 +12,17 @@
     <!-- Theme CSS -->
     @if ($event->theme == 'red')
         <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">
-                <div class="logo text-center mb-5 mt-5">
+    @elseif($event->theme == 'blue')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/blue.css') }}" type="text/css">
+    @elseif($event->theme == 'green')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/green.css') }}" type="text/css">
+    @elseif($event->theme == 'purple')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/purple.css') }}" type="text/css">
+    @elseif($event->theme == 'orange')
+        <link rel="stylesheet" id="colors" href="{{ asset('assets_conference/css/orange.css') }}" type="text/css">
+    @endif
+</head>
+<body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- jQuery -->

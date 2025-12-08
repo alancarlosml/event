@@ -1,14 +1,19 @@
 <x-event-layout>
     <div class="hero-image" id="home">
         <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="img-fluid" loading="lazy">
-        @if ($event->max_event_dates() >= \Carbon\Carbon::now())
+        @php
+            $eventStartDateTime = \Carbon\Carbon::parse($event->min_event_dates() . ' ' . $event->min_event_time());
+            $now = \Carbon\Carbon::now();
+            $eventNotStarted = $eventStartDateTime->isFuture();
+        @endphp
+        @if ($eventNotStarted)
             <div class="hero-content">
                 <h1>{{ $event->name }}</h1>
                 <p>{{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m/Y') }} às {{ \Carbon\Carbon::parse($event->min_event_time())->format('H:i') }}h</p>
             </div>
         @endif
     </div>
-    @if ($event->max_event_dates() >= \Carbon\Carbon::now())
+    @if ($eventNotStarted)
         <div class="container">
             <div class="countdown-container" id="countdownContainer">
                 <h3>O evento começa em:</h3>
