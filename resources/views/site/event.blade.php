@@ -2,9 +2,33 @@
     <div class="hero-image" id="home">
         <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="img-fluid" loading="lazy">
         @php
-            $eventStartDateTime = \Carbon\Carbon::parse($event->min_event_dates() . ' ' . $event->min_event_time());
+            // Obter data e hora do evento
+            $eventDate = $event->min_event_dates(); // Retorna formato YYYY-MM-DD
+            $eventTime = $event->min_event_time(); // Retorna formato HH:MM:SS ou HH:MM
+            
+            // Garantir que a hora tenha formato completo (HH:MM:SS)
+            if ($eventTime) {
+                $timeParts = explode(':', $eventTime);
+                if (count($timeParts) == 2) {
+                    $eventTime = $eventTime . ':00'; // Adicionar segundos se não existir
+                }
+            } else {
+                $eventTime = '00:00:00';
+            }
+            
+            // Criar objeto Carbon com data e hora combinadas
+            try {
+                $eventStartDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $eventDate . ' ' . $eventTime);
+            } catch (\Exception $e) {
+                // Fallback: usar parse se createFromFormat falhar
+                $eventStartDateTime = \Carbon\Carbon::parse($eventDate . ' ' . $eventTime);
+            }
+            
+            // Obter data/hora atual
             $now = \Carbon\Carbon::now();
-            $eventNotStarted = $eventStartDateTime->isFuture();
+            
+            // Verificar se o evento ainda não começou (data/hora do evento é no futuro)
+            $eventNotStarted = $eventStartDateTime->gt($now);
         @endphp
         @if ($eventNotStarted)
             <div class="hero-content">
