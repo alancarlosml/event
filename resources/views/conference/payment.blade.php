@@ -23,6 +23,79 @@
     @endif
 </head>
 <body>
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Finalizar Pagamento
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Informações do Evento -->
+                        <div class="mb-4">
+                            <h5>{{ $event->name }}</h5>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-calendar me-2"></i>
+                                {{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m/Y') }} às {{ \Carbon\Carbon::parse($event->min_event_time())->format('H:i') }}h
+                            </p>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                {{ $event->place->name }}, {{ optional($event->place->get_city)->name }}-{{ optional($event->place->get_city)->uf }}
+                            </p>
+                        </div>
+
+                        <hr>
+
+                        <!-- Resumo do Pedido -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Resumo do Pedido</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total:</span>
+                                <strong>R$ {{ number_format($total, 2, ',', '.') }}</strong>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Container de Erro -->
+                        <div id="error_container" class="alert alert-danger d-none" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span id="error_message"></span>
+                        </div>
+
+                        <!-- Indicador de Loading -->
+                        <div id="loading_indicator" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Carregando opções de pagamento...</p>
+                        </div>
+
+                        <!-- Container do Payment Brick -->
+                        <div id="cardPaymentBrick_container"></div>
+
+                        <!-- Container do Resultado da Operação -->
+                        <div id="result_operation" class="d-none">
+                            <div id="statusScreenBrick_container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segurança -->
+                <div class="text-center mt-4">
+                    <p class="text-muted small">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Pagamento 100% seguro processado pelo Mercado Pago
+                    </p>
+                    <img src="{{ asset('assets_conference/imgs/mercado-pago-logo.png') }}" alt="Mercado Pago" height="30px" class="mt-2">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- jQuery -->
@@ -68,9 +141,12 @@
                 $('#error_message').text(message);
                 $('#error_container').removeClass('d-none');
                 $('#loading_indicator').addClass('d-none');
-                $('html, body').animate({
-                    scrollTop: $("#error_container").offset().top - 100
-                }, 500);
+                const errorContainer = document.getElementById('error_container');
+                if (errorContainer && errorContainer.offsetTop) {
+                    $('html, body').animate({
+                        scrollTop: errorContainer.offsetTop - 100
+                    }, 500);
+                }
             }
 
             // Função para ocultar loading
@@ -186,10 +262,16 @@
                         },
                         callbacks: {
                             onReady: () => {
-                                document.getElementById('result_operation').classList.remove('d-none');
-                                $('html, body').animate({
-                                    scrollTop: $("#statusScreenBrick_container").offset().top - 100
-                                }, 500);
+                                const resultOperation = document.getElementById('result_operation');
+                                if (resultOperation) {
+                                    resultOperation.classList.remove('d-none');
+                                }
+                                const statusContainer = document.getElementById('statusScreenBrick_container');
+                                if (statusContainer && statusContainer.offsetTop) {
+                                    $('html, body').animate({
+                                        scrollTop: statusContainer.offsetTop - 100
+                                    }, 500);
+                                }
                             },
                             onError: (error) => {
                                 console.error('Erro no Status Screen Brick:', error);
