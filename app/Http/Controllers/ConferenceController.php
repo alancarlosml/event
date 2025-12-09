@@ -1043,10 +1043,22 @@ class ConferenceController extends Controller
         $tmp_explode = Str::of($user->name)->explode(' ');
         $last_name = count($tmp_explode) > 1 ? end($tmp_explode) : $first_name;
 
-        // Calcular taxa
+        // Calcular taxa (apenas para métodos que suportam application_fee)
         $config = Configuration::findOrFail(1);
         $taxa_juros = $event->config_tax != 0.0 ? $event->config_tax : $config->tax;
         $application_fee = ($total * $taxa_juros);
+        
+        // Validar application_fee
+        if ($application_fee < 0) {
+            $application_fee = 0;
+        }
+        if ($application_fee >= $total) {
+            Log::warning('Application fee is greater than or equal to transaction amount', [
+                'application_fee' => $application_fee,
+                'total' => $total
+            ]);
+            $application_fee = $total * 0.99; // Limitar a 99% do total
+        }
 
         Log::info('Processing payment', [
             'payment_type' => $input['paymentType'],
@@ -1104,11 +1116,14 @@ class ConferenceController extends Controller
                     // Obter payment_method_id (pode estar em formData ou no nível raiz)
                     $paymentMethodId = $input['formData']['payment_method_id'] ?? 'pix';
                     
+                    // PIX não suporta application_fee no marketplace
+                    // A taxa deve ser processada separadamente após o pagamento ser aprovado
                     $paymentRequest = [
                         "transaction_amount" => (float) $total,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $paymentMethodId,
-                        "application_fee" => (float) $application_fee,
+                        // NOTA: application_fee não é suportado para PIX
+                        // A taxa será processada via split payment após aprovação
                         "payer" => [
                             "email" => $user->email,
                             "first_name" => $first_name,
