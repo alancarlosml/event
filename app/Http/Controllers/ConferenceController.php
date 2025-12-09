@@ -1099,22 +1099,64 @@ class ConferenceController extends Controller
                     break;
 
                 case 'bank_transfer':
-                    // Validar CPF para PIX
-                    if (empty($user->cpf)) {
-                        Log::warning('User CPF missing for PIX payment', ['user_id' => $userId]);
+                    // Obter CPF - pode vir do usuário ou do formData
+                    $cpfSource = null;
+                    $cpfRaw = null;
+                    
+                    // Tentar obter CPF do formData primeiro (se o Payment Brick enviou)
+                    if (isset($input['formData']['payer']['identification']['number'])) {
+                        $cpfRaw = $input['formData']['payer']['identification']['number'];
+                        $cpfSource = 'formData';
+                    } elseif (!empty($user->cpf)) {
+                        $cpfRaw = $user->cpf;
+                        $cpfSource = 'user_profile';
+                    }
+                    
+                    if (empty($cpfRaw)) {
+                        Log::warning('User CPF missing for PIX payment', [
+                            'user_id' => $userId,
+                            'has_user_cpf' => !empty($user->cpf),
+                            'has_formdata_cpf' => isset($input['formData']['payer']['identification']['number'])
+                        ]);
                         return response()->json(['error' => 'CPF é obrigatório para pagamento via PIX. Atualize seu perfil e tente novamente.'], 400);
                     }
                     
                     // Limpar CPF (remover caracteres não numéricos)
-                    $cpf = preg_replace('/[^0-9]/', '', $user->cpf);
+                    $cpf = preg_replace('/[^0-9]/', '', trim($cpfRaw));
                     
+                    // Validar comprimento do CPF
                     if (strlen($cpf) != 11) {
-                        Log::warning('Invalid CPF format for PIX payment', ['user_id' => $userId, 'cpf_length' => strlen($cpf)]);
+                        Log::warning('Invalid CPF format for PIX payment', [
+                            'user_id' => $userId,
+                            'cpf_source' => $cpfSource,
+                            'cpf_original' => $cpfRaw,
+                            'cpf_cleaned' => $cpf,
+                            'cpf_length' => strlen($cpf)
+                        ]);
+                        return response()->json(['error' => 'CPF inválido. O CPF deve ter 11 dígitos. Atualize seu perfil e tente novamente.'], 400);
+                    }
+                    
+                    // Validar se o CPF não é uma sequência de números iguais (ex: 11111111111)
+                    if (preg_match('/^(\d)\1{10}$/', $cpf)) {
+                        Log::warning('CPF is a sequence of same digits', [
+                            'user_id' => $userId,
+                            'cpf_source' => $cpfSource,
+                            'cpf' => substr($cpf, 0, 3) . '***'
+                        ]);
                         return response()->json(['error' => 'CPF inválido. Atualize seu perfil com um CPF válido e tente novamente.'], 400);
                     }
                     
                     // Obter payment_method_id (pode estar em formData ou no nível raiz)
                     $paymentMethodId = $input['formData']['payment_method_id'] ?? 'pix';
+                    
+                    // Log do CPF que será enviado (sem mostrar completo por segurança)
+                    Log::info('PIX payment - CPF prepared', [
+                        'user_id' => $userId,
+                        'cpf_source' => $cpfSource,
+                        'cpf_length' => strlen($cpf),
+                        'cpf_first_3' => substr($cpf, 0, 3) . '***',
+                        'payment_method_id' => $paymentMethodId
+                    ]);
                     
                     // PIX não suporta application_fee no marketplace
                     // A taxa deve ser processada separadamente após o pagamento ser aprovado
@@ -1130,7 +1172,7 @@ class ConferenceController extends Controller
                             "last_name" => $last_name,
                             "identification" => [
                                 "type" => "CPF",
-                                "number" => $cpf
+                                "number" => $cpf // CPF deve ser string com 11 dígitos numéricos
                             ],
                         ]
                     ];
