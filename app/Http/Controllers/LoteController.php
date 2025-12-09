@@ -140,7 +140,13 @@ class LoteController extends Controller
 
         if($input['type'] == 0) {
             $input['tax'] = doubleval($input['value']) * $taxa_juros;
-            $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
+            // Se a taxa é paga pelo participante (tax_service == 0), soma ao valor
+            // Se a taxa é paga pelo organizador (tax_service == 1), subtrai do valor
+            if(isset($input['tax_service']) && $input['tax_service'] == 0) {
+                $input['final_value'] = doubleval($input['value']) + doubleval($input['value']) * $taxa_juros;
+            } else {
+                $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
+            }
             $input['form_pagamento'] = implode(',', $input['form_pagamento']);
         }
 
@@ -272,7 +278,13 @@ class LoteController extends Controller
 
         if($input['type'] == 0) {
             $input['tax'] = doubleval($input['value']) * $taxa_juros;
-            $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
+            // Se a taxa é paga pelo participante (tax_service == 0), soma ao valor
+            // Se a taxa é paga pelo organizador (tax_service == 1), subtrai do valor
+            if(isset($input['tax_service']) && $input['tax_service'] == 0) {
+                $input['final_value'] = doubleval($input['value']) + doubleval($input['value']) * $taxa_juros;
+            } else {
+                $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
+            }
             $input['form_pagamento'] = implode(',', $input['form_pagamento']);
         }
 

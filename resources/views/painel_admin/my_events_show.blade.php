@@ -14,9 +14,9 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page pt-0" id="create-event-form">
+        <section class="inner-page" id="create-event-form">
             <div class="container">
-                <div class="form-group pl-3 pr-3">
+                <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -37,124 +37,137 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body table-responsive p-0">
-                    <h4 class="d-flex justify-content-end">
-                        <a href="#" class="button-print" onclick="window.print();"><img src="{{ asset('assets/img/print-pdf.jpg') }}" alt="Imprimir" width="36px"></a>
-                    </h4>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="id">ID</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{$event->id}}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="name">Nome</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{$event->name}}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="subtitle">Subtitulo</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{$event->subtitle}}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="slug">URL do evento</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{env('APP_URL') . '/' . $event->slug}} 
-                                <a href="{{env('APP_URL') . '/' . $event->slug}}" target="_blank">
-                                    <i class="fa-solid fa-up-right-from-square"></i>
-                                </a>
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="description">Descrição</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {!!$event->description!!}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="banner">Banner</label> <br/>
-                            @if (!isset($event->banner))
-                                <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid img-thumbnail" style="width: 400px">
-                            @else
-                                Sem banner cadastrado
-                            @endif
-                        </div>
-                        <div class="form-group">
-                            <label for="max_tickets">N° máximo de ingressos</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{$event->max_tickets}}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="max_tickets">Local do evento</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{$event->place->name}}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="max_tickets">Responsável</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{$event->get_participante_admin()->name}} - {{$event->get_participante_admin()->email}}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="created_at">Data de criação</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                {{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}
-                            </p>
-                        </div>
-                        <div class="form-group">
-                            <label for="status">Ativo</label>
-                            <p class="text-muted" style="font-size: 18px">
-                                @if($event->status == 1) 
-                                    Sim 
-                                @else 
-                                    Não 
-                                @endif
-                            </p>
+                
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                        <h4 class="mb-0">Detalhes do evento</h4>
+                        <a href="#" class="btn btn-outline-secondary btn-sm" onclick="window.print();" data-bs-toggle="tooltip" title="Imprimir">
+                            <i class="fas fa-print me-2"></i>Imprimir
+                        </a>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="id" class="form-label fw-bold text-muted small">ID</label>
+                                <p class="mb-0 fs-6">{{$event->id}}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="status" class="form-label fw-bold text-muted small">Status</label>
+                                <p class="mb-0">
+                                    @if($event->status == 1) 
+                                        <span class="badge bg-success">Ativo</span>
+                                    @else 
+                                        <span class="badge bg-secondary">Inativo</span>
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="name" class="form-label fw-bold text-muted small">Nome</label>
+                                <p class="mb-0 fs-6">{{$event->name}}</p>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="subtitle" class="form-label fw-bold text-muted small">Subtítulo</label>
+                                <p class="mb-0 fs-6">{{$event->subtitle ?? 'Não informado'}}</p>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="slug" class="form-label fw-bold text-muted small">URL do evento</label>
+                                <p class="mb-0 fs-6">
+                                    <a href="{{env('APP_URL') . '/' . $event->slug}}" target="_blank" class="text-decoration-none">
+                                        {{env('APP_URL') . '/' . $event->slug}}
+                                        <i class="fa-solid fa-up-right-from-square ms-2"></i>
+                                    </a>
+                                </p>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="description" class="form-label fw-bold text-muted small">Descrição</label>
+                                <div class="text-muted">
+                                    {!!$event->description!!}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="banner" class="form-label fw-bold text-muted small">Banner</label>
+                                <div>
+                                    @if (isset($event->banner) && $event->banner)
+                                        <img src="{{ asset('storage/'.$event->banner) }}" alt="Banner evento" class="img-fluid rounded" style="max-width: 400px; max-height: 200px; object-fit: cover;">
+                                    @else
+                                        <span class="text-muted">Sem banner cadastrado</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="max_tickets" class="form-label fw-bold text-muted small">N° máximo de ingressos</label>
+                                <p class="mb-0 fs-6">{{$event->max_tickets}}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="place" class="form-label fw-bold text-muted small">Local do evento</label>
+                                <p class="mb-0 fs-6">{{$event->place->name ?? 'Não informado'}}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="responsible" class="form-label fw-bold text-muted small">Responsável</label>
+                                <p class="mb-0 fs-6">
+                                    @php
+                                        $admin = $event->get_participante_admin();
+                                    @endphp
+                                    @if($admin)
+                                        {{$admin->name}}<br>
+                                        <small class="text-muted">{{$admin->email}}</small>
+                                    @else
+                                        <span class="text-muted">Não informado</span>
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="created_at" class="form-label fw-bold text-muted small">Data de criação</label>
+                                <p class="mb-0 fs-6">{{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}</p>
+                            </div>
                         </div>
                         <hr>
-                        <label for="lotes">Lotes</label>
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-head-fixed text-nowrap">
-                                <thead>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Lotes</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
                                     <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Valor</th>
-                                    <th>Taxa</th>
-                                    <th>Preço final</th>
-                                    <th>Quantidade</th>
-                                    <th>Visibilidade</th>
-                                    {{-- <th>Cupons</th> --}}
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Valor</th>
+                                        <th>Taxa</th>
+                                        <th>Preço final</th>
+                                        <th>Quantidade</th>
+                                        <th>Visibilidade</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($event->lotes as $lote)
+                                    @if($event->lotes->count() > 0)
+                                        @foreach($event->lotes as $lote)
+                                            <tr>
+                                                <td>{{$lote->id}}</td>
+                                                <td>
+                                                    <div class="fw-bold">{{$lote->name}}</div>
+                                                    <small class="text-muted">{{ Str::limit($lote->description, 50) }}</small>
+                                                </td>
+                                                <td>@money($lote->value)</td>
+                                                <td>@money($lote->tax)</td>
+                                                <td><span class="fw-bold text-success">@money($lote->final_value)</span></td>
+                                                <td>{{$lote->quantity}}</td>
+                                                <td>
+                                                    @if($lote->visibility == 0) 
+                                                        <span class="badge bg-primary">Público</span> 
+                                                    @else 
+                                                        <span class="badge bg-secondary">Privado</span> 
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @else
                                         <tr>
-                                            <td>{{$lote->id}}</td>
-                                            <td>
-                                                <b>{{$lote->name}}</b><br/>
-                                                {{$lote->description}}
+                                            <td colspan="7" class="text-center py-4 text-muted">
+                                                <i class="fas fa-ticket-alt fa-2x mb-2"></i><br>
+                                                Nenhum lote cadastrado.
                                             </td>
-                                            <td>@money($lote->value)</td>
-                                            <td>@money($lote->tax)</td>
-                                            <td>@money($lote->final_value)</td>
-                                            <td>{{$lote->quantity}}</td>
-                                            <td>@if($lote->visibility == 0) Público @else Privado @endif</td>
-                                            {{-- <td>
-                                                <ul class="list-group list-group-flush">
-                                                    @foreach($lote->coupons as $coupon)
-                                                    <li>{{$coupon->code}}</li>
-                                                    @endforeach
-                                                </ul>
-                                            </td> --}}
                                         </tr>
-                                    @endforeach
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -197,9 +210,10 @@
                             </table>
                         </div> --}}
                     </div>
-                    <!-- /.card-body -->
-                    <div class="card-footer d-flex justify-content-between">
-                        <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">Voltar</a>
+                    <div class="card-footer bg-white border-top d-flex justify-content-between py-3">
+                        <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar
+                        </a>
                     </div>
                 </div>
             </div>
@@ -223,6 +237,11 @@
 
         <script>
         $(document).ready(function() {
+            // Inicializar tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
 
             $('#description').summernote({
                 placeholder: 'Descreva em detalhes o evento',

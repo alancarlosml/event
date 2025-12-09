@@ -1090,6 +1090,7 @@ class ConferenceController extends Controller
                         "installments" => (int) $input['formData']['installments'],
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
+                        "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $payerEmail,
                             "first_name" => $first_name,
@@ -1174,6 +1175,7 @@ class ConferenceController extends Controller
                         "transaction_amount" => (float) $total,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $paymentMethodId,
+                        "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
                         // NOTA: application_fee não é suportado para PIX
                         // A taxa será processada via split payment após aprovação
                         "payer" => [
@@ -1209,6 +1211,7 @@ class ConferenceController extends Controller
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
+                        "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $input['formData']['payer']['email'],
                             "first_name" => $input['formData']['payer']['first_name'],

@@ -312,6 +312,36 @@ class EventAdminController extends Controller
             abort(403, 'Você não tem permissão para acessar este evento');
         }
 
+        // Recalcular final_value dos lotes existentes baseado em tax_service
+        $config = Configuration::findOrFail(1);
+        $taxa_juros = $config->tax;
+        
+        foreach($event->lotes as $lote) {
+            if($lote->type == 0 && $lote->value > 0) {
+                // Recalcular taxa se necessário
+                $taxa_calculada = doubleval($lote->value) * $taxa_juros;
+                
+                // Recalcular final_value baseado em tax_service
+                if($lote->tax_service == 0) {
+                    // Taxa paga pelo participante: soma ao valor
+                    $final_value_calculado = doubleval($lote->value) + $taxa_calculada;
+                } else {
+                    // Taxa paga pelo organizador: subtrai do valor
+                    $final_value_calculado = doubleval($lote->value) - $taxa_calculada;
+                }
+                
+                // Atualizar apenas se o valor estiver incorreto
+                if(abs($lote->final_value - $final_value_calculado) > 0.01) {
+                    $lote->tax = $taxa_calculada;
+                    $lote->final_value = $final_value_calculado;
+                    $lote->save();
+                }
+            }
+        }
+
+        // Recarregar o evento com os lotes atualizados
+        $event->refresh();
+
         $isSuperAdmin = Auth::guard('participante')->user()->hasRole('super_admin');
 
         return view('painel_admin.my_events_show', compact('event', 'isSuperAdmin'));
@@ -1058,7 +1088,13 @@ class EventAdminController extends Controller
 
         if($validatedData['type'] == 0) {
             $validatedData['tax'] = doubleval($validatedData['value']) * $taxa_juros;
-            $validatedData['final_value'] = doubleval($validatedData['value']) - doubleval($validatedData['value']) * $taxa_juros;
+            // Se a taxa é paga pelo participante (tax_service == 0), soma ao valor
+            // Se a taxa é paga pelo organizador (tax_service == 1), subtrai do valor
+            if(isset($validatedData['tax_service']) && $validatedData['tax_service'] == 0) {
+                $validatedData['final_value'] = doubleval($validatedData['value']) + doubleval($validatedData['value']) * $taxa_juros;
+            } else {
+                $validatedData['final_value'] = doubleval($validatedData['value']) - doubleval($validatedData['value']) * $taxa_juros;
+            }
             $validatedData['form_pagamento'] = implode(',', $validatedData['form_pagamento']);
         }
 
@@ -1169,7 +1205,13 @@ class EventAdminController extends Controller
 
         if($input['type'] == 0) {
             $input['tax'] = doubleval($input['value']) * $taxa_juros;
-            $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
+            // Se a taxa é paga pelo participante (tax_service == 0), soma ao valor
+            // Se a taxa é paga pelo organizador (tax_service == 1), subtrai do valor
+            if(isset($input['tax_service']) && $input['tax_service'] == 0) {
+                $input['final_value'] = doubleval($input['value']) + doubleval($input['value']) * $taxa_juros;
+            } else {
+                $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
+            }
             $input['form_pagamento'] = implode(',', $input['form_pagamento']);
         }
 

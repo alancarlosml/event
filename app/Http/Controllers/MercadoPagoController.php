@@ -306,57 +306,114 @@ class MercadoPagoController extends Controller
                 
                 Log::info('Processing payment notification', ['payment_id' => $paymentId]);
                 
-                // Buscar informações do pagamento no Mercado Pago
-                $client = new Client();
-                $response = $client->get("https://api.mercadopago.com/v1/payments/{$paymentId}", [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $this->accessToken,
-                        'Content-Type' => 'application/json'
-                    ]
-                ]);
-                
-                $paymentData = json_decode($response->getBody(), true);
-                
-                Log::info('Payment data retrieved', ['payment_data' => $paymentData]);
-                
-                // Buscar o pedido correspondente
+                // Buscar o pedido correspondente primeiro para obter o access_token correto
                 $order = DB::table('orders')
                     ->where('gatway_hash', $paymentId)
                     ->first();
                 
-                if ($order) {
-                    // Atualizar status do pedido baseado no status do pagamento
-                    $status = $this->mapPaymentStatus($paymentData['status']);
-                    
-                    DB::table('orders')
-                        ->where('id', $order->id)
-                        ->update([
-                            'status' => $status,
-                            'gatway_status' => $paymentData['status'],
-                            'gatway_payment_method' => $paymentData['payment_method_id'],
-                            'gatway_date_status' => $paymentData['date_created'],
-                            'updated_at' => now()
-                        ]);
-                    
-                    Log::info('Order status updated', [
-                        'order_id' => $order->id,
-                        'status' => $status,
-                        'payment_status' => $paymentData['status']
+                if (!$order) {
+                    Log::warning('Order not found for payment', ['payment_id' => $paymentId]);
+                    return response()->json(['error' => 'Order not found'], 404);
+                }
+                
+                // Buscar o access_token do organizador do evento
+                $organizerParticipant = DB::table('participantes_events')
+                    ->where('event_id', $order->event_id)
+                    ->where('role', 'admin')
+                    ->first(['participante_id']);
+                
+                if (!$organizerParticipant) {
+                    Log::error('Event organizer not found', ['event_id' => $order->event_id]);
+                    return response()->json(['error' => 'Event organizer not found'], 500);
+                }
+                
+                // Buscar a conta do Mercado Pago vinculada ao organizador
+                $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
+                
+                if (!$mpAccount || empty($mpAccount->access_token)) {
+                    Log::error('Mercado Pago account not linked for organizer', [
+                        'event_id' => $order->event_id,
+                        'organizer_id' => $organizerParticipant->participante_id
+                    ]);
+                    // Tentar com o access_token do marketplace como fallback
+                    $accessToken = $this->accessToken;
+                    Log::warning('Using marketplace access token as fallback');
+                } else {
+                    $accessToken = $mpAccount->access_token;
+                }
+                
+                // Buscar informações do pagamento no Mercado Pago usando o access_token correto
+                $client = new Client();
+                try {
+                    $response = $client->get("https://api.mercadopago.com/v1/payments/{$paymentId}", [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $accessToken,
+                            'Content-Type' => 'application/json'
+                        ]
                     ]);
                     
-                    // Se o pagamento foi aprovado, gerar ingressos
-                    if ($paymentData['status'] === 'approved') {
-                        $this->generateTickets($order->id);
-                        // Enviar email de confirmação
-                        $orderModel = \App\Models\Order::find($order->id);
-                        if ($orderModel) {
-                            Mail::to($orderModel->get_participante()->email)->send(new \App\Mail\PaymentApprovedMail($orderModel));
-                        }
+                    $paymentData = json_decode($response->getBody(), true);
+                    
+                    Log::info('Payment data retrieved', ['payment_data' => $paymentData]);
+                } catch (\Exception $e) {
+                    Log::error('Error fetching payment from Mercado Pago', [
+                        'payment_id' => $paymentId,
+                        'error' => $e->getMessage()
+                    ]);
+                    return response()->json(['error' => 'Failed to fetch payment data'], 500);
+                }
+                
+                // Atualizar status do pedido baseado no status do pagamento
+                $status = $this->mapPaymentStatus($paymentData['status']);
+                
+                DB::table('orders')
+                    ->where('id', $order->id)
+                    ->update([
+                        'status' => $status,
+                        'gatway_status' => $paymentData['status'],
+                        'gatway_payment_method' => $paymentData['payment_method_id'] ?? $paymentData['payment_type_id'] ?? null,
+                        'gatway_date_status' => $paymentData['date_created'] ?? now(),
+                        'updated_at' => now()
+                    ]);
+                
+                Log::info('Order status updated', [
+                    'order_id' => $order->id,
+                    'status' => $status,
+                    'payment_status' => $paymentData['status']
+                ]);
+                
+                // Se o pagamento foi aprovado, atualizar order_items e gerar ingressos
+                if ($paymentData['status'] === 'approved') {
+                    // Atualizar status dos order_items
+                    $orderItems = DB::table('order_items')->where('order_id', $order->id)->get();
+                    
+                    foreach ($orderItems as $item) {
+                        // Gerar purchase_hash para cada order_item (usado no QR Code)
+                        $createdAtStr = is_string($item->created_at) ? $item->created_at : (is_object($item->created_at) ? $item->created_at->format('Y-m-d H:i:s') : $item->created_at);
+                        $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5("7bc05eb02415fe73101eeea0180e258d45e8ba2b"));
                         
-                        Log::info('Payment approved - tickets generated and email sent', ['order_id' => $order->id]);
+                        DB::table('order_items')
+                            ->where('id', $item->id)
+                            ->update([
+                                'status' => 1, // Confirmado
+                                'purchase_hash' => $purchaseHash,
+                                'updated_at' => now()
+                            ]);
                     }
-                } else {
-                    Log::warning('Order not found for payment', ['payment_id' => $paymentId]);
+                    
+                    $this->generateTickets($order->id);
+                    
+                    // Enviar email de confirmação
+                    try {
+                        $orderModel = \App\Models\Order::find($order->id);
+                        if ($orderModel && class_exists('\App\Mail\OrderMail')) {
+                            Mail::to($orderModel->get_participante()->email)->send(new \App\Mail\OrderMail($orderModel, 'Compra realizada com sucesso'));
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to send confirmation email', ['error' => $e->getMessage()]);
+                    }
+                    
+                    Log::info('Payment approved - tickets generated and email sent', ['order_id' => $order->id]);
                 }
             }
             
