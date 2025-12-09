@@ -399,19 +399,22 @@
                             </div>
                             <div id="card-new-field">
                                 @if(isset($questions) && count($questions) > 0)
-                                    @foreach ($questions as $id => $question)
-                                        @if($id < 2)
+                                    @foreach ($questions as $question)
+                                        @php
+                                            $index = $loop->index;
+                                        @endphp
+                                        @if($index < 2)
                                             <div class="mb-3">
-                                                <label for="new_field_{{ $id }}" class="form-label">Campo {{ $id + 1 }}{{ $question->required == 1 ? '*' : '' }}</label>
-                                                <input type="text" class="form-control new_field" name="new_field[]" value="{{ $question->formatted_options }}" readonly>
-                                                <input type="hidden" name="new_field_id[]" value="{{ $question->id }}">
+                                                <label for="new_field_{{ $index }}" class="form-label">Campo {{ $index + 1 }}{{ isset($question->required) && $question->required == 1 ? '*' : '' }}</label>
+                                                <input type="text" class="form-control new_field" name="new_field[]" value="{{ isset($question->formatted_options) ? $question->formatted_options : (is_array($question) && isset($question['formatted_options']) ? $question['formatted_options'] : '') }}" readonly>
+                                                <input type="hidden" name="new_field_id[]" value="{{ isset($question->id) ? $question->id : (is_array($question) && isset($question['id']) ? $question['id'] : '') }}">
                                             </div>
                                         @else
                                             <div class="row mb-3">
                                                 <div class="col-9">
-                                                    <label for="new_field_{{ $id }}" class="form-label">Campo {{ $id + 1 }}{{ $question->required ? '*' : '' }}</label>
-                                                    <input type="text" class="form-control new_field" name="new_field[]" value="{{ $question->formatted_options }}" readonly>
-                                                    <input type="hidden" name="new_field_id[]" value="{{ $question->id }}">
+                                                    <label for="new_field_{{ $index }}" class="form-label">Campo {{ $index + 1 }}{{ isset($question->required) && $question->required ? '*' : '' }}</label>
+                                                    <input type="text" class="form-control new_field" name="new_field[]" value="{{ isset($question->formatted_options) ? $question->formatted_options : (is_array($question) && isset($question['formatted_options']) ? $question['formatted_options'] : '') }}" readonly>
+                                                    <input type="hidden" name="new_field_id[]" value="{{ isset($question->id) ? $question->id : (is_array($question) && isset($question['id']) ? $question['id'] : '') }}">
                                                 </div>
                                                 <div class="col-3" style="margin-top: 35px;">
                                                     <button type="button" class="btn btn-danger btn-sm btn-remove-field me-1" title="Remover">

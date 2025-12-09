@@ -361,7 +361,7 @@ class EventAdminController extends Controller
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
         $options = Option::orderBy('id')->get();
-        $questions = Question::orderBy('order')->where('event_id', $event->id)->get();
+        $questions = Question::with('option')->orderBy('order')->where('event_id', $event->id)->get();
 
         $dates = DB::table('event_dates')
             ->join('events', 'events.id', '=', 'event_dates.event_id')
@@ -383,7 +383,14 @@ class EventAdminController extends Controller
         $request->session()->put('event', $event->toArray());
         $request->session()->put('event_id', $event->id);
         $request->session()->put('place', $place ? $place->toArray() : null);
-        $request->session()->put('questions', $questions->toArray());
+        
+        // Incluir formatted_options ao salvar questões na sessão
+        $questionsArray = $questions->map(function($question) {
+            $questionArray = $question->toArray();
+            $questionArray['formatted_options'] = $question->formatted_options;
+            return $questionArray;
+        })->toArray();
+        $request->session()->put('questions', $questionsArray);
 
         // Verificar conta do Mercado Pago
         $mercadoPagoResponse = app(MercadoPagoController::class)->checkLinkedAccount($request);
@@ -501,6 +508,9 @@ class EventAdminController extends Controller
             $sessionQuestions = $request->session()->get('questions');
             if($sessionQuestions) {
                 $questions = collect($sessionQuestions);
+            } else {
+                // Se não houver questões na sessão, buscar do banco de dados com relacionamentos
+                $questions = Question::with('option')->orderBy('order')->where('event_id', $event->id)->get();
             }
         }
 
@@ -949,9 +959,15 @@ class EventAdminController extends Controller
             }
         }
 
-        $questions = Question::orderBy('order')->where('event_id', $event_id)->get();
+        $questions = Question::with('option')->orderBy('order')->where('event_id', $event_id)->get();
 
-        $request->session()->put('questions', $questions->toArray());
+        // Incluir formatted_options ao salvar questões na sessão
+        $questionsArray = $questions->map(function($question) {
+            $questionArray = $question->toArray();
+            $questionArray['formatted_options'] = $question->formatted_options;
+            return $questionArray;
+        })->toArray();
+        $request->session()->put('questions', $questionsArray);
     }
 
     private function saveUserAdmin(Request $request, Event $event)
