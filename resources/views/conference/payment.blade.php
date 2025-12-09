@@ -394,7 +394,14 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Sobrenome</label>
-                                    <input type="text" id="boleto_last_name" class="form-control mp-form-control" value="{{ Auth::check() && count(explode(' ', Auth::user()->name)) > 1 ? end(explode(' ', Auth::user()->name)) : '' }}" required>
+                                    @php
+                                        $lastName = '';
+                                        if (Auth::check()) {
+                                            $nameParts = explode(' ', Auth::user()->name);
+                                            $lastName = count($nameParts) > 1 ? end($nameParts) : '';
+                                        }
+                                    @endphp
+                                    <input type="text" id="boleto_last_name" class="form-control mp-form-control" value="{{ $lastName }}" required>
                                     <div class="error-message" id="boleto_last_nameError"></div>
                                 </div>
                             </div>
