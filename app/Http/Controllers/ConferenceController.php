@@ -1078,16 +1078,20 @@ class ConferenceController extends Controller
                         return response()->json(['error' => 'Dados do cartão incompletos'], 400);
                     }
 
+                    // Usar email do formData ou do usuário autenticado
+                    $payerEmail = isset($input['formData']['payer']['email']) && !empty($input['formData']['payer']['email']) 
+                        ? $input['formData']['payer']['email'] 
+                        : $user->email;
+
                     $paymentRequest = [
                         "transaction_amount" => (float) $total,
                         "token" => $input['formData']['token'],
                         "description" => 'Ingresso ' . $event->name,
                         "installments" => (int) $input['formData']['installments'],
                         "payment_method_id" => $input['formData']['payment_method_id'],
-                        "issuer_id" => (int) $input['formData']['issuer_id'],
                         "application_fee" => (float) $application_fee,
                         "payer" => [
-                            "email" => $input['formData']['payer']['email'],
+                            "email" => $payerEmail,
                             "first_name" => $first_name,
                             "last_name" => $last_name,
                             "identification" => [
@@ -1096,6 +1100,12 @@ class ConferenceController extends Controller
                             ]
                         ]
                     ];
+
+                    // Adicionar issuer_id apenas se fornecido
+                    if (isset($input['formData']['issuer_id']) && !empty($input['formData']['issuer_id'])) {
+                        $paymentRequest["issuer_id"] = (int) $input['formData']['issuer_id'];
+                    }
+
                     break;
 
                 case 'bank_transfer':
@@ -1327,11 +1337,38 @@ class ConferenceController extends Controller
                 'status' => $payment->status
             ]);
 
-            return response()->json([
+            $responseData = [
                 'id' => $payment->id,
                 'status' => $payment->status,
                 'detail' => $payment->status_detail ?? null
-            ]);
+            ];
+
+            // Adicionar detalhes do PIX se disponível
+            if ($input['paymentType'] == 'bank_transfer' && ($payment->status === 'pending' || $payment->status === 'in_process')) {
+                $pixDetails = DB::table('pix_details')->where('order_id', $order_id)->first();
+                if ($pixDetails) {
+                    $responseData['pix'] = [
+                        'qr_code' => $pixDetails->qr_code,
+                        'qr_code_base64' => $pixDetails->qr_code_base64,
+                        'ticket_url' => $pixDetails->ticket_url,
+                        'expiration_date' => $pixDetails->expiration_date
+                    ];
+                }
+            }
+
+            // Adicionar detalhes do boleto se disponível
+            if ($input['paymentType'] == 'ticket' && ($payment->status === 'pending' || $payment->status === 'in_process')) {
+                $boletoDetails = DB::table('boleto_details')->where('order_id', $order_id)->first();
+                if ($boletoDetails) {
+                    $responseData['boleto'] = [
+                        'href' => $boletoDetails->href,
+                        'line_code' => $boletoDetails->line_code,
+                        'expiration_date' => $boletoDetails->expiration_date
+                    ];
+                }
+            }
+
+            return response()->json($responseData);
 
         } catch (MPApiException $e) {
             $apiResponse = $e->getApiResponse();
