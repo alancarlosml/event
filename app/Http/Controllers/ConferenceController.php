@@ -900,10 +900,55 @@ class ConferenceController extends Controller
         }
 
         // Validar estrutura dos dados
-        if (!$input || !isset($input['paymentType']) || !isset($input['formData'])) {
+        // O Payment Brick pode enviar dados em formatos diferentes dependendo do método
+        $paymentType = null;
+        $formData = null;
+        
+        // Formato 1: { paymentType: "...", formData: {...} }
+        if (isset($input['paymentType']) && isset($input['formData'])) {
+            $paymentType = $input['paymentType'];
+            $formData = $input['formData'];
+        }
+        // Formato 2: Dados diretos do Payment Brick (para cartão)
+        elseif (isset($input['token']) || isset($input['payment_method_id'])) {
+            // Se tem token, é cartão de crédito
+            if (isset($input['token'])) {
+                $paymentType = 'credit_card';
+                $formData = $input;
+            }
+            // Se tem payment_method_id, pode ser PIX ou boleto
+            elseif (isset($input['payment_method_id'])) {
+                if ($input['payment_method_id'] === 'pix') {
+                    $paymentType = 'bank_transfer';
+                    $formData = $input;
+                } elseif (in_array($input['payment_method_id'], ['bolbradesco', 'pec'])) {
+                    $paymentType = 'ticket';
+                    $formData = $input;
+                }
+            }
+        }
+        // Formato 3: Dados do Payment Brick com selectedPaymentMethod
+        elseif (isset($input['selectedPaymentMethod'])) {
+            if ($input['selectedPaymentMethod'] === 'bank_transfer' || (isset($input['formData']) && $input['formData']['payment_method_id'] === 'pix')) {
+                $paymentType = 'bank_transfer';
+                $formData = $input['formData'] ?? $input;
+            } elseif ($input['selectedPaymentMethod'] === 'credit_card') {
+                $paymentType = 'credit_card';
+                $formData = $input['formData'] ?? $input;
+            } elseif ($input['selectedPaymentMethod'] === 'ticket') {
+                $paymentType = 'ticket';
+                $formData = $input['formData'] ?? $input;
+            }
+        }
+        
+        if (!$paymentType || !$formData) {
             Log::warning('Invalid payment data structure', ['input' => $input]);
             return response()->json(['error' => 'Dados de pagamento inválidos'], 400);
         }
+        
+        // Normalizar input para o formato esperado
+        $input['paymentType'] = $paymentType;
+        $input['formData'] = $formData;
 
         // Rate limiting por usuário
         $userId = Auth::id();
@@ -921,6 +966,44 @@ class ConferenceController extends Controller
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
         $total = $request->session()->get('total');
+
+        if (!$order_id || !$event || !$total) {
+            Log::warning('Missing session data', [
+                'has_order_id' => (bool) $order_id,
+                'has_event' => (bool) $event,
+                'has_total' => (bool) $total,
+                'user_id' => $userId
+            ]);
+            return response()->json(['error' => 'Sessão expirada. Reinicie o processo de compra.'], 400);
+        }
+
+        // Validar se a ordem existe e pertence ao usuário
+        $order = Order::where('id', $order_id)
+                    ->where('participante_id', Auth::id())
+                    ->where('status', 2) // apenas ordens pendentes
+                    ->first();
+
+        if (!$order) {
+            // Verificar se a ordem existe mas com status diferente
+            $existingOrder = Order::where('id', $order_id)
+                                ->where('participante_id', Auth::id())
+                                ->first();
+            
+            if ($existingOrder) {
+                Log::warning('Order already processed', [
+                    'order_id' => $order_id,
+                    'status' => $existingOrder->status,
+                    'user_id' => $userId
+                ]);
+                return response()->json(['error' => 'Esta ordem já foi processada anteriormente.'], 400);
+            }
+            
+            Log::warning('Order not found', [
+                'order_id' => $order_id,
+                'user_id' => $userId
+            ]);
+            return response()->json(['error' => 'Ordem não encontrada. Reinicie o processo de compra.'], 400);
+        }
         
         // Buscar o organizador do evento
         $organizerParticipant = DB::table('participantes_events')
@@ -945,30 +1028,6 @@ class ConferenceController extends Controller
         }
         
         $accessToken = $mpAccount->access_token;
-
-        if (!$order_id || !$event || !$total) {
-            Log::warning('Missing session data', [
-                'has_order_id' => (bool) $order_id,
-                'has_event' => (bool) $event,
-                'has_total' => (bool) $total,
-                'user_id' => $userId
-            ]);
-            return response()->json(['error' => 'Sessão expirada. Reinicie o processo de compra.'], 400);
-        }
-
-        // Validar se a ordem existe e pertence ao usuário
-        $order = Order::where('id', $order_id)
-                    ->where('participante_id', Auth::id())
-                    ->where('status', 2) // apenas ordens pendentes
-                    ->first();
-
-        if (!$order) {
-            Log::warning('Order not found or already processed', [
-                'order_id' => $order_id,
-                'user_id' => $userId
-            ]);
-            return response()->json(['error' => 'Ordem não encontrada ou já processada'], 400);
-        }
 
         // Configurar Mercado Pago
         try {
@@ -1028,10 +1087,27 @@ class ConferenceController extends Controller
                     break;
 
                 case 'bank_transfer':
+                    // Validar CPF para PIX
+                    if (empty($user->cpf)) {
+                        Log::warning('User CPF missing for PIX payment', ['user_id' => $userId]);
+                        return response()->json(['error' => 'CPF é obrigatório para pagamento via PIX. Atualize seu perfil e tente novamente.'], 400);
+                    }
+                    
+                    // Limpar CPF (remover caracteres não numéricos)
+                    $cpf = preg_replace('/[^0-9]/', '', $user->cpf);
+                    
+                    if (strlen($cpf) != 11) {
+                        Log::warning('Invalid CPF format for PIX payment', ['user_id' => $userId, 'cpf_length' => strlen($cpf)]);
+                        return response()->json(['error' => 'CPF inválido. Atualize seu perfil com um CPF válido e tente novamente.'], 400);
+                    }
+                    
+                    // Obter payment_method_id (pode estar em formData ou no nível raiz)
+                    $paymentMethodId = $input['formData']['payment_method_id'] ?? 'pix';
+                    
                     $paymentRequest = [
                         "transaction_amount" => (float) $total,
                         "description" => 'Ingresso ' . $event->name,
-                        "payment_method_id" => $input['formData']['payment_method_id'],
+                        "payment_method_id" => $paymentMethodId,
                         "application_fee" => (float) $application_fee,
                         "payer" => [
                             "email" => $user->email,
@@ -1039,7 +1115,7 @@ class ConferenceController extends Controller
                             "last_name" => $last_name,
                             "identification" => [
                                 "type" => "CPF",
-                                "number" => $user->cpf
+                                "number" => $cpf
                             ],
                         ]
                     ];
