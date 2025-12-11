@@ -577,7 +577,13 @@ class ConferenceController extends Controller
                     $coupon_discount = $coupon->discount_value;
                 }
 
-                $coupon = [['code' => $coupon->code, 'type' => $coupon->discount_type, 'value' => $coupon->discount_value]];
+                // CORREÇÃO: Incluir ID do cupom para registro posterior
+                $coupon = [[
+                    'id' => $coupon->id, 
+                    'code' => $coupon->code, 
+                    'type' => $coupon->discount_type, 
+                    'value' => $coupon->discount_value
+                ]];
                 $total = $subtotal - $coupon_discount;
 
                 $request->session()->put('coupon', $coupon);
@@ -860,6 +866,56 @@ class ConferenceController extends Controller
         return view('conference.payment', compact('event', 'total'));
     }
 
+    /**
+     * Verifica o status de um pagamento (usado para polling do PIX)
+     * 
+     * @param Request $request
+     * @param int $order_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkPaymentStatus(Request $request, $order_id)
+    {
+        try {
+            // Buscar pedido - apenas do usuário autenticado
+            $order = DB::table('orders')
+                ->where('id', $order_id)
+                ->where('participante_id', Auth::id())
+                ->first();
+            
+            if (!$order) {
+                return response()->json(['error' => 'Pedido não encontrado'], 404);
+            }
+            
+            // Mapear status interno para status legível
+            $statusMap = [
+                1 => 'approved',
+                2 => 'pending',
+                3 => 'rejected',
+                4 => 'cancelled',
+                5 => 'refunded',
+                6 => 'charged_back'
+            ];
+            
+            $internalStatus = $statusMap[$order->status] ?? 'unknown';
+            
+            return response()->json([
+                'status' => $order->gatway_status ?? $internalStatus,
+                'internal_status' => $order->status,
+                'approved' => $order->status == 1,
+                'payment_method' => $order->gatway_payment_method
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error checking payment status', [
+                'order_id' => $order_id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json(['error' => 'Erro ao verificar status'], 500);
+        }
+    }
+
     public function thanks(Request $request)
     {
         // Log request details for debugging
@@ -1043,27 +1099,51 @@ class ConferenceController extends Controller
         $tmp_explode = Str::of($user->name)->explode(' ');
         $last_name = count($tmp_explode) > 1 ? end($tmp_explode) : $first_name;
 
+        // CORREÇÃO CRÍTICA: Aplicar desconto do cupom ao total
+        $coupon_discount = $request->session()->get('coupon_discount', 0);
+        $total_com_desconto = $total - $coupon_discount;
+        
+        // Validar que total não seja negativo
+        if ($total_com_desconto < 0) {
+            Log::warning('Coupon discount exceeded total amount', [
+                'total' => $total,
+                'coupon_discount' => $coupon_discount
+            ]);
+            $total_com_desconto = 0;
+        }
+        
+        Log::info('Coupon discount applied', [
+            'original_total' => $total,
+            'coupon_discount' => $coupon_discount,
+            'final_total' => $total_com_desconto
+        ]);
+        
+        // Usar o total com desconto para calcular application_fee e enviar ao Mercado Pago
+        $total_a_pagar = $total_com_desconto;
+        
         // Calcular taxa (apenas para métodos que suportam application_fee)
         $config = Configuration::findOrFail(1);
         $taxa_juros = $event->config_tax != 0.0 ? $event->config_tax : $config->tax;
-        $application_fee = ($total * $taxa_juros);
+        $application_fee = ($total_a_pagar * $taxa_juros);
         
         // Validar application_fee
         if ($application_fee < 0) {
             $application_fee = 0;
         }
-        if ($application_fee >= $total) {
+        if ($application_fee >= $total_a_pagar) {
             Log::warning('Application fee is greater than or equal to transaction amount', [
                 'application_fee' => $application_fee,
-                'total' => $total
+                'total' => $total_a_pagar
             ]);
-            $application_fee = $total * 0.99; // Limitar a 99% do total
+            $application_fee = $total_a_pagar * 0.99; // Limitar a 99% do total
         }
 
         Log::info('Processing payment', [
             'payment_type' => $input['paymentType'],
             'order_id' => $order_id,
-            'total' => $total,
+            'original_total' => $total,
+            'total_a_pagar' => $total_a_pagar,
+            'coupon_discount' => $coupon_discount,
             'user_id' => $userId
         ]);
 
@@ -1084,12 +1164,13 @@ class ConferenceController extends Controller
                         : $user->email;
 
                     $paymentRequest = [
-                        "transaction_amount" => (float) $total,
+                        "transaction_amount" => (float) $total_a_pagar, // COM DESCONTO DO CUPOM
                         "token" => $input['formData']['token'],
                         "description" => 'Ingresso ' . $event->name,
                         "installments" => (int) $input['formData']['installments'],
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
+                        "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
                         "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $payerEmail,
@@ -1172,9 +1253,10 @@ class ConferenceController extends Controller
                     // PIX não suporta application_fee no marketplace
                     // A taxa deve ser processada separadamente após o pagamento ser aprovado
                     $paymentRequest = [
-                        "transaction_amount" => (float) $total,
+                        "transaction_amount" => (float) $total_a_pagar, // COM DESCONTO DO CUPOM
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $paymentMethodId,
+                        "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
                         "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
                         // NOTA: application_fee não é suportado para PIX
                         // A taxa será processada via split payment após aprovação
@@ -1207,10 +1289,11 @@ class ConferenceController extends Controller
                     }
 
                     $paymentRequest = [
-                        "transaction_amount" => (float) $total,
+                        "transaction_amount" => (float) $total_a_pagar, // COM DESCONTO DO CUPOM
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
+                        "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
                         "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $input['formData']['payer']['email'],

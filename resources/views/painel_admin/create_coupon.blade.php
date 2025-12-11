@@ -155,7 +155,7 @@
                                     <label class="form-label">
                                         Lotes que terão este cupom de desconto
                                     </label>
-                                    <div class="card p-3" style="border: 1px solid #dee2e6; border-radius: 8px; background-color: #f8f9fa; max-height: 300px; overflow-y: auto;">
+                                    <div class="card p-3 bg-light" style="max-height: 300px; overflow-y: auto;">
                                         @foreach($lotes as $lote)
                                             <div class="form-check mb-2">
                                                 <input 

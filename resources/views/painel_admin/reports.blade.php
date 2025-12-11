@@ -503,7 +503,7 @@
                                                                 <div class="d-flex">
                                                                     <form action="{{ route('participante.nova_cobranca', $participante->id) }}" method="POST" class="me-2">
                                                                         @csrf
-                                                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Tem certeza que deseja gerar uma nova cobrança para este participante?');">
+                                                                        <button type="button" class="btn btn-warning btn-sm" onclick="confirmNovaCobranca(this)">
                                                                             <i class="fas fa-plus"></i>
                                                                             Nova cobrança
                                                                         </button>
@@ -654,6 +654,25 @@
                     <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">Voltar</a>
                 </div>
             </div>
+            <!-- Modal Nova Cobrança -->
+            <div class="modal fade" id="modalNovaCobranca" tabindex="-1" role="dialog" aria-labelledby="modalNovaCobrancaLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalNovaCobrancaLabel">Nova Cobrança</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body">
+                            Tem certeza que deseja gerar uma nova cobrança para este participante?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-warning" id="btn-confirm-cobranca">Sim, gerar cobrança</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
     </main><!-- End #main -->
@@ -676,7 +695,21 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.2/chart.min.js" integrity="sha512-zjlf0U0eJmSo1Le4/zcZI51ks5SjuQXkU0yOdsOBubjSmio9iCUp8XPLkEAADZNBdR9crRy3cniZ65LF2w8sRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://unpkg.com/chart.js-plugin-labels-dv/dist/chartjs-plugin-labels.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script>
+            let formToSubmit = null;
+
+            function confirmNovaCobranca(btn) {
+                formToSubmit = $(btn).closest('form');
+                $('#modalNovaCobranca').modal('show');
+            }
+
+            $('#btn-confirm-cobranca').click(function() {
+                if (formToSubmit) {
+                    formToSubmit.submit();
+                }
+            });
+
             function removeData(id) {
+                // This seems to be for the commented out section, but keeping it just in case
                 $('#modalMsgRemove-' + id).modal('show');
             }
 

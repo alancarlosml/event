@@ -58,7 +58,7 @@
                                     <div class="invalid-feedback">Selecione o tipo do lote.</div>
                                 </div>
                                 
-                                <div class="card p-3 mb-3" id="value_div" style="border: 1px solid #dee2e6; border-radius: 8px; background-color: #f8f9fa;">
+                                <div class="card bg-light mb-3 p-3" id="value_div">
                                     <div class="row g-3">
                                         <div class="col-md-4">
                                             <label for="tax_parcelamento" class="form-label">

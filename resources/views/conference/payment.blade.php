@@ -838,13 +838,84 @@
                         </div>
                         ${pixData.ticket_url ? `<p class="mt-3"><a href="${pixData.ticket_url}" target="_blank" class="btn btn-primary"><i class="fas fa-external-link-alt me-2"></i>Abrir PIX Copia e Cola</a></p>` : ''}
                         ${expirationDate ? `<p class="text-muted mt-2"><small>Válido até: ${expirationDate}</small></p>` : ''}
-                        <div class="alert alert-info mt-3">
+                        <div class="alert alert-info mt-3" id="pix_status_alert">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Importante:</strong> O QR Code também foi enviado para seu e-mail. Após o pagamento, sua compra será confirmada automaticamente.
+                            <strong>Aguardando pagamento...</strong>
+                            <p class="mb-0 mt-2">Estamos verificando seu pagamento automaticamente. Você será redirecionado assim que confirmarmos o pagamento.</p>
+                            <div class="spinner-border spinner-border-sm mt-2" role="status">
+                                <span class="visually-hidden">Verificando...</span>
+                            </div>
                         </div>
                     </div>
                 `).show();
                 showSuccess('QR Code PIX gerado com sucesso!');
+                
+                // CORREÇÃO CRÍTICA: Iniciar polling para verificar status do pagamento
+                const orderId = {{ $request->session()->get('order_id', 0) }};
+                if (orderId) {
+                    startPaymentStatusPolling(orderId);
+                }
+            }
+            
+            // Função para fazer polling do status do pagamento
+            function startPaymentStatusPolling(orderId) {
+                let attempts = 0;
+                const maxAttempts = 120; // 10 minutos (120 x 5 segundos)
+                
+                const checkInterval = setInterval(() => {
+                    attempts++;
+                    
+                    fetch(`{{ url('/check-payment-status') }}/${orderId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erro ao verificar status');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Payment status:', data);
+                            
+                            if (data.approved) {
+                                clearInterval(checkInterval);
+                                
+                                // Atualizar mensagem
+                                $('#pix_status_alert').removeClass('alert-info').addClass('alert-success').html(`
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Pagamento Confirmado!</strong>
+                                    <p class="mb-0 mt-2">Seu pagamento PIX foi confirmado. Redirecionando...</p>
+                                `);
+                                
+                                showSuccess('✅ Pagamento PIX confirmado!');
+                                
+                                // Redirecionar após 2 segundos
+                                setTimeout(() => {
+                                    window.location.href = '{{ route("event_home.my_registrations") }}';
+                                }, 2000);
+                            } else if (data.status === 'rejected' || data.status === 'cancelled') {
+                                clearInterval(checkInterval);
+                                
+                                $('#pix_status_alert').removeClass('alert-info').addClass('alert-danger').html(`
+                                    <i class="fas fa-times-circle me-2"></i>
+                                    <strong>Pagamento não aprovado</strong>
+                                    <p class="mb-0 mt-2">O pagamento foi ${data.status === 'rejected' ? 'rejeitado' : 'cancelado'}. Entre em contato com o suporte.</p>
+                                `);
+                            }
+                            
+                            // Parar após máximo de tentativas
+                            if (attempts >= maxAttempts) {
+                                clearInterval(checkInterval);
+                                $('#pix_status_alert').removeClass('alert-info').addClass('alert-warning').html(`
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Verificação automática expirou</strong>
+                                    <p class="mb-0 mt-2">Ainda não detectamos seu pagamento. Verifique seu email ou atualize esta página.</p>
+                                `);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao verificar status:', error);
+                            // Não parar o polling por erro temporário
+                        });
+                }, 5000); // Verificar a cada 5 segundos
             }
 
             // Exibir detalhes do Boleto

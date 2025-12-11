@@ -306,13 +306,72 @@ class MercadoPagoController extends Controller
                 
                 Log::info('Processing payment notification', ['payment_id' => $paymentId]);
                 
-                // Buscar o pedido correspondente primeiro para obter o access_token correto
-                $order = DB::table('orders')
-                    ->where('gatway_hash', $paymentId)
-                    ->first();
+                // CORREÇÃO CRÍTICA: Buscar informações do pagamento PRIMEIRO para obter external_reference
+                // Usar access_token do marketplace para buscar dados do pagamento
+                $client = new Client();
+                $paymentData = null;
+                
+                try {
+                    $response = $client->get("https://api.mercadopago.com/v1/payments/{$paymentId}", [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $this->accessToken,
+                            'Content-Type' => 'application/json'
+                        ]
+                    ]);
+                    
+                    $paymentData = json_decode($response->getBody(), true);
+                    
+                    Log::info('Payment data retrieved from Mercado Pago', [
+                        'payment_id' => $paymentId,
+                        'status' => $paymentData['status'] ?? 'unknown',
+                        'external_reference' => $paymentData['external_reference'] ?? 'none'
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error fetching payment from Mercado Pago', [
+                        'payment_id' => $paymentId,
+                        'error' => $e->getMessage()
+                    ]);
+                    return response()->json(['error' => 'Failed to fetch payment data'], 500);
+                }
+                
+                // Buscar o pedido correspondente usando external_reference (PRIORIDADE) ou gatway_hash (FALLBACK)
+                $order = null;
+                $externalReference = $paymentData['external_reference'] ?? null;
+                
+                // Tentar buscar por external_reference (order_id) primeiro
+                if ($externalReference) {
+                    $order = DB::table('orders')
+                        ->where('id', $externalReference)
+                        ->first();
+                    
+                    if ($order) {
+                        Log::info('Order found by external_reference', [
+                            'order_id' => $order->id,
+                            'external_reference' => $externalReference
+                        ]);
+                    }
+                }
+                
+                // Fallback: buscar por gatway_hash (para compatibilidade com pagamentos antigos)
+                if (!$order) {
+                    $order = DB::table('orders')
+                        ->where('gatway_hash', $paymentId)
+                        ->first();
+                    
+                    if ($order) {
+                        Log::info('Order found by gatway_hash', [
+                            'order_id' => $order->id,
+                            'payment_id' => $paymentId
+                        ]);
+                    }
+                }
                 
                 if (!$order) {
-                    Log::warning('Order not found for payment', ['payment_id' => $paymentId]);
+                    Log::warning('Order not found for payment', [
+                        'payment_id' => $paymentId,
+                        'external_reference' => $externalReference,
+                        'tried_methods' => ['external_reference', 'gatway_hash']
+                    ]);
                     return response()->json(['error' => 'Order not found'], 404);
                 }
                 
@@ -331,36 +390,13 @@ class MercadoPagoController extends Controller
                 $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
                 
                 if (!$mpAccount || empty($mpAccount->access_token)) {
-                    Log::error('Mercado Pago account not linked for organizer', [
+                    Log::warning('Mercado Pago account not linked for organizer - using marketplace token', [
                         'event_id' => $order->event_id,
                         'organizer_id' => $organizerParticipant->participante_id
                     ]);
-                    // Tentar com o access_token do marketplace como fallback
                     $accessToken = $this->accessToken;
-                    Log::warning('Using marketplace access token as fallback');
                 } else {
                     $accessToken = $mpAccount->access_token;
-                }
-                
-                // Buscar informações do pagamento no Mercado Pago usando o access_token correto
-                $client = new Client();
-                try {
-                    $response = $client->get("https://api.mercadopago.com/v1/payments/{$paymentId}", [
-                        'headers' => [
-                            'Authorization' => 'Bearer ' . $accessToken,
-                            'Content-Type' => 'application/json'
-                        ]
-                    ]);
-                    
-                    $paymentData = json_decode($response->getBody(), true);
-                    
-                    Log::info('Payment data retrieved', ['payment_data' => $paymentData]);
-                } catch (\Exception $e) {
-                    Log::error('Error fetching payment from Mercado Pago', [
-                        'payment_id' => $paymentId,
-                        'error' => $e->getMessage()
-                    ]);
-                    return response()->json(['error' => 'Failed to fetch payment data'], 500);
                 }
                 
                 // Atualizar status do pedido baseado no status do pagamento
@@ -628,11 +664,18 @@ class MercadoPagoController extends Controller
             ]);
             
             // Send email with boleto link
-            Mail::to($participant->email)->send(new \App\Mail\BoletoPendingMail($order, $body['init_point']));
+            try {
+                Mail::to($participant->email)->send(new \App\Mail\BoletoPendingMail($order, $body['init_point']));
+            } catch (\Exception $mailException) {
+                Log::warning('Falha ao enviar e-mail de nova cobrança: ' . $mailException->getMessage(), [
+                    'order_id' => $order->id,
+                    'participant_email' => $participant->email,
+                ]);
+            }
             
             return response()->json([
                 'success' => true,
-                'message' => 'Nova cobrança gerada e enviada por e-mail com sucesso!'
+                'message' => 'Nova cobrança gerada com sucesso!' . (isset($mailException) ? ' (E-mail não enviado)' : ' E-mail enviado.')
             ]);
             
         } catch (\Exception $e) {

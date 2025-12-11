@@ -350,7 +350,7 @@
                             <div class="card p-2 mb-3">
                                 <label for="question" class="form-label">Novo campo</label>
                                 <div class="row g-0">
-                                    <div class="col-md-5" style="margin-right: 10px; margin-bottom: 10px">
+                                    <div class="col-md-5 me-2 mb-2">
                                         <input type="text" class="form-control" id="question" name="question" placeholder="Nome do campo">
                                     </div>
                                     <div class="col-md-5">

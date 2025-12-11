@@ -295,7 +295,14 @@ class EventAdminController extends Controller
         $request->session()->put('event', $newEvent->toArray());
 
         //ENVIAR EMAIL - EVENTO CRIADO
-        Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($newEvent, 'Evento criado com sucesso', 'criado'));
+        try {
+            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($newEvent, 'Evento criado com sucesso', 'criado'));
+        } catch (\Exception $mailException) {
+            Log::warning('Falha ao enviar e-mail de duplicação de evento: ' . $mailException->getMessage(), [
+                'event_id' => $newEvent->id,
+                'user_email' => Auth::user()->email,
+            ]);
+        }
 
         return redirect()->route('event_home.my_events_edit', $newEvent->hash);
     }
@@ -650,8 +657,14 @@ class EventAdminController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
             //ENVIAR EMAIL - EVENTO CRIADO
-
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
+            try {
+                Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
+            } catch (\Exception $mailException) {
+                Log::warning('Falha ao enviar e-mail de criação de evento: ' . $mailException->getMessage(), [
+                    'event_id' => $event->id,
+                    'user_email' => Auth::user()->email,
+                ]);
+            }
 
             return $event;
 
@@ -700,7 +713,15 @@ class EventAdminController extends Controller
             $event->save();
             $request->session()->put('event', $event->toArray());
 
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
+            // Envio de e-mail envolvido em try-catch para não quebrar o fluxo
+            try {
+                Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
+            } catch (\Exception $mailException) {
+                Log::warning('Falha ao enviar e-mail de edição de evento: ' . $mailException->getMessage(), [
+                    'event_id' => $event->id,
+                    'user_email' => Auth::user()->email,
+                ]);
+            }
 
             return $event;
         }
@@ -1574,9 +1595,23 @@ class EventAdminController extends Controller
         Event::where('id', $event->id)->update(['owner_id' => $owner_id]);
 
         if(isset($validatedEvent['status'])) {
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
+            try {
+                Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
+            } catch (\Exception $mailException) {
+                Log::warning('Falha ao enviar e-mail de publicação de evento: ' . $mailException->getMessage(), [
+                    'event_id' => $event->id,
+                    'user_email' => Auth::user()->email,
+                ]);
+            }
         } else {
-            Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
+            try {
+                Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
+            } catch (\Exception $mailException) {
+                Log::warning('Falha ao enviar e-mail de salvamento de evento: ' . $mailException->getMessage(), [
+                    'event_id' => $event->id,
+                    'user_email' => Auth::user()->email,
+                ]);
+            }
         }
 
         return redirect()->route('event_home.my_events')->with('success', 'Evento salvo com sucesso!');
@@ -1664,7 +1699,14 @@ class EventAdminController extends Controller
                 $msgType = 'success';
                 $msgContent = 'Usuário convidado adicionado com sucesso!';
 
-                Mail::to($participante->email)->send(new GuestControllerMail($event, 'Você foi convidado', $participante, Auth::user()));
+                try {
+                    Mail::to($participante->email)->send(new GuestControllerMail($event, 'Você foi convidado', $participante, Auth::user()));
+                } catch (\Exception $mailException) {
+                    Log::warning('Falha ao enviar e-mail de convite: ' . $mailException->getMessage(), [
+                        'event_id' => $event->id,
+                        'guest_email' => $participante->email,
+                    ]);
+                }
             }
         } else {
             //ENVIAR EMAIL SOLICITANDO A CRIAÇÃO DA CONTA

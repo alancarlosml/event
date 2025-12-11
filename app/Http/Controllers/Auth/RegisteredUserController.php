@@ -60,7 +60,15 @@ class RegisteredUserController extends Controller
 
         $email_participante = $request->email;
 
-        $participante->notify(new WelcomeEmailNotification($participante));
+        // Envio de e-mail envolvido em try-catch para não quebrar o fluxo de cadastro
+        try {
+            $participante->notify(new WelcomeEmailNotification($participante));
+        } catch (\Exception $mailException) {
+            \Illuminate\Support\Facades\Log::warning('Falha ao enviar e-mail de boas-vindas: ' . $mailException->getMessage(), [
+                'participante_id' => $participante->id,
+                'email' => $participante->email,
+            ]);
+        }
 
         event(new Registered($participante));
 
