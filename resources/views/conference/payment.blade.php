@@ -204,12 +204,57 @@
         
         @media (max-width: 768px) {
             .payment-method-tab {
-                padding: 12px 15px;
+                padding: 10px 20px;
                 font-size: 14px;
+                margin-bottom: 0px; 
+                white-space: nowrap;
+                /* Chip style for mobile */
+                border-radius: 50px;
+                border: 1px solid #e0e0e0;
+                background-color: #f8f9fa;
+                color: #555;
             }
             
+            .payment-method-tab.active {
+                background-color: #e7f3ff;
+                border-color: #007bff;
+                color: #007bff;
+                font-weight: 600;
+                /* Override desktop style to ensure full border on chips */
+                border-bottom: 1px solid #007bff; 
+            }
+
             .payment-form-container {
                 padding: 20px;
+                /* Detach from tabs on mobile */
+                border-top: 1px solid #e0e0e0; /* Restore top border */
+                border-radius: 10px;
+                margin-top: 10px;
+            }
+
+            /* Horizontal scroll container for mobile */
+            .payment-tabs-wrapper {
+                display: flex;
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                gap: 10px;
+                padding-bottom: 5px;
+                margin-left: -16px;
+                margin-right: -16px;
+                padding-left: 16px;
+                padding-right: 16px;
+                scrollbar-width: none; /* Firefox */
+            }
+            
+            .payment-tabs-wrapper::-webkit-scrollbar {
+                display: none; /* Chrome/Safari */
+            }
+
+            .payment-tabs-wrapper .col-md-4 {
+                width: auto;
+                flex: 0 0 auto;
+                padding: 0;
             }
         }
     </style>
@@ -264,7 +309,7 @@
                     </div>
 
                     <!-- Tabs de Métodos de Pagamento -->
-                    <div class="row mb-3">
+                    <div class="row mb-3 payment-tabs-wrapper">
                         <div class="col-md-4">
                             <div class="payment-method-tab active" data-method="credit_card">
                                 <i class="fas fa-credit-card me-2"></i>
