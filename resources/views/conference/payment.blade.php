@@ -851,7 +851,7 @@
                 showSuccess('QR Code PIX gerado com sucesso!');
                 
                 // CORREÇÃO CRÍTICA: Iniciar polling para verificar status do pagamento
-                const orderId = {{ $request->session()->get('order_id', 0) }};
+                const orderId = {{ session('order_id', 0) }};
                 if (orderId) {
                     startPaymentStatusPolling(orderId);
                 }
