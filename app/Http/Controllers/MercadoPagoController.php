@@ -390,14 +390,24 @@ class MercadoPagoController extends Controller
                 $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
                 
                 if (!$mpAccount || empty($mpAccount->access_token)) {
-                    Log::warning('Mercado Pago account not linked for organizer - using marketplace token', [
+                    Log::error('Mercado Pago account not linked for organizer in webhook', [
                         'event_id' => $order->event_id,
-                        'organizer_id' => $organizerParticipant->participante_id
+                        'organizer_id' => $organizerParticipant->participante_id,
+                        'payment_id' => $paymentId
                     ]);
-                    $accessToken = $this->accessToken;
-                } else {
-                    $accessToken = $mpAccount->access_token;
+                    
+                    // IMPORTANTE: Se o pagamento foi criado com application_fee usando o token do organizador,
+                    // mas não temos o token aqui, não podemos consultar o pagamento corretamente.
+                    // Neste caso, retornar erro para que o Mercado Pago tente novamente mais tarde
+                    // quando o organizador vincular a conta
+                    return response()->json([
+                        'error' => 'Organizer account not linked. Payment cannot be processed.',
+                        'message' => 'O organizador precisa vincular sua conta do Mercado Pago para processar este pagamento.'
+                    ], 500);
                 }
+                
+                // Usar o token do organizador (mesmo usado para criar o pagamento)
+                $accessToken = $mpAccount->access_token;
                 
                 // Atualizar status do pedido baseado no status do pagamento
                 $status = $this->mapPaymentStatus($paymentData['status']);

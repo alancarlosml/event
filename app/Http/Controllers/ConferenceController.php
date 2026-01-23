@@ -863,6 +863,53 @@ class ConferenceController extends Controller
         $event = $request->session()->get('event');
         $total = $request->session()->get('total');
 
+        // Validar se o evento existe
+        if (!$event) {
+            return redirect()->back()->withErrors(['error' => 'Evento não encontrado.']);
+        }
+
+        // Validar se o evento é pago
+        if ($event->paid == 1) {
+            // Verificar se o organizador tem conta vinculada
+            $organizerParticipant = DB::table('participantes_events')
+                ->where('event_id', $event->id)
+                ->where('role', 'admin')
+                ->first(['participante_id']);
+            
+            if ($organizerParticipant) {
+                $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
+                
+                if (!$mpAccount || empty($mpAccount->access_token)) {
+                    Log::warning('Payment view accessed but organizer account not linked', [
+                        'event_id' => $event->id,
+                        'organizer_id' => $organizerParticipant->participante_id
+                    ]);
+                    
+                    return redirect()->back()->withErrors([
+                        'error' => 'O organizador deste evento ainda não vinculou sua conta do Mercado Pago. Entre em contato com o organizador do evento.'
+                    ]);
+                }
+
+                // Verificar se o token está expirado ou próximo de expirar
+                if ($this->isTokenExpiredOrExpiring($mpAccount)) {
+                    Log::info('Token expirado ou próximo de expirar, tentando renovar', [
+                        'organizer_id' => $organizerParticipant->participante_id
+                    ]);
+                    
+                    // Tentar renovar o token
+                    $renewed = $this->renewAccessToken($mpAccount);
+                    if (!$renewed) {
+                        return redirect()->back()->withErrors([
+                            'error' => 'A conta do Mercado Pago do organizador precisa ser reautorizada. Entre em contato com o organizador do evento.'
+                        ]);
+                    }
+                }
+            } else {
+                Log::error('Event organizer not found for payment view', ['event_id' => $event->id]);
+                return redirect()->back()->withErrors(['error' => 'Organizador do evento não encontrado.']);
+            }
+        }
+
         return view('conference.payment', compact('event', 'total'));
     }
 
@@ -1081,6 +1128,24 @@ class ConferenceController extends Controller
                 'organizer_id' => $organizerParticipant->participante_id
             ]);
             return response()->json(['error' => 'Conta do Mercado Pago não vinculada ao organizador. Entre em contato com o organizador do evento.'], 500);
+        }
+
+        // Verificar se o token está expirado ou próximo de expirar
+        if ($this->isTokenExpiredOrExpiring($mpAccount)) {
+            Log::info('Token expirado ou próximo de expirar durante pagamento, tentando renovar', [
+                'organizer_id' => $organizerParticipant->participante_id
+            ]);
+            
+            $renewed = $this->renewAccessToken($mpAccount);
+            if (!$renewed) {
+                Log::error('Failed to renew expired token during payment', [
+                    'organizer_id' => $organizerParticipant->participante_id
+                ]);
+                return response()->json(['error' => 'A conta do Mercado Pago do organizador precisa ser reautorizada. Entre em contato com o organizador do evento.'], 500);
+            }
+            
+            // Recarregar o modelo para obter o novo token
+            $mpAccount->refresh();
         }
         
         $accessToken = $mpAccount->access_token;
@@ -1485,10 +1550,29 @@ class ConferenceController extends Controller
             // Determinar erro específico baseado no status code
             $errorMessage = 'Falha no processamento do pagamento';
             if ($statusCode >= 400 && $statusCode < 500) {
-                $errorMessage = is_array($content) && isset($content['message']) ? 
-                    $content['message'] : 'Dados de pagamento inválidos';
+                // Erros do cliente - dados inválidos
+                if (is_array($content)) {
+                    if (isset($content['message'])) {
+                        $errorMessage = $content['message'];
+                    } elseif (isset($content['cause']) && is_array($content['cause'])) {
+                        // Mercado Pago retorna erros detalhados em 'cause'
+                        $causes = array_map(function($cause) {
+                            return $cause['description'] ?? $cause['code'] ?? 'Erro desconhecido';
+                        }, $content['cause']);
+                        $errorMessage = implode('. ', $causes);
+                    }
+                }
+                
+                // Mensagens mais amigáveis para erros comuns
+                if (strpos(strtolower($errorMessage), 'card') !== false || strpos(strtolower($errorMessage), 'cartão') !== false) {
+                    $errorMessage = 'Dados do cartão inválidos. Verifique os dados e tente novamente.';
+                } elseif (strpos(strtolower($errorMessage), 'insufficient') !== false || strpos(strtolower($errorMessage), 'insuficiente') !== false) {
+                    $errorMessage = 'Saldo insuficiente. Verifique sua conta e tente novamente.';
+                } elseif (strpos(strtolower($errorMessage), 'application_fee') !== false) {
+                    $errorMessage = 'Erro na configuração do pagamento. Entre em contato com o organizador do evento.';
+                }
             } elseif ($statusCode >= 500) {
-                $errorMessage = 'Serviço temporariamente indisponível. Tente novamente.';
+                $errorMessage = 'Serviço temporariamente indisponível. Tente novamente em alguns instantes.';
             }
 
             return response()->json(['error' => $errorMessage], $statusCode >= 500 ? 503 : 400);
@@ -1589,6 +1673,99 @@ class ConferenceController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             throw $e;
+        }
+    }
+
+    /**
+     * Verifica se o token está expirado ou próximo de expirar
+     * 
+     * @param MpAccount $mpAccount
+     * @return bool
+     */
+    private function isTokenExpiredOrExpiring($mpAccount)
+    {
+        // Se não tem expires_in, considerar como válido (compatibilidade com registros antigos)
+        if (!$mpAccount->expires_in) {
+            return false;
+        }
+
+        // expires_in é um timestamp Carbon ou DateTime
+        $expiresAt = is_string($mpAccount->expires_in) 
+            ? \Carbon\Carbon::parse($mpAccount->expires_in) 
+            : $mpAccount->expires_in;
+
+        // Considerar expirado se faltam menos de 7 dias para expirar
+        // Isso dá tempo suficiente para renovar antes de expirar
+        $daysUntilExpiration = now()->diffInDays($expiresAt, false);
+        
+        return $daysUntilExpiration < 7;
+    }
+
+    /**
+     * Renova o access_token usando o refresh_token
+     * 
+     * @param MpAccount $mpAccount
+     * @return bool
+     */
+    private function renewAccessToken($mpAccount)
+    {
+        // Se não tem refresh_token, não pode renovar
+        if (empty($mpAccount->refresh_token)) {
+            Log::warning('Cannot renew token: no refresh_token', [
+                'mp_account_id' => $mpAccount->id
+            ]);
+            return false;
+        }
+
+        try {
+            $client = new Client();
+            
+            $response = $client->post('https://api.mercadopago.com/oauth/token', [
+                'form_params' => [
+                    'client_id' => env('MERCADO_PAGO_CLIENT_ID'),
+                    'client_secret' => env('MERCADO_PAGO_CLIENT_SECRET'),
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $mpAccount->refresh_token,
+                ],
+                'headers' => [
+                    'accept' => 'application/json',
+                    'content-type' => 'application/x-www-form-urlencoded',
+                ],
+            ]);
+
+            $responseData = json_decode($response->getBody()->getContents(), true);
+
+            if (!isset($responseData['access_token'])) {
+                Log::error('Failed to renew token: invalid response', [
+                    'mp_account_id' => $mpAccount->id,
+                    'response' => $responseData
+                ]);
+                return false;
+            }
+
+            // Atualizar o registro com os novos tokens
+            $mpAccount->update([
+                'access_token' => $responseData['access_token'],
+                'refresh_token' => $responseData['refresh_token'] ?? $mpAccount->refresh_token,
+                'expires_in' => isset($responseData['expires_in']) 
+                    ? \Carbon\Carbon::now()->addSeconds($responseData['expires_in'])
+                    : \Carbon\Carbon::now()->addDays(178),
+            ]);
+
+            Log::info('Token renewed successfully', [
+                'mp_account_id' => $mpAccount->id,
+                'organizer_id' => $mpAccount->participante_id
+            ]);
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('Error renewing access token', [
+                'mp_account_id' => $mpAccount->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
         }
     }
 

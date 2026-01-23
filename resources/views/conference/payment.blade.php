@@ -1023,6 +1023,11 @@
             @if ($errors->any())
                 showError('{{ $errors->first() }}');
             @endif
+
+            // Verificar se há dados de sessão válidos
+            @if(!$event || !$total)
+                showError('Sessão expirada ou dados inválidos. Por favor, reinicie o processo de compra.');
+            @endif
         });
     </script>
 </body>
