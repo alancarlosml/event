@@ -1111,7 +1111,13 @@ class EventAdminController extends Controller
             } else {
                 $validatedData['final_value'] = doubleval($validatedData['value']) - doubleval($validatedData['value']) * $taxa_juros;
             }
-            $validatedData['form_pagamento'] = implode(',', $validatedData['form_pagamento']);
+            $fp = $validatedData['form_pagamento'] ?? null;
+            $validatedData['form_pagamento'] = is_array($fp) ? implode(',', $fp) : (string) $fp;
+        } else {
+            // Lote gratuito (type == 1): não cobra taxa
+            $validatedData['tax'] = 0;
+            $validatedData['final_value'] = 0;
+            $validatedData['form_pagamento'] = '';
         }
 
         $validatedData['hash'] = md5($validatedData['name'] . $validatedData['description'] . md5(config('services.hash_secret')));
