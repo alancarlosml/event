@@ -162,7 +162,7 @@
                             <div class="mb-4">
                                 <h4 class="mb-3 border-bottom pb-2">Publicação</h4>
                                 <div class="form-check form-switch p-3 border rounded bg-light">
-                                    <input class="form-check-input" type="checkbox" @if($event->status == 1) checked @endif name="status" id="status" value="1" style="width: 3em; height: 1.5em; margin-right: 1em;">
+                                    <input class="form-check-input" type="checkbox" @if($event->status == 1) checked @endif name="status" id="status" value="1" style="width: 3em; height: 1.5em; margin-right: 1em; margin-left: 2px;">
                                     <label class="form-check-label fw-bold pt-1" for="status">Publicar evento agora?</label>
                                     <div class="form-text ms-1">Se marcado, o evento ficará visível para o público imediatamente.</div>
                                 </div>

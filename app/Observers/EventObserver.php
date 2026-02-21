@@ -16,7 +16,7 @@ class EventObserver
      */
     public function created(Event $event)
     {
-        $event->hash = md5($event->id . $event->created_at . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
+        $event->hash = md5($event->id . $event->created_at . md5(config('services.hash_secret')));
         $event->save();
     }
 

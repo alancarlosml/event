@@ -1,3 +1,10 @@
+/* Event page design system – primary colors for modern-event.css */
+:root {
+  --event-primary: #FBC02D;
+  --event-primary-light: #ffd54f;
+  --event-primary-dark: #d4a007;
+}
+
 a{
   color: #FBC02D;
 }

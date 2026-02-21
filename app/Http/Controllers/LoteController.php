@@ -150,7 +150,7 @@ class LoteController extends Controller
             $input['form_pagamento'] = implode(',', $input['form_pagamento']);
         }
 
-        $input['hash'] = md5($input['name'] . $input['description'] . $input['event_id'] . time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
+        $input['hash'] = md5($input['name'] . $input['description'] . $input['event_id'] . time() . uniqid() . md5(config('services.hash_secret')));
 
         Lote::create($input);
 
@@ -317,7 +317,7 @@ class LoteController extends Controller
         
         foreach($lotes as $lote) {
             // Gerar novo hash único
-            $newHash = md5($lote->name . $lote->description . $lote->event_id . $lote->id . time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
+            $newHash = md5($lote->name . $lote->description . $lote->event_id . $lote->id . time() . uniqid() . md5(config('services.hash_secret')));
             
             // Atualizar o hash
             $lote->update(['hash' => $newHash]);

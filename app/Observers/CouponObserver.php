@@ -16,7 +16,7 @@ class CouponObserver
      */
     public function created(Coupon $coupon)
     {
-        $coupon->hash = md5($coupon->id . $coupon->created_at . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
+        $coupon->hash = md5($coupon->id . $coupon->created_at . md5(config('services.hash_secret')));
         $coupon->save();
     }
 

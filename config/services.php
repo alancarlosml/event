@@ -31,4 +31,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'mercadopago' => [
+        'client_id' => env('MERCADO_PAGO_CLIENT_ID'),
+        'client_secret' => env('MERCADO_PAGO_CLIENT_SECRET'),
+        'access_token' => env('MERCADO_PAGO_ACCESS_TOKEN'),
+        'redirect_uri' => env('MERCADO_PAGO_REDIRECT_URI'),
+    ],
+
+    // Secret usado para gerar hashes de pedidos, lotes, cupons, etc.
+    'hash_secret' => env('HASH_SECRET', '7bc05eb02415fe73101eeea0180e258d45e8ba2b'),
+
 ];

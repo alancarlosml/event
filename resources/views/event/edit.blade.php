@@ -268,7 +268,7 @@
 											<div class="form-group col-md-2">
 												<label for="place_name">&nbsp;</label><br>
 												<a class="btn btn-warning btn-sm mr-1" style="margin-top: 3px" href="javascript:;" id="add_place">
-													Limpar campos
+													Limpar
 												</a>
 											</div>  
 										</div>

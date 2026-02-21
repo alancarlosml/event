@@ -1,4 +1,5 @@
 <x-event-layout>
+<div class="event-page-wrap">
     <div class="hero-image" id="home">
         <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="img-fluid" loading="lazy">
         @php
@@ -62,22 +63,18 @@
             </div>
         </div>
     @endif
-    <section id="information-bar">
+    <section id="information-bar" class="event-info-bar">
         <div class="container">
-            <div class="inforation-wrapper">
+            <div class="information-wrapper">
                 <div class="info-card">
                     <ul role="list" aria-label="Informações de localização do evento">
-                        <li style="display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-                        </li>
-                        <li><span><b>Local</b> {{ $event->place->name }}, {{ optional($event->place->get_city)->name }}-{{ optional($event->place->get_city)->uf }}</span></li>
+                        <li class="info-card-icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></li>
+                        <li><span><b>Local</b> {{ $event->place->name }}, {{ optional($event->place->get_city)->name }}-{{ optional(optional($event->place->get_city)->state)->uf ?? optional($event->place->get_city)->uf }}</span></li>
                     </ul>
                 </div>
                 <div class="info-card">
                     <ul role="list" aria-label="Data e hora do evento">
-                        <li style="display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
-                        </li>
+                        <li class="info-card-icon"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></li>
                         <li><span><b>Data &amp; Hora</b>
                             @if ($event->min_event_dates() != $event->max_event_dates())
                                 De {{ \Carbon\Carbon::parse($event->min_event_dates())->format('d/m') }} a {{ \Carbon\Carbon::parse($event->max_event_dates())->format('d/m') }}
@@ -90,30 +87,23 @@
                 </div>
                 <div class="info-card">
                     <ul role="list" aria-label="Categoria do evento">
-                        <li style="display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-list-check" aria-hidden="true"></i>
-                        </li>
+                        <li class="info-card-icon"><i class="fa-solid fa-list-check" aria-hidden="true"></i></li>
                         <li><span><b>Categoria</b> {{ $event->area->category->description }}</span></li>
                     </ul>
                 </div>
                 <div class="info-card">
                     <ul role="list" aria-label="Total de vagas do evento">
-                        <li style="display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
-                        </li>
+                        <li class="info-card-icon"><i class="fa-solid fa-id-badge" aria-hidden="true"></i></li>
                         <li><span><b>Total de vagas</b> {{ $event->max_tickets }}</span></li>
                     </ul>
                 </div>
             </div>
-            <div class="row mt-4">
-                <div class="text-center">
-                    @if ($event->max_event_dates() >= \Carbon\Carbon::now())
-                        <a href="#inscricoes" class="btn btn-common sub-btn" aria-label="Inscrever-se no evento">Inscreva-se</a>
-                    @else
-                        <button class="btn btn-common sub-btn disabled" aria-label="Evento encerrado" disabled>Encerrado</button>
-                    @endif
-                    </div>
-                </div>
+            <div class="info-bar-cta">
+                @if ($event->max_event_dates() >= \Carbon\Carbon::now())
+                    <a href="#inscricoes" class="btn btn-common sub-btn" aria-label="Inscrever-se no evento">Inscreva-se</a>
+                @else
+                    <button class="btn btn-common sub-btn disabled" aria-label="Evento encerrado" disabled>Encerrado</button>
+                @endif
             </div>
         </div>
     </section>
@@ -406,7 +396,7 @@
                                     @endif
                                     
                                     <div class="lote-quantity">
-                                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Quantidade:</label>
+                                        <label class="lote-qty-label">Quantidade:</label>
                                         <div class="quantity-selector">
                                             <button class="qty-btn minus" type="button" onclick="decreaseQty('{{ $lote->hash }}')" disabled>-</button>
                                             <input type="number" 
@@ -517,12 +507,12 @@
             <div class="text-center mb-3" style="font-size: 18px">
                 <b>{{ $event->place->name }}.</b> {{ $event->place->address }}, {{ $event->place->number }}. Bairro:
                 {{ $event->place->district }}. CEP: {{ $event->place->zip }}.
-                {{ $event->place->get_city()->name }}-{{ $event->place->get_city()->uf }}
+                {{ $event->place->get_city()->name }}-{{ optional($event->place->get_city()->state)->uf ?? $event->place->get_city()->uf }}
             </div>
             <div class="row">
                 <div class="col-12" id="map_canvas" style="height: 450px; width: 100%; position: relative;">
                     <div class="map-actions">
-                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($event->place->address . ', ' . $event->place->number . ', ' . $event->place->district . ', ' . $event->place->get_city()->name . '-' . $event->place->get_city()->uf) }}" 
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($event->place->address . ', ' . $event->place->number . ', ' . $event->place->district . ', ' . $event->place->get_city()->name . '-' . (optional($event->place->get_city()->state)->uf ?? $event->place->get_city()->uf)) }}" 
                            target="_blank" 
                            class="map-action-btn"
                            title="Abrir no Google Maps">
@@ -683,7 +673,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Sticky CTA -->
     @if ($event->max_event_dates() >= \Carbon\Carbon::now())
         @php
@@ -701,6 +691,7 @@
             </div>
         </div>
     @endif
+</div><!-- .event-page-wrap -->
 
     @push('event_name')
         {{ $event->name }}
@@ -724,6 +715,10 @@
     @endpush
 
     @push('head')
+        <!-- Event page typography -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
         <!-- UX Improvements CSS -->
         <link rel="stylesheet" href="{{ asset('assets_conference/css/ux-improvements.css') }}" type="text/css">
         <link rel="stylesheet" href="{{ asset('assets_conference/css/additional-improvements.css') }}" type="text/css">
@@ -756,11 +751,13 @@
                 const eventDateStr = countdownEl.dataset.date;
                 if (!eventDateStr) return;
                 
-                // Parse da data no formato brasileiro
-                const [datePart, timePart] = eventDateStr.split(' ');
-                const [day, month, year] = datePart.split('-');
-                const [hour, minute] = timePart ? timePart.split(':') : ['00', '00'];
-                
+                // Parse da data no formato do backend: YYYY-MM-DD HH:MM ou HH:MM:SS
+                const [datePart, timePart] = eventDateStr.trim().split(/\s+/);
+                const [year, month, day] = datePart.split('-').map(Number);
+                const timeParts = timePart ? timePart.split(':') : ['00', '00'];
+                const hour = parseInt(timeParts[0], 10) || 0;
+                const minute = parseInt(timeParts[1], 10) || 0;
+                // month - 1 porque Date usa mês 0-11
                 const eventDate = new Date(year, month - 1, day, hour, minute, 0).getTime();
                 
                 const timer = setInterval(function() {
@@ -1299,7 +1296,7 @@
                             <strong>{{ $event->place->name }}</strong><br>
                             {{ $event->place->address }}, {{ $event->place->number }}<br>
                             {{ $event->place->district }}<br>
-                            {{ $event->place->get_city()->name }}-{{ $event->place->get_city()->uf }}
+                            {{ $event->place->get_city()->name }}-{{ optional($event->place->get_city()->state)->uf ?? $event->place->get_city()->uf }}
                         </div>
                     `;
                     marker.bindPopup(popupContent);
@@ -1348,7 +1345,7 @@
                                 
                             } else if (!isRetry) {
                                 // Se não conseguir geocodificar, tentar com endereço mais simples
-                                const simpleAddress = '{{ $event->place->get_city()->name }}, {{ $event->place->get_city()->uf }}, Brasil';
+                                const simpleAddress = '{{ $event->place->get_city()->name }}, {{ optional($event->place->get_city()->state)->uf ?? $event->place->get_city()->uf }}, Brasil';
                                 geocodeAddress(simpleAddress, true);
                             } else {
                                 createDefaultMap();
@@ -1363,7 +1360,7 @@
 
                 
                 // Endereço completo para geocodificação
-                const fullAddress = '{{ $event->place->address }}, {{ $event->place->number }}, {{ $event->place->district }}, {{ $event->place->get_city()->name }}, {{ $event->place->get_city()->uf }}, Brasil';
+                const fullAddress = '{{ $event->place->address }}, {{ $event->place->number }}, {{ $event->place->district }}, {{ $event->place->get_city()->name }}, {{ optional($event->place->get_city()->state)->uf ?? $event->place->get_city()->uf }}, Brasil';
                 
                 // Timeout para evitar carregamento infinito (8 segundos)
                 const timeoutId = setTimeout(() => {

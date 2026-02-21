@@ -48,7 +48,7 @@ class ConferenceController extends Controller
         $request->session()->forget('event_date');
 
         if($event) {
-            $total_dates = count($event->event_dates);
+            $total_dates = $event->event_dates->count();
             // Se há apenas uma data, use a primeira data disponível do evento
             $date_min = $total_dates == 1 ? $event->event_dates->first() : EventDate::select('id')->where('date', $event->min_event_dates())->first();
  
@@ -146,25 +146,26 @@ class ConferenceController extends Controller
                 $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
                 if($quantity > 0) {
-                    if($lote->tax_service == 0) {
-                        // Usar o valor fixo da taxa do lote (já calculado na criação)
+                    $valorExibir = (float) $lote->value;
+                    $ehPago = ($lote->type == 0 && $valorExibir > 0);
+                    if ($ehPago && $lote->tax_service == 0) {
                         $taxa_fixa = $lote->tax ?? 0;
-                        $array = ['id' => $lote->id, 'quantity' => $quantity, 'value' => ($lote->value + $taxa_fixa), 'name' => $lote->name];
+                        $array = ['id' => $lote->id, 'quantity' => $quantity, 'value' => ($valorExibir + $taxa_fixa), 'name' => $lote->name];
                     } else {
-                        $array = ['id' => $lote->id, 'quantity' => $quantity,  'value' => $lote->value, 'name' => $lote->name];
+                        $array = ['id' => $lote->id, 'quantity' => $quantity, 'value' => $valorExibir, 'name' => $lote->name];
                     }
-
                     array_push($array_lotes, $array);
                 }
 
                 if($quantity > 0) {
+                    $valorExibir = (float) $lote->value;
+                    $ehPago = ($lote->type == 0 && $valorExibir > 0);
                     for($j = 0; $j < $quantity; $j++) {
-                        if($lote->tax_service == 0) {
-                            // Usar o valor fixo da taxa do lote (já calculado na criação)
+                        if ($ehPago && $lote->tax_service == 0) {
                             $taxa_fixa = $lote->tax ?? 0;
-                            $array_obj = ['id' => $lote->id, 'quantity' => 1, 'value' => ($lote->value + $taxa_fixa), 'name' => $lote->name];
+                            $array_obj = ['id' => $lote->id, 'quantity' => 1, 'value' => ($valorExibir + $taxa_fixa), 'name' => $lote->name];
                         } else {
-                            $array_obj = ['id' => $lote->id, 'quantity' => 1,  'value' => $lote->value, 'name' => $lote->name];
+                            $array_obj = ['id' => $lote->id, 'quantity' => 1, 'value' => $valorExibir, 'name' => $lote->name];
                         }
                         array_push($array_lotes_obj, $array_obj);
                     }
@@ -345,7 +346,7 @@ class ConferenceController extends Controller
                     $soldTickets = DB::table('order_items')
                         ->join('orders', 'order_items.order_id', '=', 'orders.id')
                         ->where('order_items.lote_id', $lote->id)
-                        ->where('orders.status', '!=', 3) // Exclude cancelled orders
+                        ->whereIn('orders.status', [1, 2]) // Apenas confirmados e pendentes
                         ->sum('order_items.quantity');
                     
                     $availableTickets = $lote->quantity - $soldTickets;
@@ -359,35 +360,37 @@ class ConferenceController extends Controller
                 }
 
                 // VALIDATION 5: Check if user already purchased tickets for this lot
-                if (Auth::check()) {
+                if (Auth::check() && $lote->limit_max > 0) {
                     $userPurchases = DB::table('order_items')
                         ->join('orders', 'order_items.order_id', '=', 'orders.id')
                         ->where('order_items.lote_id', $lote->id)
                         ->where('orders.participante_id', Auth::user()->id)
-                        ->where('orders.status', '!=', 3)
+                        ->whereIn('orders.status', [1, 2]) // Apenas confirmados e pendentes
                         ->sum('order_items.quantity');
                     
-                    if (($userPurchases + $quantity) > $lote->limit_max) {
+                    if ($lote->limit_max > 0 && ($userPurchases + $quantity) > $lote->limit_max) {
                         return response()->json(['error' => "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}."], 400);
                     }
                 }
 
-                // Calcular subtotal se o lote tiver valor > 0 (independente do tipo)
-                // Isso resolve casos onde lotes estão marcados incorretamente como tipo 1 mas têm valor
-                if($lote->value && $lote->value > 0) {
+                // Só adiciona ao subtotal para lotes pagos (tipo 0 e valor > 0). Lotes gratuitos nunca cobram.
+                $valorNumerico = (float) $lote->value;
+                $ehLotePago = ($lote->type == 0 && $valorNumerico > 0);
+
+                if ($ehLotePago) {
                     try {
                         // Aplicar taxa apenas para lotes do tipo 0 (pagos) e se tax_service for 0
-                        if($lote->type == 0 && $lote->tax_service == 0) {
+                        if ($lote->tax_service == 0) {
                             // Usar o valor fixo da taxa do lote (já calculado na criação)
                             // Se não houver taxa no lote, calcular usando a taxa global como fallback
                             $taxa_fixa = $lote->tax ?? 0;
                             if($taxa_fixa == 0) {
                                 // Fallback: calcular taxa usando configuração global
-                                $config = Configuration::findOrFail(1);
-                                $taxRate = $config->tax ?? 0;
-                                $taxa_fixa = $lote->value * $taxRate;
+                                $config = Configuration::first();
+                                $taxRate = $config ? ($config->tax ?? 0) : 0;
+                                $taxa_fixa = $valorNumerico * $taxRate;
                             }
-                            $valor_calculado = ($lote->value + $taxa_fixa) * $quantity;
+                            $valor_calculado = ($valorNumerico + $taxa_fixa) * $quantity;
                             $subtotal += $valor_calculado;
                             Log::info("Subtotal calculado (com taxa)", [
                                 'lote_type' => $lote->type,
@@ -398,10 +401,10 @@ class ConferenceController extends Controller
                                 'subtotal_acumulado' => $subtotal
                             ]);
                         } else {
-                            // Lotes tipo 1 (gratuitos) com valor ou lotes tipo 0 sem taxa
-                            $valor_calculado = $lote->value * $quantity;
+                            // Lote pago com taxa paga pelo organizador (tax_service == 1)
+                            $valor_calculado = $valorNumerico * $quantity;
                             $subtotal += $valor_calculado;
-                            Log::info("Subtotal calculado (sem taxa ou lote tipo 1 com valor)", [
+                            Log::info("Subtotal calculado (sem taxa - organizador paga)", [
                                 'lote_type' => $lote->type,
                                 'valor_unitario' => $lote->value,
                                 'quantidade' => $quantity,
@@ -416,13 +419,12 @@ class ConferenceController extends Controller
                         ]);
                     }
                 } else {
-                    Log::info("Lote sem valor - não adiciona ao subtotal", [
+                    Log::info("Lote gratuito ou sem valor - não adiciona ao subtotal", [
                         'lote_type' => $lote->type,
                         'lote_id' => $lote->id,
                         'lote_value' => $lote->value
                     ]);
                 }
-                // Lotes gratuitos (type == 1) não adicionam ao subtotal, mas são processados normalmente
             }
             
             Log::info("Subtotal final calculado", [
@@ -554,7 +556,7 @@ class ConferenceController extends Controller
             $userCouponUsage = DB::table('orders')
                 ->where('coupon_id', $coupon->id)
                 ->where('participante_id', Auth::user()->id)
-                ->where('status', '!=', 3) // Exclude cancelled orders
+                ->whereIn('status', [1, 2]) // Apenas confirmados e pendentes
                 ->count();
             
             if ($userCouponUsage > 0) {
@@ -713,15 +715,18 @@ class ConferenceController extends Controller
             }
 
             // Verificar limites de quantidade
-            if ($quantity < $lote->limit_min || $quantity > $lote->limit_max) {
-                return redirect()->back()->withErrors(['error' => "Quantidade deve ser entre {$lote->limit_min} e {$lote->limit_max} ingressos."]);
+            if ($lote->limit_min > 0 && $quantity < $lote->limit_min) {
+                return redirect()->back()->withErrors(['error' => "Quantidade mínima é {$lote->limit_min} ingressos."]);
+            }
+            if ($lote->limit_max > 0 && $quantity > $lote->limit_max) {
+                return redirect()->back()->withErrors(['error' => "Quantidade máxima é {$lote->limit_max} ingressos."]);
             }
 
             // Verificar disponibilidade
             $soldTickets = DB::table('order_items')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
                 ->where('order_items.lote_id', $lote->id)
-                ->where('orders.status', '!=', 3)
+                ->whereIn('orders.status', [1, 2]) // Apenas confirmados e pendentes
                 ->sum('order_items.quantity');
             
             $availableTickets = $lote->quantity - $soldTickets;
@@ -730,15 +735,15 @@ class ConferenceController extends Controller
             }
 
             // Verificar limite por usuário
-            if (Auth::check()) {
+            if (Auth::check() && $lote->limit_max > 0) {
                 $userPurchases = DB::table('order_items')
                     ->join('orders', 'order_items.order_id', '=', 'orders.id')
                     ->where('order_items.lote_id', $lote->id)
                     ->where('orders.participante_id', Auth::user()->id)
-                    ->where('orders.status', '!=', 3)
+                    ->whereIn('orders.status', [1, 2]) // Apenas confirmados e pendentes
                     ->sum('order_items.quantity');
                 
-                if (($userPurchases + $quantity) > $lote->limit_max) {
+                if ($lote->limit_max > 0 && ($userPurchases + $quantity) > $lote->limit_max) {
                     return redirect()->back()->withErrors(['error' => "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}."]);
                 }
             }
@@ -749,59 +754,90 @@ class ConferenceController extends Controller
             return $this->processFreeTicker($request, $event, $event_date, $coupon, $input);
         }
 
-        // Criar pedido para pagamento
+        // Criar pedido para pagamento com Transaction para garantir integridade
         $coupon_id = $coupon ? ($coupon->id ?? (is_array($coupon) && isset($coupon[0]['id']) ? $coupon[0]['id'] : null)) : null;
 
-        $order_id = DB::table('orders')->insertGetId([
-            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-            'status' => 2, // pendente
-            'event_id' => $event->id,
-            'event_date_id' => $event_date->id,
-            'participante_id' => Auth::user()->id,
-            'coupon_id' => $coupon_id,
-            'created_at' => now(),
-        ]);
+        try {
+            $order_id = DB::transaction(function () use ($event, $event_date, $coupon_id) {
+                return DB::table('orders')->insertGetId([
+                    'hash' => md5(time() . uniqid() . md5(config('services.hash_secret'))),
+                    'status' => 2, // pendente
+                    'event_id' => $event->id,
+                    'event_date_id' => $event_date->id,
+                    'participante_id' => Auth::user()->id,
+                    'coupon_id' => $coupon_id,
+                    'created_at' => now(),
+                ]);
+            });
 
-        $request->session()->put('order_id', $order_id);
+            $request->session()->put('order_id', $order_id);
 
-        // Criar order_items corretamente
-        $this->createOrderItems($order_id, $request);
+            // Registrar uso do cupom na tabela pivot (para limit_buy funcionar)
+            if ($coupon_id) {
+                DB::table('orders_coupons')->insert([
+                    'order_id' => $order_id,
+                    'coupon_id' => $coupon_id,
+                ]);
+            }
 
-        return redirect()->route('conference.paymentView', $event->slug);
+            // Criar order_items corretamente
+            $this->createOrderItems($order_id, $request);
+
+            return redirect()->route('conference.paymentView', $event->slug);
+        } catch (\Throwable $e) {
+            Log::error('Erro ao criar pedido', ['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao processar pedido. Tente novamente.']);
+        }
     }
 
     private function processFreeTicker($request, $event, $event_date, $coupon, $input)
     {
         $coupon_id = $coupon ? ($coupon->id ?? (is_array($coupon) && isset($coupon[0]['id']) ? $coupon[0]['id'] : null)) : null;
 
-        $order_id = DB::table('orders')->insertGetId([
-            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-            'status' => 1, // concluído
-            'gatway_payment_method' => 'free',
-            'gatway_status' => '1',
-            'event_id' => $event->id,
-            'event_date_id' => $event_date->id,
-            'participante_id' => Auth::user()->id,
-            'coupon_id' => $coupon_id,
-            'created_at' => now(),
-        ]);
-
-        $this->createOrderItems($order_id, $request);
-
+        // Usar Transaction para garantir integridade dos dados
         try {
-            $order = Order::find($order_id);
-            if ($order) {
-                Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Inscrição gratuita realizada com sucesso'));
+            $order_id = DB::transaction(function () use ($event, $event_date, $coupon_id) {
+                return DB::table('orders')->insertGetId([
+                    'hash' => md5(time() . uniqid() . md5(config('services.hash_secret'))),
+                    'status' => 1, // concluído
+                    'gatway_payment_method' => 'free',
+                    'gatway_status' => '1',
+                    'event_id' => $event->id,
+                    'event_date_id' => $event_date->id,
+                    'participante_id' => Auth::user()->id,
+                    'coupon_id' => $coupon_id,
+                    'created_at' => now(),
+                ]);
+            });
+
+            $this->createOrderItems($order_id, $request);
+
+            // Registrar uso do cupom na tabela pivot (para limit_buy funcionar)
+            if ($coupon_id) {
+                DB::table('orders_coupons')->insert([
+                    'order_id' => $order_id,
+                    'coupon_id' => $coupon_id,
+                ]);
             }
+
+            try {
+                $order = Order::find($order_id);
+                if ($order) {
+                    Mail::to(Auth::user()->email)->send(new OrderMail($order, 'Inscrição gratuita realizada com sucesso'));
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Falha ao enviar email de confirmação', ['error' => $e->getMessage()]);
+            }
+
+            // Limpar sessão
+            $request->session()->forget(['coupon', 'subtotal', 'coupon_subtotal', 'total', 'dict_lotes', 'event_date_result', 'event_date', 'array_lotes', 'array_lotes_obj', 'order_id']);
+
+            return redirect()->route('event_home.my_registrations')
+                ->with('success', 'Inscrição realizada com sucesso!');
         } catch (\Throwable $e) {
-            Log::warning('Falha ao enviar email de confirmação', ['error' => $e->getMessage()]);
+            Log::error('Erro ao processar inscrição gratuita', ['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Erro ao processar inscrição. Tente novamente.']);
         }
-
-        // Limpar sessão
-        $request->session()->forget(['coupon', 'subtotal', 'coupon_subtotal', 'total', 'dict_lotes', 'event_date_result', 'event_date', 'array_lotes', 'array_lotes_obj', 'order_id']);
-
-        return redirect()->route('event_home.my_registrations')
-            ->with('success', 'Inscrição realizada com sucesso!');
     }
 
     private function createOrderItems($order_id, $request)
@@ -810,53 +846,56 @@ class ConferenceController extends Controller
         $input = $request->all();
 
         if ($array_lotes_obj && is_array($array_lotes_obj)) {
-            $kIndex = 1;
-            
-            foreach ($array_lotes_obj as $i => $entry) {
-                $lote = Lote::find($entry['id']);
-                if (!$lote) continue;
+            // Usar transaction para garantir atomicidade
+            DB::transaction(function () use ($array_lotes_obj, $input, $order_id) {
+                $kIndex = 1;
+                
+                foreach ($array_lotes_obj as $i => $entry) {
+                    $lote = Lote::find($entry['id']);
+                    if (!$lote) continue;
 
-                $order_item_id = DB::table('order_items')->insertGetId([
-                    'hash' => md5((time() . uniqid() . $i) . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-                    'number' => abs(crc32(md5(time() . uniqid() . $i))),
-                    'quantity' => 1,
-                    'value' => $entry['value'] ?? $lote->value,
-                    'status' => 2, // pendente
-                    'order_id' => $order_id,
-                    'lote_id' => $lote->id,
-                    'created_at' => now(),
-                ]);
-
-                // Salvar respostas dos campos personalizados
-                foreach (array_keys($input) as $field) {
-                    if (!str_contains($field, 'newfield_')) continue;
-
-                    $parts = explode('_', $field);
-                    if (count($parts) !== 3) continue;
-
-                    $kField = (int) $parts[1];
-                    $questionId = (int) $parts[2];
-                    
-                    if ($kField !== $kIndex) continue;
-
-                    $answer = $input[$field];
-                    if ($answer === null || $answer === '') continue;
-
-                    $question = Question::find($questionId);
-                    if (!$question) continue;
-
-                    DB::table('option_answers')->insert([
-                        'answer' => $answer,
-                        'question_id' => $question->id,
-                        'order_item_id' => $order_item_id,
+                    $order_item_id = DB::table('order_items')->insertGetId([
+                        'hash' => md5((time() . uniqid() . $i) . md5(config('services.hash_secret'))),
+                        'number' => abs(crc32(md5(time() . uniqid() . $i))),
+                        'quantity' => 1,
+                        'value' => $entry['value'] ?? $lote->value,
+                        'status' => 2, // pendente
+                        'order_id' => $order_id,
+                        'lote_id' => $lote->id,
                         'created_at' => now(),
                     ]);
-                }
 
-                $kIndex++;
-            }
+                    // Salvar respostas dos campos personalizados
+                    foreach (array_keys($input) as $field) {
+                        if (!str_contains($field, 'newfield_')) continue;
+
+                        $parts = explode('_', $field);
+                        if (count($parts) !== 3) continue;
+
+                        $kField = (int) $parts[1];
+                        $questionId = (int) $parts[2];
+                        
+                        if ($kField !== $kIndex) continue;
+
+                        $answer = $input[$field];
+                        if ($answer === null || $answer === '') continue;
+
+                        $question = Question::find($questionId);
+                        if (!$question) continue;
+
+                        DB::table('option_answers')->insert([
+                            'answer' => $answer,
+                            'question_id' => $question->id,
+                            'order_item_id' => $order_item_id,
+                            'created_at' => now(),
+                        ]);
+                    }
+
+                    $kIndex++;
+                }
+            });
         }
-}
+    }
 
     public function paymentView(Request $request)
     {
@@ -965,6 +1004,7 @@ class ConferenceController extends Controller
 
     public function thanks(Request $request)
     {
+        $coupon_discount = 0;
         // Log request details for debugging
         Log::info('Payment request received', [
             'method' => $request->method(),
@@ -1069,6 +1109,7 @@ class ConferenceController extends Controller
         $order_id = $request->session()->get('order_id');
         $event = $request->session()->get('event');
         $total = $request->session()->get('total');
+        $coupon_discount = (float) $request->session()->get('coupon_discount', 0);
 
         if (!$order_id || !$event || !$total) {
             Log::warning('Missing session data', [
@@ -1164,30 +1205,27 @@ class ConferenceController extends Controller
         $tmp_explode = Str::of($user->name)->explode(' ');
         $last_name = count($tmp_explode) > 1 ? end($tmp_explode) : $first_name;
 
-        // CORREÇÃO CRÍTICA: Aplicar desconto do cupom ao total
-        $coupon_discount = $request->session()->get('coupon_discount', 0);
-        $total_com_desconto = $total - $coupon_discount;
+        // O $total da sessão JÁ contém o desconto do cupom (calculado em getSubTotal)
+        // NÃO subtrair novamente para evitar desconto duplo
+        $total_a_pagar = (float) $total;
         
         // Validar que total não seja negativo
-        if ($total_com_desconto < 0) {
-            Log::warning('Coupon discount exceeded total amount', [
-                'total' => $total,
-                'coupon_discount' => $coupon_discount
-            ]);
-            $total_com_desconto = 0;
+        if ($total_a_pagar < 0) {
+            Log::warning('Total amount is negative', ['total' => $total]);
+            $total_a_pagar = 0;
         }
         
-        Log::info('Coupon discount applied', [
-            'original_total' => $total,
-            'coupon_discount' => $coupon_discount,
-            'final_total' => $total_com_desconto
+        Log::info('Payment total calculated', [
+            'session_total' => $total,
+            'total_a_pagar' => $total_a_pagar
         ]);
         
-        // Usar o total com desconto para calcular application_fee e enviar ao Mercado Pago
-        $total_a_pagar = $total_com_desconto;
-        
         // Calcular taxa (apenas para métodos que suportam application_fee)
-        $config = Configuration::findOrFail(1);
+        $config = Configuration::first();
+        if (!$config) {
+            Log::error('Configuration not found - ensure configuration record exists');
+            return response()->json(['error' => 'Configuração do sistema não encontrada.'], 500);
+        }
         $taxa_juros = $event->config_tax != 0.0 ? $event->config_tax : $config->tax;
         $application_fee = ($total_a_pagar * $taxa_juros);
         
@@ -1236,7 +1274,7 @@ class ConferenceController extends Controller
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
                         "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
-                        "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
+                        "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $payerEmail,
                             "first_name" => $first_name,
@@ -1315,23 +1353,20 @@ class ConferenceController extends Controller
                         'payment_method_id' => $paymentMethodId
                     ]);
                     
-                    // PIX não suporta application_fee no marketplace
-                    // A taxa deve ser processada separadamente após o pagamento ser aprovado
                     $paymentRequest = [
-                        "transaction_amount" => (float) $total_a_pagar, // COM DESCONTO DO CUPOM
+                        "transaction_amount" => (float) $total_a_pagar,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $paymentMethodId,
-                        "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
-                        "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
-                        // NOTA: application_fee não é suportado para PIX
-                        // A taxa será processada via split payment após aprovação
+                        "application_fee" => (float) $application_fee,
+                        "external_reference" => (string) $order_id,
+                        "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $user->email,
                             "first_name" => $first_name,
                             "last_name" => $last_name,
                             "identification" => [
                                 "type" => "CPF",
-                                "number" => $cpf // CPF deve ser string com 11 dígitos numéricos
+                                "number" => $cpf
                             ],
                         ]
                     ];
@@ -1359,7 +1394,7 @@ class ConferenceController extends Controller
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
                         "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
-                        "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
+                        "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $input['formData']['payer']['email'],
                             "first_name" => $input['formData']['payer']['first_name'],
@@ -1470,7 +1505,7 @@ class ConferenceController extends Controller
                     // Gerar purchase_hash para cada order_item (usado no QR Code)
                     // Usar created_at formatado como string para garantir consistência
                     $createdAtStr = is_string($item->created_at) ? $item->created_at : (is_object($item->created_at) ? $item->created_at->format('Y-m-d H:i:s') : $item->created_at);
-                    $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5("7bc05eb02415fe73101eeea0180e258d45e8ba2b"));
+                    $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5(config('services.hash_secret')));
                     
                     DB::table('order_items')
                         ->where('id', $item->id)
@@ -1722,8 +1757,8 @@ class ConferenceController extends Controller
             
             $response = $client->post('https://api.mercadopago.com/oauth/token', [
                 'form_params' => [
-                    'client_id' => env('MERCADO_PAGO_CLIENT_ID'),
-                    'client_secret' => env('MERCADO_PAGO_CLIENT_SECRET'),
+                    'client_id' => config('services.mercadopago.client_id'),
+                    'client_secret' => config('services.mercadopago.client_secret'),
                     'grant_type' => 'refresh_token',
                     'refresh_token' => $mpAccount->refresh_token,
                 ],
@@ -1776,11 +1811,11 @@ class ConferenceController extends Controller
         // Configuração da solicitação cURL
         $apiEndpoint = 'https://api.mercadopago.com/oauth/token';
         $requestData = [
-            'client_id' => env('MERCADO_PAGO_CLIENT_ID', ''),
-            'client_secret' => env('MERCADO_PAGO_CLIENT_SECRET', ''),
+            'client_id' => config('services.mercadopago.client_id', ''),
+            'client_secret' => config('services.mercadopago.client_secret', ''),
             'code' => $code,
             'grant_type' => 'authorization_code',
-            'redirect_uri' => env('MERCADO_PAGO_REDIRECT_URI', ''),
+            'redirect_uri' => config('services.mercadopago.redirect_uri', ''),
         ];
 
         // Inicia o cliente Guzzle

@@ -95,68 +95,11 @@
     z-index: auto !important;
 }
 
-.inforation-wrapper .info-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-}
-
-.inforation-wrapper .info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: var(--primary-color, #007bff);
-}
-
-.inforation-wrapper .info-card ul {
+/* Info cards: layout e estilos principais em modern-event.css */
+.information-wrapper .info-card ul {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    width: 100%;
-}
-
-.inforation-wrapper .info-card ul li {
-    display: flex;
-}
-
-.inforation-wrapper .info-card ul li:first-child {
-    font-size: 2rem;
-    color: var(--primary-color, #007bff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 50px;
-    height: 50px;
-    background: rgba(0, 123, 255, 0.1);
-    border-radius: 12px;
-    flex-shrink: 0;
-}
-
-.inforation-wrapper .info-card ul li:last-child {
-    flex: 1;
-}
-
-.inforation-wrapper .info-card ul li:last-child span {
-    display: block;
-    line-height: 1.6;
-}
-
-.inforation-wrapper .info-card ul li:last-child span b {
-    display: block;
-    color: #333;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.25rem;
-    opacity: 0.7;
 }
 
 /* ===== Cards de Lotes Modernos ===== */

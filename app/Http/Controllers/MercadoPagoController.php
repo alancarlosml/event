@@ -25,9 +25,9 @@ class MercadoPagoController extends Controller
     public function __construct()
     {
         $this->client = new Client();
-        $this->clientId = env('MERCADO_PAGO_CLIENT_ID');
-        $this->clientSecret = env('MERCADO_PAGO_CLIENT_SECRET');
-        $this->accessToken = env('MERCADO_PAGO_ACCESS_TOKEN');
+        $this->clientId = config('services.mercadopago.client_id');
+        $this->clientSecret = config('services.mercadopago.client_secret');
+        $this->accessToken = config('services.mercadopago.access_token');
         // Usa a rota nomeada para garantir que a URL está correta
         $this->redirectUri = route('mercado-pago.link-account');
         $this->state = rand(100000, 999999);
@@ -185,8 +185,11 @@ class MercadoPagoController extends Controller
 
     }
 
-    // Recebe os dados do pedido e redireciona
-    // para o checkout do Mercado Pago.
+    /**
+     * Fluxo legado: Checkout Pro (redireciona ao MP).
+     * Preferir o fluxo via ConferenceController::thanks() (Payment Brick).
+     * Mantido para compatibilidade com links antigos.
+     */
     public function payment (Request $r)
     {
 
@@ -226,10 +229,47 @@ class MercadoPagoController extends Controller
         // Calcular valor absoluto da taxa (marketplace_fee precisa ser valor absoluto)
         $fee = round($total * $taxa_percentual, 2);
 
+        // Salva o pedido no banco de dados
+        $order_id = DB::table('orders')->insertGetId([
+            'hash' => md5(time() . uniqid() . md5(config('services.hash_secret'))),
+            'status' => 2,
+            'gatway_hash' => null,
+            'gatway_reference' => null,
+            'gatway_status' => null,
+            'gatway_payment_method' => null,
+            'event_id' => $event_id,
+            'event_date_id' => $event->event_dates->first()->id ?? null,
+            'participante_id' => Auth::user()->id,
+            'coupon_id' => NULL,
+            'created_at' => now(),
+        ]);
+
+        // Criar order_items a partir da sessão
+        $array_lotes = $r->session()->get('array_lotes', []);
+        $array_lotes_obj = $r->session()->get('array_lotes_obj', []);
+        if ($array_lotes_obj && is_array($array_lotes_obj)) {
+            foreach ($array_lotes_obj as $i => $entry) {
+                $lote = \App\Models\Lote::find($entry['id']);
+                if (!$lote) continue;
+                DB::table('order_items')->insert([
+                    'hash' => md5((time() . uniqid() . $i) . md5(config('services.hash_secret'))),
+                    'number' => abs(crc32(md5(time() . uniqid() . $i))),
+                    'quantity' => 1,
+                    'value' => $entry['value'] ?? $lote->value,
+                    'status' => 2,
+                    'order_id' => $order_id,
+                    'lote_id' => $lote->id,
+                    'created_at' => now(),
+                ]);
+            }
+        }
+
+        $r->session()->put('order_id', $order_id);
+
         // Monta o payload para criar a preferência no Mercado Pago
         $data = [
-            "notification_url" => env('APP_URL') . "/webhooks/mercado-pago/notification",
-            "external_reference" => rand(100000, 999999),
+            "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
+            "external_reference" => (string) $order_id,
             "items" => [
                 [
                     "title" => $event_name,
@@ -239,12 +279,12 @@ class MercadoPagoController extends Controller
                     "picture_url" => $img
                 ]
             ],
-            "marketplace" => env('MERCADO_PAGO_ACCESS_TOKEN'),
+            "marketplace" => config('app.url'),
             "marketplace_fee" => $fee,
             "back_urls" => [
-                "success" => env('APP_URL') . "/" . $slug . "/obrigado",
-                "failure" => env('APP_URL') . "/" . $slug . "/erro",
-                "pending" => env('APP_URL') . "/" . $slug . "/pendente"
+                "success" => config('app.url') . "/" . $slug . "/obrigado",
+                "failure" => config('app.url') . "/" . $slug . "/erro",
+                "pending" => config('app.url') . "/" . $slug . "/pendente"
             ],
         ];
 
@@ -259,25 +299,6 @@ class MercadoPagoController extends Controller
         ]);
 
         $body = json_decode($response->getBody(), true);
-
-        // Salva o pedido no banco de dados
-        // (necessário ajustes)
-        $order_id = DB::table('orders')->insertGetId([
-            'hash' => md5(time() . uniqid() . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
-            'status' => 2,
-            'gatway_hash' => null,
-            'gatway_reference' => null,
-            'gatway_status' => null,
-            'gatway_payment_method' => null,
-            'event_id' => $event_id,
-            // 'event_date_id' => $event_date->id, // Precisei comentar para consegui testar
-            // 'event_date_id' => '63', // Ajustar, coloquei fixo pra testes
-            'participante_id' => Auth::user()->id,
-            'coupon_id' => NULL,
-            'created_at' => now(),
-        ]);
-
-        $r->session()->put('order_id', $order_id);
 
         // Redireciona para o checkout do Mercado Pago
         // através do link gerado pela preferência
@@ -341,7 +362,7 @@ class MercadoPagoController extends Controller
                 // Tentar buscar por external_reference (order_id) primeiro
                 if ($externalReference) {
                     $order = DB::table('orders')
-                        ->where('id', $externalReference)
+                        ->where('id', (int) $externalReference)
                         ->first();
                     
                     if ($order) {
@@ -430,13 +451,13 @@ class MercadoPagoController extends Controller
                 
                 // Se o pagamento foi aprovado, atualizar order_items e gerar ingressos
                 if ($paymentData['status'] === 'approved') {
-                    // Atualizar status dos order_items
+                    // Atualizar status dos order_items e gerar purchase_hash
                     $orderItems = DB::table('order_items')->where('order_id', $order->id)->get();
                     
                     foreach ($orderItems as $item) {
                         // Gerar purchase_hash para cada order_item (usado no QR Code)
                         $createdAtStr = is_string($item->created_at) ? $item->created_at : (is_object($item->created_at) ? $item->created_at->format('Y-m-d H:i:s') : $item->created_at);
-                        $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5("7bc05eb02415fe73101eeea0180e258d45e8ba2b"));
+                        $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5(config('services.hash_secret')));
                         
                         DB::table('order_items')
                             ->where('id', $item->id)
@@ -446,8 +467,6 @@ class MercadoPagoController extends Controller
                                 'updated_at' => now()
                             ]);
                     }
-                    
-                    $this->generateTickets($order->id);
                     
                     // Enviar email de confirmação
                     try {
@@ -459,7 +478,7 @@ class MercadoPagoController extends Controller
                         Log::warning('Failed to send confirmation email', ['error' => $e->getMessage()]);
                     }
                     
-                    Log::info('Payment approved - tickets generated and email sent', ['order_id' => $order->id]);
+                    Log::info('Payment approved - purchase hashes generated and email sent', ['order_id' => $order->id]);
                 }
             }
             
@@ -495,58 +514,9 @@ class MercadoPagoController extends Controller
         return $statusMap[$mpStatus] ?? 2; // Default: pendente
     }
     
-    // Gerar ingressos após pagamento aprovado
-    private function generateTickets($orderId)
-    {
-        try {
-            $order = DB::table('orders')->where('id', $orderId)->first();
-            
-            if (!$order) {
-                throw new \Exception('Order not found');
-            }
-            
-            // Buscar detalhes dos lotes do pedido
-            $orderItems = DB::table('order_items')
-                ->where('order_id', $orderId)
-                ->get();
-            
-            foreach ($orderItems as $item) {
-                // Gerar purchase_hash para cada order_item (usado no QR Code)
-                // Usar created_at formatado como string para garantir consistência
-                $createdAtStr = is_string($item->created_at) 
-                    ? $item->created_at 
-                    : (is_object($item->created_at) && method_exists($item->created_at, 'format') 
-                        ? $item->created_at->format('Y-m-d H:i:s') 
-                        : (string)$item->created_at);
-                $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5("7bc05eb02415fe73101eeea0180e258d45e8ba2b"));
-                
-                // Atualizar order_item com purchase_hash
-                DB::table('order_items')
-                    ->where('id', $item->id)
-                    ->update([
-                        'purchase_hash' => $purchaseHash,
-                        'status' => 1,
-                        'updated_at' => now()
-                    ]);
-                
-                // Gerar ingressos para cada item (se necessário)
-                for ($i = 0; $i < $item->quantity; $i++) {
-                    DB::table('tickets')->insert([
-                        'hash' => md5(time() . uniqid() . $orderId . $i),
-                        'order_id' => $orderId,
-                        'lote_id' => $item->lote_id,
-                        'participante_id' => $order->participante_id,
-                        'status' => 1, // Ativo
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
-                }
-            }
-            
-        } catch (\Exception $e) {
-            Log::error('Error generating tickets: ' . $e->getMessage());
-        }
-    }
+    // Método generateTickets removido — tabela 'tickets' não existe.
+    // O purchase_hash nos order_items é o que é usado para check-in via QR Code.
+
 
     public function thanks (Request $r)
     {
@@ -603,8 +573,21 @@ class MercadoPagoController extends Controller
             // Find the event
             $event = \App\Models\Event::findOrFail($order->event_id);
             
-            // Find the event creator's Mercado Pago account
-            $mpAccount = \App\Models\MpAccount::where('participante_id', $event->user_id)->firstOrFail();
+            // Find the event organizer's Mercado Pago account via participantes_events
+            $organizerParticipant = DB::table('participantes_events')
+                ->where('event_id', $event->id)
+                ->where('role', 'admin')
+                ->first(['participante_id']);
+            
+            if (!$organizerParticipant) {
+                throw new \Exception('Organizador do evento não encontrado');
+            }
+            
+            $mpAccount = \App\Models\MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
+            
+            if (!$mpAccount) {
+                throw new \Exception('Conta Mercado Pago do organizador não vinculada');
+            }
             
             // Create a new payment preference
             $client = new Client();
@@ -619,9 +602,9 @@ class MercadoPagoController extends Controller
                     'title' => $event->name,
                     'quantity' => $item->quantity,
                     'currency_id' => 'BRL',
-                    'unit_price' => $item->price
+                    'unit_price' => $item->value
                 ];
-                $total += $item->price * $item->quantity;
+                $total += $item->value * $item->quantity;
             }
             
             // Get platform fee from configuration (valor absoluto)
@@ -631,20 +614,25 @@ class MercadoPagoController extends Controller
             
             // Create payment preference data
             $data = [
-                'notification_url' => env('APP_URL') . "/webhooks/mercado-pago/notification",
+                'notification_url' => config('app.url') . "/webhooks/mercado-pago/notification",
                 'external_reference' => $order->id,
                 'items' => $items,
-                'marketplace' => env('MERCADO_PAGO_ACCESS_TOKEN'),
+                'marketplace' => config('app.url'),
                 'marketplace_fee' => $fee,
                 'back_urls' => [
-                    'success' => env('APP_URL') . "/{$event->slug}/obrigado",
-                    'failure' => env('APP_URL') . "/{$event->slug}/erro",
-                    'pending' => env('APP_URL') . "/{$event->slug}/pendente"
+                    'success' => config('app.url') . "/{$event->slug}/obrigado",
+                    'failure' => config('app.url') . "/{$event->slug}/erro",
+                    'pending' => config('app.url') . "/{$event->slug}/pendente"
                 ],
                 'payment_methods' => [
                     'excluded_payment_methods' => [
                         ['id' => 'credit_card'],
-                        ['id' => 'ticket'],
+                        ['id' => 'debit_card'],
+                        ['id' => 'pix']
+                    ],
+                    'excluded_payment_types' => [
+                        ['id' => 'credit_card'],
+                        ['id' => 'debit_card'],
                         ['id' => 'bank_transfer']
                     ],
                     'installments' => 1

@@ -66,40 +66,14 @@ class EventAdminController extends Controller
 
     public function myRegistrations()
     {
-        $orders = Order::orderBy('orders.created_at', 'desc')
-            ->leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
-            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
-            ->join('participantes', 'participantes.id', '=', 'orders.participante_id')
-            ->join('events', 'event_dates.event_id', '=', 'events.id')
-            ->join('places', 'places.id', '=', 'events.place_id')
-            ->select(
-                'events.name as event_name',
-                'events.status as event_status',
-                'orders.created_at as event_date',
-                'event_dates.date as data_chosen',
-                'places.name as place_name',
-                'orders.id as order_id',
-                'orders.hash as order_hash',
-                'orders.gatway_status'
-            )
-            ->where('orders.participante_id', Auth::user()->id)
-            ->groupBy('orders.id')
+        // Otimizado: Usar Eloquent com eager loading para evitar N+1 queries
+        $orders = Order::with([
+            'orderItems.lote',
+            'eventDate.event.place'
+        ])
+            ->where('participante_id', Auth::user()->id)
+            ->orderBy('created_at', 'desc')
             ->get();
-
-        // Buscar order_items com purchase_hash para cada order
-        foreach ($orders as $order) {
-            $order->order_items = \App\Models\OrderItem::where('order_id', $order->order_id)
-                ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
-                ->select(
-                    'order_items.id',
-                    'order_items.number',
-                    'order_items.purchase_hash',
-                    'order_items.checkin_status',
-                    'order_items.checkin_at',
-                    'lotes.name as lote_name'
-                )
-                ->get();
-        }
 
         return view('painel_admin.my_registrations', compact('orders'));
     }
@@ -109,43 +83,48 @@ class EventAdminController extends Controller
         $user = Auth::guard('participante')->user();
         $isSuperAdmin = $user->hasRole('super_admin');
 
-        $query = DB::table('events')
-            ->leftJoin('places', 'places.id', '=', 'events.place_id')
-            ->leftJoin('participantes_events', 'participantes_events.event_id', '=', 'events.id')
-            ->leftJoin('participantes', 'participantes.id', '=', 'participantes_events.participante_id')
-            ->leftJoin('lotes', 'events.id', '=', 'lotes.event_id')
-            ->leftJoin('event_dates', 'event_dates.event_id', '=', 'events.id')
-            ->leftJoin(DB::raw("(SELECT participantes.name,
-                                    participantes.email, 
-                                    participantes_events.event_id
-                            from participantes
-                            inner join participantes_events on participantes.id = participantes_events.participante_id
-                            where participantes_events.role = 'admin' and participantes_events.status = 1
-                            ) as x"), function ($join) {
-                $join->on('x.event_id', '=', 'events.id');
-            })
-            ->select(
-                'events.*',
-                'places.name as place_name',
-                'participantes_events.role',
-                'participantes.name as participante_name',
-                'event_dates.date as event_date',
-                'lotes.name as lote_name',
-                DB::raw('MIN(event_dates.date) as date_event_min'),
-                DB::raw('MAX(event_dates.date) as date_event_max'),
-                'x.name as admin_name',
-                'x.email as admin_email'
-            );
+        // Otimizado: Usar Eloquent com eager loading
+        $eventsQuery = Event::with([
+            'place',
+            'lotes',
+            'eventDates',
+            'participantesEvents.participante'
+        ]);
 
         // Se não for super admin, filtrar apenas eventos do usuário
         if (!$isSuperAdmin) {
-            $query->where('participantes.id', $user->id)
-                  ->where('participantes_events.status', 1);
+            $eventsQuery->whereHas('participantesEvents', function ($q) use ($user) {
+                $q->where('participante_id', $user->id)
+                  ->where('status', 1);
+            });
         }
 
-        $events = $query->orderBy('events.created_at', 'desc')
-            ->groupBy('events.id')
-            ->get();
+        $events = $eventsQuery->orderBy('created_at', 'desc')->get();
+
+        // Processar dados para compatibilidade com a view
+        $events->transform(function ($event) use ($user, $isSuperAdmin) {
+            $event->place_name = $event->place?->name;
+            $event->date_event_min = $event->eventDates->min('date');
+            $event->date_event_max = $event->eventDates->max('date');
+            $event->event_date = $event->date_event_min;
+            
+            $admin = $event->participantesEvents->where('role', 'admin')->first();
+            $event->admin_name = $admin?->participante?->name;
+            $event->admin_email = $admin?->participante?->email;
+            $event->participante_name = $event->admin_name;
+            
+            $event->lote_name = $event->lotes->first()?->name;
+            
+            // Determinar o role do usuário atual para este evento
+            if ($isSuperAdmin) {
+                $event->role = 'admin';
+            } else {
+                $userRelation = $event->participantesEvents->where('participante_id', $user->id)->first();
+                $event->role = $userRelation?->role;
+            }
+            
+            return $event;
+        });
 
         return view('painel_admin.my_events', compact('events', 'isSuperAdmin'));
     }
@@ -633,7 +612,7 @@ class EventAdminController extends Controller
                 }
             }
 
-            $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
+            $validatedDataEvent['hash'] = md5($validatedDataEvent['name'] . $validatedDataEvent['description'] . md5(config('services.hash_secret')));
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
             $validatedDataEvent['status'] = 0;
             $validatedDataEvent['place_id'] = $validatedDataEvent['place_id_hidden'];
@@ -1001,7 +980,7 @@ class EventAdminController extends Controller
 
         if($participante_evento->count() == 0) {
             DB::table('participantes_events')->insert([
-                'hash' => md5(Auth::user()->name . date('Y-m-d H:i:s') . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+                'hash' => md5(Auth::user()->name . date('Y-m-d H:i:s') . md5(config('services.hash_secret'))),
                 'role' => 'admin',
                 'status' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -1135,7 +1114,7 @@ class EventAdminController extends Controller
             $validatedData['form_pagamento'] = implode(',', $validatedData['form_pagamento']);
         }
 
-        $validatedData['hash'] = md5($validatedData['name'] . $validatedData['description'] . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
+        $validatedData['hash'] = md5($validatedData['name'] . $validatedData['description'] . md5(config('services.hash_secret')));
 
         $lote = new Lote();
         $lote->fill($validatedData);
@@ -1250,6 +1229,10 @@ class EventAdminController extends Controller
                 $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
             }
             $input['form_pagamento'] = implode(',', $input['form_pagamento']);
+        } else {
+            // Lote gratuito (type == 1): não cobra taxa
+            $input['tax'] = 0;
+            $input['final_value'] = 0;
         }
 
         if(isset($input['status'])) {
@@ -1359,7 +1342,7 @@ class EventAdminController extends Controller
         }
 
         $input['event_id'] = $event->id;
-        $input['hash'] = md5($input['code'] . $input['event_id'] . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b'));
+        $input['hash'] = md5($input['code'] . $input['event_id'] . md5(config('services.hash_secret')));
 
         $id_coupon = Coupon::create($input)->id;
 
@@ -1689,7 +1672,7 @@ class EventAdminController extends Controller
                 //ENVIAR EMAIL SOLICITANDO REATIVAÇÃO DA CONTA
             } elseif($participante->status == 1) {
                 DB::table('participantes_events')->insert([
-                    'hash' => md5($participante->name . date('Y-m-d H:i:s') . md5('7bc05eb02415fe73101eeea0180e258d45e8ba2b')),
+                    'hash' => md5($participante->name . date('Y-m-d H:i:s') . md5(config('services.hash_secret'))),
                     'role' => 'convidado',
                     'status' => 1,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -2191,7 +2174,8 @@ class EventAdminController extends Controller
                 order_items.number,
                 order_items.created_at,
                 order_items.hash as order_items_hash,
-                md5(concat(orders.hash, order_items.hash, order_items.number, order_items.created_at, md5("7bc05eb02415fe73101eeea0180e258d45e8ba2b"))) as purchase_hash'
+                md5(concat(orders.hash, order_items.hash, order_items.number, order_items.created_at, md5(?))) as purchase_hash',
+                [config('services.hash_secret')]
             )
             ->where('orders.hash', $hash)
             ->where('orders.gatway_status', '1')

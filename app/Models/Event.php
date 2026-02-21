@@ -88,9 +88,59 @@ class Event extends Model
         return $this->belongsTo(Owner::class);
     }
 
+    public function eventDates()
+    {
+        return $this->hasMany(EventDate::class)->orderBy('date');
+    }
+
+    public function participantesEvents()
+    {
+        return $this->hasMany(ParticipanteEvent::class);
+    }
+
+    public function adminUsers()
+    {
+        return $this->belongsToMany(
+            Participante::class,
+            'participantes_events',
+            'event_id',
+            'participante_id'
+        )->wherePivot('role', 'admin')
+         ->wherePivot('status', 1);
+    }
+
     public function lotes()
     {
         return $this->hasMany(Lote::class)->orderBy('order');
+    }
+
+    /**
+     * Query Scopes para otimização
+     */
+    public function scopeAtivos($query)
+    {
+        return $query->where('status', 1);
+    }
+
+    public function scopeWithRelations($query)
+    {
+        return $query->with(['place', 'area', 'owner', 'lotes', 'eventDates']);
+    }
+
+    public function scopeWithMinMaxDates($query)
+    {
+        return $query->with(['eventDates' => function ($q) {
+            $q->select('id', 'event_id', 'date', 'time_begin')
+              ->orderBy('date');
+        }]);
+    }
+
+    public function scopeForUser($query, int $userId)
+    {
+        return $query->whereHas('participantesEvents', function ($q) use ($userId) {
+            $q->where('participante_id', $userId)
+              ->where('status', 1);
+        });
     }
     
     public function lotesAtivosHoje()
@@ -224,9 +274,10 @@ class Event extends Model
             ->first();
     }
 
+    /** Alias de eventDates() para compatibilidade. Preferir eventDates() (com ordenação). */
     public function event_dates()
     {
-        return $this->hasMany(EventDate::class);
+        return $this->eventDates();
     }
 
     public function max_event_dates()

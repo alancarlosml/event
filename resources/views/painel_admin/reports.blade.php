@@ -650,9 +650,11 @@
                         </div> --}}
                     </div>
                 </div>
-                <div class="card-footer d-flex justify-content-between">
-                    <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">Voltar</a>
-                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
             </div>
             <!-- Modal Nova Cobrança -->
             <div class="modal fade" id="modalNovaCobranca" tabindex="-1" role="dialog" aria-labelledby="modalNovaCobrancaLabel" aria-hidden="true">

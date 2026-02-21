@@ -14,6 +14,20 @@ class ParticipanteEvent extends Model
     protected $table = 'participantes_events';
 
     protected $fillable = [
+        'hash',
         'status',
+        'participante_id',
+        'event_id',
+        'role',
     ];
+
+    public function participante()
+    {
+        return $this->belongsTo(Participante::class, 'participante_id', 'id');
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id', 'id');
+    }
 }

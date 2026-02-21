@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -71,9 +72,14 @@ class HomeController extends Controller
 
     public function getAreas(Request $request)
     {
-        $data['areas'] = Area::where('category_id', $request->category_id)
-            ->where('status', 1)
-            ->get(['name', 'id']);
+        // Cache áreas por categoria por 1 hora
+        $cacheKey = 'areas.category.' . $request->category_id;
+        
+        $data['areas'] = Cache::remember($cacheKey, 3600, function () use ($request) {
+            return Area::where('category_id', $request->category_id)
+                ->where('status', 1)
+                ->get(['name', 'id']);
+        });
 
         return response()->json($data);
     }

@@ -283,7 +283,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label">&nbsp;</label><br>
                                     <a class="btn btn-warning btn-sm" id="add_place" href="javascript:;">
-                                        Limpar campos
+                                        Limpar
                                     </a>
                                 </div>  
                             </div>

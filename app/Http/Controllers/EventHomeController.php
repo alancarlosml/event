@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -37,8 +38,14 @@ class EventHomeController extends Controller
 
         $event = new Event();
 
-        $categories = Category::orderBy('description')->get();
-        $states = State::orderBy('name')->get();
+        // Cache categorias e estados por 1 hora (dados que mudam raramente)
+        $categories = Cache::remember('categories.all', 3600, function () {
+            return Category::orderBy('description')->get();
+        });
+        
+        $states = Cache::remember('states.all', 3600, function () {
+            return State::orderBy('name')->get();
+        });
 
         $events = $event::getEvents(Null, '0', '0', '0', '0');
 

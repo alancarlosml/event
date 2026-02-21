@@ -32,6 +32,7 @@ class CheckInController extends Controller
                     'order_items.checkin_status',
                     'order_items.checkin_at',
                     'orders.hash as order_hash',
+                    'orders.status as order_status',
                     'orders.gatway_status',
                     'events.name as event_name',
                     'events.id as event_id',
@@ -49,8 +50,8 @@ class CheckInController extends Controller
                 ], 404);
             }
 
-            // Verificar se o pagamento foi aprovado
-            if ($orderItem->gatway_status != 1) {
+            // Verificar se o pagamento foi aprovado (status 1 = confirmado)
+            if ($orderItem->order_status != 1) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Ingresso não confirmado. Pagamento pendente ou cancelado.',
