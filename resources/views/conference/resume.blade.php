@@ -191,13 +191,14 @@
 
                                         @case(3)
                                             {{-- Campo marcação --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <br />
-                                                <p class='container_radio'>
+                                                <p class="container_radio mt-2 mb-0">
                                                     @foreach ($question->value() as $value)
                                                         <input type="radio" name="new_field_radio"
                                                             @if ($question->required) required title="Este campo é obrigatório" @endif />
@@ -209,12 +210,14 @@
 
                                         @case(4)
                                             {{-- Campo multipla escolha --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <p class='container_checkbox'>
+                                                <p class="container_checkbox mt-2 mb-0">
                                                     @foreach ($question->value() as $value)
                                                         <input type="checkbox" name="new_field_checbox[]"
                                                             @if ($question->required) required title="Este campo é obrigatório" @endif />
@@ -226,38 +229,52 @@
 
                                         @case(5)
                                             {{-- Campo CPF --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="text" class="form-control new_field cpf_mask"
+                                                <input type="text"
+                                                    class="form-control-improved new_field cpf_mask"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    placeholder="Digite o CPF"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                         @break
 
                                         @case(6)
                                             {{-- Campo CNPJ --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="text" class="form-control new_field cnpj_mask"
+                                                <input type="text"
+                                                    class="form-control-improved new_field cnpj_mask"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    placeholder="Digite o CNPJ"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                         @break
 
                                         @case(7)
                                             {{-- Campo Data --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="date" class="form-control new_field date_mask"
+                                                <input type="date"
+                                                    class="form-control-improved new_field date_mask"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
@@ -265,51 +282,70 @@
 
                                         @case(8)
                                             {{-- Campo Telefone --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="text" class="form-control new_field phone_with_ddd_mask"
+                                                <input type="text"
+                                                    class="form-control-improved new_field phone_with_ddd_mask"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    placeholder="Digite o telefone"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                         @break
 
                                         @case(9)
                                             {{-- Campo Número inteiro --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="number" class="form-control new_field"
+                                                <input type="number"
+                                                    class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    placeholder="Digite {{ strtolower($question->question) }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                         @break
 
                                         @case(10)
                                             {{-- Campo Número decimal --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="number" class="form-control new_field"
+                                                <input type="number" step="any"
+                                                    class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    placeholder="Digite {{ strtolower($question->question) }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                         @break
 
                                         @case(11)
                                             {{-- Campo arquivo --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="file" class="form-control new_field"
+                                                <input type="file"
+                                                    class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
@@ -317,25 +353,36 @@
 
                                         @case(12)
                                             {{-- Campo Textarea --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <textarea class="form-control new_field" name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                <textarea class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
+                                                    name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    rows="4"
+                                                    placeholder="Digite {{ strtolower($question->question) }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif></textarea>
                                             </div>
                                         @break
 
                                         @case(13)
                                             {{-- Campo Email --}}
-                                            <div class="form-group mb-3">
-                                                <label for="new_field">{{ $question->question }}@if ($question->required == 1)
-                                                        *
+                                            <div class="form-group-improved">
+                                                <label for="new_field_{{ $k + 1 }}_{{ $question->id }}" class="form-label-improved">
+                                                    {{ $question->question }}
+                                                    @if ($question->required == 1)
+                                                        <span class="required">*</span>
                                                     @endif
                                                 </label>
-                                                <input type="email" class="form-control new_field"
+                                                <input type="email"
+                                                    class="form-control-improved new_field"
+                                                    id="new_field_{{ $k + 1 }}_{{ $question->id }}"
                                                     name="newfield_{{ $k + 1 }}_{{ $question->id }}"
+                                                    placeholder="Digite {{ strtolower($question->question) }}"
                                                     @if ($question->required) required title="Este campo é obrigatório" @endif>
                                             </div>
                                         @break

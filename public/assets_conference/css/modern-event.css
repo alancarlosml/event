@@ -85,6 +85,13 @@
     object-position: center;
 }
 
+.event-page-wrap .hero-image-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    background: linear-gradient(135deg, var(--event-gray-200) 0%, var(--event-gray-300) 100%);
+}
+
 .event-page-wrap .hero-image::after {
     content: '';
     position: absolute;

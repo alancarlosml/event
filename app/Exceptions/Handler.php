@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -48,5 +50,25 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
 
         });
+    }
+
+    /**
+     * Convert an authentication exception into a response.
+     * Uses 303 See Other to avoid redirect loop when resumo (or other pages)
+     * are reached via POST: the browser will follow with GET instead of re-POSTing.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Auth\AuthenticationException  $exception
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($this->shouldReturnJson($request, $exception)) {
+            return response()->json(['message' => $exception->getMessage()], 401);
+        }
+
+        $redirectTo = $exception->redirectTo($request) ?? route('login');
+
+        return redirect()->guest($redirectTo)->setStatusCode(303);
     }
 }

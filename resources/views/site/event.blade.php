@@ -1,7 +1,11 @@
 <x-event-layout>
 <div class="event-page-wrap">
     <div class="hero-image" id="home">
-        <img src="{{ URL::asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="img-fluid" loading="lazy">
+        @if(!empty($event->banner))
+            <img src="{{ asset('storage/' . $event->banner) }}" alt="{{ htmlspecialchars($event->name) }}" class="img-fluid" loading="lazy">
+        @else
+            <div class="hero-image-placeholder" role="img" aria-label="{{ htmlspecialchars($event->name) }}"></div>
+        @endif
         @php
             // Obter data e hora do evento
             $eventDate = $event->min_event_dates(); // Retorna formato YYYY-MM-DD
