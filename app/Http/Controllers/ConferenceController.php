@@ -783,7 +783,7 @@ class ConferenceController extends Controller
             // Criar order_items corretamente
             $this->createOrderItems($order_id, $request);
 
-            return redirect()->route('conference.paymentView', $event->slug);
+            return redirect()->route('conference.paymentView', $event->slug)->setStatusCode(303);
         } catch (\Throwable $e) {
             Log::error('Erro ao criar pedido', ['error' => $e->getMessage()]);
             return redirect()->back()->withErrors(['error' => 'Erro ao processar pedido. Tente novamente.']);
