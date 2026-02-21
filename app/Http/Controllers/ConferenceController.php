@@ -93,13 +93,13 @@ class ConferenceController extends Controller
 
     public function resume(Request $request, $slug)
     {
-        Log::info('Accessing resume page.', ['slug' => $slug, 'session_data' => $request->session()->all()]);
-
         $coupon = $request->session()->get('coupon');
         $subtotal = $request->session()->get('subtotal');
         $total = $request->session()->get('total');
         $dict_lotes = $request->session()->get('dict_lotes');
         $event_date_result = $request->session()->get('event_date_result');
+
+        Log::info('Accessing resume page.', ['slug' => $slug, 'session_data' => $request->session()->all()]);
 
         $event = Event::where('slug', $slug)->first();
         $request->session()->put('event', $event);
@@ -612,21 +612,32 @@ class ConferenceController extends Controller
 
     public function payment(Request $request, $slug)
     {
+        $input = $request->all();
+
+        // Validar dados da sessão
+        $event = $request->session()->get('event');
+
         Log::info('=== PAYMENT METHOD START ===', [
             'slug' => $slug, 
             'method' => $request->method(),
             'session_data' => $request->session()->all()
         ]);
-        
-        $input = $request->all();
-
-        // Validar dados da sessão
-        $event = $request->session()->get('event');
         $coupon = $request->session()->get('coupon');
         $total = $request->session()->get('total');
         $dict_lotes = $request->session()->get('dict_lotes');
         $array_lotes_obj = $request->session()->get('array_lotes_obj');
         $event_date = $request->session()->get('event_date');
+
+        // Recover event_date from event_date_result if missing (session can lose object; event_date_result is scalar)
+        if (!$event_date && $event) {
+            $event_date_result = $request->session()->get('event_date_result');
+            if ($event_date_result) {
+                $event_date = EventDate::where('id', $event_date_result)->where('event_id', $event->id)->first();
+                if ($event_date) {
+                    $request->session()->put('event_date', $event_date);
+                }
+            }
+        }
 
         if (!$event) {
             return redirect()->route('conference.index', $slug)->withErrors(['error' => 'Sessão expirada. Selecione os ingressos novamente.'])->setStatusCode(303);
@@ -712,10 +723,11 @@ class ConferenceController extends Controller
                 return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => 'Lote não encontrado.'])->setStatusCode(303);
             }
 
-            // Verificar período de vendas
+            // Verificar período de vendas: se a data do evento selecionada for hoje ou futura, permitir (vendas até o evento; evita rejeição por timezone/janela curta)
             $now = now();
-            if ($lote->datetime_begin > $now || $lote->datetime_end < $now) {
-                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => 'Este lote não está disponível para venda no momento.'])->setStatusCode(303);
+            $eventDateIsFutureOrToday = $event_date && $event_date->date && (strtotime($event_date->date) >= strtotime($now->toDateString()));
+            if (!$eventDateIsFutureOrToday && ($lote->datetime_begin > $now || $lote->datetime_end < $now)) {
+                return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Este lote não está disponível para venda no momento. Selecione a data e os ingressos novamente.'])->setStatusCode(303);
             }
 
             // Verificar limites de quantidade
@@ -787,7 +799,8 @@ class ConferenceController extends Controller
             // Criar order_items corretamente
             $this->createOrderItems($order_id, $request);
 
-            return redirect()->route('conference.paymentView', $event->slug)->setStatusCode(303);
+            // Mostrar tela de pagamento na mesma resposta (evita redirect e perda de sessão no GET que causava loop)
+            return $this->resolvePaymentView($request, $event, $total);
         } catch (\Throwable $e) {
             Log::error('Erro ao criar pedido', ['error' => $e->getMessage()]);
             return redirect()->back()->withErrors(['error' => 'Erro ao processar pedido. Tente novamente.'])->setStatusCode(303);
@@ -901,59 +914,58 @@ class ConferenceController extends Controller
         }
     }
 
-    public function paymentView(Request $request)
+    /**
+     * Retorna a resposta da tela de pagamento (view ou redirect em caso de erro).
+     * Usado tanto no POST /pagamento (evita redirect e perda de sessão) quanto no GET /pagamento-view.
+     */
+    private function resolvePaymentView(Request $request, $event, $total)
     {
-        $event = $request->session()->get('event');
-        $total = $request->session()->get('total');
+        $slug = $event->slug ?? $request->route('slug');
 
-        // Validar se o evento existe
-        if (!$event) {
-            return redirect()->route('conference.index', $request->route('slug'))->withErrors(['error' => 'Evento não encontrado. Sessão pode ter expirado.'])->setStatusCode(303);
-        }
-
-        // Validar se o evento é pago
         if ($event->paid == 1) {
-            // Verificar se o organizador tem conta vinculada
             $organizerParticipant = DB::table('participantes_events')
                 ->where('event_id', $event->id)
                 ->where('role', 'admin')
                 ->first(['participante_id']);
-            
+
             if ($organizerParticipant) {
                 $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
-                
+
                 if (!$mpAccount || empty($mpAccount->access_token)) {
-                    Log::warning('Payment view accessed but organizer account not linked', [
-                        'event_id' => $event->id,
-                        'organizer_id' => $organizerParticipant->participante_id
-                    ]);
-                    
-                    return redirect()->route('conference.resume', $request->route('slug'))->withErrors([
+                    Log::warning('Payment view: organizer account not linked', ['event_id' => $event->id]);
+                    return redirect()->route('conference.resume', $slug)->withErrors([
                         'error' => 'O organizador deste evento ainda não vinculou sua conta do Mercado Pago. Entre em contato com o organizador do evento.'
                     ])->setStatusCode(303);
                 }
 
-                // Verificar se o token está expirado ou próximo de expirar
                 if ($this->isTokenExpiredOrExpiring($mpAccount)) {
-                    Log::info('Token expirado ou próximo de expirar, tentando renovar', [
-                        'organizer_id' => $organizerParticipant->participante_id
-                    ]);
-                    
-                    // Tentar renovar o token
                     $renewed = $this->renewAccessToken($mpAccount);
                     if (!$renewed) {
-                        return redirect()->route('conference.resume', $request->route('slug'))->withErrors([
+                        return redirect()->route('conference.resume', $slug)->withErrors([
                             'error' => 'A conta do Mercado Pago do organizador precisa ser reautorizada. Entre em contato com o organizador do evento.'
                         ])->setStatusCode(303);
                     }
                 }
             } else {
                 Log::error('Event organizer not found for payment view', ['event_id' => $event->id]);
-                return redirect()->route('conference.resume', $request->route('slug'))->withErrors(['error' => 'Organizador do evento não encontrado.'])->setStatusCode(303);
+                return redirect()->route('conference.resume', $slug)->withErrors(['error' => 'Organizador do evento não encontrado.'])->setStatusCode(303);
             }
         }
 
         return view('conference.payment', compact('event', 'total'));
+    }
+
+    public function paymentView(Request $request)
+    {
+        $event = $request->session()->get('event');
+        $total = $request->session()->get('total');
+        $routeSlug = $request->route('slug');
+
+        if (!$event) {
+            return redirect()->route('conference.index', $routeSlug)->withErrors(['error' => 'Evento não encontrado. Sessão pode ter expirado.'])->setStatusCode(303);
+        }
+
+        return $this->resolvePaymentView($request, $event, $total);
     }
 
     /**
