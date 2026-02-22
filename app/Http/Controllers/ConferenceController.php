@@ -852,13 +852,15 @@ class ConferenceController extends Controller
                     return response()->json(['success' => false, 'redirect' => $err['redirect'], 'errors' => $err['errors']]);
                 }
                 $paymentViewUrl = route('conference.paymentView', $event->slug);
+                // Incluir order_id na URL para paymentView recuperar dados se a sessão se perder no redirect (ex.: produção)
+                $paymentViewUrl .= '?order_id=' . (int) $order_id;
                 // Se não tem headers de AJAX (proxy pode remover), foi submit normal: redirecionar em vez de devolver JSON
                 if (!$request->ajax() && !$request->expectsJson()) {
                     return redirect()->to($paymentViewUrl)->setStatusCode(303);
                 }
                 return response()->json([
                     'success' => true,
-                    'redirect' => $paymentViewUrl,
+                    'redirect' => $paymentViewUrl, // já contém ?order_id= para recuperar sessão se perder
                 ]);
             }
 
@@ -1052,8 +1054,31 @@ class ConferenceController extends Controller
         $total = $request->session()->get('total');
         $routeSlug = $request->route('slug');
 
+        // Se sessão perdeu event/total (comum após 303 em produção), recuperar via order_id na URL
+        if (!$event && $request->has('order_id')) {
+            $orderId = (int) $request->input('order_id');
+            $order = Order::where('id', $orderId)
+                ->where('participante_id', Auth::id())
+                ->with(['event', 'order_items'])
+                ->first();
+            if ($order && $order->event) {
+                $event = $order->event;
+                $total = 0;
+                foreach ($order->order_items as $item) {
+                    $total += (float) $item->value * (int) $item->quantity;
+                }
+                $request->session()->put('event', $event);
+                $request->session()->put('total', $total);
+                $request->session()->put('order_id', $orderId);
+            }
+        }
+
         if (!$event) {
             return redirect()->route('conference.index', $routeSlug)->withErrors(['error' => 'Evento não encontrado. Sessão pode ter expirado.'])->setStatusCode(303);
+        }
+
+        if ($total === null) {
+            $total = $request->session()->get('total', 0);
         }
 
         return $this->resolvePaymentView($request, $event, $total);
