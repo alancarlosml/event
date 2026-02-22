@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use MercadoPago\MercadoPagoConfig;
+use MercadoPago\Client\Common\RequestOptions;
 use MercadoPago\Client\Payment\PaymentClient;
 use MercadoPago\Exceptions\MPApiException;
 
@@ -1391,20 +1392,30 @@ class ConferenceController extends Controller
                     if (!isset($input['formData']['token']) || !isset($input['formData']['installments'])) {
                         return response()->json(['error' => 'Dados do cartão incompletos'], 400);
                     }
+                    if (!isset($input['formData']['payer']['identification']['type']) || !isset($input['formData']['payer']['identification']['number'])) {
+                        return response()->json(['error' => 'CPF do titular do cartão é obrigatório'], 400);
+                    }
+
+                    // Sanitizar CPF (apenas dígitos) para evitar erro "Invalid user identification number"
+                    $cardCpfRaw = $input['formData']['payer']['identification']['number'];
+                    $cardCpf = preg_replace('/[^0-9]/', '', trim((string) $cardCpfRaw));
+                    if (strlen($cardCpf) !== 11) {
+                        return response()->json(['error' => 'CPF do titular deve ter 11 dígitos'], 400);
+                    }
 
                     // Usar email do formData ou do usuário autenticado
-                    $payerEmail = isset($input['formData']['payer']['email']) && !empty($input['formData']['payer']['email']) 
-                        ? $input['formData']['payer']['email'] 
+                    $payerEmail = isset($input['formData']['payer']['email']) && !empty($input['formData']['payer']['email'])
+                        ? $input['formData']['payer']['email']
                         : $user->email;
 
                     $paymentRequest = [
-                        "transaction_amount" => (float) $total_a_pagar, // COM DESCONTO DO CUPOM
+                        "transaction_amount" => (float) $total_a_pagar,
                         "token" => $input['formData']['token'],
                         "description" => 'Ingresso ' . $event->name,
                         "installments" => (int) $input['formData']['installments'],
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
-                        "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
+                        "external_reference" => (string) $order_id,
                         "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $payerEmail,
@@ -1412,7 +1423,7 @@ class ConferenceController extends Controller
                             "last_name" => $last_name,
                             "identification" => [
                                 "type" => $input['formData']['payer']['identification']['type'],
-                                "number" => $input['formData']['payer']['identification']['number'],
+                                "number" => $cardCpf,
                             ]
                         ]
                     ];
@@ -1484,11 +1495,12 @@ class ConferenceController extends Controller
                         'payment_method_id' => $paymentMethodId
                     ]);
                     
+                    // PIX: não enviar application_fee — a API rejeita se a conta não tiver split habilitado para PIX.
+                    // Ver: https://www.mercadopago.com.br/developers/pt/docs/checkout-api/integration-configuration/integrate-with-pix
                     $paymentRequest = [
                         "transaction_amount" => (float) $total_a_pagar,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $paymentMethodId,
-                        "application_fee" => (float) $application_fee,
                         "external_reference" => (string) $order_id,
                         "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [
@@ -1508,23 +1520,33 @@ class ConferenceController extends Controller
                     if (!isset($input['formData']['payer']['address'])) {
                         return response()->json(['error' => 'Endereço obrigatório para boleto'], 400);
                     }
+                    if (!isset($input['formData']['payer']['identification']['type']) || !isset($input['formData']['payer']['identification']['number'])) {
+                        return response()->json(['error' => 'CPF é obrigatório para boleto'], 400);
+                    }
 
                     $address = $input['formData']['payer']['address'];
                     $requiredAddressFields = ['zip_code', 'street_name', 'street_number', 'neighborhood', 'city', 'federal_unit'];
-                    
+
                     foreach ($requiredAddressFields as $field) {
-                        if (!isset($address[$field]) || empty($address[$field])) {
+                        if (!isset($address[$field]) || empty(trim((string) $address[$field]))) {
                             Log::warning('Missing address field for boleto', ['field' => $field, 'address' => $address]);
                             return response()->json(['error' => "Campo obrigatório para boleto: {$field}"], 400);
                         }
                     }
 
+                    // Sanitizar CPF (apenas dígitos) e CEP para evitar rejeição da API
+                    $boletoCpf = preg_replace('/[^0-9]/', '', trim((string) $input['formData']['payer']['identification']['number']));
+                    if (strlen($boletoCpf) !== 11) {
+                        return response()->json(['error' => 'CPF deve ter 11 dígitos'], 400);
+                    }
+                    $boletoZipCode = preg_replace('/[^0-9]/', '', trim((string) $address['zip_code']));
+
                     $paymentRequest = [
-                        "transaction_amount" => (float) $total_a_pagar, // COM DESCONTO DO CUPOM
+                        "transaction_amount" => (float) $total_a_pagar,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
                         "application_fee" => (float) $application_fee,
-                        "external_reference" => (string) $order_id, // CRÍTICO: Para webhook encontrar pedido
+                        "external_reference" => (string) $order_id,
                         "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [
                             "email" => $input['formData']['payer']['email'],
@@ -1532,15 +1554,15 @@ class ConferenceController extends Controller
                             "last_name" => $input['formData']['payer']['last_name'],
                             "identification" => [
                                 "type" => $input['formData']['payer']['identification']['type'],
-                                "number" => $input['formData']['payer']['identification']['number'],
+                                "number" => $boletoCpf,
                             ],
                             "address" => [
-                                "zip_code" => $address['zip_code'],
+                                "zip_code" => $boletoZipCode,
                                 "street_name" => $address['street_name'],
                                 "street_number" => $address['street_number'],
                                 "neighborhood" => $address['neighborhood'],
                                 "city" => $address['city'],
-                                "federal_unit" => $address['federal_unit'],
+                                "federal_unit" => strtoupper(substr(trim((string) $address['federal_unit']), 0, 2)),
                             ],
                         ]
                     ];
@@ -1556,8 +1578,14 @@ class ConferenceController extends Controller
                 'amount' => $total
             ]);
 
+            // X-Idempotency-Key: recomendado pela documentação para todos os métodos (evita cobrança duplicada).
+            $requestOptions = new RequestOptions();
+            $requestOptions->setCustomHeaders([
+                'X-Idempotency-Key: ' . sprintf('pay-%s-%s-%s', $order_id, $input['paymentType'], uniqid('', true))
+            ]);
+
             // Processar pagamento
-            $payment = $client->create($paymentRequest);
+            $payment = $client->create($paymentRequest, $requestOptions);
 
             Log::info('Payment response received', [
                 'payment_id' => $payment->id,
