@@ -851,9 +851,14 @@ class ConferenceController extends Controller
                 if ($err) {
                     return response()->json(['success' => false, 'redirect' => $err['redirect'], 'errors' => $err['errors']]);
                 }
+                $paymentViewUrl = route('conference.paymentView', $event->slug);
+                // Se não tem headers de AJAX (proxy pode remover), foi submit normal: redirecionar em vez de devolver JSON
+                if (!$request->ajax() && !$request->expectsJson()) {
+                    return redirect()->to($paymentViewUrl)->setStatusCode(303);
+                }
                 return response()->json([
                     'success' => true,
-                    'redirect' => route('conference.paymentView', $event->slug),
+                    'redirect' => $paymentViewUrl,
                 ]);
             }
 
