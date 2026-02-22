@@ -117,18 +117,18 @@ class ConferenceController extends Controller
                     Log::info('resume: event_date_result set from request param', ['event_date_result' => $event_date_result]);
                 } else {
                     Log::warning('resume: event_date_result from request not found in DB', ['event_date_result' => $requestEventDateResult]);
-                    return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi encontrada.']);
+                    return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi encontrada.'])->setStatusCode(303);
                 }
             } else {
                 Log::warning('resume: no event_date_result in session nor request');
-                return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi selecionada.']);
+                return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi selecionada.'])->setStatusCode(303);
             }
         }
 
         $eventDate = EventDate::where('id', $event_date_result)->first();
         if (!$eventDate) {
             Log::warning('resume: eventDate record not found', ['event_date_result' => $event_date_result]);
-            return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi encontrada.']);
+            return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Data do evento não foi encontrada.'])->setStatusCode(303);
         }
 
         Log::info('resume: proceeding with data check', [
@@ -192,7 +192,7 @@ class ConferenceController extends Controller
             $request->session()->forget('event_date_result');
             $request->session()->forget('event_date');
             Log::warning('resume: dict_lotes missing, redirecting back to conference.index');
-            return redirect()->route('conference.index', $event->slug);
+            return redirect()->route('conference.index', $event->slug)->setStatusCode(303);
         }
     }
 
