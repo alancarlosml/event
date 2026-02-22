@@ -133,7 +133,7 @@
                             <ul></ul>
                         </div>
                         
-                        <form method="POST" id="checkout_submit" action="{{ route('conference.payment', $event->slug) }}">
+                        <form method="POST" id="checkout_submit" action="{{ route('conference.payment', $event->slug) }}" data-use-ajax="{{ $total > 0 ? '1' : '0' }}">
                             @csrf
                             <div class="checkout-form-section">
                                 <h3 class="checkout-form-section-title">
@@ -545,15 +545,53 @@
             });
 
 
-            $(document).on('submit', '#checkout_submit', function() {
+            $(document).on('submit', '#checkout_submit', function(e) {
+                var $form = $(this);
+                if ($form.data('use-ajax') !== '1') return; // evento gratuito: submit normal
 
-                // if ($(".form-check-input").is(":checked")) {
-                //     $('#finalizar_comprar').attr('disabled', 'disabled');
-                // } else {
-                //     $('#modal_txt').text('Por favor, selecione ao menos uma forma de pagamento.');
-                //     $('#modal_icon').attr('src', '/assets_conference/imgs/alert.png');
-                //     $('#cupomModal').modal('show');
-                // }
+                if (!$form.valid()) return;
+
+                e.preventDefault();
+                var $btn = $('#finalizar_comprar');
+                var url = $form.attr('action');
+                var data = $form.serialize();
+
+                $btn.prop('disabled', true);
+
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: data,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                }).done(function(r) {
+                    if (r.success && r.redirect) {
+                        window.location.href = r.redirect;
+                        return;
+                    }
+                    if (r.redirect) {
+                        window.location.href = r.redirect;
+                        return;
+                    }
+                    var err = (r.errors && r.errors.length) ? r.errors : ['Erro ao processar.'];
+                    var $errDiv = $('#validation-errors');
+                    $errDiv.find('ul').html(err.map(function(m){ return '<li>' + m + '</li>'; }).join(''));
+                    $errDiv.show();
+                    $btn.prop('disabled', false);
+                }).fail(function(xhr) {
+                    var msg = 'Erro de conexão. Tente novamente.';
+                    if (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.length) {
+                        msg = xhr.responseJSON.errors;
+                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    }
+                    var $errDiv = $('#validation-errors');
+                    $errDiv.find('ul').html(Array.isArray(msg) ? msg.map(function(m){ return '<li>' + m + '</li>'; }).join('') : '<li>' + msg + '</li>');
+                    $errDiv.show();
+                    $btn.prop('disabled', false);
+                });
             });
         </script>
     @endpush

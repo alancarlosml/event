@@ -613,6 +613,7 @@ class ConferenceController extends Controller
     public function payment(Request $request, $slug)
     {
         $input = $request->all();
+        $isAjax = $request->expectsJson() || $request->ajax();
 
         // Validar dados da sessão
         $event = $request->session()->get('event');
@@ -640,20 +641,36 @@ class ConferenceController extends Controller
         }
 
         if (!$event) {
-            return redirect()->route('conference.index', $slug)->withErrors(['error' => 'Sessão expirada. Selecione os ingressos novamente.'])->setStatusCode(303);
+            $msg = 'Sessão expirada. Selecione os ingressos novamente.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'redirect' => route('conference.index', $slug), 'errors' => [$msg]]);
+            }
+            return redirect()->route('conference.index', $slug)->withErrors(['error' => $msg])->setStatusCode(303);
         }
 
         // Validações obrigatórias (303 evita loop ao voltar ao resumo após POST)
         if (!$event_date) {
-            return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => 'Data do evento não foi selecionada.'])->setStatusCode(303);
+            $msg = 'Data do evento não foi selecionada.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+            }
+            return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
         }
 
         if (!$dict_lotes || empty($dict_lotes)) {
-            return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => 'Nenhum ingresso foi selecionado.'])->setStatusCode(303);
+            $msg = 'Nenhum ingresso foi selecionado.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+            }
+            return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
         }
 
         if (!$total || $total < 0) {
-            return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => 'Valor total inválido.'])->setStatusCode(303);
+            $msg = 'Valor total inválido.';
+            if ($isAjax) {
+                return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+            }
+            return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
         }
 
         // VALIDATION: Validate form fields
@@ -710,6 +727,9 @@ class ConferenceController extends Controller
             }
             
             if (!empty($errors)) {
+                if ($isAjax) {
+                    return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => $errors]);
+                }
                 return redirect()->route('conference.resume', $event->slug)->withErrors(['form_errors' => $errors])->withInput()->setStatusCode(303);
             }
         }
@@ -720,22 +740,38 @@ class ConferenceController extends Controller
             $lote = Lote::where('hash', $dict['lote_hash'])->first();
 
             if (!$lote) {
-                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => 'Lote não encontrado.'])->setStatusCode(303);
+                $msg = 'Lote não encontrado.';
+                if ($isAjax) {
+                    return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+                }
+                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
             }
 
             // Verificar período de vendas: se a data do evento selecionada for hoje ou futura, permitir (vendas até o evento; evita rejeição por timezone/janela curta)
             $now = now();
             $eventDateIsFutureOrToday = $event_date && $event_date->date && (strtotime($event_date->date) >= strtotime($now->toDateString()));
             if (!$eventDateIsFutureOrToday && ($lote->datetime_begin > $now || $lote->datetime_end < $now)) {
-                return redirect()->route('conference.index', $event->slug)->withErrors(['error' => 'Este lote não está disponível para venda no momento. Selecione a data e os ingressos novamente.'])->setStatusCode(303);
+                $msg = 'Este lote não está disponível para venda no momento. Selecione a data e os ingressos novamente.';
+                if ($isAjax) {
+                    return response()->json(['success' => false, 'redirect' => route('conference.index', $event->slug), 'errors' => [$msg]]);
+                }
+                return redirect()->route('conference.index', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
             }
 
             // Verificar limites de quantidade
             if ($lote->limit_min > 0 && $quantity < $lote->limit_min) {
-                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => "Quantidade mínima é {$lote->limit_min} ingressos."])->setStatusCode(303);
+                $msg = "Quantidade mínima é {$lote->limit_min} ingressos.";
+                if ($isAjax) {
+                    return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+                }
+                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
             }
             if ($lote->limit_max > 0 && $quantity > $lote->limit_max) {
-                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => "Quantidade máxima é {$lote->limit_max} ingressos."])->setStatusCode(303);
+                $msg = "Quantidade máxima é {$lote->limit_max} ingressos.";
+                if ($isAjax) {
+                    return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+                }
+                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
             }
 
             // Verificar disponibilidade
@@ -747,7 +783,11 @@ class ConferenceController extends Controller
             
             $availableTickets = $lote->quantity - $soldTickets;
             if ($quantity > $availableTickets) {
-                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => "Apenas {$availableTickets} ingressos disponíveis neste lote."])->setStatusCode(303);
+                $msg = "Apenas {$availableTickets} ingressos disponíveis neste lote.";
+                if ($isAjax) {
+                    return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+                }
+                return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
             }
 
             // Verificar limite por usuário
@@ -760,7 +800,11 @@ class ConferenceController extends Controller
                     ->sum('order_items.quantity');
                 
                 if ($lote->limit_max > 0 && ($userPurchases + $quantity) > $lote->limit_max) {
-                    return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}."])->setStatusCode(303);
+                    $msg = "Você já comprou {$userPurchases} ingressos deste lote. Limite máximo: {$lote->limit_max}.";
+                    if ($isAjax) {
+                        return response()->json(['success' => false, 'redirect' => route('conference.resume', $event->slug), 'errors' => [$msg]]);
+                    }
+                    return redirect()->route('conference.resume', $event->slug)->withErrors(['error' => $msg])->setStatusCode(303);
                 }
             }
         }
@@ -799,10 +843,26 @@ class ConferenceController extends Controller
             // Criar order_items corretamente
             $this->createOrderItems($order_id, $request);
 
-            // Mostrar tela de pagamento na mesma resposta (evita redirect e perda de sessão no GET que causava loop)
+            // Fluxo AJAX: retornar JSON com URL para o cliente ir com GET (evita redirect no servidor e loop em produção)
+            if ($isAjax) {
+                $err = $this->getPaymentViewRedirectIfAny($request, $event);
+                if ($err) {
+                    return response()->json(['success' => false, 'redirect' => $err['redirect'], 'errors' => $err['errors']]);
+                }
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('conference.paymentView', $event->slug),
+                ]);
+            }
+
+            // Mostrar tela de pagamento na mesma resposta (fallback sem JS)
             return $this->resolvePaymentView($request, $event, $total);
         } catch (\Throwable $e) {
             Log::error('Erro ao criar pedido', ['error' => $e->getMessage()]);
+            $resumoUrl = $event ? route('conference.resume', $event->slug) : url()->previous();
+            if ($isAjax) {
+                return response()->json(['success' => false, 'redirect' => $resumoUrl, 'errors' => ['Erro ao processar pedido. Tente novamente.']]);
+            }
             return redirect()->back()->withErrors(['error' => 'Erro ao processar pedido. Tente novamente.'])->setStatusCode(303);
         }
     }
@@ -915,41 +975,54 @@ class ConferenceController extends Controller
     }
 
     /**
+     * Verifica se a tela de pagamento pode ser exibida. Retorna redirect + erros se não puder (para uso em respostas AJAX).
+     *
+     * @return array{redirect: string, errors: array}|null null se pode exibir a tela
+     */
+    private function getPaymentViewRedirectIfAny(Request $request, $event): ?array
+    {
+        $slug = $event->slug ?? $request->route('slug');
+
+        if ($event->paid != 1) {
+            return null;
+        }
+
+        $organizerParticipant = DB::table('participantes_events')
+            ->where('event_id', $event->id)
+            ->where('role', 'admin')
+            ->first(['participante_id']);
+
+        if (!$organizerParticipant) {
+            Log::error('Event organizer not found for payment view', ['event_id' => $event->id]);
+            return ['redirect' => route('conference.resume', $slug), 'errors' => ['Organizador do evento não encontrado.']];
+        }
+
+        $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
+
+        if (!$mpAccount || empty($mpAccount->access_token)) {
+            Log::warning('Payment view: organizer account not linked', ['event_id' => $event->id]);
+            return ['redirect' => route('conference.resume', $slug), 'errors' => ['O organizador deste evento ainda não vinculou sua conta do Mercado Pago. Entre em contato com o organizador do evento.']];
+        }
+
+        if ($this->isTokenExpiredOrExpiring($mpAccount)) {
+            $renewed = $this->renewAccessToken($mpAccount);
+            if (!$renewed) {
+                return ['redirect' => route('conference.resume', $slug), 'errors' => ['A conta do Mercado Pago do organizador precisa ser reautorizada. Entre em contato com o organizador do evento.']];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Retorna a resposta da tela de pagamento (view ou redirect em caso de erro).
      * Usado tanto no POST /pagamento (evita redirect e perda de sessão) quanto no GET /pagamento-view.
      */
     private function resolvePaymentView(Request $request, $event, $total)
     {
-        $slug = $event->slug ?? $request->route('slug');
-
-        if ($event->paid == 1) {
-            $organizerParticipant = DB::table('participantes_events')
-                ->where('event_id', $event->id)
-                ->where('role', 'admin')
-                ->first(['participante_id']);
-
-            if ($organizerParticipant) {
-                $mpAccount = MpAccount::where('participante_id', $organizerParticipant->participante_id)->first();
-
-                if (!$mpAccount || empty($mpAccount->access_token)) {
-                    Log::warning('Payment view: organizer account not linked', ['event_id' => $event->id]);
-                    return redirect()->route('conference.resume', $slug)->withErrors([
-                        'error' => 'O organizador deste evento ainda não vinculou sua conta do Mercado Pago. Entre em contato com o organizador do evento.'
-                    ])->setStatusCode(303);
-                }
-
-                if ($this->isTokenExpiredOrExpiring($mpAccount)) {
-                    $renewed = $this->renewAccessToken($mpAccount);
-                    if (!$renewed) {
-                        return redirect()->route('conference.resume', $slug)->withErrors([
-                            'error' => 'A conta do Mercado Pago do organizador precisa ser reautorizada. Entre em contato com o organizador do evento.'
-                        ])->setStatusCode(303);
-                    }
-                }
-            } else {
-                Log::error('Event organizer not found for payment view', ['event_id' => $event->id]);
-                return redirect()->route('conference.resume', $slug)->withErrors(['error' => 'Organizador do evento não encontrado.'])->setStatusCode(303);
-            }
+        $err = $this->getPaymentViewRedirectIfAny($request, $event);
+        if ($err) {
+            return redirect()->to($err['redirect'])->withErrors(['error' => $err['errors'][0] ?? 'Erro.'])->setStatusCode(303);
         }
 
         return view('conference.payment', compact('event', 'total'));
