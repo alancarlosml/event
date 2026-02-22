@@ -851,13 +851,11 @@ class ConferenceController extends Controller
                 if ($err) {
                     return response()->json(['success' => false, 'redirect' => $err['redirect'], 'errors' => $err['errors']]);
                 }
-                $paymentViewUrl = route('conference.paymentView', $event->slug);
-                // Incluir order_id na URL para paymentView recuperar dados se a sessão se perder no redirect (ex.: produção)
-                $paymentViewUrl .= '?order_id=' . (int) $order_id;
-                // Se não tem headers de AJAX (proxy pode remover), foi submit normal: redirecionar em vez de devolver JSON
+                // Submit normal (sem AJAX): devolver a tela de pagamento na mesma resposta, sem redirect
                 if (!$request->ajax() && !$request->expectsJson()) {
-                    return redirect()->to($paymentViewUrl)->setStatusCode(303);
+                    return $this->resolvePaymentView($request, $event, $total);
                 }
+                $paymentViewUrl = route('conference.paymentView', $event->slug) . '?order_id=' . (int) $order_id;
                 return response()->json([
                     'success' => true,
                     'redirect' => $paymentViewUrl, // já contém ?order_id= para recuperar sessão se perder
