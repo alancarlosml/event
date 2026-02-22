@@ -851,8 +851,8 @@
                     }, 2000);
                 } else if (result.status === 'pending' || result.status === 'in_process') {
                     if (paymentType === 'bank_transfer' && result.pix) {
-                        // Exibir QR Code PIX
-                        displayPixDetails(result.pix);
+                        // Exibir QR Code PIX (usar order_id da resposta para polling)
+                        displayPixDetails(result.pix, result.order_id);
                     } else if (paymentType === 'ticket' && result.boleto) {
                         // Exibir dados do boleto
                         displayBoletoDetails(result.boleto);
@@ -864,8 +864,8 @@
                 }
             }
 
-            // Exibir detalhes do PIX
-            function displayPixDetails(pixData) {
+            // Exibir detalhes do PIX (orderIdFromResponse: order_id retornado pelo backend para polling)
+            function displayPixDetails(pixData, orderIdFromResponse) {
                 let qrCodeHtml = '';
                 if (pixData.qr_code_base64) {
                     qrCodeHtml = `<img src="data:image/png;base64,${pixData.qr_code_base64}" alt="QR Code PIX" class="img-fluid">`;
@@ -895,8 +895,10 @@
                 `).show();
                 showSuccess('QR Code PIX gerado com sucesso!');
                 
-                // CORREÇÃO CRÍTICA: Iniciar polling para verificar status do pagamento
-                const orderId = {{ session('order_id', 0) }};
+                // Usar order_id da resposta do pagamento para polling (evita depender da sessão)
+                const orderId = (orderIdFromResponse != null && orderIdFromResponse !== undefined && orderIdFromResponse > 0)
+                    ? parseInt(orderIdFromResponse, 10)
+                    : parseInt({{ session('order_id', 0) }}, 10);
                 if (orderId) {
                     startPaymentStatusPolling(orderId);
                 }

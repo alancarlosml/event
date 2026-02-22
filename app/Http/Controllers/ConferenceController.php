@@ -1684,6 +1684,7 @@ class ConferenceController extends Controller
 
             $responseData = [
                 'id' => $payment->id,
+                'order_id' => $order_id,
                 'status' => $payment->status,
                 'detail' => $payment->status_detail ?? null
             ];

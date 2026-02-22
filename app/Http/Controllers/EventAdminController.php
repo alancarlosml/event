@@ -1917,23 +1917,23 @@ class EventAdminController extends Controller
                 // ->selectRaw("sum(CASE WHEN orders.status = 1 THEN 1 * order_items.value * $taxa_juros END) as total_taxa")
             ->selectRaw(
                 "sum(case 
-                                when 
-                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then (order_items.value - (coupons.discount_value * order_items.value)) * $taxa_juros
-                                when    
-                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then (order_items.value - coupons.discount_value) * $taxa_juros
-                                when    
-                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value * $taxa_juros
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 0 and coupons.discount_type is null and coupons.code is null then lotes.value * $taxa_juros
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 0 and coupons.discount_type = 0 and coupons.code <> '' then (lotes.value - (coupons.discount_value * lotes.value)) * $taxa_juros
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 0 and coupons.discount_type = 1 and coupons.code <> '' then (lotes.value - coupons.discount_value) * $taxa_juros
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 1 and coupons.discount_type = 0 and coupons.code <> '' then (order_items.value - (coupons.discount_value * order_items.value)) * $taxa_juros
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 1 and coupons.discount_type = 1 and coupons.code <> '' then (order_items.value - coupons.discount_value) * $taxa_juros
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 1 and coupons.discount_type is null and coupons.code is null then order_items.value * $taxa_juros
                                 end
                             ) as total_taxa"
             )
             ->selectRaw(
                 "sum(case 
-                                when 
-                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 0 and coupons.code <> '' then (order_items.value - (coupons.discount_value * order_items.value)) - ((order_items.value - (coupons.discount_value * order_items.value)) * $taxa_juros)
-                                when    
-                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type = 1 and coupons.code <> '' then (order_items.value - coupons.discount_value) - ((order_items.value - coupons.discount_value) * $taxa_juros)
-                                when    
-                                    lotes.type = 0 and orders.status = 1 and coupons.discount_type is null and coupons.code is null then order_items.value - (order_items.value * $taxa_juros)
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 0 and coupons.discount_type is null and coupons.code is null then order_items.value - (lotes.value * $taxa_juros)
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 0 and coupons.discount_type = 0 and coupons.code <> '' then (order_items.value - (coupons.discount_value * order_items.value)) - ((lotes.value - (coupons.discount_value * lotes.value)) * $taxa_juros)
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 0 and coupons.discount_type = 1 and coupons.code <> '' then (order_items.value - coupons.discount_value) - ((lotes.value - coupons.discount_value) * $taxa_juros)
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 1 and coupons.discount_type = 0 and coupons.code <> '' then (order_items.value - (coupons.discount_value * order_items.value)) - ((order_items.value - (coupons.discount_value * order_items.value)) * $taxa_juros)
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 1 and coupons.discount_type = 1 and coupons.code <> '' then (order_items.value - coupons.discount_value) - ((order_items.value - coupons.discount_value) * $taxa_juros)
+                                when lotes.type = 0 and orders.status = 1 and lotes.tax_service = 1 and coupons.discount_type is null and coupons.code is null then order_items.value - (order_items.value * $taxa_juros)
                                 end
                             ) as total_liquido"
             )

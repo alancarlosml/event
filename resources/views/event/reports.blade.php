@@ -153,6 +153,8 @@
                                                                             Boleto
                                                                         @elseif($order->gatway_payment_method == 'bank_transfer')
                                                                             Pix
+                                                                        @elseif($order->gatway_payment_method == 'pix')
+                                                                            Pix
                                                                         @elseif($order->gatway_payment_method == 'free')
                                                                             Grátis
                                                                         @else
@@ -879,7 +881,7 @@
                     } else if (pieData['original'][i].gatway_payment_method == 'ticket') {
                         methods.push('Boleto');
                     }
-                    else if (pieData['original'][i].gatway_payment_method == 'bank_transfer') {
+                    else if (pieData['original'][i].gatway_payment_method == 'bank_transfer' || pieData['original'][i].gatway_payment_method == 'pix') {
                         methods.push('Pix');
                     }
                     else if (pieData['original'][i].gatway_payment_method == 'free') {

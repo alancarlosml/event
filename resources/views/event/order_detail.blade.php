@@ -165,6 +165,8 @@
                                                             Boleto
                                                         @elseif($order->gatway_payment_method == 'bank_transfer')
                                                             Pix
+                                                        @elseif($order->gatway_payment_method == 'pix')
+                                                            Pix
                                                         @elseif($order->gatway_payment_method == 'free')
                                                             Grátis
                                                         @else
