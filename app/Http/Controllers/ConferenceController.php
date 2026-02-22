@@ -1042,7 +1042,8 @@ class ConferenceController extends Controller
     {
         $err = $this->getPaymentViewRedirectIfAny($request, $event);
         if ($err) {
-            return redirect()->to($err['redirect'])->withErrors(['error' => $err['errors'][0] ?? 'Erro.'])->setStatusCode(303);
+            // 303 no próprio to() para evitar que proxy/servidor devolva 302
+            return redirect()->to($err['redirect'], 303)->withErrors(['error' => $err['errors'][0] ?? 'Erro.']);
         }
 
         return view('conference.payment', compact('event', 'total'));
@@ -1074,7 +1075,7 @@ class ConferenceController extends Controller
         }
 
         if (!$event) {
-            return redirect()->route('conference.index', $routeSlug)->withErrors(['error' => 'Evento não encontrado. Sessão pode ter expirado.'])->setStatusCode(303);
+            return redirect()->to(route('conference.index', $routeSlug), 303)->withErrors(['error' => 'Evento não encontrado. Sessão pode ter expirado.']);
         }
 
         if ($total === null) {
