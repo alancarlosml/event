@@ -11,10 +11,12 @@ class TrustProxies extends Middleware
 {
     /**
      * The trusted proxies for this application.
+     * Em hospedagem compartilhada (ex.: Hostinger) o tráfego passa por proxy reverso;
+     * confiar em todos evita que o Laravel trate a requisição como HTTP e cause loop de redirect com HTTPS.
      *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.
