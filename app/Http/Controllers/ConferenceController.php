@@ -1822,14 +1822,19 @@ class ConferenceController extends Controller
     private function isTokenExpiredOrExpiring($mpAccount)
     {
         // Se não tem expires_in, considerar como válido (compatibilidade com registros antigos)
-        if (!$mpAccount->expires_in) {
+        if ($mpAccount->expires_in === null || $mpAccount->expires_in === '') {
             return false;
         }
 
-        // expires_in é um timestamp Carbon ou DateTime
-        $expiresAt = is_string($mpAccount->expires_in) 
-            ? \Carbon\Carbon::parse($mpAccount->expires_in) 
-            : $mpAccount->expires_in;
+        // expires_in pode ser string (datetime), int (Unix timestamp) ou DateTimeInterface
+        $raw = $mpAccount->expires_in;
+        if ($raw instanceof \DateTimeInterface) {
+            $expiresAt = \Carbon\Carbon::instance($raw);
+        } elseif (is_numeric($raw)) {
+            $expiresAt = \Carbon\Carbon::createFromTimestamp((int) $raw);
+        } else {
+            $expiresAt = \Carbon\Carbon::parse((string) $raw);
+        }
 
         // Considerar expirado se faltam menos de 7 dias para expirar
         // Isso dá tempo suficiente para renovar antes de expirar
