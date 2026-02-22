@@ -828,6 +828,7 @@ class ConferenceController extends Controller
                     'participante_id' => Auth::user()->id,
                     'coupon_id' => $coupon_id,
                     'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             });
 
@@ -859,12 +860,20 @@ class ConferenceController extends Controller
             // Mostrar tela de pagamento na mesma resposta (fallback sem JS)
             return $this->resolvePaymentView($request, $event, $total);
         } catch (\Throwable $e) {
-            Log::error('Erro ao criar pedido', ['error' => $e->getMessage()]);
+            Log::error('Erro ao criar pedido', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             $resumoUrl = $event ? route('conference.resume', $event->slug) : url()->previous();
+            $userMessage = 'Erro ao processar pedido. Tente novamente.';
             if ($isAjax) {
-                return response()->json(['success' => false, 'redirect' => $resumoUrl, 'errors' => ['Erro ao processar pedido. Tente novamente.']]);
+                $payload = ['success' => false, 'redirect' => $resumoUrl, 'errors' => [$userMessage]];
+                if (config('app.debug')) {
+                    $payload['debug_message'] = $e->getMessage();
+                }
+                return response()->json($payload);
             }
-            return redirect()->back()->withErrors(['error' => 'Erro ao processar pedido. Tente novamente.'])->setStatusCode(303);
+            return redirect()->back()->withErrors(['error' => $userMessage])->setStatusCode(303);
         }
     }
 
@@ -885,6 +894,7 @@ class ConferenceController extends Controller
                     'participante_id' => Auth::user()->id,
                     'coupon_id' => $coupon_id,
                     'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             });
 
@@ -941,6 +951,7 @@ class ConferenceController extends Controller
                         'order_id' => $order_id,
                         'lote_id' => $lote->id,
                         'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
 
                     // Salvar respostas dos campos personalizados
@@ -966,6 +977,7 @@ class ConferenceController extends Controller
                             'question_id' => $question->id,
                             'order_item_id' => $order_item_id,
                             'created_at' => now(),
+                            'updated_at' => now(),
                         ]);
                     }
 
