@@ -135,6 +135,9 @@
                         
                         <form method="POST" id="checkout_submit" action="{{ route('conference.payment', $event->slug) }}" data-use-ajax="{{ $total > 0 ? '1' : '0' }}">
                             @csrf
+                            @if($total > 0)
+                                <input type="hidden" name="_response" value="json">
+                            @endif
                             <div class="checkout-form-section">
                                 <h3 class="checkout-form-section-title">
                                     <i class="fas fa-user-edit"></i>

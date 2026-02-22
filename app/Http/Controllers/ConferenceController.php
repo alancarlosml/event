@@ -613,7 +613,8 @@ class ConferenceController extends Controller
     public function payment(Request $request, $slug)
     {
         $input = $request->all();
-        $isAjax = $request->expectsJson() || $request->ajax();
+        // Proxy/servidor em produção pode remover X-Requested-With e Accept; usar parâmetro no body
+        $isAjax = $request->expectsJson() || $request->ajax() || $request->input('_response') === 'json';
 
         // Validar dados da sessão
         $event = $request->session()->get('event');
