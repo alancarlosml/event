@@ -113,8 +113,18 @@
     </section>
     <section id="sobre" class="section-padding mt-4">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-xs-12">
+            @php
+                $youtubeVideoId = null;
+                if (!empty($event->youtube_video_url)) {
+                    $url = trim($event->youtube_video_url);
+                    if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/', $url, $m)) {
+                        $youtubeVideoId = $m[1];
+                    }
+                }
+                $hasYoutubeVideo = !empty($youtubeVideoId);
+            @endphp
+            <div class="row align-items-start">
+                <div class="{{ $hasYoutubeVideo ? 'col-lg-8 col-md-12 col-xs-12 order-2 order-lg-1' : 'col-lg-12 col-md-12 col-xs-12' }}">
                     <div class="about-content">
                         <div>
                             <div class="about-text">
@@ -240,6 +250,16 @@
                         </div>
                     </div>
                 </div>
+                @if($hasYoutubeVideo)
+                <div class="col-lg-4 col-md-12 col-xs-12 order-1 order-lg-2 mb-4 mb-lg-0">
+                    <div class="event-youtube-video">
+                        <h3 class="event-youtube-video-title">Vídeo de divulgação</h3>
+                        <div class="ratio ratio-16x9">
+                            <iframe src="https://www.youtube.com/embed/{{ $youtubeVideoId }}?rel=0" title="Vídeo de divulgação do evento {{ htmlspecialchars($event->name) }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
         
@@ -255,7 +275,7 @@
                         </div>
                         <div class="faq-answer">
                             <div class="faq-answer-content">
-                                Para se inscrever, selecione a data do evento, escolha o lote desejado, informe a quantidade de ingressos e clique em "Continuar". Preencha os dados solicitados e finalize o pagamento.
+                                Para se inscrever, selecione a data do evento, escolha o lote desejado, informe a quantidade de ingressos e clique em "Continuar". Preencha os dados solicitados e finalize o pagamento de forma segura.
                             </div>
                         </div>
                     </div>
@@ -266,7 +286,7 @@
                         </div>
                         <div class="faq-answer">
                             <div class="faq-answer-content">
-                                Aceitamos pagamento via cartão de crédito, débito, boleto bancário e PIX através do Mercado Pago. O pagamento é 100% seguro e criptografado.
+                                Os pagamentos são processados pelo Mercado Pago: cartão de crédito, débito, boleto bancário e PIX. O processamento é seguro e criptografado, em conformidade com as práticas do Mercado Pago.
                             </div>
                         </div>
                     </div>
@@ -277,7 +297,7 @@
                         </div>
                         <div class="faq-answer">
                             <div class="faq-answer-content">
-                                O cancelamento e reembolso seguem a política de cancelamento do evento. Entre em contato através do formulário de contato ou e-mail informado na página do evento para mais informações.
+                                O cancelamento e o reembolso seguem a política do organizador do evento. Entre em contato com o organizador através do formulário de contato ou e-mail informado nesta página para solicitar cancelamento ou mais informações.
                             </div>
                         </div>
                     </div>
@@ -300,6 +320,28 @@
                         <div class="faq-answer">
                             <div class="faq-answer-content">
                                 A disponibilidade de certificado depende do tipo de evento. Entre em contato com os organizadores através do formulário de contato para mais informações sobre certificados.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Meus dados estão seguros?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Sim. Tratamos seus dados em conformidade com a LGPD. Para saber como coletamos, usamos e protegemos suas informações, consulte nossa <a href="/politica" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFAQ(this)">
+                            <span>Onde posso ler os Termos de Uso e a Política de Privacidade?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <div class="faq-answer-content">
+                                Os <a href="/termos" target="_blank" rel="noopener noreferrer">Termos de Uso</a> e a <a href="/politica" target="_blank" rel="noopener noreferrer">Política de Privacidade</a> da plataforma estão disponíveis no site. Recomendamos a leitura antes do cadastro ou da compra de ingressos.
                             </div>
                         </div>
                     </div>
@@ -514,7 +556,7 @@
                 {{ $event->place->get_city()->name }}-{{ optional($event->place->get_city()->state)->uf ?? $event->place->get_city()->uf }}
             </div>
             <div class="row">
-                <div class="col-12" id="map_canvas" style="height: 450px; width: 100%; position: relative;">
+                <div class="col-12" id="map_canvas" style="height: 450px; width: 90%; position: relative; margin: 0 auto;">
                     <div class="map-actions">
                         <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($event->place->address . ', ' . $event->place->number . ', ' . $event->place->district . ', ' . $event->place->get_city()->name . '-' . (optional($event->place->get_city()->state)->uf ?? $event->place->get_city()->uf)) }}" 
                            target="_blank" 

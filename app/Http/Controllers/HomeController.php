@@ -44,6 +44,28 @@ class HomeController extends Controller
         return view('site.contact', compact('site_info'));
     }
 
+    public function politica()
+    {
+        $site_info = [
+            'menu' => 'politica',
+            'title' => 'Política de Privacidade',
+            'description' => 'Política de Privacidade - Ticket DZ6',
+        ];
+
+        return view('site.politica', compact('site_info'));
+    }
+
+    public function termos()
+    {
+        $site_info = [
+            'menu' => 'termos',
+            'title' => 'Termos de Uso',
+            'description' => 'Termos de Uso - Ticket DZ6',
+        ];
+
+        return view('site.termos', compact('site_info'));
+    }
+
     public function send(Request $request)
     {
 

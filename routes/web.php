@@ -112,7 +112,10 @@ Route::post('api/checkin/{purchase_hash}', 'App\Http\Controllers\CheckInControll
 // Rota para corrigir hashes de lotes (antes do /{slug} para não ser capturada)
 Route::get('/fix-lote-hashes', 'App\Http\Controllers\LoteController@fixLoteHashes')->middleware(['auth:web'])->name('lote.fix_hashes');
 
-Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->where('slug', '^(?!admin|api|checkin|webhooks|fix-lote-hashes|painel|getSubTotal|getCoupon|setEventDate|getLotesPorData|contato).*$')->name('conference.index');
+Route::get('/politica', 'App\Http\Controllers\HomeController@politica')->name('politica');
+Route::get('/termos', 'App\Http\Controllers\HomeController@termos')->name('termos');
+
+Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->where('slug', '^(?!admin|api|checkin|webhooks|fix-lote-hashes|painel|getSubTotal|getCoupon|setEventDate|getLotesPorData|contato|politica|termos).*$')->name('conference.index');
 Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->name('contact_event');
 Route::match(['GET', 'POST'], '{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
 Route::get('{slug}/pagamento-view', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.paymentView');

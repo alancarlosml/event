@@ -26,6 +26,7 @@ class Event extends Model
         'description',
         'banner',
         'banner_option',
+        'youtube_video_url',
         'config_tax',
         'owner_id',
         'area_id',

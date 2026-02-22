@@ -125,6 +125,12 @@
                                         @endif
                                     </div>
                                 </div>
+                                
+                                <div class="mb-4 mt-4">
+                                    <label for="youtube_video_url" class="form-label fw-bold">Vídeo de divulgação (YouTube)</label>
+                                    <input type="url" class="form-control" id="youtube_video_url" name="youtube_video_url" placeholder="Ex: https://www.youtube.com/watch?v=VIDEO_ID ou https://youtu.be/VIDEO_ID" value="{{ old('youtube_video_url', $event->youtube_video_url ?? '') }}">
+                                    <div class="form-text">Cole o link do vídeo do YouTube para exibir na página do evento (opcional).</div>
+                                </div>
                             </div>
                             
                             <div class="mb-5">

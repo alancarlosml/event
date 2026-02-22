@@ -667,6 +667,7 @@ class EventAdminController extends Controller
                 'status' => 'string',
                 'new_field' => 'required',
                 'new_field_id' => 'nullable',
+                'youtube_video_url' => 'nullable|string|max:500',
             ],[
                 'name.required' => 'O nome do evento é obrigatório.',
                 'slug.required' => 'A URL do evento é obrigatório.',
@@ -681,6 +682,9 @@ class EventAdminController extends Controller
 
             $validatedDataEvent['slug'] = Str::slug($validatedDataEvent['slug'], '-');
             $validatedDataEvent['place_id'] = $validatedDataEvent['place_id_hidden'];
+            $validatedDataEvent['youtube_video_url'] = $request->filled('youtube_video_url')
+                ? trim($request->input('youtube_video_url'))
+                : null;
 
             // if(isset($validatedDataEvent['status'])){
             //     $validatedDataEvent['status'] = 1;
@@ -1531,6 +1535,10 @@ class EventAdminController extends Controller
                 $event->save();
             }
         }
+
+        $validatedEvent['youtube_video_url'] = $request->filled('youtube_video_url')
+            ? trim($request->input('youtube_video_url'))
+            : null;
 
         $event->fill($validatedEvent);
         $event->save();

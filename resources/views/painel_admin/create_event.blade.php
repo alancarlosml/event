@@ -118,22 +118,17 @@
                                 <label for="subtitle" class="form-label">Subtítulo</label>
                                 <input type="text" class="form-control" id="subtitle" name="subtitle" placeholder="Subtítulo do evento (opcional)" value="{{ htmlspecialchars($event->subtitle ?? old('subtitle')) }}">
                             </div>
-                            @if($isEdit && $event->banner)
-                            <div class="mb-3">
-                                <label class="form-label">Banner atual</label>
-                                <div>
-                                    <img src="{{ asset('storage/' . $event->banner) }}" alt="Banner do evento" class="img-fluid mb-2" style="max-height: 200px;">
-                                </div>
-                            </div>
-                            @endif
-                            <div class="mb-3">
-                                <label for="banner" class="form-label">{{ $isEdit ? 'Alterar banner' : 'Banner do evento' }}</label>
-                                <input class="form-control" type="file" id="banner" name="banner" accept="image/*">
-                            </div>
                             <div class="mb-3">
                                 <label for="description" class="form-label">Descrição do evento <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="description" name="description" required>{{ $event->description ?? old('description') }}</textarea>
                             </div>
+                            @if($isEdit)
+                            <div class="mb-3">
+                                <label for="youtube_video_url" class="form-label">Vídeo de divulgação (YouTube)</label>
+                                <input type="url" class="form-control" id="youtube_video_url" name="youtube_video_url" placeholder="Ex: https://www.youtube.com/watch?v=VIDEO_ID" value="{{ old('youtube_video_url', $event->youtube_video_url ?? '') }}">
+                                <div class="form-text">Link do vídeo do YouTube exibido na página do evento (opcional).</div>
+                            </div>
+                            @endif
                             <div class="row">
                                 <div class="col-md-3 mb-3">
                                     <label for="category" class="form-label">Categoria <span class="text-danger">*</span></label>
