@@ -347,6 +347,54 @@
     margin-bottom: 2rem;
 }
 
+/* ===== Página /eventos - Mobile first ===== */
+/* Base: mobile - filtros colapsados, só busca e ordenar visíveis */
+.event-list-section .section-header p {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    margin-bottom: 0;
+}
+
+.event-search-box .info-box-content {
+    padding: 1rem;
+}
+
+.event-search-primary {
+    margin-top: 0.5rem !important;
+}
+
+.event-search-toggle-filters {
+    min-height: 44px;
+    font-weight: 600;
+}
+
+/* Desktop: filtros sempre visíveis (não usar collapse) */
+@media (min-width: 768px) {
+    .event-search-filters-collapse.collapse {
+        display: block !important;
+        visibility: visible;
+        height: auto !important;
+        overflow: visible;
+    }
+    
+    .event-search-filters-collapse .border-top {
+        border-top: none !important;
+        padding-top: 0 !important;
+        margin-top: 0.5rem !important;
+    }
+}
+
+/* Mobile: menos padding no container da busca */
+@media (max-width: 767.98px) {
+    .event-list-section .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .event-search-box .info-box-content {
+        padding: 0.75rem;
+    }
+}
+
 /* ===== Responsividade ===== */
 @media (max-width: 992px) {
     .events-grid {

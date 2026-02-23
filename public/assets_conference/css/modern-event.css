@@ -199,6 +199,7 @@
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
     font-family: var(--event-font-heading);
+    white-space: nowrap;
 }
 
 .event-page-wrap .countdown-label {
@@ -208,16 +209,31 @@
     letter-spacing: 0.06em;
     opacity: 0.85;
     margin-top: 0.35rem;
+    white-space: nowrap;
 }
 
+/* Countdown mobile: 2x2 grid para evitar quebra de "Segundos" e manter leitura clara */
 @media (max-width: 576px) {
+    .event-page-wrap .countdown {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
     .event-page-wrap .countdown-item {
-        min-width: 64px;
-        padding: 0.75rem 1rem;
+        min-width: 0;
+        padding: 0.75rem 0.5rem;
     }
     
     .event-page-wrap .countdown-value {
         font-size: 1.5rem;
+    }
+    
+    .event-page-wrap .countdown-label {
+        font-size: 0.625rem;
     }
 }
 
@@ -575,6 +591,8 @@
 .social-share-btn {
     width: 36px;
     height: 36px;
+    min-width: 36px;
+    min-height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -582,6 +600,7 @@
     font-size: 1rem;
     transition: all 0.3s ease;
     color: white;
+    flex-shrink: 0;
 }
 
 .social-share-btn:hover {
@@ -1199,8 +1218,26 @@
         grid-template-columns: 1fr;
     }
     
+    /* Social share mobile: label em bloco, botões em linha com wrap e touch targets 44px */
     .event-page-wrap .social-share {
-        justify-content: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 0.75rem;
+    }
+    
+    .event-page-wrap .social-share-label {
+        width: 100%;
+        flex-basis: 100%;
+        margin-bottom: 0.25rem;
+    }
+    
+    .event-page-wrap .social-share-btn {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 1.125rem;
     }
     
     .form-wrapper {

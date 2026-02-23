@@ -1541,11 +1541,11 @@ class ConferenceController extends Controller
                     }
                     $boletoZipCode = preg_replace('/[^0-9]/', '', trim((string) $address['zip_code']));
 
+                    // Boleto: não enviar application_fee — a API rejeita se a conta não tiver split habilitado para boleto (mesmo caso do PIX).
                     $paymentRequest = [
                         "transaction_amount" => (float) $total_a_pagar,
                         "description" => 'Ingresso ' . $event->name,
                         "payment_method_id" => $input['formData']['payment_method_id'],
-                        "application_fee" => (float) $application_fee,
                         "external_reference" => (string) $order_id,
                         "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [

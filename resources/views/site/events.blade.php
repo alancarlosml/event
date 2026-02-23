@@ -7,84 +7,87 @@
             </div>
         </section>
 
-        <section class="inner-page search" id="event-list">
+        <section class="inner-page search event-list-section" id="event-list">
             <div class="container">
                 <header class="section-header">
                     <p>Busque mais eventos</p>
                 </header>
-                <div class="row gy-3"> <!-- Adicionado gy-3 para espaçamento responsivo -->
-                    <div class="info-box bg-light col-12">
+                <div class="row gy-3">
+                    <div class="info-box bg-light col-12 event-search-box">
                         <div class="container-fluid info-box-content">
-                            <form action="enhanced-results.html">
-                                <div class="row mt-3">
-                                    <div class="col-12">
-                                        <div class="row gy-2"> <!-- gy-2 para mobile stack -->
-                                            <!-- Selects com ARIA labels -->
-                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
-                                                <label for="category"><b>Categoria</b></label>
-                                                <select name="category" id="category" class="form-select" aria-label="Selecione categoria">
-                                                    <option value="0">Selecione uma opção</option>
-                                                    @foreach ($categories as $category)
-                                                        <option value="{{ $category->id }}">{{ $category->description }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
-                                                <label><b>Área</b></label>
-                                                <select name="area_id" id="area_id" class="form-select" placeholder="Área">
-                                                    <option value="0">Selecione uma categoria</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
-                                                <label><b>Local</b></label>
-                                                <select name="state" id="state" class="form-select" placeholder="Estado">
-                                                    <option value="0">Selecione uma opção</option>
-                                                    @foreach ($states as $state)
-                                                        <option value="{{ $state->uf }}">{{ $state->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="mb-3 col-lg-3 col-sm-12 text-start">
-                                                <label><b>Período</b></label>
-                                                <select name="period" id="period" class="form-select" placeholder="Período">
-                                                    <option value="0">Selecione uma opção</option>
-                                                    <option value="any"> Qualquer </option>
-                                                    <option value="today"> Hoje </option>
-                                                    <option value="tomorrow"> Amanhã </option>
-                                                    <option value="week"> Esta semana </option>
-                                                    <option value="month"> Este mês </option>
-                                                    @php
-                                                        $begin = date('m');
-                                                        setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'pt_BR.utf-8', 'portuguese');
-                                                        date_default_timezone_set('America/Sao_Paulo');
-                                                        for ($i = intval($begin) + 1; $i <= 12; $i++) {
-                                                            $month = ucfirst(strftime('%B', mktime(0, 0, 0, $i, 10)));
-                                                            $month_eng = strtolower(date('F', mktime(0, 0, 0, $i, 10)));
-                                                            echo "<option value='$month_eng'>$month</option>";
-                                                        }
-                                                    @endphp
-                                                    <option value="year"> Este ano </option>
-                                                </select>
-                                            </div>
+                            <form action="enhanced-results.html" class="event-search-form">
+                                <!-- Mobile: busca e ordenar sempre visíveis; botão para abrir filtros -->
+                                <div class="row mt-3 event-search-primary">
+                                    <div class="col-12 col-md-8 mb-3 mb-md-0 text-start">
+                                        <label for="event_name_search"><b>Nome do Evento</b></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="search" class="form-control" id="event_name_search" placeholder="Nome do evento" aria-label="Buscar por nome do evento">
                                         </div>
-                                        <div class="row mt-3">
-                                            <div class="col-12 col-md-8 mb-3 text-start">
-                                                <label for="sort_events"><b>Nome do Evento</b></label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                                    <input type="search" class="form-control" id="event_name_search" placeholder="Nome do evento" aria-label="Buscar por nome do evento">
-                                                </div>
-                                            </div>
-                                            <div class="col-12 col-md-4 mb-3 text-start">
-                                                <label for="sort_events"><b>Ordenar por</b></label>
-                                                <select name="sort_events" id="sort_events" class="form-select">
-                                                    <option value="date_asc">Data: Mais próximo</option>
-                                                    <option value="date_desc">Data: Mais distante</option>
-                                                    <option value="name_asc">Nome: A-Z</option>
-                                                    <option value="name_desc">Nome: Z-A</option>
-                                                </select>
-                                            </div>
+                                    </div>
+                                    <div class="col-12 col-md-4 mb-3 text-start d-md-block event-search-sort-wrap">
+                                        <label for="sort_events"><b>Ordenar por</b></label>
+                                        <select name="sort_events" id="sort_events" class="form-select">
+                                            <option value="date_asc">Data: Mais próximo</option>
+                                            <option value="date_desc">Data: Mais distante</option>
+                                            <option value="name_asc">Nome: A-Z</option>
+                                            <option value="name_desc">Nome: Z-A</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 d-md-none mb-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm w-100 event-search-toggle-filters" id="eventSearchToggleFilters" aria-expanded="false" aria-controls="eventSearchFiltersCollapse" aria-label="Abrir ou fechar filtros avançados" data-bs-toggle="collapse" data-bs-target="#eventSearchFiltersCollapse">
+                                            <i class="fas fa-sliders-h me-2"></i><span class="event-search-toggle-text">Ver mais filtros</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Filtros avançados: colapsáveis no mobile -->
+                                <div class="event-search-filters-collapse collapse" id="eventSearchFiltersCollapse">
+                                    <div class="row gy-2 mt-2 pt-2 border-top border-secondary border-opacity-25">
+                                        <div class="mb-3 col-lg-3 col-12 text-start">
+                                            <label for="category"><b>Categoria</b></label>
+                                            <select name="category" id="category" class="form-select" aria-label="Selecione categoria">
+                                                <option value="0">Selecione uma opção</option>
+                                                @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}">{{ $category->description }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mb-3 col-lg-3 col-12 text-start">
+                                            <label><b>Área</b></label>
+                                            <select name="area_id" id="area_id" class="form-select" placeholder="Área">
+                                                <option value="0">Selecione uma categoria</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3 col-lg-3 col-12 text-start">
+                                            <label><b>Local</b></label>
+                                            <select name="state" id="state" class="form-select" placeholder="Estado">
+                                                <option value="0">Selecione uma opção</option>
+                                                @foreach ($states as $state)
+                                                    <option value="{{ $state->uf }}">{{ $state->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mb-3 col-lg-3 col-12 text-start">
+                                            <label><b>Período</b></label>
+                                            <select name="period" id="period" class="form-select" placeholder="Período">
+                                                <option value="0">Selecione uma opção</option>
+                                                <option value="any">Qualquer</option>
+                                                <option value="today">Hoje</option>
+                                                <option value="tomorrow">Amanhã</option>
+                                                <option value="week">Esta semana</option>
+                                                <option value="month">Este mês</option>
+                                                @php
+                                                    $begin = date('m');
+                                                    setlocale(LC_TIME, 'pt_BR', 'pt_BR.utf-8', 'pt_BR.utf-8', 'portuguese');
+                                                    date_default_timezone_set('America/Sao_Paulo');
+                                                    for ($i = intval($begin) + 1; $i <= 12; $i++) {
+                                                        $month = ucfirst(strftime('%B', mktime(0, 0, 0, $i, 10)));
+                                                        $month_eng = strtolower(date('F', mktime(0, 0, 0, $i, 10)));
+                                                        echo "<option value='$month_eng'>$month</option>";
+                                                    }
+                                                @endphp
+                                                <option value="year">Este ano</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -273,6 +276,20 @@
             $('#sort_events').on('change', function(e) {
                 getMoreEvents(1);
             });
+
+            // Atualizar texto do botão "Mostrar/Ocultar filtros" quando o collapse abre/fecha (mobile)
+            var collapseEl = document.getElementById('eventSearchFiltersCollapse');
+            var toggleBtn = document.getElementById('eventSearchToggleFilters');
+            if (collapseEl && toggleBtn && typeof bootstrap !== 'undefined') {
+                collapseEl.addEventListener('show.bs.collapse', function() {
+                    var textEl = toggleBtn.querySelector('.event-search-toggle-text');
+                    if (textEl) textEl.textContent = 'Ver menos filtros';
+                });
+                collapseEl.addEventListener('hide.bs.collapse', function() {
+                    var textEl = toggleBtn.querySelector('.event-search-toggle-text');
+                    if (textEl) textEl.textContent = 'Ver mais filtros';
+                });
+            }
 
             // Carregar áreas quando categoria for selecionada
             $('#category').on('change', function() {
