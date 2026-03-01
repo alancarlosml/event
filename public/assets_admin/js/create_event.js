@@ -602,23 +602,55 @@ $(document).ready(function() {
     function initMercadoPago() {
         const $formMercadoPago = $('#form_mercadopago');
         const $linkAccButton = $('#link-acc-button');
+        const $unlinkAccButton = $('#unlink-acc-button');
         const $linkedAccLabel = $('#linked-acc-label');
 
         $('input[name="paid"]').on('change', function() {
             $formMercadoPago.toggleClass('d-none', this.value !== '1');
-            if (this.value === '1' && $linkAccButton.attr('data-linked') === 'false') {
+            if (this.value === '1' && $linkAccButton.length && $linkAccButton.attr('data-linked') === 'false') {
                 const intervalId = setInterval(() => {
                     $.get('/webhooks/mercado-pago/check-linked-account')
                         .done(data => {
                             if (data.linked) {
                                 clearInterval(intervalId);
                                 $linkedAccLabel.text(`ID da Conta Vinculada: ${data.id}`);
-                                $linkAccButton.removeClass('btn-success').addClass('btn-secondary').text('Vincular outra conta').attr('data-linked', 'true');
+                                $linkAccButton.replaceWith('<button type="button" id="unlink-acc-button" class="btn btn-danger">Desvincular conta</button>');
+                                bindUnlinkButton();
                             }
                         })
                         .fail(error => console.error('Erro ao verificar conta Mercado Pago:', error));
                 }, 5000);
             }
+        });
+
+        bindUnlinkButton();
+    }
+
+    function bindUnlinkButton() {
+        $(document).off('click', '#unlink-acc-button').on('click', '#unlink-acc-button', function() {
+            if (!confirm('Tem certeza que deseja desvincular a conta do Mercado Pago?')) return;
+
+            const $btn = $(this);
+            $btn.prop('disabled', true).text('Desvinculando...');
+
+            $.ajax({
+                url: '/mercado-pago/unlink-account',
+                type: 'POST',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function(data) {
+                    if (data.success) {
+                        $('#linked-acc-label').text('Vincular conta Mercado Pago');
+                        $btn.replaceWith('<a href="' + $btn.closest('#form_mercadopago').data('link-url') + '" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success">Vincular conta</a>');
+                    } else {
+                        alert('Erro ao desvincular conta.');
+                        $btn.prop('disabled', false).text('Desvincular conta');
+                    }
+                },
+                error: function() {
+                    alert('Erro ao desvincular conta.');
+                    $btn.prop('disabled', false).text('Desvincular conta');
+                }
+            });
         });
     }
 

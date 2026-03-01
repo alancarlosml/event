@@ -196,6 +196,19 @@ class MercadoPagoController extends Controller
 
     }
 
+    public function unlinkAccount(Request $r)
+    {
+        $id = Auth::user()->id;
+        $deleted = MpAccount::where('participante_id', $id)->delete();
+
+        Log::info('Conta do Mercado Pago desvinculada', [
+            'user_id' => $id,
+            'deleted' => $deleted,
+        ]);
+
+        return response()->json(['success' => $deleted > 0]);
+    }
+
     // Verifica se o usuário já tem uma conta
     // do Mercado Pago vinculada, e retorna o id
     // do usuário no Mercado Pago, caso tenha.

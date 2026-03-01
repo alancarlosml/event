@@ -256,5 +256,6 @@ Route::get('/webhooks/mercado-pago/check-linked-account', 'App\Http\Controllers\
 
 // Mercado Pago OAuth Callback
 Route::get('/mercado-pago/link-account', 'App\Http\Controllers\MercadoPagoController@linkAccount')->name('mercado-pago.link-account');
+Route::post('/mercado-pago/unlink-account', 'App\Http\Controllers\MercadoPagoController@unlinkAccount')->middleware(['auth:participante', 'verified'])->name('mercado-pago.unlink-account');
 
 require __DIR__.'/auth.php';

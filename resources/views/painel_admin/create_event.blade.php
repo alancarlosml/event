@@ -453,17 +453,18 @@
                                     </div>
                                 </div>
 
+                                @php $mpAuthUrl = "https://auth.mercadopago.com.br/authorization?client_id=" . env('MERCADO_PAGO_CLIENT_ID', '') . "&response_type=code&platform_id=mp&redirect_uri=" . urlencode(route('mercado-pago.link-account')); @endphp
                                 @if(isset($mercadoPagoLinked['linked']) && $mercadoPagoLinked['linked'])
-                                    <div class="mb-3 d-none" id="form_mercadopago">
+                                    <div class="mb-3 d-none" id="form_mercadopago" data-link-url="{{ $mpAuthUrl }}">
                                         <label for="contact" id="linked-acc-label" class="form-label">ID da Conta Vinculada: {{ $mercadoPagoLinked['id'] }}</label>
                                         <br>
-                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_CLIENT_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ urlencode(route('mercado-pago.link-account')) }}" target="_blank" id="link-acc-button" data-linked="true" class="btn btn-secondary">Vincular outra conta</a>
+                                        <button type="button" id="unlink-acc-button" class="btn btn-danger">Desvincular conta</button>
                                     </div>
                                 @else
-                                    <div class="mb-3 d-none" id="form_mercadopago">
+                                    <div class="mb-3 d-none" id="form_mercadopago" data-link-url="{{ $mpAuthUrl }}">
                                         <label for="contact" id="linked-acc-label" class="form-label">Vincular conta Mercado Pago</label>
                                         <br>
-                                        <a href="https://auth.mercadopago.com.br/authorization?client_id={{ env('MERCADO_PAGO_CLIENT_ID', '') }}&response_type=code&platform_id=mp&redirect_uri={{ urlencode(route('mercado-pago.link-account')) }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success">Vincular conta</a>
+                                        <a href="{{ $mpAuthUrl }}" target="_blank" id="link-acc-button" data-linked="false" class="btn btn-success">Vincular conta</a>
                                     </div>
                                 @endif
                                 <input type="hidden" name="mercadopago_link" id="mercadopago_link" value="{{ $mercadopago_link ?? '' }}">
