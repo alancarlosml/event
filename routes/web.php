@@ -255,6 +255,6 @@ Route::post('/webhooks/mercado-pago/notification', 'App\Http\Controllers\Mercado
 Route::get('/webhooks/mercado-pago/check-linked-account', 'App\Http\Controllers\MercadoPagoController@checkLinkedAccount')->middleware(['auth:participante', 'verified']);
 
 // Mercado Pago OAuth Callback
-Route::get('/mercado-pago/link-account', 'App\Http\Controllers\MercadoPagoController@linkAccount')->middleware(['auth:participante', 'verified'])->name('mercado-pago.link-account');
+Route::get('/mercado-pago/link-account', 'App\Http\Controllers\MercadoPagoController@linkAccount')->name('mercado-pago.link-account');
 
 require __DIR__.'/auth.php';

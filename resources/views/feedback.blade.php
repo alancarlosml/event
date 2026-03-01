@@ -17,6 +17,11 @@
                                 <div class="w-100 text-center">
                                     <h5 class="mb-4 text-center">{{ $title }}</h5>
                                     <label>{{ $subtitle }}</label>
+                                    @if(isset($login_url))
+                                        <div class="mt-4">
+                                            <a href="{{ $login_url }}" class="btn btn-primary">Fazer login</a>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

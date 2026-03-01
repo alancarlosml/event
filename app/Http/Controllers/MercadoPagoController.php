@@ -61,26 +61,52 @@ class MercadoPagoController extends Controller
     // a vinculação foi bem sucedida.
     public function linkAccount(Request $r)
     {
-        // Verifica se o usuário está autenticado
-        if (!Auth::check()) {
-            $data = [
-                'title' => 'Erro ao vincular conta do Mercado Pago',
-                'subtitle' => 'Você precisa estar autenticado para vincular uma conta.',
-            ];
-            return view('feedback', $data);
-        }
+        // Log diagnóstico — sempre executa, independente de auth
+        Log::info('MercadoPago OAuth callback received', [
+            'session_id' => session()->getId(),
+            'auth_check' => Auth::check(),
+            'auth_guard' => Auth::guard('participante')->check(),
+            'user_id' => Auth::id(),
+            'ip' => $r->ip(),
+            'referer' => $r->header('referer'),
+            'has_code' => $r->has('code'),
+            'url' => $r->fullUrl(),
+        ]);
 
         $authorizationCode = $r->input('code');
-        
+
+        // Tenta recuperar code salvo na session (cenário de re-login)
+        if (!$authorizationCode && $r->session()->has('mp_oauth_code')) {
+            $authorizationCode = $r->session()->get('mp_oauth_code');
+            Log::info('MercadoPago OAuth code recovered from session');
+        }
+
         // Verifica se o código de autorização foi recebido
         if (!$authorizationCode) {
             Log::error('Código de autorização não recebido', [
                 'request_params' => $r->all()
             ]);
-            
+
             $data = [
                 'title' => 'Erro ao vincular conta do Mercado Pago',
                 'subtitle' => 'Código de autorização não recebido. Por favor, tente novamente.',
+            ];
+            return view('feedback', $data);
+        }
+
+        // Se usuário NÃO está autenticado: salvar code na session e pedir login
+        if (!Auth::guard('participante')->check()) {
+            $r->session()->put('mp_oauth_code', $authorizationCode);
+            $r->session()->put('url.intended', route('mercado-pago.link-account'));
+
+            Log::info('MercadoPago OAuth: user not authenticated, saving code to session', [
+                'code_length' => strlen($authorizationCode),
+            ]);
+
+            $data = [
+                'title' => 'Sessão expirada',
+                'subtitle' => 'Sua sessão expirou durante a autorização do Mercado Pago. Faça login para concluir a vinculação.',
+                'login_url' => route('login'),
             ];
             return view('feedback', $data);
         }
@@ -104,7 +130,7 @@ class MercadoPagoController extends Controller
                 Log::error('Resposta do Mercado Pago incompleta', [
                     'response' => $accessTokenData
                 ]);
-                
+
                 $data = [
                     'title' => 'Erro ao vincular conta do Mercado Pago',
                     'subtitle' => 'Resposta inválida do Mercado Pago. Verifique as credenciais da aplicação.',
@@ -118,33 +144,36 @@ class MercadoPagoController extends Controller
                     'access_token' => $accessTokenData['access_token'],
                     'public_key' => $accessTokenData['public_key'] ?? null,
                     'refresh_token' => $accessTokenData['refresh_token'] ?? null,
-                    'expires_in' => isset($accessTokenData['expires_in']) 
+                    'expires_in' => isset($accessTokenData['expires_in'])
                         ? Carbon::now()->addSeconds($accessTokenData['expires_in'])
                         : Carbon::now()->addDays(178),
                     'mp_user_id' => $accessTokenData['user_id'],
                 ]
             );
 
+            // Limpar code da session após sucesso
+            $r->session()->forget('mp_oauth_code');
+
             Log::info('Conta do Mercado Pago vinculada com sucesso', [
                 'user_id' => $id,
                 'mp_user_id' => $accessTokenData['user_id']
             ]);
 
-            $data = [   
+            $data = [
                 'title' => 'Conta do Mercado Pago vinculada com sucesso!',
                 'subtitle' => 'Você pode fechar esta página.'
             ];
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $response = $e->getResponse();
             $responseBody = json_decode($response->getBody()->getContents(), true);
-            
+
             Log::error('Erro ao vincular conta Mercado Pago (ClientException)', [
                 'user_id' => $id,
                 'status_code' => $response->getStatusCode(),
                 'response' => $responseBody,
                 'error' => $e->getMessage()
             ]);
-            
+
             $errorMessage = $responseBody['message'] ?? 'Erro ao processar a vinculação.';
             $data = [
                 'title' => 'Erro ao vincular conta do Mercado Pago',
@@ -156,13 +185,13 @@ class MercadoPagoController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             $data = [
                 'title' => 'Erro ao vincular conta do Mercado Pago',
                 'subtitle' => 'Ocorreu um erro ao processar a vinculação: ' . $e->getMessage(),
             ];
         }
-        
+
         return view('feedback', $data);
 
     }
