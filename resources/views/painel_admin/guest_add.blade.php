@@ -73,7 +73,7 @@
                                 <a href="{{ route('event_home.guests', $event->hash) }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left me-2"></i>Voltar
                                 </a>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" onclick="this.disabled=true;this.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Salvando...';this.form.submit();">
                                     <i class="fas fa-save me-2"></i>Salvar
                                 </button>
                             </div>

@@ -430,10 +430,9 @@
                 const ctx = document.getElementById('salesChart');
                 if (!ctx) return;
                 
-                // Dados iniciais vazios (pode ser expandido no futuro)
-                const chartLabels = [];
-                const chartConfirmed = [];
-                const chartPending = [];
+                const chartLabels = @json($chartLabels ?? []);
+                const chartConfirmed = @json($chartConfirmed ?? []);
+                const chartPending = @json($chartPending ?? []);
                 
                 const salesChart = new Chart(ctx, {
                     type: 'line',

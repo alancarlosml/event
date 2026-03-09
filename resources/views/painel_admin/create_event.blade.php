@@ -107,7 +107,7 @@
                                 <label for="slug" class="form-label">URL personalizada <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">{{ config('app.url') }}/</span>
-                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="url-personalizada" value="{{ $event->slug ?? old('slug') }}" {{ $isEdit ? 'readonly' : 'required' }}>
+                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="url-personalizada" value="{{ $event->slug ?? old('slug') }}" pattern="[a-z0-9\-]+" minlength="3" title="Apenas letras minúsculas, números e hífens" {{ $isEdit ? 'readonly' : 'required' }}>
                                 </div>
                                 @if($isEdit)
                                     <small class="form-text text-muted">A URL não pode ser alterada após a criação do evento.</small>
@@ -497,12 +497,14 @@
                             <div></div>
                         @endif
                         @if($currentStep < 4)
-                            <button type="submit" form="event-form" class="btn btn-primary">
-                                Próximo <i class="fas fa-arrow-right"></i>
+                            <button type="submit" form="event-form" class="btn btn-primary btn-submit-loading">
+                                <span class="btn-text">Próximo <i class="fas fa-arrow-right"></i></span>
+                                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
                             </button>
                         @else
-                            <button type="submit" form="event-form" class="btn btn-success">
-                                <i class="fas fa-check"></i> Publicar Evento
+                            <button type="submit" form="event-form" class="btn btn-success btn-submit-loading">
+                                <span class="btn-text"><i class="fas fa-check"></i> Publicar Evento</span>
+                                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
                             </button>
                         @endif
                     </div>
@@ -565,10 +567,23 @@
                 var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
                     return new bootstrap.Dropdown(dropdownToggleEl);
                 });
-                
+
                 // Prevenir que outros event listeners bloqueiem o dropdown
                 $('#userDropdown').on('click', function(e) {
                     e.stopPropagation();
+                });
+
+                // Submit loading state: show spinner, disable button, show progress bar
+                $('form#event-form').on('submit', function() {
+                    var $btn = $('.btn-submit-loading');
+                    $btn.prop('disabled', true);
+                    $btn.find('.btn-text').css('opacity', '0.6');
+                    $btn.find('.spinner-border').removeClass('d-none');
+                    $('#form-progress').removeClass('d-none');
+                    var $bar = $('#progress-bar');
+                    $bar.css('width', '30%');
+                    setTimeout(function(){ $bar.css('width', '70%'); }, 500);
+                    setTimeout(function(){ $bar.css('width', '90%'); }, 1500);
                 });
             });
         </script>

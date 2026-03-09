@@ -47,6 +47,26 @@ class Lote extends Model
         );
     }
 
+    /**
+     * Calcula a taxa da plataforma para um valor de ingresso.
+     * Centraliza o cálculo para evitar divergências entre fluxos.
+     *
+     * @param float $value Valor sobre o qual calcular a taxa
+     * @return float
+     */
+    public function calculateTax(float $value): float
+    {
+        $config = Configuration::first();
+        $taxRate = ($this->event && $this->event->config_tax != 0.0)
+            ? $this->event->config_tax
+            : ($config->tax ?? 0);
+
+        // Se tax_service = 1, taxa é sobre o valor do item; senão, sobre o valor do lote
+        $base = $this->tax_service ? $value : $this->value;
+
+        return round($base * $taxRate, 2);
+    }
+
     // public function participantes()
     // {
     //     return $this->belongsToMany(

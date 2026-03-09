@@ -36,6 +36,7 @@ return [
         'client_secret' => env('MERCADO_PAGO_CLIENT_SECRET'),
         'access_token' => env('MERCADO_PAGO_ACCESS_TOKEN'),
         'redirect_uri' => env('MERCADO_PAGO_REDIRECT_URI'),
+        'webhook_secret' => env('MERCADO_PAGO_WEBHOOK_SECRET'),
     ],
 
     // Secret usado para gerar hashes de pedidos, lotes, cupons, etc.

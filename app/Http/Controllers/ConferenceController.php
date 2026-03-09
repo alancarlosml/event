@@ -35,6 +35,7 @@ use MercadoPago\Exceptions\MPApiException;
 
 class ConferenceController extends Controller
 {
+    use \App\Traits\MercadoPagoTokenTrait;
     public function event(Request $request, $slug)
     {
 
@@ -948,16 +949,25 @@ class ConferenceController extends Controller
                     $lote = Lote::find($entry['id']);
                     if (!$lote) continue;
 
+                    $itemHash = md5((time() . uniqid() . $i) . md5(config('services.hash_secret')));
+                    $itemNumber = abs(crc32(md5(time() . uniqid() . $i)));
+                    $createdAt = now();
+
+                    // Buscar order hash para gerar purchase_hash imediatamente
+                    $orderHash = DB::table('orders')->where('id', $order_id)->value('hash');
+                    $purchaseHash = md5($orderHash . $itemHash . $itemNumber . $createdAt->format('Y-m-d H:i:s') . md5(config('services.hash_secret')));
+
                     $order_item_id = DB::table('order_items')->insertGetId([
-                        'hash' => md5((time() . uniqid() . $i) . md5(config('services.hash_secret'))),
-                        'number' => abs(crc32(md5(time() . uniqid() . $i))),
+                        'hash' => $itemHash,
+                        'number' => $itemNumber,
                         'quantity' => 1,
                         'value' => $entry['value'] ?? $lote->value,
                         'status' => 2, // pendente
                         'order_id' => $order_id,
                         'lote_id' => $lote->id,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'purchase_hash' => $purchaseHash,
+                        'created_at' => $createdAt,
+                        'updated_at' => $createdAt,
                     ]);
 
                     // Salvar respostas dos campos personalizados
@@ -1099,11 +1109,73 @@ class ConferenceController extends Controller
                 ->where('id', $order_id)
                 ->where('participante_id', Auth::id())
                 ->first();
-            
+
             if (!$order) {
                 return response()->json(['error' => 'Pedido não encontrado'], 404);
             }
-            
+
+            // Se status ainda é pendente e temos o payment_id, consultar API do MP como fallback
+            if ($order->status == 2 && !empty($order->gatway_hash)) {
+                try {
+                    $orderModel = Order::find($order->id);
+                    $mpAccount = $orderModel ? $orderModel->getMpAccount() : null;
+
+                    if ($mpAccount && !empty($mpAccount->access_token)) {
+                        $this->ensureValidToken($mpAccount);
+                        $client = new Client();
+                        $response = $client->get("https://api.mercadopago.com/v1/payments/{$order->gatway_hash}", [
+                            'headers' => [
+                                'Authorization' => 'Bearer ' . $mpAccount->access_token,
+                                'Content-Type' => 'application/json'
+                            ],
+                            'timeout' => 5,
+                        ]);
+
+                        $paymentData = json_decode($response->getBody(), true);
+
+                        if (isset($paymentData['status']) && $paymentData['status'] === 'approved') {
+                            // Atualizar order no banco
+                            DB::table('orders')->where('id', $order->id)->update([
+                                'status' => 1,
+                                'gatway_status' => 'approved',
+                                'gatway_payment_method' => $paymentData['payment_method_id'] ?? $order->gatway_payment_method,
+                                'gatway_date_status' => $paymentData['date_approved'] ?? now(),
+                                'updated_at' => now(),
+                            ]);
+
+                            // Atualizar order_items
+                            $orderItems = DB::table('order_items')->where('order_id', $order->id)->get();
+                            foreach ($orderItems as $item) {
+                                $updateData = ['status' => 1, 'updated_at' => now()];
+                                if (empty($item->purchase_hash)) {
+                                    $createdAtStr = is_string($item->created_at) ? $item->created_at : $item->created_at;
+                                    $updateData['purchase_hash'] = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5(config('services.hash_secret')));
+                                }
+                                DB::table('order_items')->where('id', $item->id)->update($updateData);
+                            }
+
+                            Log::info('Payment approved via polling fallback', [
+                                'order_id' => $order->id,
+                                'payment_id' => $order->gatway_hash,
+                            ]);
+
+                            return response()->json([
+                                'status' => 'approved',
+                                'internal_status' => 1,
+                                'approved' => true,
+                                'payment_method' => $paymentData['payment_method_id'] ?? $order->gatway_payment_method,
+                            ]);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Falha na consulta ao MP - apenas logar e retornar status local
+                    Log::warning('Polling fallback: failed to query MP API', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             // Mapear status interno para status legível
             $statusMap = [
                 1 => 'approved',
@@ -1113,23 +1185,23 @@ class ConferenceController extends Controller
                 5 => 'refunded',
                 6 => 'charged_back'
             ];
-            
+
             $internalStatus = $statusMap[$order->status] ?? 'unknown';
-            
+
             return response()->json([
                 'status' => $order->gatway_status ?? $internalStatus,
                 'internal_status' => $order->status,
                 'approved' => $order->status == 1,
                 'payment_method' => $order->gatway_payment_method
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Error checking payment status', [
                 'order_id' => $order_id,
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage()
             ]);
-            
+
             return response()->json(['error' => 'Erro ao verificar status'], 500);
         }
     }
@@ -1685,6 +1757,7 @@ class ConferenceController extends Controller
             $responseData = [
                 'id' => $payment->id,
                 'order_id' => $order_id,
+                'order_hash' => $order->hash,
                 'status' => $payment->status,
                 'detail' => $payment->status_detail ?? null
             ];
@@ -1848,8 +1921,9 @@ class ConferenceController extends Controller
 
             $boletoData = [
                 'value' => $payment->transaction_details->total_paid_amount ?? $total,
-                'href' => $payment->transaction_details->external_resource_url ?? null,
-                'line_code' => $payment->barcode->content ?? null,
+                'href' => $payment->transaction_details->external_resource_url ?? '',
+                'line_code' => $payment->barcode->content ?? '',
+                'href_print' => $payment->transaction_details->external_resource_url ?? '',
                 'expiration_date' => $payment->date_of_expiration ?? null,
                 'order_id' => $order_id,
                 'created_at' => now(),
@@ -1871,102 +1945,28 @@ class ConferenceController extends Controller
         }
     }
 
-    /**
-     * Verifica se o token está expirado ou próximo de expirar
-     * 
-     * @param MpAccount $mpAccount
-     * @return bool
-     */
-    private function isTokenExpiredOrExpiring($mpAccount)
+    public function confirmation(Request $request, $order_hash)
     {
-        // Se não tem expires_in, considerar como válido (compatibilidade com registros antigos)
-        if ($mpAccount->expires_in === null || $mpAccount->expires_in === '') {
-            return false;
+        $order = Order::with(['order_items.lote', 'eventDate.event.place'])
+            ->where('hash', $order_hash)
+            ->where('participante_id', Auth::id())
+            ->first();
+
+        if (!$order) {
+            abort(404, 'Pedido não encontrado');
         }
 
-        // expires_in pode ser string (datetime), int (Unix timestamp) ou DateTimeInterface
-        $raw = $mpAccount->expires_in;
-        if ($raw instanceof \DateTimeInterface) {
-            $expiresAt = \Carbon\Carbon::instance($raw);
-        } elseif (is_numeric($raw)) {
-            $expiresAt = \Carbon\Carbon::createFromTimestamp((int) $raw);
-        } else {
-            $expiresAt = \Carbon\Carbon::parse((string) $raw);
-        }
+        $event = $order->eventDate?->event;
+        $eventDate = $order->eventDate;
 
-        // Considerar expirado se faltam menos de 7 dias para expirar
-        // Isso dá tempo suficiente para renovar antes de expirar
-        $daysUntilExpiration = now()->diffInDays($expiresAt, false);
-        
-        return $daysUntilExpiration < 7;
-    }
+        // Buscar detalhes de pagamento conforme método
+        $pixDetails = DB::table('pix_details')->where('order_id', $order->id)->first();
+        $boletoDetails = DB::table('boleto_details')->where('order_id', $order->id)->first();
+        $creditDetails = DB::table('credit_details')->where('order_id', $order->id)->first();
 
-    /**
-     * Renova o access_token usando o refresh_token
-     * 
-     * @param MpAccount $mpAccount
-     * @return bool
-     */
-    private function renewAccessToken($mpAccount)
-    {
-        // Se não tem refresh_token, não pode renovar
-        if (empty($mpAccount->refresh_token)) {
-            Log::warning('Cannot renew token: no refresh_token', [
-                'mp_account_id' => $mpAccount->id
-            ]);
-            return false;
-        }
-
-        try {
-            $client = new Client();
-            
-            $response = $client->post('https://api.mercadopago.com/oauth/token', [
-                'form_params' => [
-                    'client_id' => config('services.mercadopago.client_id'),
-                    'client_secret' => config('services.mercadopago.client_secret'),
-                    'grant_type' => 'refresh_token',
-                    'refresh_token' => $mpAccount->refresh_token,
-                ],
-                'headers' => [
-                    'accept' => 'application/json',
-                    'content-type' => 'application/x-www-form-urlencoded',
-                ],
-            ]);
-
-            $responseData = json_decode($response->getBody()->getContents(), true);
-
-            if (!isset($responseData['access_token'])) {
-                Log::error('Failed to renew token: invalid response', [
-                    'mp_account_id' => $mpAccount->id,
-                    'response' => $responseData
-                ]);
-                return false;
-            }
-
-            // Atualizar o registro com os novos tokens
-            $mpAccount->update([
-                'access_token' => $responseData['access_token'],
-                'refresh_token' => $responseData['refresh_token'] ?? $mpAccount->refresh_token,
-                'expires_in' => isset($responseData['expires_in']) 
-                    ? \Carbon\Carbon::now()->addSeconds($responseData['expires_in'])
-                    : \Carbon\Carbon::now()->addDays(178),
-            ]);
-
-            Log::info('Token renewed successfully', [
-                'mp_account_id' => $mpAccount->id,
-                'organizer_id' => $mpAccount->participante_id
-            ]);
-
-            return true;
-
-        } catch (\Exception $e) {
-            Log::error('Error renewing access token', [
-                'mp_account_id' => $mpAccount->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return false;
-        }
+        return view('conference.confirmation', compact(
+            'order', 'event', 'eventDate', 'pixDetails', 'boletoDetails', 'creditDetails'
+        ));
     }
 
     public function oauth(Request $request){

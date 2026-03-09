@@ -71,30 +71,28 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                 $statusClass = 'not-processed';
                                 $statusText = 'Não processado';
                                 $statusIcon = 'fa-question-circle';
-                                
-                                if(isset($order->gatway_status)) {
-                                    if($order->gatway_status == 1) {
-                                        $statusClass = 'confirmed';
-                                        $statusText = 'Confirmado';
-                                        $statusIcon = 'fa-check-circle';
-                                    } elseif($order->gatway_status == 2) {
-                                        $statusClass = 'pending';
-                                        $statusText = 'Pendente';
-                                        $statusIcon = 'fa-clock';
-                                    } elseif($order->gatway_status == 3) {
-                                        $statusClass = 'cancelled';
-                                        $statusText = 'Cancelado';
-                                        $statusIcon = 'fa-times-circle';
-                                    }
+
+                                if($order->status == 1) {
+                                    $statusClass = 'confirmed';
+                                    $statusText = 'Confirmado';
+                                    $statusIcon = 'fa-check-circle';
+                                } elseif($order->status == 2) {
+                                    $statusClass = 'pending';
+                                    $statusText = 'Pendente';
+                                    $statusIcon = 'fa-clock';
+                                } elseif($order->status == 3) {
+                                    $statusClass = 'cancelled';
+                                    $statusText = 'Cancelado';
+                                    $statusIcon = 'fa-times-circle';
                                 }
                             @endphp
-                            <div class="registration-card" data-status="{{ $order->gatway_status ?? '0' }}" data-search="{{ strtolower($order->event_name . ' ' . $order->order_hash) }}">
+                            <div class="registration-card" data-status="{{ $order->status ?? '0' }}" data-search="{{ strtolower(($order->eventDate?->event?->name ?? '') . ' ' . $order->hash) }}">
                                 <div class="registration-header">
-                                    <div class="registration-id">ID: {{ $order->order_id }}</div>
-                                    <div class="registration-hash">{{ $order->order_hash }}</div>
+                                    <div class="registration-id">ID: {{ $order->id }}</div>
+                                    <div class="registration-hash">{{ $order->hash }}</div>
                                 </div>
                                 <div class="registration-content">
-                                    <h3 class="registration-event-name">{{ $order->event_name }}</h3>
+                                    <h3 class="registration-event-name">{{ $order->eventDate?->event?->name ?? 'Evento' }}</h3>
                                     <div class="registration-status {{ $statusClass }}">
                                         <i class="fas {{ $statusIcon }}"></i>
                                         <span>{{ $statusText }}</span>
@@ -104,30 +102,36 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                             <i class="fas fa-calendar-alt"></i>
                                             <div>
                                                 <span class="registration-info-label">Data do evento:</span>
-                                                {{ \Carbon\Carbon::parse($order->data_chosen)->format('d/m/Y') }}
+                                                {{ $order->eventDate ? \Carbon\Carbon::parse($order->eventDate->date)->format('d/m/Y') : '-' }}
                                             </div>
                                         </div>
                                         <div class="registration-info-item">
                                             <i class="fas fa-map-marker-alt"></i>
                                             <div>
                                                 <span class="registration-info-label">Local:</span>
-                                                {{ $order->place_name }}
+                                                {{ $order->eventDate?->event?->place?->name ?? '-' }}
                                             </div>
                                         </div>
                                         <div class="registration-info-item">
                                             <i class="fas fa-shopping-cart"></i>
                                             <div>
                                                 <span class="registration-info-label">Data da compra:</span>
-                                                {{ \Carbon\Carbon::parse($order->event_date)->format('d/m/Y H:i') }}
+                                                {{ \Carbon\Carbon::parse($order->created_at)->format('d/m/Y H:i') }}
                                             </div>
                                         </div>
                                     </div>
                                     <!-- QR Codes para Check-in -->
-                                    @if($order->gatway_status == 1 && isset($order->order_items) && $order->order_items->count() > 0)
+                                    @if(in_array($order->status, [1, 2]) && $order->order_items && $order->order_items->count() > 0)
                                         <div class="qr-codes-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e9ecef;">
                                             <h5 style="font-size: 1rem; font-weight: 600; color: #333; margin-bottom: 1rem;">
                                                 <i class="fas fa-qrcode"></i> QR Codes para Check-in
                                             </h5>
+                                            @if($order->status == 2)
+                                                <div class="alert alert-warning py-2 px-3" style="font-size: 0.8rem;">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                                    Pagamento pendente. O ingresso será válido após a confirmação do pagamento.
+                                                </div>
+                                            @endif
                                             <div class="qr-codes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                                                 @foreach($order->order_items as $item)
                                                     @if($item->purchase_hash)
@@ -135,9 +139,9 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                                             <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.5rem;">
                                                                 Ingresso #{{ $item->number }}
                                                             </div>
-                                                            @if($item->lote_name)
+                                                            @if($item->lote?->name)
                                                                 <div style="font-size: 0.7rem; color: #999; margin-bottom: 0.5rem;">
-                                                                    {{ $item->lote_name }}
+                                                                    {{ $item->lote->name }}
                                                                 </div>
                                                             @endif
                                                             <div style="background: white; padding: 0.5rem; border-radius: 4px; display: inline-block; margin-bottom: 0.5rem;">
@@ -170,15 +174,15 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                     @endif
                                     
                                     <div class="registration-actions">
-                                        @if($order->gatway_status == 1)
-                                            <a href="{{route('event_home.order.print_voucher', $order->order_hash)}}" 
-                                               target="_blank" 
+                                        @if($order->status == 1)
+                                            <a href="{{route('event_home.order.print_voucher', $order->hash)}}"
+                                               target="_blank"
                                                class="registration-btn registration-btn-primary">
                                                 <i class="fas fa-print"></i>
                                                 Imprimir
                                             </a>
                                         @endif
-                                        <a href="{{route('event_home.order.details', $order->order_hash)}}" 
+                                        <a href="{{route('event_home.order.details', $order->hash)}}"
                                            class="registration-btn registration-btn-secondary">
                                             <i class="fas fa-eye"></i>
                                             Detalhes

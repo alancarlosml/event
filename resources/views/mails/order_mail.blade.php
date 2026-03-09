@@ -52,7 +52,7 @@
                               </tbody>
                             </table>
                             <div class="space-y-4">
-                              <h2 class="text-4xl fw-800" style="padding-top: 0; padding-bottom: 0; font-weight: 800 !important; vertical-align: baseline; font-size: 36px; line-height: 43.2px; margin: 0;" align="left">Muito obrigado, {{Str::of($event->get_participante_admin()->name)->explode(' ')[0]}}!</h2>
+                              <h2 class="text-4xl fw-800" style="padding-top: 0; padding-bottom: 0; font-weight: 800 !important; vertical-align: baseline; font-size: 36px; line-height: 43.2px; margin: 0;" align="left">Muito obrigado, {{ Str::of($order->get_participante()->name ?? 'Cliente')->explode(' ')[0] }}!</h2>
                               <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
                                 <tbody>
                                   <tr>
@@ -62,7 +62,7 @@
                                   </tr>
                                 </tbody>
                               </table>
-                              <p class="" style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left">Sua compra foi concluída com sucesso. Você pode acessar seu ingresso através dos links abaixo.</p>
+                              <p style="line-height: 24px; font-size: 16px; width: 100%; margin: 0;" align="left">Sua compra foi concluída com sucesso. Confira os detalhes abaixo.</p>
                               <table class="s-4 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">
                                 <tbody>
                                   <tr>
@@ -72,15 +72,35 @@
                                   </tr>
                                 </tbody>
                               </table>
-                              <table class="btn btn-red-500 rounded-full px-6 w-full w-lg-48" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 9999px; border-collapse: separate !important; width: 192px;" width="192">
+                              @php
+                                $event = $order->eventDate?->event;
+                                $place = $event?->place;
+                              @endphp
+                              @if($event)
+                              <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; background: #f8f9fa; border-radius: 8px; margin-bottom: 16px;">
                                 <tbody>
                                   <tr>
-                                    <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 192px; margin: 0;" align="center" bgcolor="#dc3545" width="192">
-                                      <a href="{{ route('participante.my_registrations') }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Minhas compras</a>
+                                    <td style="padding: 16px; font-size: 14px; line-height: 22px;">
+                                      <strong style="font-size: 16px;">{{ $event->name }}</strong><br>
+                                      @if($order->eventDate)
+                                        <span style="color: #666;">Data: {{ \Carbon\Carbon::parse($order->eventDate->date)->format('d/m/Y') }}</span><br>
+                                      @endif
+                                      @if($place)
+                                        <span style="color: #666;">Local: {{ $place->name }}</span><br>
+                                        @if($place->address)
+                                          <span style="color: #999; font-size: 13px;">{{ $place->address }}</span><br>
+                                        @endif
+                                      @endif
                                     </td>
-                                    <td>&nbsp;&nbsp;&nbsp;</td>
-                                    <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; width: 192px; margin: 0;" align="center" bgcolor="#dc3545" width="192">
-                                      <a href="{{ route('participante.print_voucher', ['hash' => $order->hash]) }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Imprimir ingresso</a>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              @endif
+                              <table class="btn btn-red-500 rounded-full px-6 w-full w-lg-48" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-radius: 9999px; border-collapse: separate !important; width: 100%;">
+                                <tbody>
+                                  <tr>
+                                    <td style="line-height: 24px; font-size: 16px; border-radius: 9999px; margin: 0;" align="center" bgcolor="#dc3545">
+                                      <a href="{{ url('/confirmacao/' . $order->hash) }}" style="color: #ffffff; font-size: 16px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; border-radius: 9999px; line-height: 20px; display: block; font-weight: normal; white-space: nowrap; padding: 8px 24px; border: 1px solid #dc3545;">Ver meus ingressos</a>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -99,20 +119,27 @@
                               <tbody>
                                 <tr>
                                   <td style="line-height: 24px; font-size: 16px; width: 100%; border-radius: 24px; margin: 0; padding: 40px;" align="left" bgcolor="#F1f1f5">
-                                    <h3 class="text-center" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 28px; line-height: 33.6px; margin: 0;" align="center">{{$event_name}}</h3>
-                                    <p class="text-center text-muted" style="line-height: 24px; font-size: 16px; color: #718096; width: 100%; margin: 0;" align="center">Hash da compra: {{$order->hash}}</p>
+                                    <h3 class="text-center" style="padding-top: 0; padding-bottom: 0; font-weight: 500; vertical-align: baseline; font-size: 28px; line-height: 33.6px; margin: 0;" align="center">Detalhes do Pedido</h3>
+                                    <p class="text-center text-muted" style="line-height: 24px; font-size: 16px; color: #718096; width: 100%; margin: 0;" align="center">Pedido #{{ $order->id }} &middot; {{ $order->hash }}</p>
                                     <table class="p-2 w-full" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin-top: 20px" width="100%">
                                       <tbody>
+                                        @php $emailTotal = 0; @endphp
                                         @foreach($order->order_items as $item)
                                         <tr>
-                                          <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="left" width="100%">{{$item->lote->name}}</td>
-                                          <td class="text-right" style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="right" width="100%">@money($item->lote->value)</td>
+                                          <td style="line-height: 24px; font-size: 16px; width: 100%; margin: 0; padding: 8px;" align="left" width="100%">{{ $item->lote?->name ?? 'Ingresso' }} <br><small style="color:#999;">#{{ $item->number }}</small></td>
+                                          <td class="text-right" style="line-height: 24px; font-size: 16px; margin: 0; padding: 8px; white-space: nowrap;" align="right">R$ {{ number_format($item->value, 2, ',', '.') }}</td>
                                         </tr>
+                                        @php $emailTotal += $item->value; @endphp
                                         @endforeach
                                         <tr>
-                                          <td class="fw-700 border-top" style="line-height: 24px; font-size: 16px; border-top-width: 1px !important; border-top-color: #e2e8f0 !important; border-top-style: solid !important; width: 100%; font-weight: 700 !important; margin: 0; padding: 8px;" align="left" width="100%">Amount paid</td>
-                                          <td class="fw-700 text-right border-top" style="line-height: 24px; font-size: 16px; border-top-width: 1px !important; border-top-color: #e2e8f0 !important; border-top-style: solid !important; width: 100%; font-weight: 700 !important; margin: 0; padding: 8px;" align="right" width="100%">$42.00</td>
+                                          <td class="fw-700 border-top" style="line-height: 24px; font-size: 16px; border-top-width: 1px !important; border-top-color: #e2e8f0 !important; border-top-style: solid !important; width: 100%; font-weight: 700 !important; margin: 0; padding: 8px;" align="left" width="100%">Total pago</td>
+                                          <td class="fw-700 text-right border-top" style="line-height: 24px; font-size: 16px; border-top-width: 1px !important; border-top-color: #e2e8f0 !important; border-top-style: solid !important; font-weight: 700 !important; margin: 0; padding: 8px; white-space: nowrap;" align="right">R$ {{ number_format($emailTotal, 2, ',', '.') }}</td>
                                         </tr>
+                                        @if($order->gatway_payment_method)
+                                        <tr>
+                                          <td colspan="2" style="line-height: 24px; font-size: 14px; color: #718096; margin: 0; padding: 4px 8px;" align="left">Método: {{ $order->payment_method_label }}</td>
+                                        </tr>
+                                        @endif
                                       </tbody>
                                     </table>
                                     <table class="s-6 w-full" role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%;" width="100%">

@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
 
 class MercadoPagoController extends Controller
 {
+    use \App\Traits\MercadoPagoTokenTrait;
     protected $client;
     protected $clientId;
     protected $clientSecret;
@@ -255,6 +256,8 @@ class MercadoPagoController extends Controller
 
         // Busca a conta do mercado pago vinculada ao criador do evento
         if ( $mpAccount = MpAccount::where('participante_id', $creator_id)->first() ) {
+            $this->ensureValidToken($mpAccount);
+            $mpAccount->refresh();
             $accessToken = $mpAccount->access_token;
         } else {
             return null;
@@ -289,19 +292,25 @@ class MercadoPagoController extends Controller
         // Criar order_items a partir da sessão
         $array_lotes = $r->session()->get('array_lotes', []);
         $array_lotes_obj = $r->session()->get('array_lotes_obj', []);
+        $orderHash = DB::table('orders')->where('id', $order_id)->value('hash');
         if ($array_lotes_obj && is_array($array_lotes_obj)) {
             foreach ($array_lotes_obj as $i => $entry) {
                 $lote = \App\Models\Lote::find($entry['id']);
                 if (!$lote) continue;
+                $itemHash = md5((time() . uniqid() . $i) . md5(config('services.hash_secret')));
+                $itemNumber = abs(crc32(md5(time() . uniqid() . $i)));
+                $createdAt = now();
+                $purchaseHash = md5($orderHash . $itemHash . $itemNumber . $createdAt->format('Y-m-d H:i:s') . md5(config('services.hash_secret')));
                 DB::table('order_items')->insert([
-                    'hash' => md5((time() . uniqid() . $i) . md5(config('services.hash_secret'))),
-                    'number' => abs(crc32(md5(time() . uniqid() . $i))),
+                    'hash' => $itemHash,
+                    'number' => $itemNumber,
                     'quantity' => 1,
                     'value' => $entry['value'] ?? $lote->value,
                     'status' => 2,
                     'order_id' => $order_id,
                     'lote_id' => $lote->id,
-                    'created_at' => now(),
+                    'purchase_hash' => $purchaseHash,
+                    'created_at' => $createdAt,
                 ]);
             }
         }
@@ -352,11 +361,53 @@ class MercadoPagoController extends Controller
     public function notification (Request $r)
     {
         try {
+            // Verificar assinatura do webhook (X-Signature) do Mercado Pago
+            $webhookSecret = config('services.mercadopago.webhook_secret');
+            if ($webhookSecret) {
+                $xSignature = $r->header('x-signature');
+                $xRequestId = $r->header('x-request-id');
+
+                if (!$xSignature || !$xRequestId) {
+                    Log::warning('Webhook rejected: missing signature headers');
+                    return response()->json(['error' => 'Missing signature'], 401);
+                }
+
+                // Parse x-signature header: "ts=...,v1=..."
+                $parts = [];
+                foreach (explode(',', $xSignature) as $part) {
+                    $kv = explode('=', $part, 2);
+                    if (count($kv) === 2) {
+                        $parts[trim($kv[0])] = trim($kv[1]);
+                    }
+                }
+
+                $ts = $parts['ts'] ?? null;
+                $v1 = $parts['v1'] ?? null;
+
+                if (!$ts || !$v1) {
+                    Log::warning('Webhook rejected: invalid signature format', ['x_signature' => $xSignature]);
+                    return response()->json(['error' => 'Invalid signature format'], 401);
+                }
+
+                // Montar o template de validação conforme documentação MP
+                $dataId = $r->query('data.id', $r->input('data.id', ''));
+                $manifest = "id:{$dataId};request-id:{$xRequestId};ts:{$ts};";
+                $computedHash = hash_hmac('sha256', $manifest, $webhookSecret);
+
+                if (!hash_equals($computedHash, $v1)) {
+                    Log::warning('Webhook rejected: signature mismatch', [
+                        'expected' => $computedHash,
+                        'received' => $v1,
+                    ]);
+                    return response()->json(['error' => 'Invalid signature'], 401);
+                }
+            }
+
             $data = $r->all();
-            
+
             // Log da notificação recebida
             Log::info('Mercado Pago Webhook received', $data);
-            
+
             // Verificar se é uma notificação válida do Mercado Pago
             if (!isset($data['type']) || !isset($data['data']['id'])) {
                 Log::error('Invalid Mercado Pago notification', $data);
@@ -472,55 +523,87 @@ class MercadoPagoController extends Controller
                 // Usar o token do organizador (mesmo usado para criar o pagamento)
                 $accessToken = $mpAccount->access_token;
                 
-                // Atualizar status do pedido baseado no status do pagamento
+                // Processamento idempotente com lock FOR UPDATE
                 $status = $this->mapPaymentStatus($paymentData['status']);
-                
-                DB::table('orders')
-                    ->where('id', $order->id)
-                    ->update([
-                        'status' => $status,
-                        'gatway_status' => $paymentData['status'],
-                        'gatway_payment_method' => $paymentData['payment_method_id'] ?? $paymentData['payment_type_id'] ?? null,
-                        'gatway_date_status' => $paymentData['date_created'] ?? now(),
-                        'updated_at' => now()
-                    ]);
-                
-                Log::info('Order status updated', [
-                    'order_id' => $order->id,
-                    'status' => $status,
-                    'payment_status' => $paymentData['status']
-                ]);
-                
-                // Se o pagamento foi aprovado, atualizar order_items e gerar ingressos
-                if ($paymentData['status'] === 'approved') {
-                    // Atualizar status dos order_items e gerar purchase_hash
-                    $orderItems = DB::table('order_items')->where('order_id', $order->id)->get();
-                    
-                    foreach ($orderItems as $item) {
-                        // Gerar purchase_hash para cada order_item (usado no QR Code)
-                        $createdAtStr = is_string($item->created_at) ? $item->created_at : (is_object($item->created_at) ? $item->created_at->format('Y-m-d H:i:s') : $item->created_at);
-                        $purchaseHash = md5($order->hash . $item->hash . $item->number . $createdAtStr . md5(config('services.hash_secret')));
-                        
-                        DB::table('order_items')
-                            ->where('id', $item->id)
-                            ->update([
-                                'status' => 1, // Confirmado
-                                'purchase_hash' => $purchaseHash,
-                                'updated_at' => now()
-                            ]);
+
+                DB::transaction(function () use ($order, $status, $paymentData, $paymentId) {
+                    // Lock na order para evitar processamento duplicado
+                    $lockedOrder = DB::table('orders')
+                        ->where('id', $order->id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    // Se o status já é o mesmo ou mais avançado (approved), não reprocessar
+                    if ($lockedOrder->status == $status) {
+                        Log::info('Webhook idempotent: order already at status', [
+                            'order_id' => $order->id,
+                            'status' => $status
+                        ]);
+                        return;
                     }
-                    
-                    // Enviar email de confirmação
+
+                    // Não regredir status (ex: approved -> pending)
+                    if ($lockedOrder->status == 1 && $status != 1) {
+                        Log::info('Webhook idempotent: not downgrading from approved', [
+                            'order_id' => $order->id,
+                            'current' => $lockedOrder->status,
+                            'incoming' => $status
+                        ]);
+                        return;
+                    }
+
+                    DB::table('orders')
+                        ->where('id', $order->id)
+                        ->update([
+                            'status' => $status,
+                            'gatway_hash' => $paymentId,
+                            'gatway_status' => $paymentData['status'],
+                            'gatway_payment_method' => $paymentData['payment_method_id'] ?? $paymentData['payment_type_id'] ?? null,
+                            'gatway_date_status' => $paymentData['date_created'] ?? now(),
+                            'updated_at' => now()
+                        ]);
+
+                    Log::info('Order status updated', [
+                        'order_id' => $order->id,
+                        'status' => $status,
+                        'payment_status' => $paymentData['status']
+                    ]);
+
+                    // Se o pagamento foi aprovado, atualizar order_items
+                    if ($paymentData['status'] === 'approved') {
+                        $orderItems = DB::table('order_items')->where('order_id', $order->id)->get();
+
+                        foreach ($orderItems as $item) {
+                            $updateData = ['status' => 1, 'updated_at' => now()];
+
+                            // Gerar purchase_hash se ainda não existe
+                            if (empty($item->purchase_hash)) {
+                                $createdAtStr = is_string($item->created_at) ? $item->created_at : (is_object($item->created_at) ? $item->created_at->format('Y-m-d H:i:s') : $item->created_at);
+                                $updateData['purchase_hash'] = md5($lockedOrder->hash . $item->hash . $item->number . $createdAtStr . md5(config('services.hash_secret')));
+                            }
+
+                            DB::table('order_items')
+                                ->where('id', $item->id)
+                                ->update($updateData);
+                        }
+
+                        Log::info('Payment approved - order items updated', ['order_id' => $order->id]);
+                    }
+                });
+
+                // Enviar email fora da transaction (não bloquear commit se falhar)
+                if ($paymentData['status'] === 'approved') {
                     try {
                         $orderModel = \App\Models\Order::find($order->id);
-                        if ($orderModel && class_exists('\App\Mail\OrderMail')) {
-                            Mail::to($orderModel->get_participante()->email)->send(new \App\Mail\OrderMail($orderModel, 'Compra realizada com sucesso'));
+                        if ($orderModel && $orderModel->status == 1) {
+                            $participante = $orderModel->get_participante();
+                            if ($participante) {
+                                Mail::to($participante->email)->send(new \App\Mail\OrderMail($orderModel, 'Compra realizada com sucesso'));
+                            }
                         }
                     } catch (\Throwable $e) {
                         Log::warning('Failed to send confirmation email', ['error' => $e->getMessage()]);
                     }
-                    
-                    Log::info('Payment approved - purchase hashes generated and email sent', ['order_id' => $order->id]);
                 }
             }
             
@@ -562,14 +645,20 @@ class MercadoPagoController extends Controller
 
     public function thanks (Request $r)
     {
+        // Tentar redirecionar para página de confirmação detalhada
+        $order_id = $r->session()->get('order_id');
+        if ($order_id) {
+            $order = DB::table('orders')->where('id', $order_id)->first();
+            if ($order) {
+                return redirect()->route('conference.confirmation', $order->hash);
+            }
+        }
 
-        // Adicionar lógica da página de obrigado
         $data = [
             'title' => 'Pagamento Aprovado!',
             'subtitle' => 'Confira seu e-mail para mais informações.',
         ];
         return view('feedback', $data);
-
     }
 
     public function error (Request $r)

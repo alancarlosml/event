@@ -644,22 +644,25 @@
                 if (!bin || bin.length < 6) return;
 
                 mp.getInstallments({
-                    amount: {{ $total }},
+                    amount: String({{ $total }}),
                     bin: bin,
                     locale: 'pt-BR'
-                }, function(status, response) {
-                    if (status === 200) {
-                        installments = response[0].payer_costs;
-                        const select = $('#installments');
-                        select.empty();
-                        
-                        installments.forEach(function(installment) {
-                            const option = $('<option></option>')
-                                .attr('value', installment.installments)
-                                .text(`${installment.installments}x de R$ ${installment.installment_amount.toFixed(2).replace('.', ',')} ${installment.installments === 1 ? '(sem juros)' : '(total: R$ ' + installment.total_amount.toFixed(2).replace('.', ',') + ')'}`);
-                            select.append(option);
-                        });
-                    }
+                }).then(function(response) {
+                    installments = response[0].payer_costs;
+                    const select = $('#installments');
+                    select.empty();
+
+                    installments.forEach(function(installment) {
+                        const option = $('<option></option>')
+                            .attr('value', installment.installments)
+                            .text(`${installment.installments}x de R$ ${installment.installment_amount.toFixed(2).replace('.', ',')} ${installment.installments === 1 ? '(sem juros)' : '(total: R$ ' + installment.total_amount.toFixed(2).replace('.', ',') + ')'}`);
+                        select.append(option);
+                    });
+                }).catch(function(error) {
+                    console.error('Erro ao carregar parcelas:', error);
+                    const select = $('#installments');
+                    select.empty();
+                    select.append($('<option></option>').attr('value', '1').text('1x de R$ {{ number_format($total, 2, ",", ".") }} (sem juros)'));
                 });
             }
 
@@ -702,22 +705,16 @@
 
                 // Criar token do cartão
                 mp.fields.createCardToken({
-                    cardNumber: cardNumber,
                     cardholderName: cardholderName,
-                    cardExpirationMonth: expirationDate.getExpirationMonth(),
-                    cardExpirationYear: expirationDate.getExpirationYear(),
-                    securityCode: securityCode,
                     identificationType: 'CPF',
                     identificationNumber: cardholderCPF
-                }, function(status, response) {
-                    if (status === 200) {
-                        cardToken = response.id;
-                        submitCardPayment(response.id);
-                    } else {
-                        hideLoading();
-                        $('#submit_card_payment').prop('disabled', false);
-                        showError('Erro ao processar cartão: ' + (response.message || 'Tente novamente'));
-                    }
+                }).then(function(response) {
+                    cardToken = response.id;
+                    submitCardPayment(response.id);
+                }).catch(function(error) {
+                    hideLoading();
+                    $('#submit_card_payment').prop('disabled', false);
+                    showError('Erro ao processar cartão: ' + (error.message || 'Tente novamente'));
                 });
             });
 
@@ -847,9 +844,12 @@
                 if (result.status === 'approved') {
                     showSuccess('Pagamento aprovado! Redirecionando...');
                     setTimeout(() => {
-                        window.location.href = "{{ route('event_home.my_registrations') }}";
+                        window.location.href = "/confirmacao/" + result.order_hash;
                     }, 2000);
                 } else if (result.status === 'pending' || result.status === 'in_process') {
+                    // Guardar order_hash para redirecionamento pós-polling
+                    window._orderHash = result.order_hash;
+
                     if (paymentType === 'bank_transfer' && result.pix) {
                         // Exibir QR Code PIX (usar order_id da resposta para polling)
                         displayPixDetails(result.pix, result.order_id);
@@ -936,7 +936,7 @@
                                 
                                 // Redirecionar após 2 segundos
                                 setTimeout(() => {
-                                    window.location.href = '{{ route("event_home.my_registrations") }}';
+                                    window.location.href = window._orderHash ? '/confirmacao/' + window._orderHash : '{{ route("event_home.my_registrations") }}';
                                 }, 2000);
                             } else if (data.status === 'rejected' || data.status === 'cancelled') {
                                 clearInterval(checkInterval);

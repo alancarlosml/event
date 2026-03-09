@@ -10,7 +10,11 @@
                     <li><a href="/painel/meus-eventos">Meus eventos</a></li>
                 </ol>
                 <h2>Relatórios do Evento: {{ $event->name }}</h2>
-
+                <div class="mt-2">
+                    <a href="{{ route('event_home.reports.csv', $event->hash) }}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-file-csv me-1"></i>Exportar Participantes (CSV)
+                    </a>
+                </div>
             </div>
         </section><!-- End Breadcrumbs -->
 

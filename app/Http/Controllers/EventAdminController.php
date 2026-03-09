@@ -68,7 +68,7 @@ class EventAdminController extends Controller
     {
         // Otimizado: Usar Eloquent com eager loading para evitar N+1 queries
         $orders = Order::with([
-            'orderItems.lote',
+            'order_items.lote',
             'eventDate.event.place'
         ])
             ->where('participante_id', Auth::user()->id)
@@ -228,23 +228,48 @@ class EventAdminController extends Controller
             ->where('lotes.type', 0)
             ->where('orders.status', 2)
             ->selectRaw(
-                "sum(case 
+                "sum(case
                     when coupons.discount_type = 0 and coupons.code <> '' then order_items.value - (coupons.discount_value * order_items.value)
-                    when coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value 
+                    when coupons.discount_type = 1 and coupons.code <> '' then order_items.value - coupons.discount_value
                     when coupons.discount_type is null and coupons.code is null then order_items.value
                     end
                 ) as total_pendente"
             )
             ->first();
 
+        // Dados para gráfico de vendas (últimos 30 dias)
+        $salesData = DB::table('orders')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->where('lotes.type', 0)
+            ->where('orders.created_at', '>=', now()->subDays(30))
+            ->selectRaw('DATE(orders.created_at) as date, orders.status, SUM(order_items.value) as total')
+            ->groupBy('date', 'orders.status')
+            ->orderBy('date')
+            ->get();
+
+        $chartLabels = [];
+        $chartConfirmed = [];
+        $chartPending = [];
+
+        $last30Days = collect(range(29, 0))->map(fn($d) => now()->subDays($d)->format('Y-m-d'));
+        foreach ($last30Days as $date) {
+            $chartLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
+            $chartConfirmed[] = (float) ($salesData->where('date', $date)->where('status', 1)->sum('total') ?? 0);
+            $chartPending[] = (float) ($salesData->where('date', $date)->where('status', 2)->sum('total') ?? 0);
+        }
+
         return view('painel_admin.dashboard', compact(
-            'event_count', 
-            'ingressos_confirmados', 
-            'ingressos_cancelados', 
-            'ingressos_pendentes', 
-            'total_confirmado', 
+            'event_count',
+            'ingressos_confirmados',
+            'ingressos_cancelados',
+            'ingressos_pendentes',
+            'total_confirmado',
             'total_pendente',
-            'isSuperAdmin'
+            'isSuperAdmin',
+            'chartLabels',
+            'chartConfirmed',
+            'chartPending'
         ));
     }
 
@@ -1138,7 +1163,7 @@ class EventAdminController extends Controller
         $request->session()->put('lotes', $lotes->toArray());
         $request->session()->put('lote_id', $lote_id);
 
-        return redirect()->route('event_home.create.step.two');
+        return redirect()->route('event_home.create.step.two')->with('success', 'Lote criado com sucesso!');
     }
 
     public function editLote($hash)
@@ -1253,12 +1278,20 @@ class EventAdminController extends Controller
 
         $lote->fill($input)->save();
 
-        return redirect()->route('event_home.create.step.two');
+        return redirect()->route('event_home.create.step.two')->with('success', 'Lote atualizado com sucesso!');
     }
 
     public function deleteLote($hash)
     {
         $lote = Lote::where('hash', $hash)->first();
+
+        if (!$lote) {
+            return redirect()->route('event_home.create.step.two')->with('error', 'Lote não encontrado.');
+        }
+
+        if (OrderItem::where('lote_id', $lote->id)->exists()) {
+            return redirect()->route('event_home.create.step.two')->with('error', 'Não é possível excluir este lote pois já existem ingressos vendidos vinculados a ele.');
+        }
 
         $lote->delete();
 
@@ -1620,12 +1653,16 @@ class EventAdminController extends Controller
 
         $event->delete();
 
-        return redirect()->route('event_home.my_events');
+        return redirect()->route('event_home.my_events')->with('success', 'Evento excluído com sucesso!');
     }
 
     public function guests($hash)
     {
         $event = Event::where('hash', $hash)->first();
+
+        if (!$event || !$this->hasAccessToEvent($event->id)) {
+            abort(403, 'Você não tem permissão para acessar este evento');
+        }
 
         $usuarios = Participante::orderBy('participantes_events.role')
             ->join('participantes_events', 'participantes_events.participante_id', '=', 'participantes.id')
@@ -1718,19 +1755,23 @@ class EventAdminController extends Controller
     {
         $guest = Participante::join('participantes_events', 'participantes_events.participante_id', '=', 'participantes.id')
             ->join('events', 'participantes_events.event_id', '=', 'events.id')
-            ->select('participantes_events.id', 'participantes.name', 'participantes.email', 'participantes_events.role', 'participantes_events.status', 'events.hash as event_hash')
+            ->select('participantes_events.id', 'participantes.name', 'participantes.email', 'participantes_events.role', 'participantes_events.status', 'events.hash as event_hash', 'events.id as event_id')
             ->where('participantes_events.id', $id)
             ->first();
 
-        // $guest = DB::table('participantes_events')->where('id', $id)->first();
+        if (!$guest || !$this->hasAccessToEvent($guest->event_id)) {
+            abort(403, 'Você não tem permissão para acessar este evento');
+        }
 
         return view('painel_admin.guest_edit', compact('guest'));
     }
 
     public function updateGuest(Request $request, $id)
     {
-        if (Auth::user()->userEvent->isEmpty()) {
-            return redirect('/');
+        $participanteEventObj = ParticipanteEvent::where('id', $id)->first();
+
+        if (!$participanteEventObj || !$this->hasAccessToEvent($participanteEventObj->event_id)) {
+            abort(403, 'Você não tem permissão para acessar este evento');
         }
 
         $this->validate($request, [
@@ -1748,8 +1789,6 @@ class EventAdminController extends Controller
 
         ParticipanteEvent::where('id', $id)->update(['status' => $input['status']]);
 
-        $participanteEventObj = ParticipanteEvent::where('id', $id)->first();
-
         $event = Event::where('id', $participanteEventObj->event_id)->first();
 
         return redirect()->route('event_home.guests', $event->hash)->with('success', 'Usuário convidado editado com sucesso!');
@@ -1758,6 +1797,10 @@ class EventAdminController extends Controller
     public function destroyGuest($id)
     {
         $guest = ParticipanteEvent::findOrFail($id);
+
+        if (!$this->hasAccessToEvent($guest->event_id)) {
+            abort(403, 'Você não tem permissão para acessar este evento');
+        }
 
         $guest->delete();
 
@@ -1879,6 +1922,10 @@ class EventAdminController extends Controller
     public function reports(Request $request, $hash)
     {
         $event = Event::where('hash', $hash)->first();
+
+        if (!$event || !$this->hasAccessToEvent($event->id)) {
+            abort(403, 'Você não tem permissão para acessar este evento');
+        }
 
         $config = Configuration::findOrFail(1);
 
@@ -2137,6 +2184,59 @@ class EventAdminController extends Controller
             'ticket_medio',
             'vendas_por_lote'
         ));
+    }
+
+    public function exportCsv(Request $request, $hash)
+    {
+        $event = Event::where('hash', $hash)->first();
+
+        if (!$event || !$this->hasAccessToEvent($event->id)) {
+            abort(403);
+        }
+
+        $rows = Participante::orderBy('participantes.name')
+            ->join('orders', 'orders.participante_id', '=', 'participantes.id')
+            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->join('lotes', 'order_items.lote_id', '=', 'lotes.id')
+            ->join('event_dates', 'orders.event_date_id', '=', 'event_dates.id')
+            ->where('event_dates.event_id', $event->id)
+            ->select(
+                'participantes.name',
+                'participantes.email',
+                'participantes.cpf',
+                'lotes.name as lote_name',
+                'orders.status',
+                'orders.gatway_payment_method',
+                'order_items.number as ingresso_number',
+                'orders.created_at'
+            )
+            ->get();
+
+        $statusLabels = [1 => 'Confirmado', 2 => 'Pendente', 3 => 'Rejeitado', 4 => 'Cancelado', 5 => 'Reembolsado'];
+        $methodLabels = ['credit_card' => 'Cartão', 'pix' => 'PIX', 'bank_transfer' => 'PIX', 'bolbradesco' => 'Boleto', 'ticket' => 'Boleto', 'free' => 'Gratuito'];
+
+        $filename = 'participantes_' . Str::slug($event->name) . '_' . date('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($rows, $statusLabels, $methodLabels) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM for Excel UTF-8
+            fputcsv($handle, ['Nome', 'Email', 'CPF', 'Lote', 'Status', 'Pagamento', 'Ingresso #', 'Data Compra'], ';');
+
+            foreach ($rows as $row) {
+                fputcsv($handle, [
+                    $row->name,
+                    $row->email,
+                    $row->cpf,
+                    $row->lote_name,
+                    $statusLabels[$row->status] ?? 'Desconhecido',
+                    $methodLabels[$row->gatway_payment_method] ?? ($row->gatway_payment_method ?? 'N/A'),
+                    $row->ingresso_number,
+                    $row->created_at,
+                ], ';');
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function order_details(Request $request, $hash)
