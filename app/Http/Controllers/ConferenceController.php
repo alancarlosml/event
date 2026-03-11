@@ -1491,7 +1491,7 @@ class ConferenceController extends Controller
                         "description" => 'Ingresso ' . $event->name,
                         "installments" => (int) $input['formData']['installments'],
                         "payment_method_id" => $input['formData']['payment_method_id'],
-                        "application_fee" => (float) $application_fee,
+                        // Cartão: não enviar application_fee — a API rejeita se a conta não tiver split/marketplace habilitado (mesmo caso do PIX e boleto).
                         "external_reference" => (string) $order_id,
                         "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
                         "payer" => [

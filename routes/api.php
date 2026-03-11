@@ -21,7 +21,9 @@ use Illuminate\Support\Facades\Route;
 // });
 
 // Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
-Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->name('conference.thanks');
+// Route::post('{slug}/obrigado', ...)->name('conference.thanks');
+// Removida: rota duplicava conference.thanks (já existe em web.php com auth/sessão).
+// Mantê-la aqui fazia route() resolver para /api/{slug}/obrigado, causando 500.
 Route::get('oauth', 'App\Http\Controllers\ConferenceController@oauth')->name('conference.oauth');
 
 Route::post('painel/meus-eventos/mensagens/marcar-como-lida', 'App\Http\Controllers\EventAdminController@marcarComoLida')->middleware(['auth:participante', 'verified'])->name('event_home.marcar_como_lida');
