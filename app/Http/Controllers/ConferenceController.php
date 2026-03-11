@@ -1506,7 +1506,6 @@ class ConferenceController extends Controller
                         "token" => $input['formData']['token'],
                         "description" => 'Ingresso ' . $event->name,
                         "installments" => (int) $input['formData']['installments'],
-                        "payment_method_id" => $input['formData']['payment_method_id'],
                         // Cartão: não enviar application_fee — a API rejeita se a conta não tiver split/marketplace habilitado (mesmo caso do PIX e boleto).
                         "external_reference" => (string) $order_id,
                         "notification_url" => config('app.url') . "/webhooks/mercado-pago/notification",
@@ -1520,6 +1519,11 @@ class ConferenceController extends Controller
                             ]
                         ]
                     ];
+
+                    // Adicionar payment_method_id apenas se fornecido (MP infere do token quando ausente)
+                    if (!empty($input['formData']['payment_method_id'])) {
+                        $paymentRequest["payment_method_id"] = $input['formData']['payment_method_id'];
+                    }
 
                     // Adicionar issuer_id apenas se fornecido
                     if (isset($input['formData']['issuer_id']) && !empty($input['formData']['issuer_id'])) {
