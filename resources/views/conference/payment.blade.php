@@ -907,20 +907,25 @@
             // Função para fazer polling do status do pagamento
             function startPaymentStatusPolling(orderId) {
                 let attempts = 0;
+                let consecutiveErrors = 0;
                 const maxAttempts = 120; // 10 minutos (120 x 5 segundos)
-                
+                const checkUrl = "{{ route('conference.checkPaymentStatus', ['order_id' => '__OID__']) }}".replace('__OID__', orderId);
+
                 const checkInterval = setInterval(() => {
                     attempts++;
-                    
-                    fetch(`{{ url('/check-payment-status') }}/${orderId}`, {
+
+                    fetch(checkUrl, {
+                        method: 'GET',
                         headers: {
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        credentials: 'same-origin'
+                        credentials: 'same-origin',
+                        redirect: 'manual'
                     })
                         .then(response => {
-                            if (response.status === 401 || response.status === 403) {
+                            // redirect: 'manual' retorna opaqueredirect (status 0) quando há redirect
+                            if (response.type === 'opaqueredirect' || response.status === 0 || response.status === 401 || response.status === 403) {
                                 clearInterval(checkInterval);
                                 $('#pix_status_alert').removeClass('alert-info').addClass('alert-warning').html(`
                                     <i class="fas fa-exclamation-triangle me-2"></i>
@@ -935,38 +940,34 @@
                             if (!response.ok) {
                                 throw new Error('Erro ao verificar status');
                             }
+                            consecutiveErrors = 0;
                             return response.json();
                         })
                         .then(data => {
-                            console.log('Payment status:', data);
-                            
                             if (data.approved) {
                                 clearInterval(checkInterval);
-                                
-                                // Atualizar mensagem
+
                                 $('#pix_status_alert').removeClass('alert-info').addClass('alert-success').html(`
                                     <i class="fas fa-check-circle me-2"></i>
                                     <strong>Pagamento Confirmado!</strong>
                                     <p class="mb-0 mt-2">Seu pagamento PIX foi confirmado. Redirecionando...</p>
                                 `);
-                                
-                                showSuccess('✅ Pagamento PIX confirmado!');
-                                
-                                // Redirecionar após 2 segundos
+
+                                showSuccess('Pagamento PIX confirmado!');
+
                                 setTimeout(() => {
                                     window.location.href = window._orderHash ? '/confirmacao/' + window._orderHash : '{{ route("event_home.my_registrations") }}';
                                 }, 2000);
                             } else if (data.status === 'rejected' || data.status === 'cancelled') {
                                 clearInterval(checkInterval);
-                                
+
                                 $('#pix_status_alert').removeClass('alert-info').addClass('alert-danger').html(`
                                     <i class="fas fa-times-circle me-2"></i>
                                     <strong>Pagamento não aprovado</strong>
                                     <p class="mb-0 mt-2">O pagamento foi ${data.status === 'rejected' ? 'rejeitado' : 'cancelado'}. Entre em contato com o suporte.</p>
                                 `);
                             }
-                            
-                            // Parar após máximo de tentativas
+
                             if (attempts >= maxAttempts) {
                                 clearInterval(checkInterval);
                                 $('#pix_status_alert').removeClass('alert-info').addClass('alert-warning').html(`
@@ -977,10 +978,21 @@
                             }
                         })
                         .catch(error => {
-                            console.error('Erro ao verificar status:', error);
-                            // Não parar o polling por erro temporário
+                            consecutiveErrors++;
+                            console.warn('Polling: erro temporário #' + consecutiveErrors, error.message);
+                            if (consecutiveErrors >= 5) {
+                                clearInterval(checkInterval);
+                                $('#pix_status_alert').removeClass('alert-info').addClass('alert-warning').html(`
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Erro na verificação</strong>
+                                    <p class="mb-0 mt-2">Não foi possível verificar o pagamento. Recarregue a página ou verifique em "Minhas Inscrições".</p>
+                                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="location.reload()">
+                                        <i class="fas fa-sync-alt me-1"></i> Recarregar Página
+                                    </button>
+                                `);
+                            }
                         });
-                }, 5000); // Verificar a cada 5 segundos
+                }, 5000);
             }
 
             // Exibir detalhes do Boleto

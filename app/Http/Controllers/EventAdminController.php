@@ -75,7 +75,22 @@ class EventAdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('painel_admin.my_registrations', compact('orders'));
+        // Buscar dados de pagamento para pedidos pendentes (PIX e boleto)
+        $pendingOrderIds = $orders->where('status', 2)->pluck('id');
+        $pixDetailsMap = collect();
+        $boletoDetailsMap = collect();
+        if ($pendingOrderIds->isNotEmpty()) {
+            $pixDetailsMap = DB::table('pix_details')
+                ->whereIn('order_id', $pendingOrderIds)
+                ->get()
+                ->keyBy('order_id');
+            $boletoDetailsMap = DB::table('boleto_details')
+                ->whereIn('order_id', $pendingOrderIds)
+                ->get()
+                ->keyBy('order_id');
+        }
+
+        return view('painel_admin.my_registrations', compact('orders', 'pixDetailsMap', 'boletoDetailsMap'));
     }
 
     public function myEvents()
@@ -2258,8 +2273,8 @@ class EventAdminController extends Controller
             abort(404, 'Pedido não encontrado');
         }
 
-        // Se não for super admin, verificar se o usuário tem acesso ao evento
-        if (!$isSuperAdmin && !$this->hasAccessToEvent($order->event_id)) {
+        // Se não for super admin, verificar se é dono do pedido ou tem acesso ao evento
+        if (!$isSuperAdmin && $order->participante_id != $user->id && !$this->hasAccessToEvent($order->event_id)) {
             abort(403, 'Você não tem permissão para acessar este pedido');
         }
 
