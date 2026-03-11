@@ -912,8 +912,26 @@
                 const checkInterval = setInterval(() => {
                     attempts++;
                     
-                    fetch(`{{ url('/check-payment-status') }}/${orderId}`)
+                    fetch(`{{ url('/check-payment-status') }}/${orderId}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
                         .then(response => {
+                            if (response.status === 401 || response.status === 403) {
+                                clearInterval(checkInterval);
+                                $('#pix_status_alert').removeClass('alert-info').addClass('alert-warning').html(`
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Sessão expirada</strong>
+                                    <p class="mb-0 mt-2">Sua sessão expirou. Recarregue a página para continuar verificando o pagamento.</p>
+                                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="location.reload()">
+                                        <i class="fas fa-sync-alt me-1"></i> Recarregar Página
+                                    </button>
+                                `);
+                                throw new Error('Auth error');
+                            }
                             if (!response.ok) {
                                 throw new Error('Erro ao verificar status');
                             }
