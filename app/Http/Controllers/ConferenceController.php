@@ -1779,13 +1779,18 @@ class ConferenceController extends Controller
                 'status' => $payment->status
             ]);
 
+            // Garantir que temos o order atualizado para a resposta
+            $orderForResponse = DB::table('orders')->where('id', $order_id)->first();
+
             $responseData = [
                 'id' => $payment->id,
                 'order_id' => $order_id,
-                'order_hash' => $order->hash,
+                'order_hash' => $orderForResponse->hash ?? null,
                 'status' => $payment->status,
                 'detail' => $payment->status_detail ?? null
             ];
+
+            Log::info('=== THANKS: RESPONSE DATA ===', $responseData);
 
             // Adicionar detalhes do PIX se disponível
             if ($input['paymentType'] == 'bank_transfer' && ($payment->status === 'pending' || $payment->status === 'in_process')) {

@@ -842,9 +842,17 @@
             // Tratar resposta do pagamento
             function handlePaymentResponse(result, paymentType) {
                 if (result.status === 'approved') {
+                    console.log('DEBUG: Payment approved, result:', JSON.stringify(result));
                     showSuccess('Pagamento aprovado! Redirecionando...');
+                    if (!result.order_hash) {
+                        console.error('DEBUG: order_hash is missing!', result);
+                        showError('Pagamento aprovado, mas houve um erro ao redirecionar. Entre em Meus Ingressos para verificar.');
+                        return;
+                    }
+                    var confirmUrl = "/confirmacao/" + result.order_hash;
+                    console.log('DEBUG: Redirecting to:', confirmUrl);
                     setTimeout(() => {
-                        window.location.href = "/confirmacao/" + result.order_hash;
+                        window.top.location.href = confirmUrl;
                     }, 2000);
                 } else if (result.status === 'pending' || result.status === 'in_process') {
                     // Guardar order_hash para redirecionamento pós-polling
