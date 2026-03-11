@@ -1104,10 +1104,15 @@ class ConferenceController extends Controller
     public function checkPaymentStatus(Request $request, $order_id)
     {
         try {
+            // Auth manual — middleware removido pois proxy em produção strip headers e causa redirect loop
+            if (!Auth::guard('participante')->check()) {
+                return response()->json(['error' => 'Não autenticado'], 401);
+            }
+
             // Buscar pedido - apenas do usuário autenticado
             $order = DB::table('orders')
                 ->where('id', $order_id)
-                ->where('participante_id', Auth::id())
+                ->where('participante_id', Auth::guard('participante')->id())
                 ->first();
 
             if (!$order) {

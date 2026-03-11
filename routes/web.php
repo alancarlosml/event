@@ -122,7 +122,7 @@ Route::match(['GET', 'POST'], '{slug}/resumo', 'App\Http\Controllers\ConferenceC
 Route::get('{slug}/pagamento-view', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.paymentView');
 Route::post('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@payment')->middleware(['auth:participante', 'verified'])->name('conference.payment');
 Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
-Route::get('check-payment-status/{order_id}', 'App\Http\Controllers\ConferenceController@checkPaymentStatus')->middleware(['auth:participante', 'verified'])->name('conference.checkPaymentStatus');
+Route::get('check-payment-status/{order_id}', 'App\Http\Controllers\ConferenceController@checkPaymentStatus')->name('conference.checkPaymentStatus');
 Route::get('confirmacao/{order_hash}', 'App\Http\Controllers\ConferenceController@confirmation')->middleware(['auth:participante', 'verified'])->name('conference.confirmation');
 Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');
 Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');

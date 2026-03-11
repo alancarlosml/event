@@ -920,12 +920,10 @@
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        credentials: 'same-origin',
-                        redirect: 'manual'
+                        credentials: 'same-origin'
                     })
                         .then(response => {
-                            // redirect: 'manual' retorna opaqueredirect (status 0) quando há redirect
-                            if (response.type === 'opaqueredirect' || response.status === 0 || response.status === 401 || response.status === 403) {
+                            if (response.status === 401 || response.status === 403) {
                                 clearInterval(checkInterval);
                                 $('#pix_status_alert').removeClass('alert-info').addClass('alert-warning').html(`
                                     <i class="fas fa-exclamation-triangle me-2"></i>
