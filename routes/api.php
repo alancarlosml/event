@@ -20,10 +20,9 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-// Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
-// Route::post('{slug}/obrigado', ...)->name('conference.thanks');
-// Removida: rota duplicava conference.thanks (já existe em web.php com auth/sessão).
-// Mantê-la aqui fazia route() resolver para /api/{slug}/obrigado, causando 500.
+// Rota SEM ->name() para não conflitar com conference.thanks do web.php.
+// Necessária porque o fetch() do JS pode chegar via /api/ (cache de browser).
+Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['web', 'auth:participante', 'verified']);
 Route::get('oauth', 'App\Http\Controllers\ConferenceController@oauth')->name('conference.oauth');
 
 Route::post('painel/meus-eventos/mensagens/marcar-como-lida', 'App\Http\Controllers\EventAdminController@marcarComoLida')->middleware(['auth:participante', 'verified'])->name('event_home.marcar_como_lida');
