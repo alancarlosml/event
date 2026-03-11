@@ -1213,6 +1213,22 @@ class ConferenceController extends Controller
 
     public function thanks(Request $request)
     {
+        // DEBUG: log absoluto no início — se NÃO aparecer, o 500 vem do middleware (auth/verified/CSRF)
+        Log::info('=== THANKS: INÍCIO DO MÉTODO ===', [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'ip' => $request->ip(),
+            'is_ajax' => $request->ajax(),
+            'has_session' => $request->hasSession(),
+            'session_id' => $request->hasSession() ? $request->session()->getId() : 'NO_SESSION',
+            'auth_check' => Auth::check(),
+            'auth_guard' => Auth::guard('participante')->check(),
+            'user_id' => Auth::id(),
+            'csrf_token_header' => $request->header('X-CSRF-TOKEN') ? 'present' : 'missing',
+            'cookies' => array_keys($request->cookies->all()),
+            'middleware' => $request->route() ? $request->route()->middleware() : 'no_route',
+        ]);
+
         $coupon_discount = 0;
         // Log request details for debugging
         Log::info('Payment request received', [

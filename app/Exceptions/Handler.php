@@ -48,7 +48,20 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-
+            // DEBUG: capturar qualquer exceção na rota /obrigado (middleware ou controller)
+            $url = request()->fullUrl();
+            if (str_contains($url, 'obrigado')) {
+                \Log::error('=== EXCEPTION NA ROTA OBRIGADO ===', [
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile() . ':' . $e->getLine(),
+                    'url' => $url,
+                    'method' => request()->method(),
+                    'auth' => \Auth::check(),
+                    'has_session' => request()->hasSession(),
+                    'trace_short' => collect(explode("\n", $e->getTraceAsString()))->take(10)->implode("\n"),
+                ]);
+            }
         });
     }
 
