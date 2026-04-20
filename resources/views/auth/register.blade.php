@@ -15,7 +15,7 @@
                         <div class="login-wrap p-4 p-md-5">
                             <div class="d-flex">
                                 <div class="w-100">
-                                    <h3 class="mb-4">Cadastrar</h3>
+                                    <h3 class="mb-4">{{ __('auth.register.title') }}</h3>
                                 </div>
                                 {{-- 
                                 <div class="w-100">
@@ -34,39 +34,44 @@
                             <form method="POST" action="{{ route('register') }}" class="signin-form" id="form-submit">
                                 @csrf
                                 <div class="form-group mb-3">
-                                    <label class="label" for="name">Nome completo</label>
-                                    <input type="text" class="form-control" name="name" placeholder="Nome" required="" value="{{old('name')}}">
+                                    <label class="label" for="name">{{ __('auth.register.name') }}</label>
+                                    <input type="text" class="form-control" name="name" placeholder="{{ __('auth.register.name_placeholder') }}" required="" value="{{old('name')}}">
                                 </div>
                                 <div class="row">
                                     <div class="form-group mb-3 col-md-6">
-                                        <label class="label" for="email">Email</label>
-                                        <input type="email" class="form-control" name="email" placeholder="Email" required="" value="{{old('email')}}">
+                                        <label class="label" for="email">{{ __('auth.register.email') }}</label>
+                                        <input type="email" class="form-control" name="email" placeholder="{{ __('auth.register.email') }}" required="" value="{{old('email')}}">
                                     </div>
                                     <div class="form-group mb-3 col-md-6">
-                                        <label class="label" for="phone">Telefone</label>
-                                        <input type="text" class="form-control" name="phone" id="phone_with_ddd_mask" placeholder="Telefone" required="" value="{{old('phone')}}">
+                                        <label class="label" for="phone">{{ __('auth.register.phone') }}</label>
+                                        <input type="text" class="form-control" name="phone" id="phone_with_ddd_mask" placeholder="{{ __('auth.register.phone') }}" required="" value="{{old('phone')}}">
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="form-group mb-3 col-md-6">
-                                        <label class="label" for="password">Senha</label>
-                                        <input type="password" class="form-control" name="password" placeholder="Senha" required="">
+                                        <label class="label" for="password">{{ __('auth.register.password') }}</label>
+                                        <input type="password" class="form-control" name="password" placeholder="{{ __('auth.register.password') }}" required="">
                                     </div>
                                     <div class="form-group mb-3 col-md-6">
-                                        <label class="label" for="password_confirmation">Confirmar senha</label>
-                                        <input type="password" class="form-control" name="password_confirmation" placeholder="Confirmar senha" required="">
+                                        <label class="label" for="password_confirmation">{{ __('auth.register.password_confirmation') }}</label>
+                                        <input type="password" class="form-control" name="password_confirmation" placeholder="{{ __('auth.register.password_confirmation') }}" required="">
                                     </div>
                                 </div>
-                                <div class="form-group form-check mb-3 col-md-6">
+                                <div class="form-group form-check mb-3 col-md-10">
                                     <input type="checkbox" class="form-check-input" id="read_terms" name="read_terms">
-                                    <label class="form-check-label" for="read_terms">Eu concordo com os <a href="/termos">termos</a> e <a href="/politica">política de privacidade</a></label>
+                                    <label class="form-check-label" for="read_terms">
+                                        {!! __('auth.register.agree_terms', [
+                                            'terms' => '<a href="/termos">'.__('auth.register.terms').'</a>',
+                                            'privacy' => '<a href="/politica">'.__('auth.register.privacy').'</a>'
+                                        ]) !!}
+                                    </label>
                                 </div>
                                 <div class="form-group">
                                     {!! RecaptchaV3::field('register') !!}
-                                    <button type="submit" id="btn-submit" class="form-control btn btn-primary rounded submit px-3">Cadastrar</button>
+                                    <button type="submit" id="btn-submit" class="form-control btn btn-primary rounded submit px-3">{{ __('auth.register.title') }}</button>
                                 </div>
                             </form>
-                            <p class="text-center mt-2">Já cadastrado? <a href="/painel/login">Entrar</a></p>
+                            <p class="text-center mt-2">{{ __('auth.register.already_registered') }} <a href="/painel/login">{{ __('auth.register.login_link') }}</a></p>
                         </div>
                     </div>
                 </div>

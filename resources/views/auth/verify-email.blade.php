@@ -15,19 +15,19 @@
                         <div class="login-wrap p-4 p-md-5">
                             <div class="d-flex">
                                 <div class="w-100">
-                                    <h3 class="mb-4">Verique seu email</h3>
+                                    <h3 class="mb-4">{{ __('auth.verify_email.title') }}</h3>
                                 </div>
                             </div>
 
                             <div>
                         
-                                <div class="mb-4 text-lg text-gray-600">
-                                    {{ __('Obrigado por se cadastrar na Ticket DZ6! Antes de começar, você poderia verificar seu endereço de e-mail clicando no link que acabamos de enviar para você? Se você não recebeu o e-mail, teremos o prazer de lhe enviar outro.') }}
+                                <div class="mb-4 text-base text-gray-600">
+                                    {{ __('auth.verify_email.description') }}
                                 </div>
                         
                                 @if (session('status') == 'verification-link-sent')
                                     <div class="mb-4 font-medium text-sm text-green-600">
-                                        {{ __('Um novo link de verificação foi enviado para o endereço de e-mail fornecido durante o registro.') }}
+                                        {{ __('auth.verify_email.sent') }}
                                     </div>
                                 @endif
                         
@@ -35,14 +35,14 @@
                                     <form method="POST" action="{{ route('verification.send') }}" id="form-submit">
                                         @csrf
                                         <button type="submit" class="btn btn-primary" id="btn-submit">
-                                            {{ __('Reenviar email') }}
+                                            {{ __('auth.verify_email.resend_button') }}
                                         </button> &nbsp;&nbsp;&nbsp;
                                     </form>
                         
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="btn btn-secondary">
-                                            {{ __('Sair') }}
+                                            {{ __('auth.verify_email.logout_button') }}
                                         </button>
                                     </form>
                                 </div>

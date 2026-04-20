@@ -3,6 +3,16 @@
 declare(strict_types=1);
 
 return [
+    'nav' => [
+        'home' => 'Home',
+        'about' => 'About',
+        'services' => 'Features',
+        'portfolio' => 'Events',
+        'team' => 'Categories',
+        'contact' => 'Contact',
+        'create_event' => 'Create Event',
+        'login' => 'Login',
+    ],
     'hero' => [
         'image_alt_1' => 'Complete platform for event creation and management',
         'image_alt_2' => 'Online ticket sales with security and convenience',

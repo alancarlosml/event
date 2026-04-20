@@ -27,22 +27,22 @@
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-telephone" aria-hidden="true"></i>
-                                    <h3>Telefones</h3>
+                                    <h3>{{ __('site.contact.phones') }}</h3>
                                     <p>+1 5589 55488 55<br>+1 6678 254445 41</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-envelope" aria-hidden="true"></i>
-                                    <h3>Email</h3>
+                                    <h3>{{ __('site.contact.email') }}</h3>
                                     <p>info@example.com<br>contact@example.com</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box">
                                     <i class="bi bi-clock" aria-hidden="true"></i>
-                                    <h3>Funcionamento</h3>
-                                    <p>Seg - Sex<br> 9:00AM - 5:00PM</p>
+                                    <h3>{{ __('site.contact.working_hours') }}</h3>
+                                    <p>{{ __('site.contact.working_days') }}<br> 9:00AM - 5:00PM</p>
                                 </div>
                             </div>
                         </div>

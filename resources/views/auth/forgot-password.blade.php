@@ -15,12 +15,12 @@
                         <div class="login-wrap p-4 p-md-5">
                             <div class="d-flex">
                                 <div class="w-100">
-                                    <h3 class="mb-4">Esqueceu sua senha?</h3>
+                                    <h3 class="mb-4">{{ __('auth.forgot_password_page.title') }}</h3>
                                 </div>
                             </div>
 
-                            <div class="mb-4 text-lg text-gray-600">
-                                {{ __('Esqueceu sua senha? Sem problemas. Basta nos informar seu endereço de e-mail e nós lhe enviaremos um link de redefinição de senha que permitirá que você escolha uma nova.') }}
+                            <div class="mb-4 text-base text-gray-600">
+                                {{ __('auth.forgot_password_page.description') }}
                             </div>
                     
                             <!-- Session Status -->
@@ -34,14 +34,14 @@
                     
                                 <!-- Email Address -->
                                 <div>
-                                    <x-label for="email" :value="__('Informe seu email')" />
+                                    <x-label for="email" :value="__('auth.forgot_password_page.email_label')" />
                     
                                     <x-input id="email" class="form-control" type="email" name="email" :value="old('email')" required autofocus />
                                 </div>
                     
                                 <div class="flex items-center justify-end mt-4">
                                     <x-button class="btn btn-primary" id="btn-submit">
-                                        {{ __('Enviar email') }}
+                                        {{ __('auth.forgot_password_page.submit_button') }}
                                     </x-button>
                                 </div>
                             </form>

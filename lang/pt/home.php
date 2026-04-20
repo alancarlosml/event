@@ -3,6 +3,16 @@
 declare(strict_types=1);
 
 return [
+    'nav' => [
+        'home' => 'Home',
+        'about' => 'Sobre',
+        'services' => 'Recursos',
+        'portfolio' => 'Eventos',
+        'team' => 'Categorias',
+        'contact' => 'Contato',
+        'create_event' => 'Criar Evento',
+        'login' => 'Entrar',
+    ],
     'hero' => [
         'image_alt_1' => 'Plataforma completa para criação e gestão de eventos',
         'image_alt_2' => 'Venda de ingressos online com segurança e praticidade',

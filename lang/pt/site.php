@@ -33,4 +33,31 @@ return [
     'accessibility' => [
         'back_to_top' => 'Voltar ao topo',
     ],
+    'contact' => [
+        'title' => 'Contato',
+        'kicker' => 'Entre em contato',
+        'address' => 'Endereço',
+        'phones' => 'Telefones',
+        'email' => 'Email',
+        'working_hours' => 'Funcionamento',
+        'working_days' => 'Seg - Sex',
+        'form' => [
+            'name' => 'Seu nome',
+            'email' => 'Seu email',
+            'subject' => 'Assunto',
+            'phone' => 'Telefone',
+            'message' => 'Mensagem',
+            'loading' => 'Carregando...',
+            'sent' => 'Sua mensagem foi enviada. Obrigado!',
+            'submit' => 'Enviar mensagem',
+            'sending' => 'Enviando...',
+        ],
+        'errors' => [
+            'name' => 'Nome deve ter pelo menos 2 caracteres',
+            'email' => 'Email inválido',
+            'subject' => 'Assunto deve ter pelo menos 3 caracteres',
+            'phone' => 'Telefone deve ter pelo menos 10 dígitos',
+            'message' => 'Mensagem deve ter pelo menos 10 caracteres',
+        ],
+    ],
 ];
