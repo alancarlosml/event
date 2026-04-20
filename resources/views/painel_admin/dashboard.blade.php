@@ -25,6 +25,14 @@
 
         <section class="inner-page">
             <div class="container">
+                <div class="app-page-head">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Super administração</span>
+                        <h1 class="app-page-title">Visão operacional da plataforma</h1>
+                        <p class="app-page-subtitle">KPIs, tendências de venda e tabelas críticas agora ficam sob uma mesma hierarquia visual para leitura executiva mais rápida.</p>
+                    </div>
+                </div>
+
                 <!-- Toast Container -->
                 <div id="toast-container" class="toast-container"></div>
 

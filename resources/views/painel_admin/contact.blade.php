@@ -14,9 +14,17 @@
             </div>
         </section><!-- End Breadcrumbs -->
 
-        <section class="inner-page" id="contact-detail">
+        <section class="inner-page module-page" id="contact-detail">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Comunicacao</span>
+                        <h1 class="app-page-title">Detalhes da mensagem</h1>
+                        <p class="app-page-subtitle">Visualize o contato completo do participante sem perder contexto do evento e do historico da caixa.</p>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2"></i>
@@ -38,65 +46,56 @@
                     @endif
                 </div>
 
-                <div class="card">
-                    <div class="card-header bg-white py-3">
+                <div class="card module-card">
+                    <div class="card-header bg-white py-3 module-card-head">
                         <h4 class="mb-0">
                             <i class="fas fa-envelope-open-text me-2"></i>
                             Mensagem de Contato
                         </h4>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-user me-2 text-primary"></i>Nome
-                                </label>
-                                <p class="text-muted ms-4">{{ $contact->name }}</p>
+                    <div class="card-body module-card-body">
+                        <div class="row module-detail-grid">
+                            <div class="col-md-6">
+                                <div class="module-detail-item">
+                                    <span class="module-detail-label"><i class="fas fa-user text-primary"></i>Nome</span>
+                                    <div class="module-detail-value">{{ $contact->name }}</div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-envelope me-2 text-primary"></i>Email
-                                </label>
-                                <p class="text-muted ms-4">{{ $contact->email }}</p>
+                            <div class="col-md-6">
+                                <div class="module-detail-item">
+                                    <span class="module-detail-label"><i class="fas fa-envelope text-primary"></i>Email</span>
+                                    <div class="module-detail-value">{{ $contact->email }}</div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-phone me-2 text-primary"></i>Telefone
-                                </label>
-                                <p class="text-muted ms-4">{{ $contact->phone }}</p>
+                            <div class="col-md-6">
+                                <div class="module-detail-item">
+                                    <span class="module-detail-label"><i class="fas fa-phone text-primary"></i>Telefone</span>
+                                    <div class="module-detail-value">{{ $contact->phone }}</div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-calendar me-2 text-primary"></i>Data de Recebimento
-                                </label>
-                                <p class="text-muted ms-4">{{ \Carbon\Carbon::parse($contact->created_at)->format('d/m/Y H:i') }}</p>
+                            <div class="col-md-6">
+                                <div class="module-detail-item">
+                                    <span class="module-detail-label"><i class="fas fa-calendar text-primary"></i>Data de recebimento</span>
+                                    <div class="module-detail-value">{{ \Carbon\Carbon::parse($contact->created_at)->format('d/m/Y H:i') }}</div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-tag me-2 text-primary"></i>Assunto
-                                </label>
-                                <p class="text-muted ms-4">{{ $contact->subject }}</p>
-                            </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-12">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-comment-dots me-2 text-primary"></i>Mensagem
-                                </label>
-                                <div class="ms-4 p-3 bg-light rounded">
-                                    <p class="text-muted mb-0" style="white-space: pre-wrap;">{{ $contact->text }}</p>
+                                <div class="module-detail-item">
+                                    <span class="module-detail-label"><i class="fas fa-tag text-primary"></i>Assunto</span>
+                                    <div class="module-detail-value">{{ $contact->subject }}</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="module-detail-item">
+                                    <span class="module-detail-label"><i class="fas fa-comment-dots text-primary"></i>Mensagem</span>
+                                    <div class="module-rich-box">
+                                        <p class="text-muted mb-0" style="white-space: pre-wrap;">{{ $contact->text }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3 module-actions">
                         <a href="{{ route('event_home.messages', $contact->event->hash) }}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Voltar
                         </a>
@@ -114,6 +113,7 @@
 
     @push('head')
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
     @endpush
 
 </x-site-layout>

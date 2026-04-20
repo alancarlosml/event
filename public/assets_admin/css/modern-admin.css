@@ -573,7 +573,6 @@
 /* ===== Buttons ===== */
 .btn {
     font-weight: 500;
-    padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
 }
@@ -901,9 +900,9 @@
 
 /* ===== Wizard Container ===== */
 .wizard-container {
-    max-width: 1000px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 2rem 0;
+    padding: 2rem;
 }
 
 .wizard-progress {

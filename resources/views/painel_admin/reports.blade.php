@@ -18,9 +18,25 @@
             </div>
         </section><!-- End Breadcrumbs -->
 
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page reports-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 ps-3 pe-3">
+                <div class="app-page-head reports-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Relatorios do evento</span>
+                        <h1 class="app-page-title">{{ $event->name }}</h1>
+                        <p class="app-page-subtitle">Visao executiva das vendas, ocupacao, check-in e distribuicao dos ingressos em uma unica leitura operacional.</p>
+                    </div>
+                    <div class="reports-hero-actions">
+                        <a href="{{ route('event_home.reports.csv', $event->hash) }}" class="btn btn-success">
+                            <i class="fas fa-file-csv me-1"></i>Exportar participantes
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary" onclick="window.print();" title="Imprimir relatorio">
+                            <i class="fas fa-print me-1"></i>Imprimir
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mb-3 ps-3 pe-3 reports-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -43,13 +59,13 @@
                 </div>
 
                 <!-- Informações do Evento -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
+                <div class="card mb-4 reports-panel reports-context-shell">
+                    <div class="card-header reports-panel-head">
                         <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações do Evento</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                    <div class="card-body reports-panel-body">
+                        <div class="row reports-context-legacy">
+                            <div class="col-md-6 mb-3 reports-context-item">
                                 <strong><i class="fas fa-calendar-alt me-2 text-primary"></i>Data(s) do Evento:</strong><br>
                                 @if($event_dates && $event_dates->count() > 0)
                                     @foreach($event_dates as $date)
@@ -64,7 +80,7 @@
                                     <span class="text-muted">Não informado</span>
                                 @endif
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3 reports-context-item">
                                 <strong><i class="fas fa-map-marker-alt me-2 text-danger"></i>Local:</strong><br>
                                 @if($place)
                                     {{ $place->name }}
@@ -75,7 +91,7 @@
                                     <span class="text-muted">Não informado</span>
                                 @endif
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3 reports-context-item">
                                 <strong><i class="fas fa-ticket-alt me-2 text-success"></i>Status:</strong><br>
                                 @if($event->status == 1)
                                     <span class="badge bg-success">Publicado</span>
@@ -83,7 +99,7 @@
                                     <span class="badge bg-secondary">Rascunho</span>
                                 @endif
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3 reports-context-item">
                                 <strong><i class="fas fa-users me-2 text-warning"></i>Capacidade:</strong><br>
                                 <span class="badge bg-primary">{{ number_format($capacidade_total, 0, ',', '.') }} ingressos</span>
                             </div>
@@ -92,76 +108,76 @@
                 </div>
 
                 <!-- KPIs Principais -->
-                <div class="row mb-4">
+                <div class="row mb-4 reports-section reports-kpi-section g-3">
                     <div class="col-12">
-                        <h4 class="d-flex justify-content-between mb-3">
+                        <h4 class="d-flex justify-content-between align-items-center mb-3 reports-section-title-row">
                             <span><i class="fas fa-chart-line me-2"></i>Indicadores Principais</span>
-                            <a href="#" class="button-print" onclick="window.print();" title="Imprimir relatório">
-                                <img src="{{ asset('assets/img/print-pdf.jpg') }}" alt="Imprimir" width="36px">
+                                                        <a href="#" class="reports-inline-action" onclick="window.print();" title="Imprimir relatorio">
+                                <i class="fas fa-print me-1"></i>Imprimir
                             </a>
                         </h4>
                     </div>
-                    <div class="col-12 col-sm-6 col-md-3 mb-3">
-                        <div class="card border-left-primary shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Ingressos Vendidos</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($ingressos_vendidos, 0, ',', '.') }}</div>
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3 reports-kpi-item">
+                        <div class="stat-card stat-card-primary h-100">
+                            <div class="reports-stat-body">
+                                <div class="stat-card-content">
+                                    <div class="stat-card-info">
+                                        <div class="stat-card-label">Ingressos vendidos</div>
+                                        <div class="stat-card-value">{{ number_format($ingressos_vendidos, 0, ',', '.') }}</div>
                                         <small class="text-muted">de {{ number_format($capacidade_total, 0, ',', '.') }} disponíveis</small>
                                     </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-ticket-alt fa-2x text-gray-300"></i>
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-ticket-alt"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-md-3 mb-3">
-                        <div class="card border-left-success shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Taxa de Ocupação</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ number_format($taxa_ocupacao, 1, ',', '.') }}%</div>
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3 reports-kpi-item">
+                        <div class="stat-card stat-card-success h-100">
+                            <div class="reports-stat-body">
+                                <div class="stat-card-content">
+                                    <div class="stat-card-info">
+                                        <div class="stat-card-label">Taxa de ocupacao</div>
+                                        <div class="stat-card-value">{{ number_format($taxa_ocupacao, 1, ',', '.') }}%</div>
                                         <small class="text-muted">do evento preenchido</small>
                                     </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-percentage"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-md-3 mb-3">
-                        <div class="card border-left-info shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Ticket Médio</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">@money($ticket_medio ?? 0)</div>
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3 reports-kpi-item">
+                        <div class="stat-card stat-card-info h-100">
+                            <div class="reports-stat-body">
+                                <div class="stat-card-content">
+                                    <div class="stat-card-info">
+                                        <div class="stat-card-label">Ticket medio</div>
+                                        <div class="stat-card-value">@money($ticket_medio ?? 0)</div>
                                         <small class="text-muted">por participante confirmado</small>
                                     </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-dollar-sign"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-md-3 mb-3">
-                        <div class="card border-left-warning shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row no-gutters align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Check-in Realizado</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    <div class="col-12 col-sm-6 col-xl-3 mb-3 reports-kpi-item">
+                        <div class="stat-card stat-card-warning h-100">
+                            <div class="reports-stat-body">
+                                <div class="stat-card-content">
+                                    <div class="stat-card-info">
+                                        <div class="stat-card-label">Check-in realizado</div>
+                                        <div class="stat-card-value">
                                             {{ $checkin_stats->total_checkin ?? 0 }}
                                         </div>
                                         <small class="text-muted">de {{ $checkin_stats->total_confirmados ?? 0 }} confirmados</small>
                                     </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                    <div class="stat-card-icon">
+                                        <i class="fas fa-check-circle"></i>
                                     </div>
                                 </div>
                             </div>
@@ -170,14 +186,14 @@
                 </div>
 
                 <!-- Resumo Financeiro -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
+                <div class="card mb-4 reports-panel reports-finance-shell">
+                    <div class="card-header reports-panel-head">
                         <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Resumo Financeiro</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
+                    <div class="card-body reports-panel-body">
+                        <div class="row g-3 reports-finance-top">
                             <div class="col-12 col-sm-4 mb-3">
-                                <div class="info-box bg-light justify-content-center">
+                                <div class="info-box bg-light justify-content-center reports-metric-box reports-metric-success">
                                     <div class="info-box-content">
                                         <span class="info-box-text text-center text-muted">Total Confirmado</span>
                                         <span class="info-box-number text-center text-success mb-0 h5">@money($resumo->total_confirmado ?? 0)</span>
@@ -186,7 +202,7 @@
                                 </div>
                             </div>
                             <div class="col-12 col-sm-4 mb-3">
-                                <div class="info-box bg-light justify-content-center">
+                                <div class="info-box bg-light justify-content-center reports-metric-box reports-metric-danger">
                                     <div class="info-box-content">
                                         <span class="info-box-text text-center text-muted">Total Pendente</span>
                                         <span class="info-box-number text-center text-danger mb-0 h5">@money($resumo->total_pendente ?? 0)</span>
@@ -195,7 +211,7 @@
                                 </div>
                             </div>
                             <div class="col-12 col-sm-4 mb-3">
-                                <div class="info-box bg-light justify-content-center">
+                                <div class="info-box bg-light justify-content-center reports-metric-box reports-metric-primary">
                                     <div class="info-box-content">
                                         <span class="info-box-text text-center text-muted">Total Geral</span>
                                         <span class="info-box-number text-center text-primary mb-0 h5">@money(($resumo->total_confirmado ?? 0) + ($resumo->total_pendente ?? 0))</span>
@@ -204,12 +220,12 @@
                                 </div>
                             </div>
                         </div>
-                        <hr>
-                        <div class="row">
+                        <hr class="reports-divider">
+                        <div class="row g-3">
                             <div class="col-md-6 mb-3">
-                                <h5><i class="fas fa-calculator me-2"></i>Detalhamento Financeiro</h5>
+                                <h5 class="reports-subtitle"><i class="fas fa-calculator me-2"></i>Detalhamento Financeiro</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered">
+                                    <table class="table table-bordered reports-compact-table">
                                         <tr>
                                             <th style="width:60%">Total Confirmado:</th>
                                             <td class="text-end fw-bold text-success">@money($resumo->total_confirmado ?? 0)</td>
@@ -218,7 +234,7 @@
                                             <th>Taxa de Serviço ({{ number_format(($config->tax ?? 0) * 100, 2, ',', '.') }}%):</th>
                                             <td class="text-end text-danger">- @money($resumo->total_taxa ?? 0)</td>
                                         </tr>
-                                        <tr class="table-success" style="border-top: solid 2px #28a745">
+                                        <tr class="table-success reports-table-highlight">
                                             <th class="fw-bold">Valor Líquido a Receber:</th>
                                             <td class="text-end fw-bold h5 mb-0">@money($resumo->total_liquido ?? 0)</td>
                                         </tr>
@@ -226,9 +242,9 @@
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <h5 class="text-center"><i class="fas fa-credit-card me-2"></i>Vendas por Meio de Pagamento</h5>
-                                <div class="table-responsive">
-                                    <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                <h5 class="text-center reports-subtitle"><i class="fas fa-credit-card me-2"></i>Vendas por Meio de Pagamento</h5>
+                                <div class="table-responsive reports-chart-wrap reports-chart-wrap-sm">
+                                    <canvas id="pieChart"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -237,32 +253,62 @@
 
                 <!-- Gráfico de Vendas ao Longo do Tempo -->
                 @if($vendas_por_periodo && $vendas_por_periodo->count() > 0)
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
+                <div class="card mb-4 reports-panel reports-chart-shell">
+                    <div class="card-header reports-panel-head">
                         <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>Evolução de Vendas</h5>
                     </div>
-                    <div class="card-body">
-                        <canvas id="salesChart" style="min-height: 300px; height: 300px; max-height: 300px; max-width: 100%;"></canvas>
+                    <div class="card-body reports-panel-body">
+                        <div class="reports-chart-wrap">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="card mb-4 reports-panel reports-chart-shell">
+                    <div class="card-header reports-panel-head">
+                        <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>Evolução de Vendas</h5>
+                    </div>
+                    <div class="card-body reports-panel-body">
+                        <div class="reports-empty-state">
+                            <i class="fas fa-chart-line"></i>
+                            <strong>Nenhum dado suficiente para a evolucao de vendas</strong>
+                            <p>Quando houver historico de compras confirmado, este grafico passa a exibir a curva de desempenho do evento.</p>
+                        </div>
                     </div>
                 </div>
                 @endif
 
                 <!-- Gráfico de Vendas por Lote -->
                 @if($vendas_por_lote && $vendas_por_lote->count() > 0)
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-dark">
+                <div class="card mb-4 reports-panel reports-chart-shell">
+                    <div class="card-header reports-panel-head">
                         <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Vendas por Lote</h5>
                     </div>
-                    <div class="card-body">
-                        <canvas id="lotesChart" style="min-height: 300px; height: 300px; max-height: 300px; max-width: 100%;"></canvas>
+                    <div class="card-body reports-panel-body">
+                        <div class="reports-chart-wrap">
+                            <canvas id="lotesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="card mb-4 reports-panel reports-chart-shell">
+                    <div class="card-header reports-panel-head">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Vendas por Lote</h5>
+                    </div>
+                    <div class="card-body reports-panel-body">
+                        <div class="reports-empty-state">
+                            <i class="fas fa-layer-group"></i>
+                            <strong>Sem dados para comparar os lotes</strong>
+                            <p>Assim que houver vendas vinculadas aos lotes publicados, este comparativo sera preenchido automaticamente.</p>
+                        </div>
                     </div>
                 </div>
                 @endif
 
-                <hr />
-                            <div class="row pt-3">
+                <hr class="reports-divider reports-divider-spacious" />
+                            <div class="row pt-3 reports-section">
                                 <div class="col-12">
-                                    <h4 class="mb-3">Listagem de vendas realizadas ({{ count($all_orders) }})</h4>
+                                    <h4 class="mb-3 reports-section-table-title">Listagem de vendas realizadas ({{ count($all_orders) }})</h4>
                                     {{-- <div class="info-box bg-light" style="margin-top: 20px">
                                         <div class="container-fluid info-box-content">
                                             <h6 class="text-left display-5">Opções de busca</h6>
@@ -317,11 +363,11 @@
                                             </form>
                                         </div>
                                     </div> --}}
-                                    <div class="card-body table-responsive p-0">
+                                    <div class="card-body table-responsive p-0 reports-table-wrap">
                                         <!-- Mobile Card View -->
                                         <div class="d-md-none">
                                             @foreach ($all_orders as $order)
-                                                <div class="card mb-2 border">
+                                                <div class="card mb-2 border reports-mobile-card">
                                                     <div class="card-body p-3">
                                                         <div class="row">
                                                             <div class="col-6">
@@ -375,7 +421,7 @@
 
                                         <!-- Desktop Table View -->
                                         <div class="d-none d-md-block">
-                                            <table class="table table-head-fixed text-nowrap display" id="participantes_table">
+                                            <table class="table table-head-fixed text-nowrap display reports-data-table" id="participantes_table">
                                                 <thead>
                                                     <tr>
                                                         <th>#</th>
@@ -436,12 +482,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr class="mt-5" />
-                            <div class="row pt-3">
+                            <hr class="mt-5 reports-divider reports-divider-spacious" />
+                            <div class="row pt-3 reports-section">
                                 <div class="col-12">
-                                    <h4>Resumo de inscritos por lote ({{ count($lotes) }})</h4>
-                                    <div class="card-body table-responsive p-0">
-                                        <table class="table table-head-fixed text-nowrap display" id="participantes_inscritos_lote">
+                                    <h4 class="reports-section-table-title">Resumo de inscritos por lote ({{ count($lotes) }})</h4>
+                                    <div class="card-body table-responsive p-0 reports-table-wrap">
+                                        <table class="table table-head-fixed text-nowrap display reports-data-table" id="participantes_inscritos_lote">
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -470,12 +516,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr class="mt-5" />
-                            <div class="row">
+                            <hr class="mt-5 reports-divider reports-divider-spacious" />
+                            <div class="row reports-section">
                                 <div class="col-12">
-                                    <h4 class="mb-3">Listagem de inscritos por lote ({{ count($situacao_participantes_lotes) }})</h4>
-                                    <div class="card-body table-responsive p-0">
-                                        <table class="table table-head-fixed text-nowrap display" id="participantes_listagem_lote">
+                                    <h4 class="mb-3 reports-section-table-title">Listagem de inscritos por lote ({{ count($situacao_participantes_lotes) }})</h4>
+                                    <div class="card-body table-responsive p-0 reports-table-wrap">
+                                        <table class="table table-head-fixed text-nowrap display reports-data-table" id="participantes_listagem_lote">
                                             <thead>
                                                 <tr>
                                                     <th>Nº inscrição</th>
@@ -531,7 +577,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr class="mt-5" />
+                            <hr class="mt-5 reports-divider reports-divider-spacious" />
                             {{-- <div class="row">
                                 <div class="col-12">
                                     <h4 class="mb-3">Situação do pagamento dos inscritos</h4>
@@ -586,11 +632,11 @@
                                 </div>
                             </div>
                             <hr class="mt-5"/> --}}
-                            <div class="row">
+                            <div class="row reports-section">
                                 <div class="col-12">
-                                    <h4 class="mb-3">Resumo de inscritos por cupom de desconto ({{ count($situacao_coupons) }})</h4>
-                                    <div class="card-body table-responsive p-0">
-                                        <table class="table table-head-fixed text-nowrap display" id="participantes_inscritos_cupom">
+                                    <h4 class="mb-3 reports-section-table-title">Resumo de inscritos por cupom de desconto ({{ count($situacao_coupons) }})</h4>
+                                    <div class="card-body table-responsive p-0 reports-table-wrap">
+                                        <table class="table table-head-fixed text-nowrap display reports-data-table" id="participantes_inscritos_cupom">
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -659,7 +705,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-4">
+            <div class="mt-4 reports-footer-actions">
                 <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Voltar
                 </a>
@@ -692,6 +738,7 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="{{ asset('assets/css/print.css') }}" media="print" type="text/css"/>
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/reports-modern.css') }}" type="text/css">
     @endpush
 
     @push('footer')
@@ -1366,3 +1413,7 @@
     @endpush
 
 </x-site-layout>
+
+
+
+

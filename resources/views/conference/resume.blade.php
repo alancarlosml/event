@@ -3,8 +3,16 @@
         <link rel="stylesheet" href="{{ asset('assets_conference/css/modern-conference.css') }}" type="text/css">
     @endpush
     
-    <section id="checkout" class="section-bg" style="margin-top: 120px">
+    <section id="checkout" class="section-bg checkout-shell-offset">
         <div class="container pb-5">
+            <div class="app-page-head">
+                <div class="app-page-copy">
+                    <span class="app-page-kicker">Checkout</span>
+                    <h1 class="app-page-title">Revise os dados da inscrição</h1>
+                    <p class="app-page-subtitle">O fluxo de compra agora segue a mesma linguagem visual do restante da plataforma para reduzir ruído e aumentar confiança.</p>
+                </div>
+            </div>
+
             <!-- Progresso do Checkout -->
             <div class="checkout-progress">
                 <div class="checkout-progress-steps">

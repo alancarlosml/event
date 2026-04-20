@@ -12,14 +12,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 
 use App\Mail\EventAdminControllerMail;
 use App\Mail\GuestControllerMail;
 
 use App\Models\Category;
 use App\Models\Configuration;
-use App\Models\City;
 use App\Models\Coupon;
 use App\Models\Event;
 use App\Models\EventDate;
@@ -34,15 +32,34 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Owner;
 use App\Models\Question;
-use App\Models\User;
 use App\Models\State;
-
-use App\Http\Controllers\MercadoPagoController;
-
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class EventAdminController extends Controller
 {
+    private function resolveFilters(Request $request, string $sessionKey, array $defaults): array
+    {
+        if ($request->boolean('reset_filters')) {
+            $request->session()->forget($sessionKey);
+
+            return $defaults;
+        }
+
+        $allowedKeys = array_keys($defaults);
+        $incoming = $request->only($allowedKeys);
+        $hasIncoming = collect($incoming)->filter(static fn ($value) => $value !== null && $value !== '')->isNotEmpty();
+
+        if ($hasIncoming) {
+            $filters = array_merge($defaults, $incoming);
+            $request->session()->put($sessionKey, $filters);
+
+            return $filters;
+        }
+
+        $saved = (array) $request->session()->get($sessionKey, []);
+
+        return array_merge($defaults, array_intersect_key($saved, $defaults));
+    }
+
     /**
      * Verifica se o usuário tem acesso ao evento
      * Retorna true se for super admin ou se for admin do evento
@@ -50,7 +67,7 @@ class EventAdminController extends Controller
     private function hasAccessToEvent($eventId)
     {
         $user = Auth::guard('participante')->user();
-        
+
         if ($user->hasRole('super_admin')) {
             return true;
         }
@@ -64,19 +81,48 @@ class EventAdminController extends Controller
         return $participanteEvent !== null;
     }
 
-    public function myRegistrations()
+    public function myRegistrations(Request $request)
     {
-        // Otimizado: Usar Eloquent com eager loading para evitar N+1 queries
-        $orders = Order::with([
+        $filters = $this->resolveFilters($request, 'event_home.my_registrations.filters', [
+            'q' => '',
+            'status' => 'all',
+            'date_from' => '',
+            'date_to' => '',
+        ]);
+
+        $ordersQuery = Order::with([
             'order_items.lote',
-            'eventDate.event.place'
+            'eventDate.event.place',
+            'event.eventDates',
         ])
-            ->where('participante_id', Auth::user()->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->where('participante_id', Auth::guard('participante')->id());
+
+        if ($filters['q'] !== '') {
+            $search = trim((string) $filters['q']);
+            $ordersQuery->where(function ($query) use ($search) {
+                $query->where('hash', 'like', '%' . $search . '%')
+                    ->orWhereHas('eventDate.event', function ($eventQuery) use ($search) {
+                        $eventQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        if ($filters['status'] !== 'all' && in_array((int) $filters['status'], [1, 2, 3, 4, 5], true)) {
+            $ordersQuery->where('status', (int) $filters['status']);
+        }
+
+        if ($filters['date_from'] !== null && $filters['date_from'] !== '') {
+            $ordersQuery->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if ($filters['date_to'] !== null && $filters['date_to'] !== '') {
+            $ordersQuery->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        $orders = $ordersQuery->orderBy('created_at', 'desc')->paginate(9)->withQueryString();
 
         // Buscar dados de pagamento para pedidos pendentes (PIX e boleto)
-        $pendingOrderIds = $orders->where('status', 2)->pluck('id');
+        $pendingOrderIds = $orders->getCollection()->where('status', 2)->pluck('id');
         $pixDetailsMap = collect();
         $boletoDetailsMap = collect();
         if ($pendingOrderIds->isNotEmpty()) {
@@ -90,46 +136,83 @@ class EventAdminController extends Controller
                 ->keyBy('order_id');
         }
 
-        return view('painel_admin.my_registrations', compact('orders', 'pixDetailsMap', 'boletoDetailsMap'));
+        return view('painel_admin.my_registrations', compact('orders', 'pixDetailsMap', 'boletoDetailsMap', 'filters'));
     }
 
-    public function myEvents()
+    public function myEvents(Request $request)
     {
         $user = Auth::guard('participante')->user();
         $isSuperAdmin = $user->hasRole('super_admin');
+        $filters = $this->resolveFilters($request, 'event_home.my_events.filters', [
+            'q' => '',
+            'status' => 'all',
+            'date_from' => '',
+            'date_to' => '',
+        ]);
 
         // Otimizado: Usar Eloquent com eager loading
         $eventsQuery = Event::with([
             'place',
             'lotes',
             'eventDates',
-            'participantesEvents.participante'
+            'participantesEvents.participante',
         ]);
 
         // Se não for super admin, filtrar apenas eventos do usuário
-        if (!$isSuperAdmin) {
+        if ( ! $isSuperAdmin) {
             $eventsQuery->whereHas('participantesEvents', function ($q) use ($user) {
                 $q->where('participante_id', $user->id)
-                  ->where('status', 1);
+                    ->where('status', 1);
             });
         }
 
-        $events = $eventsQuery->orderBy('created_at', 'desc')->get();
+        if ($filters['q'] !== '') {
+            $search = trim((string) $filters['q']);
+            $eventsQuery->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('hash', 'like', '%' . $search . '%')
+                    ->orWhereHas('place', function ($placeQuery) use ($search) {
+                        $placeQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        if ($filters['status'] === 'active') {
+            $eventsQuery->where('status', 1);
+        } elseif ($filters['status'] === 'inactive') {
+            $eventsQuery->where('status', '<>', 1);
+        } elseif ($filters['status'] === 'incomplete') {
+            $eventsQuery->where(function ($query) {
+                $query->whereDoesntHave('place')
+                    ->orWhereDoesntHave('eventDates')
+                    ->orWhereDoesntHave('lotes');
+            });
+        }
+
+        if ($filters['date_from'] !== null && $filters['date_from'] !== '') {
+            $eventsQuery->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if ($filters['date_to'] !== null && $filters['date_to'] !== '') {
+            $eventsQuery->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        $events = $eventsQuery->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         // Processar dados para compatibilidade com a view
-        $events->transform(function ($event) use ($user, $isSuperAdmin) {
+        $events->getCollection()->transform(function ($event) use ($user, $isSuperAdmin) {
             $event->place_name = $event->place?->name;
             $event->date_event_min = $event->eventDates->min('date');
             $event->date_event_max = $event->eventDates->max('date');
             $event->event_date = $event->date_event_min;
-            
+
             $admin = $event->participantesEvents->where('role', 'admin')->first();
             $event->admin_name = $admin?->participante?->name;
             $event->admin_email = $admin?->participante?->email;
             $event->participante_name = $event->admin_name;
-            
+
             $event->lote_name = $event->lotes->first()?->name;
-            
+
             // Determinar o role do usuário atual para este evento
             if ($isSuperAdmin) {
                 $event->role = 'admin';
@@ -137,11 +220,11 @@ class EventAdminController extends Controller
                 $userRelation = $event->participantesEvents->where('participante_id', $user->id)->first();
                 $event->role = $userRelation?->role;
             }
-            
+
             return $event;
         });
 
-        return view('painel_admin.my_events', compact('events', 'isSuperAdmin'));
+        return view('painel_admin.my_events', compact('events', 'isSuperAdmin', 'filters'));
     }
 
     public function dashboard()
@@ -149,7 +232,7 @@ class EventAdminController extends Controller
         $user = Auth::guard('participante')->user();
         $isSuperAdmin = $user->hasRole('super_admin');
 
-        if (!$isSuperAdmin) {
+        if ( ! $isSuperAdmin) {
             return redirect()->route('event_home.my_events');
         }
 
@@ -165,8 +248,8 @@ class EventAdminController extends Controller
                                 inner join participantes_events on participantes.id = participantes_events.participante_id
                                 where participantes_events.role = 'admin' and participantes_events.status = 1
                                 ) as x"), function ($join) {
-                    $join->on('x.event_id', '=', 'events.id');
-                })
+                $join->on('x.event_id', '=', 'events.id');
+            })
             ->where('events.status', '1')
             ->select(
                 'events.*',
@@ -267,7 +350,7 @@ class EventAdminController extends Controller
         $chartConfirmed = [];
         $chartPending = [];
 
-        $last30Days = collect(range(29, 0))->map(fn($d) => now()->subDays($d)->format('Y-m-d'));
+        $last30Days = collect(range(29, 0))->map(fn ($d) => now()->subDays($d)->format('Y-m-d'));
         foreach ($last30Days as $date) {
             $chartLabels[] = \Carbon\Carbon::parse($date)->format('d/m');
             $chartConfirmed[] = (float) ($salesData->where('date', $date)->where('status', 1)->sum('total') ?? 0);
@@ -316,7 +399,7 @@ class EventAdminController extends Controller
         //ENVIAR EMAIL - EVENTO CRIADO
         try {
             Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($newEvent, 'Evento criado com sucesso', 'criado'));
-        } catch (\Exception $mailException) {
+        } catch (Exception $mailException) {
             Log::warning('Falha ao enviar e-mail de duplicação de evento: ' . $mailException->getMessage(), [
                 'event_id' => $newEvent->id,
                 'user_email' => Auth::user()->email,
@@ -328,36 +411,36 @@ class EventAdminController extends Controller
 
     public function myEventsShow($hash)
     {
-        $event = Event::where('hash', $hash)->first();
+        $event = Event::with(['lotes', 'place', 'owner', 'eventDates'])->where('hash', $hash)->first();
 
-        if (!$event) {
+        if ( ! $event) {
             abort(404, 'Evento não encontrado');
         }
 
-        if (!$this->hasAccessToEvent($event->id)) {
+        if ( ! $this->hasAccessToEvent($event->id)) {
             abort(403, 'Você não tem permissão para acessar este evento');
         }
 
         // Recalcular final_value dos lotes existentes baseado em tax_service
         $config = Configuration::findOrFail(1);
         $taxa_juros = $config->tax;
-        
-        foreach($event->lotes as $lote) {
-            if($lote->type == 0 && $lote->value > 0) {
+
+        foreach ($event->lotes as $lote) {
+            if ($lote->type == 0 && $lote->value > 0) {
                 // Recalcular taxa se necessário
                 $taxa_calculada = doubleval($lote->value) * $taxa_juros;
-                
+
                 // Recalcular final_value baseado em tax_service
-                if($lote->tax_service == 0) {
+                if ($lote->tax_service == 0) {
                     // Taxa paga pelo participante: soma ao valor
                     $final_value_calculado = doubleval($lote->value) + $taxa_calculada;
                 } else {
                     // Taxa paga pelo organizador: subtrai do valor
                     $final_value_calculado = doubleval($lote->value) - $taxa_calculada;
                 }
-                
+
                 // Atualizar apenas se o valor estiver incorreto
-                if(abs($lote->final_value - $final_value_calculado) > 0.01) {
+                if (abs($lote->final_value - $final_value_calculado) > 0.01) {
                     $lote->tax = $taxa_calculada;
                     $lote->final_value = $final_value_calculado;
                     $lote->save();
@@ -373,15 +456,56 @@ class EventAdminController extends Controller
         return view('painel_admin.my_events_show', compact('event', 'isSuperAdmin'));
     }
 
+    public function manageEvent($hash, Request $request)
+    {
+        $event = Event::with(['place', 'owner', 'eventDates', 'participantesEvents', 'lotes'])->where('hash', $hash)->first();
+
+        if ( ! $event) {
+            abort(404, 'Evento não encontrado');
+        }
+
+        if ( ! $this->hasAccessToEvent($event->id)) {
+            abort(403, 'Você não tem permissão para acessar este evento');
+        }
+
+        $user = Auth::guard('participante')->user();
+        $isSuperAdmin = $user->hasRole('super_admin');
+        $userRelation = $event->participantesEvents->where('participante_id', $user->id)->first();
+        $canManage = $isSuperAdmin || $userRelation?->role === 'admin';
+
+        $tab = $request->input('tab', 'details');
+        $contentRoutes = [
+            'details' => route('event_home.my_events_show', ['hash' => $event->hash, 'embedded' => 1]),
+            'reports' => route('event_home.reports', ['hash' => $event->hash, 'embedded' => 1]),
+            'guests' => route('event_home.guests', ['hash' => $event->hash, 'embedded' => 1]),
+            'messages' => route('event_home.messages', ['hash' => $event->hash, 'embedded' => 1]),
+            'certificates' => route('event_home.certificate.edit', ['hash' => $event->hash, 'embedded' => 1]),
+            'edit' => route('event_home.my_events_edit', ['hash' => $event->hash, 'embedded' => 1]),
+        ];
+
+        if ( ! array_key_exists($tab, $contentRoutes)) {
+            $tab = 'details';
+        }
+
+        return view('painel_admin.event_manage', [
+            'event' => $event,
+            'tab' => $tab,
+            'contentUrl' => $contentRoutes[$tab],
+            'contentRoutes' => $contentRoutes,
+            'canManage' => $canManage,
+            'isSuperAdmin' => $isSuperAdmin,
+        ]);
+    }
+
     public function myEventsEdit(Request $request, $hash)
     {
         $event = Event::where('hash', $hash)->first();
 
-        if (!$event) {
+        if ( ! $event) {
             abort(404, 'Evento não encontrado');
         }
 
-        if (!$this->hasAccessToEvent($event->id)) {
+        if ( ! $this->hasAccessToEvent($event->id)) {
             abort(403, 'Você não tem permissão para editar este evento');
         }
         $categories = Category::orderBy('description')->get();
@@ -403,17 +527,18 @@ class EventAdminController extends Controller
 
         // Carregar dados do local do evento
         $place = $event->place;
-        
+
         // Adicionar dados à sessão para o template unificado
         $request->session()->put('dates', $dates->toArray());
         $request->session()->put('event', $event->toArray());
         $request->session()->put('event_id', $event->id);
         $request->session()->put('place', $place ? $place->toArray() : null);
-        
+
         // Incluir formatted_options ao salvar questões na sessão
-        $questionsArray = $questions->map(function($question) {
+        $questionsArray = $questions->map(function ($question) {
             $questionArray = $question->toArray();
             $questionArray['formatted_options'] = $question->formatted_options;
+
             return $questionArray;
         })->toArray();
         $request->session()->put('questions', $questionsArray);
@@ -441,10 +566,11 @@ class EventAdminController extends Controller
 
             // Atualiza dados principais do evento
             $event = $this->saveEvent($request);
-            
+
             // Verificar se o retorno é um RedirectResponse (erro de validação)
             if ($event instanceof \Illuminate\Http\RedirectResponse) {
                 DB::rollBack();
+
                 return $event;
             }
 
@@ -494,7 +620,7 @@ class EventAdminController extends Controller
     {
         $categories = Category::orderBy('description')->get();
         $states = State::orderBy('name')->get();
-        
+
         $options = Option::orderBy('id')->get();
         // $questions = Question::orderBy('order')->get();
 
@@ -505,24 +631,24 @@ class EventAdminController extends Controller
         // Se há evento na sessão, buscar o objeto completo do banco
         $event = null;
         $place = null;
-        if(isset($eventSession) && isset($eventSession['id'])) {
+        if (isset($eventSession, $eventSession['id'])) {
             $event = Event::with('place')->find($eventSession['id']);
-            if($event && $event->place) {
+            if ($event && $event->place) {
                 $place = $event->place;
-            } elseif(isset($placeSession) && isset($placeSession['id'])) {
+            } elseif (isset($placeSession, $placeSession['id'])) {
                 $place = Place::find($placeSession['id']);
             }
         }
 
         $eventDate = null;
-        if(isset($event)) {
+        if (isset($event)) {
             $eventDate = EventDate::where('event_id', $event->id)
                 ->selectRaw('id, date, DATE_FORMAT(time_begin, "%H:%i") time_begin, DATE_FORMAT(time_end, "%H:%i") time_end')
                 ->where('status', '1')
                 ->get();
 
-            if(isset($eventDate)) {
-                foreach($eventDate as $date) {
+            if (isset($eventDate)) {
+                foreach ($eventDate as $date) {
                     $date['id'] = $date['id'];
                     $date['date'] = date('d/m/Y', strtotime($date['date']));
                 }
@@ -530,9 +656,9 @@ class EventAdminController extends Controller
         }
 
         $questions = collect([]);
-        if($event) {
+        if ($event) {
             $sessionQuestions = $request->session()->get('questions');
-            if($sessionQuestions) {
+            if ($sessionQuestions) {
                 $questions = collect($sessionQuestions);
             } else {
                 // Se não houver questões na sessão, buscar do banco de dados com relacionamentos
@@ -541,7 +667,7 @@ class EventAdminController extends Controller
         }
 
         // Adicionei uma verificação para saber se o usuário já tem uma conta vinculada ao Mercado Pago
-        $mercadoPagoResponse  = app(MercadoPagoController::class)->checkLinkedAccount($request);
+        $mercadoPagoResponse = app(MercadoPagoController::class)->checkLinkedAccount($request);
         $mercadoPagoLinked = [
             'linked' => $mercadoPagoResponse->getData()->linked,
             'id' => $mercadoPagoResponse->getData()->id,
@@ -557,13 +683,14 @@ class EventAdminController extends Controller
             DB::beginTransaction();
 
             $event = $this->saveEvent($request);
-            
+
             // Verificar se o retorno é um RedirectResponse (erro de validação)
             if ($event instanceof \Illuminate\Http\RedirectResponse) {
                 DB::rollback();
+
                 return $event;
             }
-            
+
             $request->session()->put('event', $event->toArray());
 
             $place = $this->savePlace($request, $event);
@@ -584,7 +711,7 @@ class EventAdminController extends Controller
             Log::error('Erro ao criar evento: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'request_data' => $request->except(['password']),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Retornar erro específico para o usuário
@@ -598,7 +725,7 @@ class EventAdminController extends Controller
 
     private function saveEvent(Request $request)
     {
-        if(empty($request->session()->get('event'))) {
+        if (empty($request->session()->get('event'))) {
 
             $validatedDataEvent = $request->validate([
                 'name' => 'required|min:3|max:255',
@@ -645,7 +772,7 @@ class EventAdminController extends Controller
             // Validar se evento é pago e se tem conta Mercado Pago vinculada
             if ($validatedDataEvent['paid'] == 1) {
                 $mpAccount = MpAccount::where('participante_id', $validatedDataEvent['admin_id'])->first();
-                if (!$mpAccount || empty($mpAccount->access_token)) {
+                if ( ! $mpAccount || empty($mpAccount->access_token)) {
                     return back()
                         ->withInput()
                         ->withErrors(['paid' => 'Para criar um evento pago, é necessário vincular sua conta do Mercado Pago primeiro. Clique em "Vincular conta" na seção "Carteira de pagamento".']);
@@ -675,10 +802,11 @@ class EventAdminController extends Controller
                 'status' => 1,
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
+
             //ENVIAR EMAIL - EVENTO CRIADO
             try {
                 Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento criado com sucesso', 'criado'));
-            } catch (\Exception $mailException) {
+            } catch (Exception $mailException) {
                 Log::warning('Falha ao enviar e-mail de criação de evento: ' . $mailException->getMessage(), [
                     'event_id' => $event->id,
                     'user_email' => Auth::user()->email,
@@ -708,7 +836,7 @@ class EventAdminController extends Controller
                 'new_field' => 'required',
                 'new_field_id' => 'nullable',
                 'youtube_video_url' => 'nullable|string|max:500',
-            ],[
+            ], [
                 'name.required' => 'O nome do evento é obrigatório.',
                 'slug.required' => 'A URL do evento é obrigatório.',
                 'slug.unique' => 'A URL do evento já está em uso.',
@@ -739,7 +867,7 @@ class EventAdminController extends Controller
             // Envio de e-mail envolvido em try-catch para não quebrar o fluxo
             try {
                 Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento editado com sucesso', 'editado'));
-            } catch (\Exception $mailException) {
+            } catch (Exception $mailException) {
                 Log::warning('Falha ao enviar e-mail de edição de evento: ' . $mailException->getMessage(), [
                     'event_id' => $event->id,
                     'user_email' => Auth::user()->email,
@@ -763,7 +891,7 @@ class EventAdminController extends Controller
             'complement' => 'nullable',
             'zip' => 'required',
             'city_id_hidden' => 'required',
-        ],[
+        ], [
             'place_name.required' => 'O nome do lugar é obrigatório.',
             'address.required' => 'O endereço do lugar é obrigatório.',
             'number.required' => 'O número do lugar é obrigatório.',
@@ -784,9 +912,10 @@ class EventAdminController extends Controller
         $event_id = $event->id;
 
         // Verificar se place_id existe (diferente de null e string vazia)
-        if(!empty($validatedDataPlace['place_id'])) {
+        if ( ! empty($validatedDataPlace['place_id'])) {
             $event = Event::where('id', $event_id)->update(['place_id' => $validatedDataPlace['place_id']]);
             $place = Place::findOrFail($validatedDataPlace['place_id']);
+
             // $request->session()->put('place', $place);
             // $request->session()->put('place_id', $validatedDataPlace['place_id']);
             // $request->session()->put('uf', $place->get_city()->uf);
@@ -797,6 +926,7 @@ class EventAdminController extends Controller
             $place->save();
             $place_id = $place->id;
             Event::where('id', $event_id)->update(['place_id' => $place_id]);
+
             // $request->session()->put('place', $place);
             // $request->session()->put('place_id', $place_id);
             return $place;
@@ -812,7 +942,7 @@ class EventAdminController extends Controller
             'time_begin.*' => 'required|date_format:H:i',
             'time_end.*' => 'required|date_format:H:i',
             'date_id.*' => 'nullable|integer',
-        ],[
+        ], [
             'date.*.required' => 'A data do evento é obrigatória.',
             'time_begin.*.required' => 'A hora de início do evento é obrigatória.',
             'time_end.*.required' => 'A hora de término do evento é obrigatória.',
@@ -822,14 +952,14 @@ class EventAdminController extends Controller
         $dates = $validatedDataEventDate['date'];
         $times_begin = $validatedDataEventDate['time_begin'];
         $times_end = $validatedDataEventDate['time_end'];
-        
+
         // Validar que time_end > time_begin para cada data
         foreach ($times_begin as $index => $begin) {
             if (isset($times_end[$index]) && strtotime($begin) >= strtotime($times_end[$index])) {
                 throw new Exception('A hora de termino deve ser maior que a hora de inicio para a data ' . ($index + 1) . '.');
             }
         }
-        
+
         $event_id = $event->id;
 
         // Verifica se está faltando um id para excluir no banco
@@ -840,9 +970,9 @@ class EventAdminController extends Controller
             ->only('id')
             ->toArray();
 
-        foreach($date_ids_db as $date_id_db) {
+        foreach ($date_ids_db as $date_id_db) {
 
-            if( ! in_array($date_id_db['id'], $date_ids)) {
+            if ( ! in_array($date_id_db['id'], $date_ids)) {
                 // Verificar se existem pedidos vinculados a esta data antes de excluir
                 $ordersCount = Order::where('event_date_id', $date_id_db['id'])->count();
                 if ($ordersCount > 0) {
@@ -855,7 +985,7 @@ class EventAdminController extends Controller
         $date_events_array = [];
         for ($i = 0; $i < count($dates); $i++) {
             $date = str_replace('/', '-', $dates[$i]);
-            if( ! isset($date_ids[$i])) {
+            if ( ! isset($date_ids[$i])) {
                 array_push($date_events_array, [
                     'date_id' => null,
                     'date' => date('Y-m-d', strtotime($date)),
@@ -872,9 +1002,9 @@ class EventAdminController extends Controller
             }
         }
 
-        foreach($date_events_array as $arr_date) {
+        foreach ($date_events_array as $arr_date) {
 
-            if($arr_date['date_id'] == null) {
+            if ($arr_date['date_id'] == null) {
                 EventDate::create([
                     'date' => date('Y-m-d', strtotime(str_replace('/', '-', $arr_date['date']))),
                     'time_begin' => date('H:i', strtotime($arr_date['time_begin'])),
@@ -902,7 +1032,7 @@ class EventAdminController extends Controller
         $validatedDataQuestion = $request->validate([
             'new_field' => 'required',
             'new_field_id' => 'nullable',
-        ],[
+        ], [
             'new_field.required' => 'As perguntas são obrigatórias.',
         ]);
 
@@ -918,9 +1048,9 @@ class EventAdminController extends Controller
             ->only('id')
             ->toArray();
 
-        foreach($questions_ids_db as $question_id_db) {
+        foreach ($questions_ids_db as $question_id_db) {
 
-            if( ! in_array($question_id_db['id'], $field_ids)) {
+            if ( ! in_array($question_id_db['id'], $field_ids)) {
                 DB::table('questions')->where('id', $question_id_db['id'])->delete();
             }
         }
@@ -928,7 +1058,7 @@ class EventAdminController extends Controller
 
         $questions_array = [];
         for ($i = 0; $i < count($fields); $i++) {
-            if( ! isset($field_ids[$i])) {
+            if ( ! isset($field_ids[$i])) {
                 array_push($questions_array, [
                     'question_id' => null,
                     'question' => $fields[$i],
@@ -943,9 +1073,9 @@ class EventAdminController extends Controller
 
         // dd($questions_array);
 
-        foreach($questions_array as $id => $field) {
+        foreach ($questions_array as $id => $field) {
 
-            if($field['question_id'] == null) {
+            if ($field['question_id'] == null) {
 
                 preg_match_all("/\(([^\]]*)\)/", $field['question'], $matches);
                 $result_field = $matches[1];
@@ -954,25 +1084,26 @@ class EventAdminController extends Controller
                 $more_fields = explode(';', $field['question']);
 
                 $required = 0;
-                if(strpos($field['question'], 'Obrigatório')) {
+                if (strpos($field['question'], 'Obrigatório')) {
                     $required = 1;
                 }
 
                 $unique = 0;
-                if(strpos($field['question'], 'Único')) {
+                if (strpos($field['question'], 'Único')) {
                     $unique = 1;
                 }
 
                 $option = Option::where('option', $result_field[0] ?? '')->first();
-                
-                if (!$option) {
+
+                if ( ! $option) {
                     Log::warning('Tipo de campo não encontrado: ' . ($result_field[0] ?? 'vazio'), [
                         'event_id' => $event_id,
-                        'field' => $field['question']
+                        'field' => $field['question'],
                     ]);
+
                     continue; // Pular este campo se o tipo não for encontrado
                 }
-                
+
                 $question = Question::create([
                     'question' => $more_fields[0],
                     'order' => $id + 1,
@@ -987,13 +1118,13 @@ class EventAdminController extends Controller
 
                 $result_regex = preg_match_all("/\[([^\]]*)\]/", $field['question'], $matches);
 
-                if($result_regex) {
+                if ($result_regex) {
                     $result_field = $matches[1];
                     $result_field = str_replace('Opções: ', '', $result_field);
 
                     $array_explode_question = explode(',', $result_field[0]);
 
-                    foreach($array_explode_question as $item_array_explode_question) {
+                    foreach ($array_explode_question as $item_array_explode_question) {
                         DB::table('option_values')->insert([
                             'value' => trim($item_array_explode_question),
                             'question_id' => $id_question,
@@ -1006,9 +1137,10 @@ class EventAdminController extends Controller
         $questions = Question::with('option')->orderBy('order')->where('event_id', $event_id)->get();
 
         // Incluir formatted_options ao salvar questões na sessão
-        $questionsArray = $questions->map(function($question) {
+        $questionsArray = $questions->map(function ($question) {
             $questionArray = $question->toArray();
             $questionArray['formatted_options'] = $question->formatted_options;
+
             return $questionArray;
         })->toArray();
         $request->session()->put('questions', $questionsArray);
@@ -1022,7 +1154,7 @@ class EventAdminController extends Controller
             ->where('event_id', $event_id)
             ->get();
 
-        if($participante_evento->count() == 0) {
+        if ($participante_evento->count() == 0) {
             DB::table('participantes_events')->insert([
                 'hash' => md5(Auth::user()->name . date('Y-m-d H:i:s') . md5(config('services.hash_secret'))),
                 'role' => 'admin',
@@ -1038,10 +1170,10 @@ class EventAdminController extends Controller
     {
         $event_id = $request->session()->get('event_id');
 
-        if($event_id != null) {
+        if ($event_id != null) {
 
             $lotesSession = $request->session()->get('lotes');
-            if(empty($lotesSession)) {
+            if (empty($lotesSession)) {
                 $lotes = Lote::orderBy('order')
                     ->where('event_id', $event_id)
                     ->get();
@@ -1075,7 +1207,7 @@ class EventAdminController extends Controller
 
         $taxa_juros = $config->tax;
 
-        if($input['type'] == 0) {
+        if ($input['type'] == 0) {
             $validatedData = $this->validate($request, [
                 'event_id' => 'nullable',
                 'type' => 'required|integer',
@@ -1091,20 +1223,20 @@ class EventAdminController extends Controller
                 'datetime_end' => 'required',
                 'form_pagamento' => 'nullable',
                 'visibility' => 'required',
-            ],[
-               'type.required' => 'Tipo de lote é obrigatório',
-               'tax_parcelamento.required' => 'Taxa de parcelamento é obrigatória',
-               'tax_service.required' => 'Taxa de serviço é obrigatória',
-               'value.required' => 'Valor do lote é obrigatório',
-               'name.required' => 'Nome do lote é obrigatório',
-               'quantity.required' => 'Quantidade é obrigatória',
-               'description.required' => 'Descrição do lote é obrigatória',
-               'limit_min.required' => 'Limite mínimo de 1 é obrigatório',
-               'limit_max.required' => 'Limite máximo maior ou igual ao limíte mínimo é obrigatório',
-               'datetime_begin.required' => 'Data de inicio é obrigatória',
-               'datetime_end.required' => 'Data de fim é obrigatória',
-               'form_pagamento.required' => 'Forma de pagamento é obrigatória',
-               'visibility.required' => 'Visibilidade do lote é obrigatória',
+            ], [
+                'type.required' => 'Tipo de lote é obrigatório',
+                'tax_parcelamento.required' => 'Taxa de parcelamento é obrigatória',
+                'tax_service.required' => 'Taxa de serviço é obrigatória',
+                'value.required' => 'Valor do lote é obrigatório',
+                'name.required' => 'Nome do lote é obrigatório',
+                'quantity.required' => 'Quantidade é obrigatória',
+                'description.required' => 'Descrição do lote é obrigatória',
+                'limit_min.required' => 'Limite mínimo de 1 é obrigatório',
+                'limit_max.required' => 'Limite máximo maior ou igual ao limíte mínimo é obrigatório',
+                'datetime_begin.required' => 'Data de inicio é obrigatória',
+                'datetime_end.required' => 'Data de fim é obrigatória',
+                'form_pagamento.required' => 'Forma de pagamento é obrigatória',
+                'visibility.required' => 'Visibilidade do lote é obrigatória',
             ]);
         } else {
             $validatedData = $this->validate($request, [
@@ -1118,7 +1250,7 @@ class EventAdminController extends Controller
                 'datetime_begin' => 'required',
                 'datetime_end' => 'required',
                 'event_id' => 'nullable',
-            ],[
+            ], [
                 'type.required' => 'Tipo de lote é obrigatório',
                 'tax_parcelamento.required' => 'Taxa de parcelamento é obrigatória',
                 'tax_service.required' => 'Taxa de serviço é obrigatória',
@@ -1146,11 +1278,11 @@ class EventAdminController extends Controller
         $validatedData['datetime_begin'] = date('Y-m-d H:m', strtotime(str_replace('/', '-', $validatedData['datetime_begin'])));
         $validatedData['datetime_end'] = date('Y-m-d H:m', strtotime(str_replace('/', '-', $validatedData['datetime_end'])));
 
-        if($validatedData['type'] == 0) {
+        if ($validatedData['type'] == 0) {
             $validatedData['tax'] = doubleval($validatedData['value']) * $taxa_juros;
             // Se a taxa é paga pelo participante (tax_service == 0), soma ao valor
             // Se a taxa é paga pelo organizador (tax_service == 1), subtrai do valor
-            if(isset($validatedData['tax_service']) && $validatedData['tax_service'] == 0) {
+            if (isset($validatedData['tax_service']) && $validatedData['tax_service'] == 0) {
                 $validatedData['final_value'] = doubleval($validatedData['value']) + doubleval($validatedData['value']) * $taxa_juros;
             } else {
                 $validatedData['final_value'] = doubleval($validatedData['value']) - doubleval($validatedData['value']) * $taxa_juros;
@@ -1206,7 +1338,7 @@ class EventAdminController extends Controller
 
         $input = $request->all();
 
-        if($input['type'] == 0) {
+        if ($input['type'] == 0) {
             $this->validate($request, [
                 'type' => 'required|integer',
                 'tax_parcelamento' => 'required|integer',
@@ -1224,7 +1356,7 @@ class EventAdminController extends Controller
                 'datetime_end' => 'required',
                 'visibility' => 'required',
                 'event_id' => 'nullable',
-            ],[
+            ], [
                 'type.required' => 'Tipo de lote é obrigatório',
                 'tax_parcelamento.required' => 'Taxa de parcelamento é obrigatória',
                 'tax_service.required' => 'Taxa de serviço é obrigatória',
@@ -1238,7 +1370,7 @@ class EventAdminController extends Controller
                 'datetime_end.required' => 'Data de fim é obrigatória',
                 'form_pagamento.required' => 'Forma de pagamento é obrigatória',
                 'visibility.required' => 'Visibilidade do lote é obrigatória',
-             ]);
+            ]);
         } else {
 
             $this->validate($request, [
@@ -1252,7 +1384,7 @@ class EventAdminController extends Controller
                 'datetime_end' => 'required',
                 'visibility' => 'required',
                 'event_id' => 'nullable',
-            ],[
+            ], [
                 'type.required' => 'Tipo de lote é obrigatório',
                 'name.required' => 'Nome do lote é obrigatório',
                 'quantity.required' => 'Quantidade é obrigatória',
@@ -1269,11 +1401,11 @@ class EventAdminController extends Controller
         $input['datetime_begin'] = date('Y-m-d H:m', strtotime(str_replace('/', '-', $input['datetime_begin'])));
         $input['datetime_end'] = date('Y-m-d H:m', strtotime(str_replace('/', '-', $input['datetime_end'])));
 
-        if($input['type'] == 0) {
+        if ($input['type'] == 0) {
             $input['tax'] = doubleval($input['value']) * $taxa_juros;
             // Se a taxa é paga pelo participante (tax_service == 0), soma ao valor
             // Se a taxa é paga pelo organizador (tax_service == 1), subtrai do valor
-            if(isset($input['tax_service']) && $input['tax_service'] == 0) {
+            if (isset($input['tax_service']) && $input['tax_service'] == 0) {
                 $input['final_value'] = doubleval($input['value']) + doubleval($input['value']) * $taxa_juros;
             } else {
                 $input['final_value'] = doubleval($input['value']) - doubleval($input['value']) * $taxa_juros;
@@ -1285,7 +1417,7 @@ class EventAdminController extends Controller
             $input['final_value'] = 0;
         }
 
-        if(isset($input['status'])) {
+        if (isset($input['status'])) {
             $input['status'] = 1;
         } else {
             $input['status'] = 0;
@@ -1300,7 +1432,7 @@ class EventAdminController extends Controller
     {
         $lote = Lote::where('hash', $hash)->first();
 
-        if (!$lote) {
+        if ( ! $lote) {
             return redirect()->route('event_home.create.step.two')->with('error', 'Lote não encontrado.');
         }
 
@@ -1317,15 +1449,15 @@ class EventAdminController extends Controller
     {
         $input = $request->all();
 
-        if(isset($input['order_lote'])) {
-            foreach($input['order_lote'] as $order) {
+        if (isset($input['order_lote'])) {
+            foreach ($input['order_lote'] as $order) {
 
                 $hash_order = explode('_', $order);
                 $hashlote = $hash_order[0];
                 $order = $hash_order[1];
                 $lote = Lote::where('hash', $hashlote)->first();
 
-                if($lote) {
+                if ($lote) {
                     $lote->order = $order;
                     $lote->save();
                 }
@@ -1341,12 +1473,12 @@ class EventAdminController extends Controller
     {
         $event_id = $request->session()->get('event_id');
 
-        if($event_id != null) {
+        if ($event_id != null) {
 
             $event = Event::findOrFail($event_id);
             $hash_event = $event->hash;
 
-            if(empty($request->session()->get('coupons'))) {
+            if (empty($request->session()->get('coupons'))) {
                 $coupons = Coupon::where('event_id', $event_id)->orderBy('created_at')->get();
             } else {
                 $lotes = $request->session()->get('coupons');
@@ -1383,7 +1515,7 @@ class EventAdminController extends Controller
             'discount_value' => 'required',
             'limit_buy' => 'required',
             'limit_tickets' => 'required',
-        ],[
+        ], [
             'code.required' => 'Código do cupom é obrigatório',
             'discount_type.required' => 'Tipo de desconto é obrigatório',
             'discount_value.required' => 'Valor do desconto é obrigatório',
@@ -1393,7 +1525,7 @@ class EventAdminController extends Controller
 
         $input = $request->all();
 
-        if(isset($input['status'])) {
+        if (isset($input['status'])) {
             $input['status'] = 1;
         } else {
             $input['status'] = 0;
@@ -1408,13 +1540,13 @@ class EventAdminController extends Controller
 
         $lotes = $input['lotes'];
 
-        foreach($lotes as $lote) {
+        foreach ($lotes as $lote) {
 
             $coupon_obj->lotes()->attach($lote);
         }
 
-        if($input['discount_type'] == 0) {
-            $input['discount_value'] = (double)$input['discount_value'] / 100;
+        if ($input['discount_type'] == 0) {
+            $input['discount_value'] = (float) $input['discount_value'] / 100;
         }
 
         $coupon_obj->fill($input)->save();
@@ -1453,7 +1585,7 @@ class EventAdminController extends Controller
             'limit_buy' => 'required',
             'limit_tickets' => 'required',
             'status' => 'nullable',
-        ],[
+        ], [
             'code.required' => 'Código do cupom é obrigatório',
             'discount_type.required' => 'Tipo de desconto é obrigatório',
             'discount_value.required' => 'Valor do desconto é obrigatório',
@@ -1465,7 +1597,7 @@ class EventAdminController extends Controller
 
         $input['event_id'] = $coupon->event_id;
 
-        if(isset($input['status'])) {
+        if (isset($input['status'])) {
             $input['status'] = 1;
         } else {
             $input['status'] = 0;
@@ -1475,13 +1607,13 @@ class EventAdminController extends Controller
 
         $coupon->lotes()->detach();
 
-        foreach($lotes as $lote) {
+        foreach ($lotes as $lote) {
 
             $coupon->lotes()->attach($lote);
         }
 
-        if($input['discount_type'] == 0) {
-            $input['discount_value'] = (double)$input['discount_value'] / 100;
+        if ($input['discount_type'] == 0) {
+            $input['discount_value'] = (float) $input['discount_value'] / 100;
         }
 
         $coupon->fill($input)->save();
@@ -1508,7 +1640,7 @@ class EventAdminController extends Controller
     {
         $event_id = $request->session()->get('event_id');
 
-        if($event_id != null) {
+        if ($event_id != null) {
 
             $event = Event::findOrFail($event_id);
             $owner_id = $event->owner_id;
@@ -1529,26 +1661,26 @@ class EventAdminController extends Controller
         $event = Event::where('hash', $hash)->first();
         $owner = Owner::where('id', $input['owner_id'])->first();
 
-        if($event->banner) {
+        if ($event->banner) {
             $validatedEvent = $request->validate([
                 'theme' => 'required',
                 'banner_option' => 'required',
                 'status' => 'nullable',
-            ],[
+            ], [
                 'theme.required' => 'O tema do evento é obrigatório',
                 'banner_option.required' => 'O banner do evento é obrigatório',
                 'status.required' => 'Status é obrigatório',
             ]);
         } else {
-            if($input['banner_option'] == 2) {
+            if ($input['banner_option'] == 2) {
                 $validatedEvent = $request->validate([
                     'banner' => 'mimes:jpg,jpeg,bmp,png|max:2048',
                     'theme' => 'required',
                     'banner_option' => 'required',
                     'status' => 'nullable',
-                ],[
+                ], [
                     'banner.required' => 'Os formatos aceitos para as imagens dos banner são: jpg, jpeg, bmp, png',
-                    'theme.required' => 'O tema do evento é obrigatória',   
+                    'theme.required' => 'O tema do evento é obrigatória',
                     'banner_option.required' => 'O banner do evento é obrigatório',
                     'status.required' => 'Status é obrigatório',
                 ]);
@@ -1557,7 +1689,7 @@ class EventAdminController extends Controller
                     'theme' => 'required',
                     'banner_option' => 'required',
                     'status' => 'nullable',
-                ],[
+                ], [
                     'theme.required' => 'O tema do evento é obrigatório',
                     'banner_option.required' => 'O banner do evento é obrigatório',
                 ]);
@@ -1568,17 +1700,17 @@ class EventAdminController extends Controller
 
         // dd($validatedEvent);
 
-        if(isset($validatedEvent['status'])) {
+        if (isset($validatedEvent['status'])) {
             $validatedEvent['status'] = 1;
         } else {
             $validatedEvent['status'] = 0;
         }
 
-        if($request->file('banner')) {
+        if ($request->file('banner')) {
             $fileName = time().'_'.$request->file('banner')->getClientOriginalName();
             $filePath = $request->file('banner')->storeAs('events', $fileName, 'public');
 
-            if($event) {
+            if ($event) {
                 $validatedEvent['banner'] = $filePath;
                 $event->save();
             }
@@ -1591,13 +1723,13 @@ class EventAdminController extends Controller
         $event->fill($validatedEvent);
         $event->save();
 
-        if($owner && $owner->icon) {
+        if ($owner && $owner->icon) {
             $validatedOwner = $request->validate([
                 'owner_name' => 'required',
                 'description' => 'required',
                 'status' => 'nullable',
                 'icon' => 'nullable|mimes:jpg,jpeg,bmp,png|max:2048',
-            ],[
+            ], [
                 'owner_name.required' => 'O nome do proprietário é obrigatório',
                 'description.required' => 'A descrição do proprietário é obrigatória',
                 'icon.mimes' => 'Os formatos aceitos para as imagens são: jpg, jpeg, bmp, png',
@@ -1608,7 +1740,7 @@ class EventAdminController extends Controller
                 'owner_name' => 'required',
                 'description' => 'required',
                 'status' => 'nullable',
-            ],[
+            ], [
                 'owner_name.required' => 'O nome do proprietário é obrigatório',
                 'description.required' => 'A descrição do proprietário é obrigatória',
                 'icon.required' => 'O ícone do organizador é obrigatório',
@@ -1616,7 +1748,7 @@ class EventAdminController extends Controller
             ]);
         }
 
-        if($request->file('icon')) {
+        if ($request->file('icon')) {
             $fileName = time().'_'.$request->file('icon')->getClientOriginalName();
             $filePath = $request->file('icon')->storeAs('owners', $fileName, 'public');
             $validatedOwner['icon'] = $filePath;
@@ -1626,7 +1758,7 @@ class EventAdminController extends Controller
         $validatedOwner['status'] = 1;
 
         $owner_id = '';
-        if($owner) {
+        if ($owner) {
             $owner->fill($validatedOwner);
             $owner->save();
             $owner_id = $owner->id;
@@ -1639,10 +1771,10 @@ class EventAdminController extends Controller
 
         Event::where('id', $event->id)->update(['owner_id' => $owner_id]);
 
-        if(isset($validatedEvent['status'])) {
+        if (isset($validatedEvent['status'])) {
             try {
                 Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento publicado com sucesso', 'publicado'));
-            } catch (\Exception $mailException) {
+            } catch (Exception $mailException) {
                 Log::warning('Falha ao enviar e-mail de publicação de evento: ' . $mailException->getMessage(), [
                     'event_id' => $event->id,
                     'user_email' => Auth::user()->email,
@@ -1651,7 +1783,7 @@ class EventAdminController extends Controller
         } else {
             try {
                 Mail::to(Auth::user()->email)->send(new EventAdminControllerMail($event, 'Evento salvo com sucesso', 'salvo'));
-            } catch (\Exception $mailException) {
+            } catch (Exception $mailException) {
                 Log::warning('Falha ao enviar e-mail de salvamento de evento: ' . $mailException->getMessage(), [
                     'event_id' => $event->id,
                     'user_email' => Auth::user()->email,
@@ -1675,7 +1807,7 @@ class EventAdminController extends Controller
     {
         $event = Event::where('hash', $hash)->first();
 
-        if (!$event || !$this->hasAccessToEvent($event->id)) {
+        if ( ! $event || ! $this->hasAccessToEvent($event->id)) {
             abort(403, 'Você não tem permissão para acessar este evento');
         }
 
@@ -1696,7 +1828,7 @@ class EventAdminController extends Controller
     {
         $event = Event::where('hash', $hash)->first();
 
-        if($event != null) {
+        if ($event != null) {
 
             return view('painel_admin.guest_add', compact('event'));
 
@@ -1710,7 +1842,7 @@ class EventAdminController extends Controller
     {
         $event = Event::where('hash', $hash)->first();
 
-        if (!$event) {
+        if ( ! $event) {
             return redirect('/');
         }
 
@@ -1722,7 +1854,7 @@ class EventAdminController extends Controller
 
         $input = $request->all();
 
-        if(isset($input['status'])) {
+        if (isset($input['status'])) {
             $input['status'] = 1;
         } else {
             $input['status'] = 0;
@@ -1731,12 +1863,12 @@ class EventAdminController extends Controller
         $participante = Participante::where('email', $input['email'])->first();
         $msgType = '';
         $msgContent = '';
-        if($participante) {
-            if($participante->status == 0) {
+        if ($participante) {
+            if ($participante->status == 0) {
                 $msgType = 'error';
                 $msgContent = 'A conta do usuário convidado está desativada. Entre em contato para regularização.';
                 //ENVIAR EMAIL SOLICITANDO REATIVAÇÃO DA CONTA
-            } elseif($participante->status == 1) {
+            } elseif ($participante->status == 1) {
                 DB::table('participantes_events')->insert([
                     'hash' => md5($participante->name . date('Y-m-d H:i:s') . md5(config('services.hash_secret'))),
                     'role' => 'convidado',
@@ -1750,7 +1882,7 @@ class EventAdminController extends Controller
 
                 try {
                     Mail::to($participante->email)->send(new GuestControllerMail($event, 'Você foi convidado', $participante, Auth::user()));
-                } catch (\Exception $mailException) {
+                } catch (Exception $mailException) {
                     Log::warning('Falha ao enviar e-mail de convite: ' . $mailException->getMessage(), [
                         'event_id' => $event->id,
                         'guest_email' => $participante->email,
@@ -1774,7 +1906,7 @@ class EventAdminController extends Controller
             ->where('participantes_events.id', $id)
             ->first();
 
-        if (!$guest || !$this->hasAccessToEvent($guest->event_id)) {
+        if ( ! $guest || ! $this->hasAccessToEvent($guest->event_id)) {
             abort(403, 'Você não tem permissão para acessar este evento');
         }
 
@@ -1785,7 +1917,7 @@ class EventAdminController extends Controller
     {
         $participanteEventObj = ParticipanteEvent::where('id', $id)->first();
 
-        if (!$participanteEventObj || !$this->hasAccessToEvent($participanteEventObj->event_id)) {
+        if ( ! $participanteEventObj || ! $this->hasAccessToEvent($participanteEventObj->event_id)) {
             abort(403, 'Você não tem permissão para acessar este evento');
         }
 
@@ -1796,7 +1928,7 @@ class EventAdminController extends Controller
 
         $input = $request->all();
 
-        if(isset($input['status'])) {
+        if (isset($input['status'])) {
             $input['status'] = 1;
         } else {
             $input['status'] = 0;
@@ -1813,7 +1945,7 @@ class EventAdminController extends Controller
     {
         $guest = ParticipanteEvent::findOrFail($id);
 
-        if (!$this->hasAccessToEvent($guest->event_id)) {
+        if ( ! $this->hasAccessToEvent($guest->event_id)) {
             abort(403, 'Você não tem permissão para acessar este evento');
         }
 
@@ -1834,7 +1966,7 @@ class EventAdminController extends Controller
 
         unlink($path);
 
-        if($event) {
+        if ($event) {
             $event->banner = '';
             $event->save();
         }
@@ -1852,7 +1984,7 @@ class EventAdminController extends Controller
 
         unlink($path);
 
-        if($owner) {
+        if ($owner) {
             $owner->icon = '';
             $owner->save();
         }
@@ -1883,10 +2015,10 @@ class EventAdminController extends Controller
     public function marcarComoLida(Request $request)
     {
         if ($request->input('action') === 'marcarLida') {
-            
+
             $ids = $request->input('ids');
 
-            if (!is_array($ids) || empty($ids)) {
+            if ( ! is_array($ids) || empty($ids)) {
                 return response()->json(['error' => 'Nenhum ID de mensagem foi fornecido'], 400);
             }
 
@@ -1901,10 +2033,10 @@ class EventAdminController extends Controller
     public function marcarComoNaoLida(Request $request)
     {
         if ($request->input('action') === 'marcarNaoLida') {
-            
+
             $ids = $request->input('ids');
 
-            if (!is_array($ids) || empty($ids)) {
+            if ( ! is_array($ids) || empty($ids)) {
                 return response()->json(['error' => 'Nenhum ID de mensagem foi fornecido'], 400);
             }
 
@@ -1919,10 +2051,10 @@ class EventAdminController extends Controller
     public function deletarMensagens(Request $request)
     {
         if ($request->input('action') === 'deletarMensagens') {
-            
+
             $ids = $request->input('ids');
 
-            if (!is_array($ids) || empty($ids)) {
+            if ( ! is_array($ids) || empty($ids)) {
                 return response()->json(['error' => 'Nenhum ID de mensagem foi fornecido'], 400);
             }
 
@@ -1938,14 +2070,14 @@ class EventAdminController extends Controller
     {
         $event = Event::where('hash', $hash)->first();
 
-        if (!$event || !$this->hasAccessToEvent($event->id)) {
+        if ( ! $event || ! $this->hasAccessToEvent($event->id)) {
             abort(403, 'Você não tem permissão para acessar este evento');
         }
 
         $config = Configuration::findOrFail(1);
 
         $taxa_juros = $config->tax;
-        if($event->config_tax != 0.0) {
+        if ($event->config_tax != 0.0) {
             $taxa_juros = $event->config_tax;
         }
 
@@ -2147,27 +2279,27 @@ class EventAdminController extends Controller
         // Informações do evento
         $event_dates = $event->event_dates()->orderBy('date')->get();
         $place = $event->place;
-        
+
         // Calcular capacidade total e vendida
         $capacidade_total = Lote::where('event_id', $event->id)
             ->where('type', 0) // Apenas lotes pagos
             ->sum('quantity');
-        
+
         $ingressos_vendidos = $resumo->geral ?? 0;
         $taxa_ocupacao = $capacidade_total > 0 ? ($ingressos_vendidos / $capacidade_total) * 100 : 0;
 
         // Ticket médio
-        $ticket_medio = ($resumo->confirmado ?? 0) > 0 
-            ? ($resumo->total_confirmado ?? 0) / ($resumo->confirmado ?? 1) 
+        $ticket_medio = ($resumo->confirmado ?? 0) > 0
+            ? ($resumo->total_confirmado ?? 0) / ($resumo->confirmado ?? 1)
             : 0;
 
         // Vendas por lote (para gráfico)
         $vendas_por_lote = Lote::where('lotes.event_id', $event->id)
             ->leftJoin('order_items', 'lotes.id', '=', 'order_items.lote_id')
             ->leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('orders.id')
-                      ->orWhereIn('orders.status', [1, 2]);
+                    ->orWhereIn('orders.status', [1, 2]);
             })
             ->select('lotes.id', 'lotes.name')
             ->selectRaw('COUNT(CASE WHEN orders.status IN (1,2) THEN 1 END) as vendidos')
@@ -2178,16 +2310,16 @@ class EventAdminController extends Controller
         $payment_methods_json = response()->json($payment_methods);
 
         return view('painel_admin.reports', compact(
-            'event', 
-            'lotes', 
-            'resumo', 
-            'all_orders', 
-            'participantes_json', 
-            'config', 
-            'situacao_participantes', 
-            'situacao_participantes_lotes', 
-            'payment_methods', 
-            'payment_methods_json', 
+            'event',
+            'lotes',
+            'resumo',
+            'all_orders',
+            'participantes_json',
+            'config',
+            'situacao_participantes',
+            'situacao_participantes_lotes',
+            'payment_methods',
+            'payment_methods_json',
             'situacao_coupons',
             'checkin_stats',
             'vendas_por_periodo',
@@ -2205,7 +2337,7 @@ class EventAdminController extends Controller
     {
         $event = Event::where('hash', $hash)->first();
 
-        if (!$event || !$this->hasAccessToEvent($event->id)) {
+        if ( ! $event || ! $this->hasAccessToEvent($event->id)) {
             abort(403);
         }
 
@@ -2269,12 +2401,12 @@ class EventAdminController extends Controller
             ->groupBy('order_items.id')
             ->first();
 
-        if (!$order) {
+        if ( ! $order) {
             abort(404, 'Pedido não encontrado');
         }
 
         // Se não for super admin, verificar se é dono do pedido ou tem acesso ao evento
-        if (!$isSuperAdmin && $order->participante_id != $user->id && !$this->hasAccessToEvent($order->event_id)) {
+        if ( ! $isSuperAdmin && $order->participante_id != $user->id && ! $this->hasAccessToEvent($order->event_id)) {
             abort(403, 'Você não tem permissão para acessar este pedido');
         }
 
@@ -2310,13 +2442,13 @@ class EventAdminController extends Controller
             ->where('orders.gatway_status', '1')
             ->get();
 
-        foreach($items as $item){
+        foreach ($items as $item) {
 
             OrderItem::where('status', '1')
                 ->where('hash', $item->order_items_hash)
                 ->update(['purchase_hash' => $item->purchase_hash]);
         }
-        
+
         return view('painel_admin.print_voucher', compact('items'));
 
     }
@@ -2324,6 +2456,7 @@ class EventAdminController extends Controller
     public function profile()
     {
         $user = Auth::guard('participante')->user();
+
         return view('painel_admin.profile', compact('user'));
     }
 
@@ -2340,7 +2473,7 @@ class EventAdminController extends Controller
 
         $input = $request->all();
 
-        if(empty($input['password'])) {
+        if (empty($input['password'])) {
             unset($input['password']);
         } else {
             $input['password'] = Hash::make($input['password']);
@@ -2350,5 +2483,4 @@ class EventAdminController extends Controller
 
         return redirect()->route('event_home.profile')->with('success', 'Perfil atualizado com sucesso!');
     }
-
 }

@@ -15,9 +15,17 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page module-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Finalizacao</span>
+                        <h1 class="app-page-title">Publicar evento</h1>
+                        <p class="app-page-subtitle">Ajuste tema, banner, organizador e status de publicacao em uma etapa final mais consistente.</p>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -39,7 +47,7 @@
                     @endif
                 </div>
                 
-                <div class="wizard-container">
+                <div class="wizard-container module-card">
                     <div class="wizard-progress">
                         <div class="wizard-progress-bar" style="width: 100%"></div>
                     </div>
@@ -73,26 +81,26 @@
                                 
                                 <div class="mb-4">
                                     <label class="form-label fw-bold">Tema <span class="text-danger">*</span></label>
-                                    <div class="d-flex gap-3 flex-wrap">
-                                        <label class="theme-selector">
+                                    <div class="module-selection-grid">
+                                        <label class="module-theme-selector">
                                             <input type="radio" name="color_option" value="green" @if($event->theme == 'green') checked @endif class="d-none">
-                                            <div class="theme-circle bg-success" title="Verde"></div>
+                                            <div class="module-theme-circle bg-success" title="Verde"></div>
                                         </label>
-                                        <label class="theme-selector">
+                                        <label class="module-theme-selector">
                                             <input type="radio" name="color_option" value="blue" @if($event->theme == 'blue') checked @endif class="d-none">
-                                            <div class="theme-circle bg-primary" title="Azul"></div>
+                                            <div class="module-theme-circle bg-primary" title="Azul"></div>
                                         </label>
-                                        <label class="theme-selector">
+                                        <label class="module-theme-selector">
                                             <input type="radio" name="color_option" value="purple" @if($event->theme == 'purple') checked @endif class="d-none">
-                                            <div class="theme-circle" style="background-color: #6f42c1;" title="Roxo"></div>
+                                            <div class="module-theme-circle" style="background-color: #6f42c1;" title="Roxo"></div>
                                         </label>
-                                        <label class="theme-selector">
+                                        <label class="module-theme-selector">
                                             <input type="radio" name="color_option" value="red" @if($event->theme == 'red') checked @endif class="d-none">
-                                            <div class="theme-circle bg-danger" title="Vermelho"></div>
+                                            <div class="module-theme-circle bg-danger" title="Vermelho"></div>
                                         </label>
-                                        <label class="theme-selector">
+                                        <label class="module-theme-selector">
                                             <input type="radio" name="color_option" value="orange" @if($event->theme == 'orange') checked @endif class="d-none">
-                                            <div class="theme-circle" style="background-color: #fd7e14;" title="Laranja"></div>
+                                            <div class="module-theme-circle" style="background-color: #fd7e14;" title="Laranja"></div>
                                         </label>
                                     </div>
                                     <input type="hidden" name="theme" id="theme" value="{{ $event->theme ?? '' }}">
@@ -111,7 +119,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div id="banner_container" class="mt-3 p-3 border rounded bg-light" style="{{ $event->banner_option == 1 ? 'display: none;' : '' }}">
+                                    <div id="banner_container" class="mt-3 p-3 border rounded bg-light module-toggle-panel" style="{{ $event->banner_option == 1 ? 'display: none;' : '' }}">
                                         @if($event->banner == "")
                                             <input class="form-control" type="file" id="banner" name="banner">
                                             <div class="form-text">Recomendado: 1200x400px, max 2MB.</div>
@@ -149,7 +157,7 @@
                                 
                                 <div class="mb-3">
                                     <label for="icon" class="form-label fw-bold">Logo/Foto do Organizador <span class="text-danger">*</span></label>
-                                    <div class="p-3 border rounded bg-light">
+                                    <div class="p-3 border rounded bg-light module-toggle-panel">
                                         @if($event->owner === null || !$event->owner->icon)
                                             <input class="form-control" type="file" id="icon" name="icon" required>
                                             <div class="form-text">Recomendado: 200x200px (quadrado), max 1MB.</div>
@@ -167,14 +175,14 @@
                             
                             <div class="mb-4">
                                 <h4 class="mb-3 border-bottom pb-2">Publicação</h4>
-                                <div class="form-check form-switch p-3 border rounded bg-light">
+                                <div class="form-check form-switch p-3 border rounded bg-light module-toggle-panel">
                                     <input class="form-check-input" type="checkbox" @if($event->status == 1) checked @endif name="status" id="status" value="1" style="width: 3em; height: 1.5em; margin-right: 1em; margin-left: 2px;">
                                     <label class="form-check-label fw-bold pt-1" for="status">Publicar evento agora?</label>
                                     <div class="form-text ms-1">Se marcado, o evento ficará visível para o público imediatamente.</div>
                                 </div>
                             </div>
                             
-                            <div class="wizard-actions">
+                            <div class="wizard-actions module-actions">
                                 <a href="{{ route('event_home.create.step.three') }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left me-2"></i>Anterior
                                 </a>
@@ -192,26 +200,7 @@
 
       @push('head')
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
-        <style>
-            .theme-selector {
-                cursor: pointer;
-                position: relative;
-            }
-            .theme-circle {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                border: 2px solid #ddd;
-                transition: all 0.2s;
-            }
-            .theme-selector input:checked + .theme-circle {
-                border: 3px solid #333;
-                transform: scale(1.1);
-                box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            }
-            .text-purple { color: #6f42c1; }
-            .text-orange { color: #fd7e14; }
-        </style>
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
       @endpush
 
       @push('footer')

@@ -9,8 +9,11 @@
     <title>Ticket DZ6</title>
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
+    <link href="{{ asset('assets/css/frontend-unified.css') }}" rel="stylesheet">
     {!! RecaptchaV3::initJs() !!}
     @stack('head')
 
@@ -300,16 +303,72 @@
             background: #e3b04b;
             color: #fff;
         }
+
+        .locale-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .locale-flag {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .locale-code {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
     </style>
 
 </head>
 
-<body>
+<body class="auth-shell-body">
+    @php
+        $currentLocale = app()->getLocale();
+        $supportedLocales = [
+            'pt' => 'Português',
+            'en' => 'English',
+            'es' => 'Español',
+            'fr' => 'Français',
+        ];
+        $localeMeta = [
+            'pt' => ['code' => 'PT', 'flag' => 'br'],
+            'en' => ['code' => 'EN', 'flag' => 'gb'],
+            'es' => ['code' => 'ES', 'flag' => 'es'],
+            'fr' => ['code' => 'FR', 'flag' => 'fr'],
+        ];
+    @endphp
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <div class="dropdown">
+            <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="authLanguageDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="locale-chip">
+                    <span class="locale-flag fi fi-{{ $localeMeta[$currentLocale]['flag'] ?? 'un' }}" aria-hidden="true"></span>
+                    <span class="locale-code">{{ $localeMeta[$currentLocale]['code'] ?? strtoupper($currentLocale) }}</span>
+                </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="authLanguageDropdown">
+                @foreach ($supportedLocales as $localeCode => $localeName)
+                    <li>
+                        <a class="dropdown-item {{ $localeCode === $currentLocale ? 'active' : '' }}"
+                           href="{{ route('locale.switch', ['locale' => $localeCode, 'redirect' => request()->getRequestUri()]) }}">
+                            <span class="locale-chip">
+                                <span class="locale-flag fi fi-{{ $localeMeta[$localeCode]['flag'] ?? 'un' }}" aria-hidden="true"></span>
+                                <span class="locale-code">{{ $localeMeta[$localeCode]['code'] ?? strtoupper($localeCode) }}</span>
+                            </span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
     <div class="font-sans text-gray-900 antialiased w-100">
         {{ $slot }}
     </div>
 </body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/js/all.min.js" integrity="sha512-6PM0qYu5KExuNcKt5bURAoT6KCThUmHRewN3zUFNaoI6Di7XJPTMoT6K0nsagZKk2OB4L7E3q1uQKHNHd4stIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 @stack('footer')

@@ -18,12 +18,14 @@ body {
 }
 
 a {
-  color: #185ca4; /*#ec7c04*/
+  color: #185ca4;
+  /*#ec7c04*/
   text-decoration: none;
 }
 
 a:hover {
-  color: #4f9bd5; /*#f48509*/
+  color: #4f9bd5;
+  /*#f48509*/
   text-decoration: none;
 }
 
@@ -36,7 +38,8 @@ h6 {
   font-family: "Nunito", sans-serif;
 }
 
-.container, .container-xl {
+.container,
+.container-xl {
   max-width: 1320px !important;
 }
 
@@ -44,7 +47,7 @@ h6 {
 # Sections
 --------------------------------------------------------------*/
 section {
-  padding: 60px 0;
+  /* padding: 60px 0; */
   overflow: hidden;
 }
 
@@ -196,7 +199,7 @@ section {
   .header {
     padding: 15px 0;
   }
-  
+
   .header.header-scrolled {
     padding: 12px 0;
   }
@@ -412,6 +415,7 @@ section {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -504,6 +508,7 @@ section {
       opacity: 0;
       transform: translateY(-20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -616,12 +621,12 @@ section {
   background-size: cover;
 } */
 
-.hero .hero_img{
+.hero .hero_img {
   position: relative;
   height: 100vh;
 }
 
-.hero .hero_img img{
+.hero .hero_img img {
   position: absolute;
   left: 0;
   top: 0;
@@ -634,15 +639,15 @@ section {
   position: absolute;
   left: 50%;
   top: 60%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
   z-index: 10;
 }
 
-@media(max-width:767px){
+@media(max-width:767px) {
   .hero_absolute {
     position: absolute;
     right: 50%;
-    top:60%;
+    top: 60%;
   }
 
   .hero_absolute .hero-img {
@@ -971,6 +976,11 @@ section {
   display: flex;
 }
 
+.features .feature-icons .content .icon-box:hover i {
+  background: #185ca4;
+  color: #fff;
+}
+
 .features .feature-icons .content .icon-box h4 {
   font-size: 20px;
   font-weight: 700;
@@ -1271,8 +1281,12 @@ section {
 }
 
 .faq .accordion-body {
-  padding: 0 0 25px 0;
+  padding: 0 15px 15px 15px;
   border: 0;
+}
+
+.faq .accordion-item {
+  padding-left: 15px;
 }
 
 /*--------------------------------------------------------------
@@ -1820,7 +1834,7 @@ section {
 .contact .info-box p {
   padding: 0;
   /* line-height: 24px; */
-  
+
   font-size: 14px;
   margin-bottom: 0;
   text-align: right;
@@ -1930,7 +1944,7 @@ section {
   }
 }
 
-#start_event i{
+#start_event i {
   color: #185ca4;
   font-size: 2em;
   margin-bottom: 15px;
@@ -2632,14 +2646,17 @@ section {
   z-index: 50;
   width: 100%;
 }
+
 .custom-select-wrapper select {
   display: none;
 }
+
 .custom-select {
   position: relative;
   display: inline-block;
   width: 100%;
 }
+
 .custom-select-trigger {
   position: relative;
   display: block;
@@ -2652,12 +2669,15 @@ section {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .custom-select-trigger:after {
   position: absolute;
   display: block;
   content: '';
-  width: 10px; height: 10px;
-  top: 50%; right: 25px;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  right: 25px;
   margin-top: -3px;
   border-bottom: 1px solid #fff;
   border-right: 1px solid #fff;
@@ -2665,40 +2685,48 @@ section {
   transition: all .4s ease-in-out;
   transform-origin: 50% 0;
 }
+
 .custom-select.opened .custom-select-trigger:after {
   margin-top: 3px;
   transform: rotate(-135deg) translateY(-50%);
 }
+
 .custom-options {
   position: absolute;
   display: block;
-  top: 100%; left: 0; right: 0;
+  top: 100%;
+  left: 0;
+  right: 0;
   min-width: 100%;
   margin: 15px 0;
   border: 1px solid #b5b5b5;
   border-radius: 4px;
   box-sizing: border-box;
-  box-shadow: 0 2px 1px rgba(0,0,0,.07);
+  box-shadow: 0 2px 1px rgba(0, 0, 0, .07);
   background: #fff;
   transition: all .4s ease-in-out;
-  
+
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translateY(-15px);
 }
+
 .custom-select.opened .custom-options {
   opacity: 1;
   visibility: visible;
   pointer-events: all;
   transform: translateY(0);
 }
+
 .custom-options:before {
   position: absolute;
   display: block;
   content: '';
-  bottom: 100%; right: 25px;
-  width: 7px; height: 7px;
+  bottom: 100%;
+  right: 25px;
+  width: 7px;
+  height: 7px;
   margin-bottom: -2px;
   border-top: 1px solid #b5b5b5;
   border-left: 1px solid #b5b5b5;
@@ -2706,9 +2734,11 @@ section {
   transform: rotate(45deg);
   transition: all .4s ease-in-out;
 }
+
 .option-hover:before {
   background: #f9f9f9;
 }
+
 .custom-option {
   position: relative;
   display: block;
@@ -2722,13 +2752,16 @@ section {
   transition: all .4s ease-in-out;
   z-index: 50;
 }
+
 .custom-option:first-of-type {
   border-radius: 4px 4px 0 0;
 }
+
 .custom-option:last-of-type {
   border-bottom: 0;
   border-radius: 0 0 4px 4px;
 }
+
 .custom-option:hover,
 .custom-option.selection {
   background: #f9f9f9;
@@ -2762,19 +2795,19 @@ section {
   text-transform: uppercase;
 }
 
-#event-list .blog-content h6 a{
-  color:#013289;
+#event-list .blog-content h6 a {
+  color: #013289;
   font-weight: 600;
   font-size: 16px;
 }
 
-#event-list .blog-content h4 a{
-  color:#185ca4;
+#event-list .blog-content h4 a {
+  color: #185ca4;
   font-size: 20px;
 }
 
-#event-list .blog-content h4#place_name a{
-  color:#333;
+#event-list .blog-content h4#place_name a {
+  color: #333;
   font-size: 16px;
 }
 
@@ -2888,19 +2921,17 @@ section {
 
 /* CREATE EVENT FORM */
 
-#create-event-form label
-{
+#create-event-form label {
   font-size: 14px;
   font-weight: 700;
 }
 
-#create-event-form h4
-{
+#create-event-form h4 {
   font-size: 28px;
   font-weight: 700;
 }
 
-.btn-group-toggle label{
+.btn-group-toggle label {
   border: solid 1px #ced4da;
   padding: 10px;
   outline: none;
@@ -2909,24 +2940,29 @@ section {
 .btn-group-toggle .text-red {
   color: #ff4a67;
 }
+
 .btn-group-toggle .text-blue {
   color: #1cb9c8;
 }
+
 .btn-group-toggle .text-green {
   color: #26ae61;
 }
+
 .btn-group-toggle .text-orange {
   color: #FBC02D;
 }
+
 .btn-group-toggle .text-purple {
   color: #8546c9;
 }
+
 .btn-group-toggle .active {
   background: #ddd;
 }
 
 .bg-light {
-  background-color: #f8f9fa!important;
+  background-color: #f8f9fa !important;
 }
 
 .info-box {
@@ -2940,7 +2976,7 @@ section {
   padding: 0.5rem;
   position: relative;
   width: 100%;
-  text-align:center;
+  text-align: center;
 }
 
 .info-box .info-box-text {
@@ -2948,7 +2984,7 @@ section {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align:center;
+  text-align: center;
 }
 
 .info-box .info-box-number {
@@ -2956,8 +2992,9 @@ section {
   margin-top: 0.25rem;
   font-weight: 700;
 }
+
 .text-success {
-  color: #28a745!important;
+  color: #28a745 !important;
 }
 
 .contact_event tr {

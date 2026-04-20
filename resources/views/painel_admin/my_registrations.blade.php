@@ -19,6 +19,14 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
     
         <section class="inner-page" id="create-event-form">
             <div class="container">
+                <div class="app-page-head">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Conta do participante</span>
+                        <h1 class="app-page-title">Minhas inscrições</h1>
+                        <p class="app-page-subtitle">Acompanhe o status dos pedidos, recupere QR Codes, conclua pagamentos pendentes e acesse certificados sem precisar abrir várias telas.</p>
+                    </div>
+                </div>
+
                 <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -41,30 +49,40 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                     @endif
                 </div>
                 
-                <!-- Filtros -->
-                <div class="registrations-filters">
-                    <div class="filter-tabs" id="statusFilters">
-                        <div class="filter-tab active" data-status="all">
-                            <i class="fas fa-list"></i> Todas
-                        </div>
-                        <div class="filter-tab" data-status="1">
-                            <i class="fas fa-check-circle"></i> Confirmadas
-                        </div>
-                        <div class="filter-tab" data-status="2">
-                            <i class="fas fa-clock"></i> Pendentes
-                        </div>
-                        <div class="filter-tab" data-status="3">
-                            <i class="fas fa-times-circle"></i> Canceladas
-                        </div>
-                    </div>
-                    <div class="filter-search-box">
-                        <i class="fas fa-search filter-search-icon"></i>
-                        <input type="text" class="form-control" id="searchRegistrations" placeholder="Buscar por nome do evento, hash...">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('event_home.my_registrations') }}" class="row g-2 align-items-end">
+                            <div class="col-lg-4">
+                                <label for="q" class="form-label mb-1">Busca</label>
+                                <input type="text" id="q" name="q" class="form-control" value="{{ $filters['q'] ?? '' }}" placeholder="Nome do evento ou hash">
+                            </div>
+                            <div class="col-lg-2">
+                                <label for="status" class="form-label mb-1">Status</label>
+                                <select id="status" name="status" class="form-select">
+                                    <option value="all" {{ ($filters['status'] ?? 'all') === 'all' ? 'selected' : '' }}>Todos</option>
+                                    <option value="1" {{ ($filters['status'] ?? '') === '1' ? 'selected' : '' }}>Confirmado</option>
+                                    <option value="2" {{ ($filters['status'] ?? '') === '2' ? 'selected' : '' }}>Pendente</option>
+                                    <option value="3" {{ ($filters['status'] ?? '') === '3' ? 'selected' : '' }}>Cancelado</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <label for="date_from" class="form-label mb-1">Compra de</label>
+                                <input type="date" id="date_from" name="date_from" class="form-control" value="{{ $filters['date_from'] ?? '' }}">
+                            </div>
+                            <div class="col-lg-2">
+                                <label for="date_to" class="form-label mb-1">Compra até</label>
+                                <input type="date" id="date_to" name="date_to" class="form-control" value="{{ $filters['date_to'] ?? '' }}">
+                            </div>
+                            <div class="col-lg-2 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
+                                <a href="{{ route('event_home.my_registrations', ['reset_filters' => 1]) }}" class="btn btn-outline-secondary">Limpar</a>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 
                 <!-- Grid de Inscrições -->
-                @if(count($orders) > 0)
+                @if($orders->count() > 0)
                     <div class="registrations-grid" id="registrationsGrid">
                         @foreach($orders as $order)
                             @php
@@ -86,7 +104,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                     $statusIcon = 'fa-times-circle';
                                 }
                             @endphp
-                            <div class="registration-card" data-status="{{ $order->status ?? '0' }}" data-search="{{ strtolower(($order->eventDate?->event?->name ?? '') . ' ' . $order->hash) }}">
+                            <div class="registration-card">
                                 <div class="registration-header">
                                     <div class="registration-id">ID: {{ $order->id }}</div>
                                     <div class="registration-hash">{{ $order->hash }}</div>
@@ -122,42 +140,42 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                     </div>
                                     <!-- QR Codes para Check-in (só pedidos confirmados) -->
                                     @if($order->status == 1 && $order->order_items && $order->order_items->count() > 0)
-                                        <div class="qr-codes-section" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e9ecef;">
-                                            <h5 style="font-size: 1rem; font-weight: 600; color: #333; margin-bottom: 1rem;">
+                                        <div class="registration-subsection qr-codes-section">
+                                            <h5 class="registration-subsection-title">
                                                 <i class="fas fa-qrcode"></i> QR Codes para Check-in
                                             </h5>
-                                            <div class="qr-codes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                                            <div class="qr-codes-grid">
                                                 @foreach($order->order_items as $item)
                                                     @if($item->purchase_hash)
-                                                        <div class="qr-code-item" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
-                                                            <div style="font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.5rem;">
+                                                        <div class="qr-code-item">
+                                                            <div class="qr-code-meta">
                                                                 Ingresso #{{ $item->number }}
                                                             </div>
                                                             @if($item->lote?->name)
-                                                                <div style="font-size: 0.7rem; color: #999; margin-bottom: 0.5rem;">
+                                                                <div class="qr-code-lote">
                                                                     {{ $item->lote->name }}
                                                                 </div>
                                                             @endif
-                                                            <div style="background: white; padding: 0.5rem; border-radius: 4px; display: inline-block; margin-bottom: 0.5rem;">
+                                                            <div class="qr-code-canvas">
                                                                 {!! QrCode::size(120)->generate(route('checkin.view', $item->purchase_hash)) !!}
                                                             </div>
                                                             @if($item->checkin_status == 1)
-                                                                <div style="font-size: 0.7rem; color: #28a745; font-weight: 600; margin-top: 0.5rem;">
+                                                                <div class="qr-code-status qr-code-status--success">
                                                                     <i class="fas fa-check-circle"></i> Check-in realizado
+                                                                    @if($item->checkin_at)
+                                                                        <span class="qr-code-status-time">
+                                                                            {{ \Carbon\Carbon::parse($item->checkin_at)->format('d/m/Y H:i') }}
+                                                                        </span>
+                                                                    @endif
                                                                 </div>
-                                                                @if($item->checkin_at)
-                                                                    <div style="font-size: 0.65rem; color: #666; margin-top: 0.25rem;">
-                                                                        {{ \Carbon\Carbon::parse($item->checkin_at)->format('d/m/Y H:i') }}
-                                                                    </div>
-                                                                @endif
                                                             @else
-                                                                <div style="font-size: 0.7rem; color: #666; margin-top: 0.5rem;">
+                                                                <div class="qr-code-status qr-code-status--muted">
                                                                     Aguardando check-in
                                                                 </div>
                                                             @endif
                                                             <a href="{{ route('checkin.view', $item->purchase_hash) }}"
                                                                target="_blank"
-                                                               style="display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: #007bff; text-decoration: none;">
+                                                               class="qr-code-link">
                                                                 <i class="fas fa-external-link-alt"></i> Ver ingresso
                                                             </a>
                                                         </div>
@@ -174,49 +192,51 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                             $boletoInfo = $boletoDetailsMap[$order->id] ?? null;
                                         @endphp
                                         @if($pixInfo)
-                                            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e9ecef;">
-                                                <h5 style="font-size: 1rem; font-weight: 600; color: #856404; margin-bottom: 1rem;">
+                                            <div class="registration-subsection">
+                                                <h5 class="registration-subsection-title">
                                                     <i class="fas fa-qrcode"></i> Pague com PIX
                                                 </h5>
-                                                <div style="text-align: center;">
+                                                <div class="registration-payment-box text-center">
                                                     @if($pixInfo->qr_code_base64)
-                                                        <img src="data:image/png;base64,{{ $pixInfo->qr_code_base64 }}" alt="QR Code PIX" style="max-width: 200px; margin-bottom: 1rem;">
+                                                        <img src="data:image/png;base64,{{ $pixInfo->qr_code_base64 }}" alt="QR Code PIX" class="img-fluid mb-3 registration-payment-image">
                                                     @endif
                                                     @if($pixInfo->qr_code)
-                                                        <div class="input-group mb-2" style="max-width: 400px; margin: 0 auto;">
+                                                        <div class="input-group mb-2 mx-auto registration-copy-group">
                                                             <input type="text" class="form-control form-control-sm" value="{{ $pixInfo->qr_code }}" id="pix_code_{{ $order->id }}" readonly>
-                                                            <button class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('pix_code_{{ $order->id }}').value).then(()=>{this.innerHTML='<i class=\'fas fa-check\'></i> Copiado';setTimeout(()=>{this.innerHTML='<i class=\'fas fa-copy\'></i> Copiar'},2000)})">
+                                                            <button class="btn btn-outline-secondary btn-sm copy-feedback-btn" onclick="navigator.clipboard.writeText(document.getElementById('pix_code_{{ $order->id }}').value).then(()=>{this.innerHTML='<i class=\'fas fa-check\'></i> Copiado';setTimeout(()=>{this.innerHTML='<i class=\'fas fa-copy\'></i> Copiar'},2000)})">
                                                                 <i class="fas fa-copy"></i> Copiar
                                                             </button>
                                                         </div>
                                                     @endif
                                                     @if($pixInfo->expiration_date)
-                                                        <p style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">Expira em: {{ \Carbon\Carbon::parse($pixInfo->expiration_date)->format('d/m/Y H:i') }}</p>
+                                                        <p class="registration-inline-note">Expira em: {{ \Carbon\Carbon::parse($pixInfo->expiration_date)->format('d/m/Y H:i') }}</p>
                                                     @endif
                                                 </div>
                                             </div>
                                         @endif
                                         @if($boletoInfo)
-                                            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e9ecef;">
-                                                <h5 style="font-size: 1rem; font-weight: 600; color: #856404; margin-bottom: 1rem;">
+                                            <div class="registration-subsection">
+                                                <h5 class="registration-subsection-title">
                                                     <i class="fas fa-barcode"></i> Boleto Bancário
                                                 </h5>
-                                                @if($boletoInfo->href)
-                                                    <a href="{{ $boletoInfo->href }}" target="_blank" class="btn btn-warning w-100 mb-2">
-                                                        <i class="fas fa-external-link-alt me-2"></i>Abrir Boleto
-                                                    </a>
-                                                @endif
-                                                @if($boletoInfo->line_code)
-                                                    <div class="input-group mb-2">
-                                                        <input type="text" class="form-control form-control-sm" value="{{ $boletoInfo->line_code }}" id="boleto_code_{{ $order->id }}" readonly>
-                                                        <button class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('boleto_code_{{ $order->id }}').value).then(()=>{this.innerHTML='<i class=\'fas fa-check\'></i> Copiado';setTimeout(()=>{this.innerHTML='<i class=\'fas fa-copy\'></i> Copiar'},2000)})">
-                                                            <i class="fas fa-copy"></i> Copiar
-                                                        </button>
-                                                    </div>
-                                                @endif
-                                                @if($boletoInfo->expiration_date)
-                                                    <p style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">Vencimento: {{ \Carbon\Carbon::parse($boletoInfo->expiration_date)->format('d/m/Y') }}</p>
-                                                @endif
+                                                <div class="registration-payment-box">
+                                                    @if($boletoInfo->href)
+                                                        <a href="{{ $boletoInfo->href }}" target="_blank" class="btn btn-warning w-100 mb-2">
+                                                            <i class="fas fa-external-link-alt me-2"></i>Abrir Boleto
+                                                        </a>
+                                                    @endif
+                                                    @if($boletoInfo->line_code)
+                                                        <div class="input-group mb-2">
+                                                            <input type="text" class="form-control form-control-sm" value="{{ $boletoInfo->line_code }}" id="boleto_code_{{ $order->id }}" readonly>
+                                                            <button class="btn btn-outline-secondary btn-sm copy-feedback-btn" onclick="navigator.clipboard.writeText(document.getElementById('boleto_code_{{ $order->id }}').value).then(()=>{this.innerHTML='<i class=\'fas fa-check\'></i> Copiado';setTimeout(()=>{this.innerHTML='<i class=\'fas fa-copy\'></i> Copiar'},2000)})">
+                                                                <i class="fas fa-copy"></i> Copiar
+                                                            </button>
+                                                        </div>
+                                                    @endif
+                                                    @if($boletoInfo->expiration_date)
+                                                        <p class="registration-inline-note">Vencimento: {{ \Carbon\Carbon::parse($boletoInfo->expiration_date)->format('d/m/Y') }}</p>
+                                                    @endif
+                                                </div>
                                             </div>
                                         @endif
                                     @endif
@@ -229,6 +249,14 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                                 <i class="fas fa-print"></i>
                                                 Imprimir
                                             </a>
+                                            @if($order->event && $order->event->certificate_enabled && $order->event->max_event_dates() && $order->event->max_event_dates() < now()->toDateString())
+                                                <a href="{{route('event_home.certificate.download', $order->hash)}}"
+                                                   class="registration-btn registration-btn-primary"
+                                                   title="Ver certificados disponíveis">
+                                                    <i class="fas fa-certificate"></i>
+                                                    Certificados
+                                                </a>
+                                            @endif
                                         @endif
                                         <a href="{{route('event_home.order.details', $order->hash)}}"
                                            class="registration-btn registration-btn-secondary">
@@ -239,6 +267,9 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+                    <div class="mt-3 d-flex justify-content-end">
+                        {{ $orders->links() }}
                     </div>
                 @else
                     <div class="registrations-empty">
@@ -255,11 +286,6 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
       </main><!-- End #main -->
 
       @push('head')
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-        <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.dataTables.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
         <link rel="stylesheet" href="{{ asset('assets/css/my-registrations-improvements.css') }}" type="text/css">
       @endpush

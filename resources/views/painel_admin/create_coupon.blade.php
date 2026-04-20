@@ -12,9 +12,17 @@
             </div>
         </section><!-- End Breadcrumbs -->
 
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page module-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Configuracao comercial</span>
+                        <h1 class="app-page-title">Criar cupom</h1>
+                        <p class="app-page-subtitle">Defina desconto, limites e lotes elegiveis em um formulario mais legivel e coerente com o restante do painel.</p>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -36,13 +44,13 @@
                     @endif
                 </div>
                 
-                <div class="card">
-                    <div class="card-body">
+                <div class="card module-card">
+                    <div class="card-body module-card-body">
                         <form method="POST" action="{{ route('event_home.store_coupon', $hash) }}" id="coupon-form" class="needs-validation" novalidate>
                             @csrf
                             <input type="hidden" name="hash_event" value="{{ $hash }}">
                             
-                            <div class="card-body">
+                            <div class="module-form-section">
                                 <h4>Informações do cupom</h4>
                                 
                                 <div class="mb-3">
@@ -155,7 +163,7 @@
                                     <label class="form-label">
                                         Lotes que terão este cupom de desconto
                                     </label>
-                                    <div class="card p-3 bg-light" style="max-height: 300px; overflow-y: auto;">
+                                    <div class="module-lote-box">
                                         @foreach($lotes as $lote)
                                             <div class="form-check mb-2">
                                                 <input 
@@ -197,7 +205,7 @@
                                 </div>
                             </div>
                             
-                            <div class="card-footer d-flex justify-content-between">
+                            <div class="card-footer d-flex justify-content-between module-actions">
                                 <a href="{{ route('event_home.create.step.three') }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left me-2"></i>Voltar
                                 </a>
@@ -216,6 +224,7 @@
     @push('head')
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
     @endpush
 
     @push('footer')

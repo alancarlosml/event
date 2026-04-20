@@ -15,9 +15,22 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page module-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Equipe do evento</span>
+                        <h1 class="app-page-title">Usuarios convidados</h1>
+                        <p class="app-page-subtitle">Gerencie admins, monitores e vendedores vinculados ao evento com uma visualizacao mais clara.</p>
+                    </div>
+                    <div class="module-hero-actions">
+                        <a href="{{route('event_home.guest_add', $event->hash)}}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Cadastrar novo usuario
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -46,16 +59,19 @@
                     @endif
                 </div>
                 
-                <div class="card">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                        <h4 class="mb-0">Lista de Usuários</h4>
-                        <a href="{{route('event_home.guest_add', $event->hash)}}" class="btn btn-success">
-                            <i class="fas fa-plus me-2"></i>Cadastrar novo usuário
+                <div class="card module-card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 module-card-head">
+                        <div>
+                            <h4 class="mb-0">Lista de usuarios</h4>
+                            <p>{{ count($usuarios) }} registro(s) disponiveis para este evento.</p>
+                        </div>
+                        <a href="{{route('event_home.guest_add', $event->hash)}}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Novo usuario
                         </a>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle" id="table_guests">
+                    <div class="card-body module-card-body">
+                        <div class="table-responsive module-table-wrap">
+                            <table class="table table-hover align-middle module-table" id="table_guests">
                                 <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
@@ -70,7 +86,7 @@
                                     @foreach($usuarios as $usuario)
                                         <tr data-guest-id="{{$usuario->id}}">
                                             <td>{{$usuario->id}}</td>
-                                            <td>{{$usuario->name}}</td>
+                                            <td class="fw-semibold">{{$usuario->name}}</td>
                                             <td>{{$usuario->email}}</td>
                                             <td>
                                                 @if($usuario->role == 'admin') 
@@ -109,6 +125,17 @@
                                             </td>
                                         </tr>
                                     @endforeach
+                                    @if(count($usuarios) == 0)
+                                        <tr>
+                                            <td colspan="6" class="p-0">
+                                                <div class="module-empty">
+                                                    <i class="fas fa-users"></i>
+                                                    <strong>Nenhum usuario convidado cadastrado</strong>
+                                                    <span>Adicione perfis de apoio para distribuir a operacao do evento.</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -140,6 +167,7 @@
 
       @push('head')
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
       @endpush
 
       @push('footer')
@@ -168,3 +196,6 @@
       @endpush
 
 </x-site-layout>
+
+
+

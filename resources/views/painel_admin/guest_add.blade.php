@@ -15,9 +15,17 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page module-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Equipe do evento</span>
+                        <h1 class="app-page-title">Adicionar usuario</h1>
+                        <p class="app-page-subtitle">Inclua um novo perfil de apoio para operacao, atendimento ou monitoria do evento.</p>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -39,9 +47,10 @@
                     @endif
                 </div>
                 
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4">Adicionar novo usuário convidado</h4>
+                <div class="card module-card">
+                    <div class="card-body module-card-body">
+                        <div class="module-form-section">
+                            <h4 class="card-title mb-4">Adicionar novo usuario convidado</h4>
                         <form method="POST" action="{{route('event_home.guest_store', $event->hash)}}">
                             @csrf
                             
@@ -69,7 +78,7 @@
                                 </div>
                             </div>
                             
-                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top module-actions">
                                 <a href="{{ route('event_home.guests', $event->hash) }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left me-2"></i>Voltar
                                 </a>
@@ -78,15 +87,16 @@
                                 </button>
                             </div>
                         </form>
+                        </div>
                     </div>
                 </div>
-            </div>
         </section>
     
       </main><!-- End #main -->
 
       @push('head')
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
       @endpush
 
       @push('footer')
@@ -100,3 +110,5 @@
       @endpush
 
 </x-site-layout>
+
+

@@ -15,9 +15,17 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page module-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Equipe do evento</span>
+                        <h1 class="app-page-title">Editar usuario</h1>
+                        <p class="app-page-subtitle">Ajuste papel e status do usuario convidado sem perder contexto do evento.</p>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -39,21 +47,22 @@
                     @endif
                 </div>
                 
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4">Editar usuário convidado</h4>
+                <div class="card module-card">
+                    <div class="card-body module-card-body">
+                        <div class="module-form-section">
+                            <h4 class="card-title mb-4">Editar usuario convidado</h4>
                         <form method="POST" action="{{ route('event_home.guest_update', $guest->id) }}">
                             @csrf
                             
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nome <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="name" name="name"
+                                <input type="text" class="form-control module-readonly" id="name" name="name"
                                        placeholder="Nome" value="{{ $guest->name ?? old('name') }}" readonly>
                             </div>
                             
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="email" name="email"
+                                <input type="text" class="form-control module-readonly" id="email" name="email"
                                        placeholder="Email" value="{{ $guest->email ?? old('email') }}" readonly>
                             </div>
                             
@@ -74,7 +83,7 @@
                                 </div>
                             </div>
                             
-                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top module-actions">
                                 <a href="{{ route('event_home.guests', $guest->event_hash) }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left me-2"></i>Voltar
                                 </a>
@@ -83,15 +92,16 @@
                                 </button>
                             </div>
                         </form>
+                        </div>
                     </div>
                 </div>
-            </div>
         </section>
     
       </main><!-- End #main -->
 
       @push('head')
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
       @endpush
 
       @push('footer')
@@ -105,3 +115,5 @@
       @endpush
 
 </x-site-layout>
+
+

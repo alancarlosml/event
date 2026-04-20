@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,10 +16,48 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', 'App\Http\Controllers\HomeController@home')->name('home');
+Route::get('/', function (Request $request) {
+    $locale = $request->session()->get('locale', 'pt');
+
+    if (! in_array($locale, ['pt', 'en', 'es', 'fr'], true)) {
+        $locale = 'pt';
+    }
+
+    return redirect("/{$locale}", 301);
+});
+
+Route::get('/language/{locale}', function (Request $request, string $locale) {
+    abort_unless(in_array($locale, ['pt', 'en', 'es', 'fr'], true), 404);
+
+    $request->session()->put('locale', $locale);
+
+    $redirect = $request->query('redirect');
+
+    if (is_string($redirect) && $redirect !== '') {
+        $path = parse_url($redirect, PHP_URL_PATH) ?: '/';
+        $query = parse_url($redirect, PHP_URL_QUERY);
+    } else {
+        $referer = url()->previous();
+        $path = parse_url($referer, PHP_URL_PATH) ?: '/';
+        $query = parse_url($referer, PHP_URL_QUERY);
+    }
+
+    if (! str_starts_with($path, '/')) {
+        $path = '/' . ltrim($path, '/');
+    }
+
+    $normalizedPath = preg_replace('#^/(pt|en|es|fr)(?=/|$)#', '', $path) ?: '/';
+    $localizedPath = '/' . $locale . ($normalizedPath === '/' ? '' : $normalizedPath);
+
+    if ($query) {
+        $localizedPath .= '?' . $query;
+    }
+
+    return redirect($localizedPath);
+})->name('locale.switch');
 // Route::post ('/contato', 'App\Http\Controllers\HomeController@contact')->name('contact');
 Route::get('/contato', 'App\Http\Controllers\HomeController@show_contact_form');
-Route::post('/contato', 'App\Http\Controllers\HomeController@send')->name('contact');
+Route::post('/contato', 'App\Http\Controllers\HomeController@send')->middleware('throttle:10,1')->name('contact');
 Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
 Route::get('/eventos/get-more-events', 'App\Http\Controllers\EventHomeController@getMoreEvents')->name('event_home.get-more-events');
 
@@ -45,6 +84,7 @@ Route::prefix('painel')
         Route::put('/perfil', 'App\Http\Controllers\EventAdminController@updateProfile')->name('profile.update');
         
         // Eventos - CRUD
+        Route::get('/meus-eventos/{hash}/gerenciar', 'App\Http\Controllers\EventAdminController@manageEvent')->name('event_manage');
         Route::get('/meus-eventos/{hash}/detalhes', 'App\Http\Controllers\EventAdminController@myEventsShow')->name('my_events_show');
         Route::get('/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@myEventsEdit')->name('my_events_edit');
         Route::put('/meus-eventos/{hash}/editar', 'App\Http\Controllers\EventAdminController@updateEvent')->name('my_events_edit.update');
@@ -100,15 +140,21 @@ Route::prefix('painel')
         // Order Management (Cancel/Refund for organizers)
         Route::post('/orders/{id}/cancel', 'App\Http\Controllers\OrderController@cancelOrganizer')->name('order.cancel');
         Route::post('/orders/{id}/refund', 'App\Http\Controllers\OrderController@refundOrganizer')->name('order.refund');
-        
+
         // Arquivos
         Route::get('/eventos/{id}/delete_file', 'App\Http\Controllers\EventAdminController@deleteFileEvent')->name('delete_file_event');
         Route::get('/eventos/organizador/{id}/delete_file_icon', 'App\Http\Controllers\EventAdminController@deleteFileIcon')->name('delete_file_icon');
+        // Certificados
+        Route::get('/meus-eventos/{hash}/certificado', 'App\Http\Controllers\CertificateController@edit')->name('certificate.edit');
+        Route::post('/meus-eventos/{hash}/certificado/configurar', 'App\Http\Controllers\CertificateController@updateSettings')->name('certificate.settings');
+        Route::delete('/meus-eventos/{hash}/certificado/imagem/{type}', 'App\Http\Controllers\CertificateController@deleteImage')->name('certificate.delete_image');
+        Route::get('/certificado/{order_hash}/download', 'App\Http\Controllers\CertificateController@download')->name('certificate.download');
+        Route::get('/certificado/{order_hash}/ingresso/{order_item_id}/download', 'App\Http\Controllers\CertificateController@downloadItem')->name('certificate.download_item');
     });
 
 // Check-in Routes
 Route::get('checkin/{purchase_hash}', 'App\Http\Controllers\CheckInController@viewTicket')->name('checkin.view');
-Route::post('api/checkin/{purchase_hash}', 'App\Http\Controllers\CheckInController@validateCheckIn')->name('checkin.validate');
+Route::post('api/checkin/{purchase_hash}', 'App\Http\Controllers\CheckInController@validateCheckIn')->middleware('throttle:30,1')->name('checkin.validate');
 
 // Rota para corrigir hashes de lotes (antes do /{slug} para não ser capturada)
 Route::get('/fix-lote-hashes', 'App\Http\Controllers\LoteController@fixLoteHashes')->middleware(['auth:web'])->name('lote.fix_hashes');
@@ -116,19 +162,22 @@ Route::get('/fix-lote-hashes', 'App\Http\Controllers\LoteController@fixLoteHashe
 Route::get('/politica', 'App\Http\Controllers\HomeController@politica')->name('politica');
 Route::get('/termos', 'App\Http\Controllers\HomeController@termos')->name('termos');
 
-Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->where('slug', '^(?!admin|api|checkin|webhooks|fix-lote-hashes|painel|getSubTotal|getCoupon|setEventDate|getLotesPorData|contato|politica|termos|mercado-pago).*$')->name('conference.index');
-Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->name('contact_event');
+// Verificação pública de certificado
+Route::get('/certificado/verificar', 'App\Http\Controllers\CertificateController@verify')->name('certificate.verify');
+
+Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->where('slug', '^(?!pt$|en$|es$|fr$|admin$|api$|checkin$|webhooks$|fix-lote-hashes$|painel$|getSubTotal$|getCoupon$|setEventDate$|getLotesPorData$|contato$|politica$|termos$|mercado-pago$|certificado$)[^/]+$')->name('conference.index');
+Route::post('contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->middleware('throttle:10,1')->name('contact_event');
 Route::match(['GET', 'POST'], '{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
 Route::get('{slug}/pagamento-view', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.paymentView');
 Route::post('{slug}/pagamento', 'App\Http\Controllers\ConferenceController@payment')->middleware(['auth:participante', 'verified'])->name('conference.payment');
 Route::post('{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
-Route::get('check-payment-status/{order_id}', 'App\Http\Controllers\ConferenceController@checkPaymentStatus')->name('conference.checkPaymentStatus');
+Route::get('check-payment-status/{order_id}', 'App\Http\Controllers\ConferenceController@checkPaymentStatus')->middleware('throttle:60,1')->name('conference.checkPaymentStatus');
 Route::get('confirmacao/{order_hash}', 'App\Http\Controllers\ConferenceController@confirmation')->middleware(['auth:participante', 'verified'])->name('conference.confirmation');
-Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->name('conference.getSubTotal');
-Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->name('conference.getCoupon');
-Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->name('conference.removeCoupon');
-Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEventDate')->name('conference.setEventDate');
-Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLotesPorData')->name('conference.getLotesPorData');
+Route::post('getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->middleware('throttle:60,1')->name('conference.getSubTotal');
+Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->middleware('throttle:30,1')->name('conference.getCoupon');
+Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->middleware('throttle:30,1')->name('conference.removeCoupon');
+Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEventDate')->middleware('throttle:60,1')->name('conference.setEventDate');
+Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLotesPorData')->middleware('throttle:60,1')->name('conference.getLotesPorData');
 
 // Route::post('painel/lotes/{id}/store', 'App\Http\Controllers\LoteController@store')->middleware(['auth:participante', 'verified'])->name('lote.store');
 // Route::get('painel/lotes/{id}/edit', 'App\Http\Controllers\LoteController@edit')->middleware(['auth:participante', 'verified'])->name('lote.edit');
@@ -143,7 +192,7 @@ Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLo
 // Route::get('admin/login', [AuthenticatedSessionController::class, 'create'])->name('login');
 
 Route::get('admin/login', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@create')->name('admin.login');
-Route::post('admin/login', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@store')->name('admin.login.store');
+Route::post('admin/login', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@store')->middleware('throttle:10,1')->name('admin.login.store');
 Route::post('admin/logout', 'App\Http\Controllers\Admin\Auth\AuthenticatedSessionController@destroy')->name('admin.logout');
 
 Route::get('admin/dashboard', 'App\Http\Controllers\DashboardController@dashboard')->middleware(['auth:web'])->name('dashboard');
@@ -253,7 +302,7 @@ Route::get('admin/events/{id}/questions', 'App\Http\Controllers\EventController@
 Route::post('admin/events/{id}/questions/create', 'App\Http\Controllers\EventController@create_questions')->middleware(['auth:web'])->name('event.questions.create');
 
 // Mercado Pago Webhooks
-Route::post('/webhooks/mercado-pago/notification', 'App\Http\Controllers\MercadoPagoController@notification');
+Route::post('/webhooks/mercado-pago/notification', 'App\Http\Controllers\MercadoPagoController@notification')->middleware('throttle:120,1');
 Route::get('/webhooks/mercado-pago/check-linked-account', 'App\Http\Controllers\MercadoPagoController@checkLinkedAccount')->middleware(['auth:participante', 'verified']);
 
 // Mercado Pago OAuth Callback
@@ -261,3 +310,34 @@ Route::get('/mercado-pago/link-account', 'App\Http\Controllers\MercadoPagoContro
 Route::post('/mercado-pago/unlink-account', 'App\Http\Controllers\MercadoPagoController@unlinkAccount')->middleware(['auth:participante', 'verified'])->name('mercado-pago.unlink-account');
 
 require __DIR__.'/auth.php';
+
+Route::prefix('{locale}')
+    ->where(['locale' => 'pt|en|es|fr'])
+    ->middleware('set.locale')
+    ->group(function () {
+        Route::get('/', 'App\Http\Controllers\HomeController@home')->name('home');
+        Route::get('/contato', 'App\Http\Controllers\HomeController@show_contact_form');
+        Route::post('/contato', 'App\Http\Controllers\HomeController@send')->middleware('throttle:10,1')->name('contact');
+        Route::get('/eventos', 'App\Http\Controllers\EventHomeController@events');
+        Route::get('/eventos/get-more-events', 'App\Http\Controllers\EventHomeController@getMoreEvents')->name('event_home.get-more-events');
+        Route::get('/politica', 'App\Http\Controllers\HomeController@politica')->name('politica');
+        Route::get('/termos', 'App\Http\Controllers\HomeController@termos')->name('termos');
+        Route::get('/certificado/verificar', 'App\Http\Controllers\CertificateController@verify')->name('certificate.verify');
+
+        Route::post('/contato/{hash}', 'App\Http\Controllers\ConferenceController@send')->middleware('throttle:10,1')->name('contact_event');
+        Route::match(['GET', 'POST'], '/{slug}/resumo', 'App\Http\Controllers\ConferenceController@resume')->middleware(['auth:participante', 'verified'])->name('conference.resume');
+        Route::get('/{slug}/pagamento-view', 'App\Http\Controllers\ConferenceController@paymentView')->middleware(['auth:participante', 'verified'])->name('conference.paymentView');
+        Route::post('/{slug}/pagamento', 'App\Http\Controllers\ConferenceController@payment')->middleware(['auth:participante', 'verified'])->name('conference.payment');
+        Route::post('/{slug}/obrigado', 'App\Http\Controllers\ConferenceController@thanks')->middleware(['auth:participante', 'verified'])->name('conference.thanks');
+        Route::get('/check-payment-status/{order_id}', 'App\Http\Controllers\ConferenceController@checkPaymentStatus')->middleware('throttle:60,1')->name('conference.checkPaymentStatus');
+        Route::get('/confirmacao/{order_hash}', 'App\Http\Controllers\ConferenceController@confirmation')->middleware(['auth:participante', 'verified'])->name('conference.confirmation');
+        Route::post('/getSubTotal', 'App\Http\Controllers\ConferenceController@getSubTotal')->middleware('throttle:60,1')->name('conference.getSubTotal');
+        Route::post('/getCoupon', 'App\Http\Controllers\ConferenceController@getCoupon')->middleware('throttle:30,1')->name('conference.getCoupon');
+        Route::delete('/{slug}/remover-cupom', 'App\Http\Controllers\ConferenceController@removeCoupon')->middleware('throttle:30,1')->name('conference.removeCoupon');
+        Route::post('/setEventDate', 'App\Http\Controllers\ConferenceController@setEventDate')->middleware('throttle:60,1')->name('conference.setEventDate');
+        Route::post('/getLotesPorData', 'App\Http\Controllers\ConferenceController@getLotesPorData')->middleware('throttle:60,1')->name('conference.getLotesPorData');
+
+        require __DIR__.'/auth.php';
+
+        Route::get('/{slug}', 'App\Http\Controllers\ConferenceController@event')->where('slug', '^(?!painel$|contato$|eventos$|politica$|termos$|certificado$)[^/]+$')->name('conference.index');
+    });

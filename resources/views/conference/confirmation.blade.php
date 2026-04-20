@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmação - {{ $event->name ?? 'Pedido' }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/css/frontend-unified.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @if ($event && $event->theme == 'red')
         <link rel="stylesheet" href="{{ asset('assets_conference/css/red.css') }}" type="text/css">
@@ -26,11 +28,17 @@
         .ticket-card.pending { border-left-color: #ffc107; }
     </style>
 </head>
-<body class="bg-light">
+<body class="confirmation-shell-page">
     <div class="container py-5">
         <div class="confirmation-container">
+            <div class="confirmation-shell-header">
+                <span class="app-page-kicker">Pós-compra</span>
+                <h1>Resumo da sua inscrição</h1>
+                <p>Acompanhe o status do pedido, recupere instruções de pagamento e acesse seus ingressos com clareza.</p>
+            </div>
+
             {{-- Status header --}}
-            <div class="text-center mb-4">
+            <div class="confirmation-status-hero">
                 @if($order->status == 1)
                     <i class="fas fa-check-circle fa-4x status-approved mb-3"></i>
                     <h2 class="status-approved">Pagamento Aprovado!</h2>
@@ -196,6 +204,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -14,9 +14,17 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page module-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Visao geral</span>
+                        <h1 class="app-page-title">{{$event->name}}</h1>
+                        <p class="app-page-subtitle">Resumo do evento com status, conteudo principal e configuracao dos lotes em uma leitura mais organizada.</p>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -38,14 +46,14 @@
                     @endif
                 </div>
                 
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <div class="card module-card shadow-sm border-0 rounded-3">
+                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3 module-card-head">
                         <h4 class="mb-0">Detalhes do evento</h4>
                         <a href="#" class="btn btn-outline-secondary btn-sm" onclick="window.print();" data-bs-toggle="tooltip" title="Imprimir">
                             <i class="fas fa-print me-2"></i>Imprimir
                         </a>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body module-card-body p-4">
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label for="id" class="form-label fw-bold text-muted small">ID</label>
@@ -66,8 +74,8 @@
                                 <p class="mb-0 fs-6">{{$event->name}}</p>
                             </div>
                             <div class="col-md-12">
-                                <label for="subtitle" class="form-label fw-bold text-muted small">Subtítulo</label>
-                                <p class="mb-0 fs-6">{{$event->subtitle ?? 'Não informado'}}</p>
+                                <label for="subtitle" class="form-label fw-bold text-muted small">Subtitulo</label>
+                                <p class="mb-0 fs-6">{{$event->subtitle ?? 'Nao informado'}}</p>
                             </div>
                             <div class="col-md-12">
                                 <label for="slug" class="form-label fw-bold text-muted small">URL do evento</label>
@@ -79,7 +87,7 @@
                                 </p>
                             </div>
                             <div class="col-md-12">
-                                <label for="description" class="form-label fw-bold text-muted small">Descrição</label>
+                                <label for="description" class="form-label fw-bold text-muted small">Descricao</label>
                                 <div class="text-muted">
                                     {!!$event->description!!}
                                 </div>
@@ -95,15 +103,15 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="max_tickets" class="form-label fw-bold text-muted small">N° máximo de ingressos</label>
+                                <label for="max_tickets" class="form-label fw-bold text-muted small">Numero maximo de ingressos</label>
                                 <p class="mb-0 fs-6">{{$event->max_tickets}}</p>
                             </div>
                             <div class="col-md-6">
                                 <label for="place" class="form-label fw-bold text-muted small">Local do evento</label>
-                                <p class="mb-0 fs-6">{{$event->place->name ?? 'Não informado'}}</p>
+                                <p class="mb-0 fs-6">{{$event->place->name ?? 'Nao informado'}}</p>
                             </div>
                             <div class="col-md-6">
-                                <label for="responsible" class="form-label fw-bold text-muted small">Responsável</label>
+                                <label for="responsible" class="form-label fw-bold text-muted small">Responsavel</label>
                                 <p class="mb-0 fs-6">
                                     @php
                                         $admin = $event->get_participante_admin();
@@ -117,7 +125,7 @@
                                 </p>
                             </div>
                             <div class="col-md-6">
-                                <label for="created_at" class="form-label fw-bold text-muted small">Data de criação</label>
+                                <label for="created_at" class="form-label fw-bold text-muted small">Data de criacao</label>
                                 <p class="mb-0 fs-6">{{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}</p>
                             </div>
                         </div>
@@ -125,15 +133,15 @@
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="mb-0">Lotes</h5>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
+                        <div class="table-responsive module-table-wrap">
+                            <table class="table table-hover align-middle module-table">
                                 <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
                                         <th>Nome</th>
                                         <th>Valor</th>
                                         <th>Taxa</th>
-                                        <th>Preço final</th>
+                                        <th>Preco final</th>
                                         <th>Quantidade</th>
                                         <th>Visibilidade</th>
                                     </tr>
@@ -153,7 +161,7 @@
                                                 <td>{{$lote->quantity}}</td>
                                                 <td>
                                                     @if($lote->visibility == 0) 
-                                                        <span class="badge bg-primary">Público</span> 
+                                                        <span class="badge bg-primary">Publico</span> 
                                                     @else 
                                                         <span class="badge bg-secondary">Privado</span> 
                                                     @endif
@@ -163,8 +171,11 @@
                                     @else
                                         <tr>
                                             <td colspan="7" class="text-center py-4 text-muted">
-                                                <i class="fas fa-ticket-alt fa-2x mb-2"></i><br>
-                                                Nenhum lote cadastrado.
+                                                <div class="module-empty">
+                                                    <i class="fas fa-ticket-alt"></i>
+                                                    <strong>Nenhum lote cadastrado</strong>
+                                                    <span>Adicione lotes para estruturar as inscricoes do evento.</span>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endif
@@ -203,14 +214,15 @@
                                                     @endforeach
                                                 </ul>
                                             </td>
-                                            <td>@if($coupon->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Não ativo</span> @endif</td>
+                                            <td>@if($coupon->status == 1) <span class="badge badge-success">Ativo</span> @else <span class="badge badge-danger">Nao ativo</span> @endif</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div> --}}
                     </div>
-                    <div class="card-footer bg-white border-top d-flex justify-content-between py-3">
+
+                    <div class="card-footer bg-white border-top d-flex justify-content-between py-3 module-actions">
                         <a href="{{ route('event_home.my_events') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Voltar
                         </a>
@@ -227,6 +239,7 @@
         <link href="{{ asset('assets_admin/jquery.datetimepicker.min.css') }}" rel="stylesheet">
         <link rel="stylesheet" href="{{ asset('assets/css/print.css') }}" media="print" type="text/css"/>
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
       @endpush
 
       @push('footer')
@@ -519,3 +532,4 @@
     @endpush
 
 </x-site-layout>
+

@@ -15,9 +15,22 @@
           </div>
         </section><!-- End Breadcrumbs -->
     
-        <section class="inner-page" id="create-event-form">
+        <section class="inner-page module-page" id="create-event-form">
             <div class="container">
-                <div class="mb-3 px-3">
+                <div class="app-page-head module-hero">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Beneficios comerciais</span>
+                        <h1 class="app-page-title">Cupons do evento</h1>
+                        <p class="app-page-subtitle">Controle descontos, limites de uso e status dos cupons com a mesma linguagem visual do painel.</p>
+                    </div>
+                    <div class="module-hero-actions">
+                        <a href="{{route('event_home.create_coupon', $hash_event)}}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Cadastrar novo cupom
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mb-3 px-3 module-alerts">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -39,7 +52,7 @@
                     @endif
                 </div>
                 
-                <div class="wizard-container">
+                <div class="wizard-container module-card">
                     <div class="wizard-progress">
                         <div class="wizard-progress-bar" style="width: 75%"></div>
                     </div>
@@ -64,15 +77,18 @@
                     </div>
                     
                     <div class="wizard-content">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4>Listagem dos cupons</h4>
-                            <a href="{{route('event_home.create_coupon', $hash_event)}}" class="btn btn-success">
-                                <i class="fas fa-plus me-2"></i>Cadastrar novo cupom
+                        <div class="module-card-head mb-4">
+                            <div>
+                                <h4>Listagem dos cupons</h4>
+                                <p>{{ count($coupons) }} cupom(ns) cadastrado(s) no evento.</p>
+                            </div>
+                            <a href="{{route('event_home.create_coupon', $hash_event)}}" class="btn btn-outline-primary">
+                                <i class="fas fa-ticket-alt me-2"></i>Novo cupom
                             </a>
                         </div>
                         
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
+                        <div class="table-responsive module-table-wrap">
+                            <table class="table table-hover align-middle module-table">
                                 <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
@@ -89,7 +105,7 @@
                                     @foreach($coupons as $coupon)
                                         <tr data-coupon-hash="{{$coupon->hash}}">
                                             <td>{{$coupon->id}}</td>
-                                            <td><span class="badge bg-light text-dark border">{{$coupon->code}}</span></td>
+                                            <td><span class="module-badge-soft">{{$coupon->code}}</span></td>
                                             <td>@if($coupon->discount_type == 0) Porcentagem @elseif($coupon->discount_type == 1) Fixo @endif</td>
                                             <td>@if($coupon->discount_type == 0) {{$coupon->discount_value*100}}% @elseif($coupon->discount_type == 1) @money($coupon->discount_value) @endif</td>
                                             <td>{{$coupon->limit_buy}}</td>
@@ -121,8 +137,11 @@
                                     @if(count($coupons) == 0)
                                         <tr>
                                             <td colspan="8" class="text-center py-4 text-muted">
-                                                <i class="fas fa-ticket-alt fa-2x mb-2"></i><br>
-                                                Nenhum cupom cadastrado.
+                                                <div class="module-empty">
+                                                    <i class="fas fa-ticket-alt"></i>
+                                                    <strong>Nenhum cupom cadastrado</strong>
+                                                    <span>Crie descontos para acelerar campanhas e conversao do evento.</span>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endif
@@ -130,7 +149,7 @@
                             </table>
                         </div>
                         
-                        <div class="wizard-actions">
+                        <div class="wizard-actions module-actions">
                             <a href="{{ route('event_home.create.step.two') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Anterior
                             </a>
@@ -166,6 +185,7 @@
 
       @push('head')
         <link rel="stylesheet" href="{{ asset('assets_admin/css/modern-admin.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ asset('assets_admin/css/manage-modules.css') }}" type="text/css">
       @endpush
 
       @push('footer')

@@ -14,6 +14,14 @@
 
         <section class="inner-page" id="create-event-form">
             <div class="container">
+                <div class="app-page-head">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Configuração do evento</span>
+                        <h1 class="app-page-title">@if(isset($event) && $event->id) Editar @else Criar @endif {{ isset($event) ? htmlspecialchars($event->name) : 'novo evento' }}</h1>
+                        <p class="app-page-subtitle">Preencha as etapas com mais clareza visual, menos campos comprimidos e foco no que realmente precisa ser publicado.</p>
+                    </div>
+                </div>
+
                 <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -33,7 +41,7 @@
                         </div>
                     @endif
                 </div>
-                <div class="wizard-container">
+                <div class="wizard-container" style="width: 1500px">
                     @php
                         $currentStep = 1; // Step atual baseado na rota ou sessão
                         if (request()->routeIs('event_home.create.step.two')) {
@@ -152,12 +160,12 @@
                             </div>
                             <div class="mb-3">
                                 <label for="max_tickets" class="form-label">Total máximo de vagas <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control w-25" id="max_tickets" name="max_tickets" value="{{ $event->max_tickets ?? old('max_tickets') }}" min="0" required>
+                                <input type="number" class="form-control compact-field" id="max_tickets" name="max_tickets" value="{{ $event->max_tickets ?? old('max_tickets') }}" min="0" required>
                                 <div class="invalid-feedback">Insira um número válido.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="contact" class="form-label">Email para contato <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control w-50" id="contact" name="contact" placeholder="Contato" value="{{ $event->contact ?? old('contact') }}" required>
+                                <input type="email" class="form-control medium-field" id="contact" name="contact" placeholder="Contato" value="{{ $event->contact ?? old('contact') }}" required>
                                 <div class="invalid-feedback" id="contact-error">Insira um email válido.</div>
                             </div>
                             <input type="hidden" name="admin_id" id="admin_id_hidden" value="{{ Auth::user()->id }}">

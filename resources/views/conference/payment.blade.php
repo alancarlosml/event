@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Finalizar Compra - {{ $event->name }}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap">
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/css/frontend-unified.css') }}" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -259,10 +261,16 @@
         }
     </style>
 </head>
-<body>
+<body class="payment-shell-page">
     <div class="container mt-5 mb-5">
         <div class="payment-container">
-            <div class="card shadow-sm">
+            <div class="payment-shell-header">
+                <span class="app-page-kicker">Pagamento</span>
+                <h1>Finalize sua inscrição com segurança</h1>
+                <p>Escolha a forma de pagamento e acompanhe um fluxo visual consistente com o restante da plataforma.</p>
+            </div>
+
+            <div class="card shadow-sm payment-shell-card">
                 <div class="card-header bg-primary text-white">
                     <h3 class="card-title mb-0">
                         <i class="fas fa-credit-card me-2"></i>
@@ -519,7 +527,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
 

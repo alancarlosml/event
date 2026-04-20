@@ -244,29 +244,35 @@
                         <img src="assets/img/features-3.png" class="img-fluid p-4" alt="Recursos da plataforma de eventos">
                     </div>
                     <div class="col-xl-8 d-flex content">
-                        <div class="row align-self-center gy-4">
+                        <div class="row align-self-center g-md-5">
 
-                            <div class="col-md-6 icon-box" data-aos="fade-up">
-                                <i class="ri-global-line"></i>
-                                <div>
-                                    <h4>Site personalizado do evento</h4>
-                                    <p>Crie um site profissional e completo para seu evento em poucos minutos. Personalize cores, adicione informações, programação e muito mais. Seu evento terá uma página exclusiva e otimizada para conversão.</p>
+                            <div class="col-md-6" data-aos="fade-up">
+                                <div class="icon-box">
+                                    <i class="ri-global-line"></i>
+                                    <div>
+                                        <h4>Site personalizado do evento</h4>
+                                        <p>Crie um site profissional e completo para seu evento em poucos minutos. Personalize cores, adicione informações, programação e muito mais. Seu evento terá uma página exclusiva e otimizada para conversão.</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="100">
-                                <i class="ri-money-dollar-circle-line"></i>
-                                <div>
-                                    <h4>Venda de inscrições online</h4>
-                                    <p>Aceite pagamentos via cartão de crédito (em até 12x), PIX, boleto bancário e empenho. Receba pagamentos nacionais e internacionais de forma segura. Dinheiro na sua conta em até 2 dias úteis após a aprovação.</p>
+                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
+                                <div class="icon-box">
+                                    <i class="ri-money-dollar-circle-line"></i>
+                                    <div>
+                                        <h4>Venda de inscrições online</h4>
+                                        <p>Aceite pagamentos via cartão de crédito (em até 12x), PIX, boleto bancário e empenho. Receba pagamentos nacionais e internacionais de forma segura. Dinheiro na sua conta em até 2 dias úteis após a aprovação.</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="200">
-                                <i class="ri-qr-code-line"></i>
-                                <div>
-                                    <h4>Check-in com QR Code</h4>
-                                    <p>Sistema completo de credenciamento com QR Code. Faça o check-in rápido dos participantes, controle entrada e saída, gere relatórios em tempo real e tenha total controle sobre a presença no seu evento.</p>
+                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                                <div class="icon-box">
+                                    <i class="ri-qr-code-line"></i>
+                                    <div>
+                                        <h4>Check-in com QR Code</h4>
+                                        <p>Sistema completo de credenciamento com QR Code. Faça o check-in rápido dos participantes, controle entrada e saída, gere relatórios em tempo real e tenha total controle sobre a presença no seu evento.</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -278,19 +284,23 @@
                                 </div>
                             </div> --}}
 
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="400">
-                                <i class="ri-bar-chart-box-line"></i>
-                                <div>
-                                    <h4>Relatórios e análises</h4>
-                                    <p>Acompanhe vendas, participantes confirmados, receita gerada e muito mais através de dashboards intuitivos. Tome decisões baseadas em dados reais do seu evento.</p>
+                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
+                                <div class="icon-box">
+                                    <i class="ri-bar-chart-box-line"></i>
+                                    <div>
+                                        <h4>Relatórios e análises</h4>
+                                        <p>Acompanhe vendas, participantes confirmados, receita gerada e muito mais através de dashboards intuitivos. Tome decisões baseadas em dados reais do seu evento.</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="500">
-                                <i class="ri-coupon-line"></i>
-                                <div>
-                                    <h4>Cupons de desconto</h4>
-                                    <p>Crie cupons promocionais com desconto percentual ou valor fixo. Aplique a lotes específicos, defina validade e limite de uso. Ideal para campanhas de marketing e incentivo de vendas.</p>
+                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
+                                <div class="icon-box">
+                                    <i class="ri-coupon-line"></i>
+                                    <div>
+                                        <h4>Cupons de desconto</h4>
+                                        <p>Crie cupons promocionais com desconto percentual ou valor fixo. Aplique a lotes específicos, defina validade e limite de uso. Ideal para campanhas de marketing e incentivo de vendas.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -753,6 +763,111 @@
             
             .lazy.loaded {
                 opacity: 1;
+            }
+
+            /* Melhorias Features Section */
+            .feature-icons .icon-box {
+                padding: 2.5rem 2rem;
+                border-radius: 16px;
+                transition: all 0.3s ease;
+                background: #ffffff;
+                border: 1px solid rgba(0,0,0,0.05);
+                box-shadow: 0 10px 30px rgba(1, 41, 112, 0.05);
+                height: 100%;
+                display: flex;
+                align-items: flex-start;
+            }
+
+            .feature-icons .icon-box i {
+                font-size: 38px;
+                line-height: 1;
+                color: #0245bc;
+                margin-right: 20px;
+                flex-shrink: 0;
+                background: #f1f4ff;
+                width: 64px;
+                height: 64px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                transition: all 0.3s ease;
+            }
+
+            .feature-icons .icon-box:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 15px 35px rgba(1, 41, 112, 0.1);
+                border-color: rgba(65, 84, 241, 0.2);
+            }
+
+            .feature-icons .icon-box:hover i {
+                background: #0245bc;
+                color: #fff;
+            }
+
+            .feature-icons .icon-box h4 {
+                font-size: 20px;
+                font-weight: 700;
+                margin: 0 0 12px 0;
+                color: #073b58;
+            }
+
+            .feature-icons .icon-box p {
+                font-size: 15px;
+                color: #666;
+                line-height: 1.6;
+                margin-bottom: 0;
+            }
+
+            /* Melhorias Services Section */
+            .services .service-box {
+                transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+                border-radius: 20px;
+                padding: 3rem 2rem;
+                height: 100%;
+                background: #ffffff;
+                border: 1px solid rgba(0,0,0,0.03);
+                box-shadow: 0 5px 20px rgba(1, 41, 112, 0.05);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .services .service-box::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: var(--primary-color, #4154f1);
+                opacity: 0;
+                transition: 0.3s;
+            }
+
+            .services .service-box:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 20px 40px rgba(1, 41, 112, 0.1);
+                background-color: #ffffff;
+            }
+
+            .services .service-box:hover::before {
+                opacity: 1;
+            }
+
+            .services .service-box h3 a {
+                color: #073b58;
+                font-weight: 700;
+                font-size: 22px;
+                transition: 0.3s;
+            }
+
+            .services .service-box:hover h3 a {
+                color: var(--primary-color, #4154f1);
             }
             
             @media (max-width: 768px) {

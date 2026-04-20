@@ -37,6 +37,12 @@ class Event extends Model
         'mercadopago_link',
         'contact',
         'status',
+        'certificate_enabled',
+        'certificate_release_mode',
+        'certificate_hours',
+        'certificate_logo',
+        'certificate_signature_image',
+        'certificate_signature_name',
     ];
 
     /**
@@ -294,5 +300,10 @@ class Event extends Model
     public function min_event_time()
     {
         return $this->event_dates()->min('event_dates.time_begin');
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
     }
 }

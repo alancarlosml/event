@@ -13,6 +13,14 @@
 
         <section class="inner-page">
             <div class="container">
+                <div class="app-page-head">
+                    <div class="app-page-copy">
+                        <span class="app-page-kicker">Conta</span>
+                        <h1 class="app-page-title">Meu perfil</h1>
+                        <p class="app-page-subtitle">Atualize seus dados com a mesma linguagem visual do painel e mantenha seu acesso pronto para compras, organização e acompanhamento.</p>
+                    </div>
+                </div>
+
                 <div class="mb-3 px-3">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
