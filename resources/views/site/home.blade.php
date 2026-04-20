@@ -1,30 +1,30 @@
 <x-site-layout>
-        <section id="hero" class="hero owl-carousel">
+    <section id="hero" class="hero owl-carousel">
         <div class="hero_img">
-            <img src="{{ asset('site/home1.jpg') }}" alt="Plataforma completa para criação e gestão de eventos" loading="lazy">
+            <img src="{{ asset('site/home1.jpg') }}" alt="{{ __('home.hero.image_alt_1') }}" loading="lazy">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home2.jpg') }}" alt="Venda de ingressos online com segurança e praticidade" loading="lazy">
+            <img src="{{ asset('site/home2.jpg') }}" alt="{{ __('home.hero.image_alt_2') }}" loading="lazy">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home3.jpg') }}" alt="Check-in rápido com QR Code para seus eventos" loading="lazy">
+            <img src="{{ asset('site/home3.jpg') }}" alt="{{ __('home.hero.image_alt_3') }}" loading="lazy">
         </div>
         <div class="hero_img">
-            <img src="{{ asset('site/home4.jpg') }}" alt="Gerencie todos os aspectos do seu evento em um só lugar" loading="lazy">
+            <img src="{{ asset('site/home4.jpg') }}" alt="{{ __('home.hero.image_alt_4') }}" loading="lazy">
         </div>
     </section><!-- End Hero -->
 
     <div class="container hero_absolute">
         <div class="row">
             <div class="col-lg-6 d-flex flex-column justify-content-center">
-                <h1 data-aos="fade-up">Plataforma completa para criar e gerenciar seus eventos</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400">Crie seu evento, venda inscrições online e gerencie tudo em um só lugar. Simples, rápido e profissional.</h2>
+                <h1 data-aos="fade-up">{{ __('home.hero.title') }}</h1>
+                <h2 data-aos="fade-up" data-aos-delay="400">{{ __('home.hero.subtitle') }}</h2>
                 <div>
                     <div class="text-center text-lg-start">
                         <a href="@if (!Auth::user()) {{ route('register') }} @else {{ route('event_home.create_event_link') }} @endif"
                            class="btn-get-started d-inline-flex align-items-center justify-content-center align-self-center"
-                           aria-label="Começar a criar seu evento agora">
-                            <span>Começar agora</span>
+                           aria-label="{{ __('home.hero.cta_aria') }}">
+                            <span>{{ __('home.hero.cta') }}</span>
                             <i class="bi bi-arrow-right" aria-hidden="true"></i>
                         </a>
                     </div>
@@ -32,7 +32,7 @@
             </div>
             <div class="col-lg-6 hero-img">
                 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/XOTq6z3QdX8"
-                        title="Vídeo demonstrativo da plataforma de eventos"
+                        title="{{ __('home.hero.video_title') }}"
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen
@@ -47,47 +47,47 @@
 
             <div class="container" data-aos="fade-up">
                 <header class="section-header">
-                    <p>Comece a vender em 5 minutos!</p>
-                    <h2 class="mt-3">Tudo que você precisa para criar e gerenciar eventos profissionais em uma única plataforma</h2>
+                    <p>{{ __('home.steps.kicker') }}</p>
+                    <h2 class="mt-3">{{ __('home.steps.subtitle') }}</h2>
                 </header>
                 <div class="row justify-content-center" id="start_event">
                     <div class="col-lg-2 col-md-4 col-sm-6" data-aos="fade-up" data-aos-delay="200">
                         <div class="box">
                             <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
-                            <h5>Cadastre-se gratuitamente</h5>
-                            <p class="small text-muted mt-2">Crie sua conta em segundos</p>
+                            <h5>{{ __('home.steps.item_1_title') }}</h5>
+                            <p class="small text-muted mt-2">{{ __('home.steps.item_1_text') }}</p>
                         </div>
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-sm-6 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="400">
                         <div class="box">
                             <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
-                            <h5>Configure seu evento</h5>
-                            <p class="small text-muted mt-2">Preencha as informações básicas</p>
+                            <h5>{{ __('home.steps.item_2_title') }}</h5>
+                            <p class="small text-muted mt-2">{{ __('home.steps.item_2_text') }}</p>
                         </div>
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-sm-6 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="600">
                         <div class="box">
                             <i class="fa-solid fa-ticket" aria-hidden="true"></i>
-                            <h5>Crie seus lotes</h5>
-                            <p class="small text-muted mt-2">Defina preços e quantidades</p>
+                            <h5>{{ __('home.steps.item_3_title') }}</h5>
+                            <p class="small text-muted mt-2">{{ __('home.steps.item_3_text') }}</p>
                         </div>
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-sm-6 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="800">
                         <div class="box">
                             <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
-                            <h5>Publique e divulgue</h5>
-                            <p class="small text-muted mt-2">Seu evento fica online</p>
+                            <h5>{{ __('home.steps.item_4_title') }}</h5>
+                            <p class="small text-muted mt-2">{{ __('home.steps.item_4_text') }}</p>
                         </div>
                     </div>
 
                     <div class="col-lg-2 col-md-4 col-sm-6 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="1000">
                         <div class="box">
                             <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-                            <h5>Gerencie e fatura</h5>
-                            <p class="small text-muted mt-2">Acompanhe vendas em tempo real</p>
+                            <h5>{{ __('home.steps.item_5_title') }}</h5>
+                            <p class="small text-muted mt-2">{{ __('home.steps.item_5_text') }}</p>
                         </div>
                     </div>
                 </div>
@@ -235,13 +235,13 @@
             <!-- Feature Icons -->
             <div class="row feature-icons" data-aos="fade-up">
                 <header class="section-header">
-                    <p>Recursos da Plataforma</p>
-                    <h2>Tudo que você precisa para eventos de sucesso</h2>
+                    <p>{{ __('home.features.kicker') }}</p>
+                    <h2>{{ __('home.features.subtitle') }}</h2>
                 </header>
 
                 <div class="row">
                     <div class="col-xl-4 text-center" data-aos="fade-right" data-aos-delay="100">
-                        <img src="assets/img/features-3.png" class="img-fluid p-4" alt="Recursos da plataforma de eventos">
+                        <img src="assets/img/features-3.png" class="img-fluid p-4" alt="{{ __('home.features.image_alt') }}">
                     </div>
                     <div class="col-xl-8 d-flex content">
                         <div class="row align-self-center g-md-5">
@@ -250,8 +250,8 @@
                                 <div class="icon-box">
                                     <i class="ri-global-line"></i>
                                     <div>
-                                        <h4>Site personalizado do evento</h4>
-                                        <p>Crie um site profissional e completo para seu evento em poucos minutos. Personalize cores, adicione informações, programação e muito mais. Seu evento terá uma página exclusiva e otimizada para conversão.</p>
+                                        <h4>{{ __('home.features.item_1_title') }}</h4>
+                                        <p>{{ __('home.features.item_1_text') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -260,8 +260,8 @@
                                 <div class="icon-box">
                                     <i class="ri-money-dollar-circle-line"></i>
                                     <div>
-                                        <h4>Venda de inscrições online</h4>
-                                        <p>Aceite pagamentos via cartão de crédito (em até 12x), PIX, boleto bancário e empenho. Receba pagamentos nacionais e internacionais de forma segura. Dinheiro na sua conta em até 2 dias úteis após a aprovação.</p>
+                                        <h4>{{ __('home.features.item_2_title') }}</h4>
+                                        <p>{{ __('home.features.item_2_text') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -270,26 +270,18 @@
                                 <div class="icon-box">
                                     <i class="ri-qr-code-line"></i>
                                     <div>
-                                        <h4>Check-in com QR Code</h4>
-                                        <p>Sistema completo de credenciamento com QR Code. Faça o check-in rápido dos participantes, controle entrada e saída, gere relatórios em tempo real e tenha total controle sobre a presença no seu evento.</p>
+                                        <h4>{{ __('home.features.item_3_title') }}</h4>
+                                        <p>{{ __('home.features.item_3_text') }}</p>
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- <div class="col-md-6 icon-box" data-aos="fade-up" data-aos-delay="300">
-                                <i class="ri-file-certificate-line"></i>
-                                <div>
-                                    <h4>Emissão de certificados</h4>
-                                    <p>Gere certificados personalizados automaticamente para participantes, palestrantes, organizadores e demais envolvidos. Envie por email com um clique e economize tempo na organização do seu evento.</p>
-                                </div>
-                            </div> --}}
 
                             <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
                                 <div class="icon-box">
                                     <i class="ri-bar-chart-box-line"></i>
                                     <div>
-                                        <h4>Relatórios e análises</h4>
-                                        <p>Acompanhe vendas, participantes confirmados, receita gerada e muito mais através de dashboards intuitivos. Tome decisões baseadas em dados reais do seu evento.</p>
+                                        <h4>{{ __('home.features.item_4_title') }}</h4>
+                                        <p>{{ __('home.features.item_4_text') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -298,8 +290,8 @@
                                 <div class="icon-box">
                                     <i class="ri-coupon-line"></i>
                                     <div>
-                                        <h4>Cupons de desconto</h4>
-                                        <p>Crie cupons promocionais com desconto percentual ou valor fixo. Aplique a lotes específicos, defina validade e limite de uso. Ideal para campanhas de marketing e incentivo de vendas.</p>
+                                        <h4>{{ __('home.features.item_5_title') }}</h4>
+                                        <p>{{ __('home.features.item_5_text') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -314,8 +306,8 @@
         <section id="services" class="services">
             <div class="container" data-aos="fade-up">
                 <header class="section-header">
-                    <p>Categorias de Eventos</p>
-                    <h2>Explore eventos por categoria</h2>
+                    <p>{{ __('home.categories.kicker') }}</p>
+                    <h2>{{ __('home.categories.subtitle') }}</h2>
                 </header>
                 <div class="row gy-4">
                     @if(isset($categories) && $categories->count() > 0)
@@ -328,7 +320,7 @@
                         @endforeach
                     @else
                         <div class="col-12 text-center">
-                            <p class="text-muted">Nenhuma categoria disponível no momento.</p>
+                            <p class="text-muted">{{ __('home.categories.empty') }}</p>
                         </div>
                     @endif
                 </div>
@@ -426,8 +418,8 @@
             <div class="container" data-aos="fade-up">
 
                 <header class="section-header">
-                    <p>Dúvidas Comuns</p>
-                    <h2>Perguntas frequentes</h2>
+                    <p>{{ __('home.faq.kicker') }}</p>
+                    <h2>{{ __('home.faq.title') }}</h2>
                 </header>
 
                 <div class="row">
@@ -439,13 +431,13 @@
                                     <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#faq-content-1"
                                             aria-expanded="false" aria-controls="faq-content-1">
-                                        Como funciona a criação de eventos na plataforma?
+                                        {{ __('home.faq.q1_title') }}
                                     </button>
                                 </h2>
                                 <div id="faq-content-1" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist1">
+                                      data-bs-parent="#faqlist1">
                                     <div class="accordion-body">
-                                        É muito simples! Após criar sua conta gratuita, você preenche as informações básicas do evento (nome, data, local, descrição), configura os lotes de ingressos com preços e quantidades, e publica. Em poucos minutos seu evento estará online e pronto para receber inscrições.
+                                        {{ __('home.faq.q1_text') }}
                                     </div>
                                 </div>
                             </div>
@@ -455,13 +447,13 @@
                                     <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#faq-content-2"
                                             aria-expanded="false" aria-controls="faq-content-2">
-                                        Quais formas de pagamento são aceitas?
+                                        {{ __('home.faq.q2_title') }}
                                     </button>
                                 </h2>
                                 <div id="faq-content-2" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist1">
+                                      data-bs-parent="#faqlist1">
                                     <div class="accordion-body">
-                                        Aceitamos cartão de crédito (em até 12x), PIX, boleto bancário e empenho. Também é possível receber pagamentos internacionais. O dinheiro cai na sua conta em até 2 dias úteis após a aprovação do pagamento.
+                                        {{ __('home.faq.q2_text') }}
                                     </div>
                                 </div>
                             </div>
@@ -471,13 +463,13 @@
                                     <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#faq-content-3"
                                             aria-expanded="false" aria-controls="faq-content-3">
-                                        Existe algum custo para usar a plataforma?
+                                        {{ __('home.faq.q3_title') }}
                                     </button>
                                 </h2>
                                 <div id="faq-content-3" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist1">
+                                      data-bs-parent="#faqlist1">
                                     <div class="accordion-body">
-                                        Para eventos gratuitos (sem cobrança de ingresso), a plataforma é totalmente gratuita. Para eventos pagos, cobramos uma taxa de 10% sobre cada venda, que já inclui todos os custos de meios de pagamento. Não há mensalidade, taxa de adesão ou valor mínimo.
+                                        {{ __('home.faq.q3_text') }}
                                     </div>
                                 </div>
                             </div>
@@ -487,13 +479,13 @@
                                     <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#faq-content-4"
                                             aria-expanded="false" aria-controls="faq-content-4">
-                                        Como funciona o sistema de check-in com QR Code?
+                                        {{ __('home.faq.q4_title') }}
                                     </button>
                                 </h2>
                                 <div id="faq-content-4" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist1">
+                                      data-bs-parent="#faqlist1">
                                     <div class="accordion-body">
-                                        Cada participante recebe um ingresso com QR Code único por email após a confirmação do pagamento. No dia do evento, basta escanear o código com um dispositivo móvel ou leitor de QR Code para fazer o check-in. O sistema registra a entrada em tempo real e você pode acompanhar tudo pelo painel administrativo.
+                                        {{ __('home.faq.q4_text') }}
                                     </div>
                                 </div>
                             </div>
@@ -509,45 +501,29 @@
                                     <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#faq2-content-1"
                                             aria-expanded="false" aria-controls="faq2-content-1">
-                                        Posso criar cupons de desconto para meu evento?
+                                        {{ __('home.faq.q5_title') }}
                                     </button>
                                 </h2>
                                 <div id="faq2-content-1" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist2">
+                                      data-bs-parent="#faqlist2">
                                     <div class="accordion-body">
-                                        Sim! Você pode criar quantos cupons quiser com desconto percentual ou valor fixo. Configure validade, limite de uso por cupom e aplique a lotes específicos. Ideal para campanhas promocionais e incentivo de vendas antecipadas.
+                                        {{ __('home.faq.q5_text') }}
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#faq2-content-2"
-                                            aria-expanded="false" aria-controls="faq2-content-2">
-                                        Como são emitidos os certificados?
-                                    </button>
-                                </h2>
-                                <div id="faq2-content-2" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist2">
-                                    <div class="accordion-body">
-                                        Após o evento, você pode gerar certificados personalizados para todos os participantes, palestrantes, organizadores e demais envolvidos. Os certificados são enviados automaticamente por email em formato PDF. Você pode personalizar o design e incluir informações específicas do evento.
-                                    </div>
-                                </div>
-                            </div> --}}
 
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#faq2-content-3"
                                             aria-expanded="false" aria-controls="faq2-content-3">
-                                        Posso acompanhar as vendas em tempo real?
+                                        {{ __('home.faq.q6_title') }}
                                     </button>
                                 </h2>
                                 <div id="faq2-content-3" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist2">
+                                      data-bs-parent="#faqlist2">
                                     <div class="accordion-body">
-                                        Sim! O painel administrativo oferece dashboards completos com gráficos de vendas, receita gerada, participantes confirmados, taxa de conversão e muito mais. Todas as informações são atualizadas em tempo real, permitindo que você tome decisões baseadas em dados reais.
+                                        {{ __('home.faq.q6_text') }}
                                     </div>
                                 </div>
                             </div>
@@ -557,13 +533,13 @@
                                     <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#faq2-content-4"
                                             aria-expanded="false" aria-controls="faq2-content-4">
-                                        Meu evento terá uma página própria?
+                                        {{ __('home.faq.q7_title') }}
                                     </button>
                                 </h2>
                                 <div id="faq2-content-4" class="accordion-collapse collapse"
-                                     data-bs-parent="#faqlist2">
+                                      data-bs-parent="#faqlist2">
                                     <div class="accordion-body">
-                                        Sim! Cada evento recebe uma página exclusiva e personalizada com todas as informações, programação, localização, formulário de inscrição e muito mais. A página é otimizada para conversão e totalmente responsiva, funcionando perfeitamente em dispositivos móveis.
+                                        {{ __('home.faq.q7_text') }}
                                     </div>
                                 </div>
                             </div>
@@ -580,8 +556,8 @@
 
             <div class="container" data-aos="fade-up">
                 <header class="section-header">
-                    <p>O que nossos clientes dizem</p>
-                    <h2>Depoimentos</h2>
+                    <p>{{ __('home.testimonials.kicker') }}</p>
+                    <h2>{{ __('home.testimonials.title') }}</h2>
                 </header>
 
                 <div class="testimonials-slider swiper" data-aos="fade-up" data-aos-delay="200">
@@ -598,14 +574,14 @@
                                     <i class="bi bi-star-fill" aria-hidden="true"></i>
                                 </div>
                                 <p>
-                                    A plataforma facilitou muito a organização do nosso evento. Em poucos minutos conseguimos criar a página, configurar os lotes e começar a vender. O sistema de check-in com QR Code foi fundamental no dia do evento, agilizando muito o credenciamento.
+                                    {{ __('home.testimonials.quote') }}
                                 </p>
                                 <div class="profile mt-auto">
                                     <div class="testimonial-img bg-primary text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 60px; height: 60px;" aria-hidden="true">
                                         <i class="bi bi-person-fill fs-4"></i>
                                     </div>
-                                    <h3>Organizador de Eventos</h3>
-                                    <h4>Cliente da Plataforma</h4>
+                                    <h3>{{ __('home.testimonials.author') }}</h3>
+                                    <h4>{{ __('home.testimonials.role') }}</h4>
                                 </div>
                             </div>
                         </div><!-- End testimonial item -->

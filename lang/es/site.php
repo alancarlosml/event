@@ -10,6 +10,8 @@ return [
         'create_event' => 'Crear evento',
         'login' => 'Entrar',
         'my_account' => 'Mi cuenta',
+        'menu' => 'Menú',
+        'toggle_navigation' => 'Alternar navegación',
     ],
     'account' => [
         'my_events' => 'Mis eventos',
@@ -29,6 +31,13 @@ return [
         'our_services' => 'Nuestros servicios',
         'contact_title' => 'Contacto',
         'rights_reserved' => 'Todos los derechos reservados.',
+        'address_line_1' => 'Calle Ejemplo, 123',
+        'address_line_2' => 'Barrio Centro',
+        'address_line_3' => 'Madrid, ES',
+        'phone_label' => 'Teléfono',
+        'phone_value' => '+34 900 000 000',
+        'email_label' => 'Correo electrónico',
+        'email_value' => 'contacto@ticketdz6.com',
     ],
     'accessibility' => [
         'back_to_top' => 'Volver arriba',

@@ -200,9 +200,9 @@
 
                 <button class="navbar-toggler modern-nav-toggle" type="button" data-bs-toggle="collapse" 
                         data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" 
-                        aria-label="Toggle navigation">
+                        aria-label="{{ __('site.nav.toggle_navigation') }}">
                     <span class="navbar-toggler-icon"></span>
-                    <span class="nav-toggle-text">Menu</span>
+                    <span class="nav-toggle-text">{{ __('site.nav.menu') }}</span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
@@ -370,11 +370,11 @@
                     <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
                         <h4>{{ __('site.footer.contact_title') }}</h4>
                         <p>
-                            A108 Adam Street <br>
-                            New York, NY 535022<br>
-                            United States <br><br>
-                            <strong>Phone:</strong> +1 5589 55488 55<br>
-                            <strong>Email:</strong> info@example.com<br>
+                            {{ __('site.footer.address_line_1') }}<br>
+                            {{ __('site.footer.address_line_2') }}<br>
+                            {{ __('site.footer.address_line_3') }}<br><br>
+                            <strong>{{ __('site.footer.phone_label') }}:</strong> {{ __('site.footer.phone_value') }}<br>
+                            <strong>{{ __('site.footer.email_label') }}:</strong> {{ __('site.footer.email_value') }}<br>
                         </p>
 
                     </div>

@@ -10,6 +10,8 @@ return [
         'create_event' => 'Criar evento',
         'login' => 'Entrar',
         'my_account' => 'Minha conta',
+        'menu' => 'Menu',
+        'toggle_navigation' => 'Alternar navegação',
     ],
     'account' => [
         'my_events' => 'Meus eventos',
@@ -29,6 +31,13 @@ return [
         'our_services' => 'Nossos servicos',
         'contact_title' => 'Contato',
         'rights_reserved' => 'Todos os direitos reservados',
+        'address_line_1' => 'Rua Exemplo, 123',
+        'address_line_2' => 'Bairro Centro',
+        'address_line_3' => 'Cidade - UF',
+        'phone_label' => 'Telefone',
+        'phone_value' => '+55 (11) 99999-9999',
+        'email_label' => 'E-mail',
+        'email_value' => 'contato@ticketdz6.com',
     ],
     'accessibility' => [
         'back_to_top' => 'Voltar ao topo',

@@ -10,6 +10,8 @@ return [
         'create_event' => 'Créer un événement',
         'login' => 'Connexion',
         'my_account' => 'Mon compte',
+        'menu' => 'Menu',
+        'toggle_navigation' => 'Afficher la navigation',
     ],
     'account' => [
         'my_events' => 'Mes événements',
@@ -29,6 +31,13 @@ return [
         'our_services' => 'Nos services',
         'contact_title' => 'Contact',
         'rights_reserved' => 'Tous droits réservés.',
+        'address_line_1' => '123 Rue Exemple',
+        'address_line_2' => 'Centre-ville',
+        'address_line_3' => 'Paris, FR',
+        'phone_label' => 'Téléphone',
+        'phone_value' => '+33 1 00 00 00 00',
+        'email_label' => 'E-mail',
+        'email_value' => 'contact@ticketdz6.com',
     ],
     'accessibility' => [
         'back_to_top' => 'Retour en haut',

@@ -10,6 +10,8 @@ return [
         'create_event' => 'Create event',
         'login' => 'Sign in',
         'my_account' => 'My account',
+        'menu' => 'Menu',
+        'toggle_navigation' => 'Toggle navigation',
     ],
     'account' => [
         'my_events' => 'My events',
@@ -29,6 +31,13 @@ return [
         'our_services' => 'Our services',
         'contact_title' => 'Contact',
         'rights_reserved' => 'All rights reserved',
+        'address_line_1' => '123 Example Street',
+        'address_line_2' => 'Downtown',
+        'address_line_3' => 'New York, NY',
+        'phone_label' => 'Phone',
+        'phone_value' => '+1 (555) 000-0000',
+        'email_label' => 'Email',
+        'email_value' => 'contact@ticketdz6.com',
     ],
     'accessibility' => [
         'back_to_top' => 'Back to top',
