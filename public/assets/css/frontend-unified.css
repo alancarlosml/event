@@ -201,6 +201,7 @@ a:hover {
 
 .breadcrumbs h2 {
     font-size: var(--dz6-type-2xl);
+    color: #fff;
 }
 
 .section-header {
