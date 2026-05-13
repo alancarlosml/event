@@ -21,7 +21,7 @@
                                 <div class="info-box">
                                     <i class="bi bi-geo-alt" aria-hidden="true"></i>
                                     <h3>Endereço</h3>
-                                    <p>A108 Adam Street,<br>New York, NY 535022</p>
+                                    <p>Avenida Zequinha Freire, 201, Santa Isabel<br>CEP 64053-400. Teresina - PI</p>
                                 </div>
                             </div>
                             <div class="col-md-6">

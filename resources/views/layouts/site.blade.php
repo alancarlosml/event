@@ -335,9 +335,9 @@
                         </a>
                         <p>{{ __('site.footer.tagline') }}</p>
                         <div class="social-links mt-3">
-                            <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-                            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-                            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+                            {{-- <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+                            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a> --}}
+                            <a href="https://www.instagram.com/ticketdz6?igsh=OHZub25iZHd0d3A4" class="instagram"><i class="bi bi-instagram"></i></a>
                         </div>
                     </div>
 

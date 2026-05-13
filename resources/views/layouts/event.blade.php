@@ -195,9 +195,9 @@
                     <p>Sua nova plataforma de criação e gerenciamento de eventos. </p>
                     <div class="social-icons-footer">
                         <ul>
-                            <li class="facebook"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-facebook"></i></a></li>
-                            <li class="twitter"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-twitter"></i></a></li>
-                            <li class="instagram"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-instagram"></i></a></li>
+                            {{-- <li class="facebook"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-facebook"></i></a></li>
+                            <li class="twitter"><a target="_blank" href="https://preview.uideck.com/items/event-up/multi-page/3"><i class="fa-brands fa-twitter"></i></a></li> --}}
+                            <li class="instagram"><a target="_blank" href="https://www.instagram.com/ticketdz6?igsh=OHZub25iZHd0d3A4"><i class="fa-brands fa-instagram"></i></a></li>
                         </ul>
                     </div>
                 </div>

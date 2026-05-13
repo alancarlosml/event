@@ -187,9 +187,7 @@ a:hover {
 }
 
 .breadcrumbs {
-    background:
-        radial-gradient(circle at right top, rgba(243, 154, 39, 0.14), transparent 26%),
-        linear-gradient(135deg, #0b2239 0%, #14395d 100%) !important;
+    background:#1E69B2;
     margin-top: 72px !important;
     padding: 1.35rem 0 1.5rem !important;
 }
